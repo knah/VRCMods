@@ -16,7 +16,7 @@ namespace JoinNotifier
     [VRCModInfo("JoinNotifier", VersionConst, "knah")]
     public class JoinNotifierMod : VRCMod
     {
-        public const string VersionConst = "0.1.0.0";
+        public const string VersionConst = "0.1.1";
 
         private Image myNotifierImage;
         private AudioSource myChimeSource;
@@ -72,14 +72,12 @@ namespace JoinNotifier
                 var numSamples = (int) resourceStream.Length / 2;
                 var clip = AudioClip.Create("chime.bin", numSamples, 1, 44100, false);
                 source.clip = clip;
-                var stopwatch = Stopwatch.StartNew();
                 float[] data = new float[numSamples];
                 using (var reader = new BinaryReader(resourceStream))
                 {
                     for (var i = 0; i < numSamples; i++) 
                         data[i] = reader.ReadInt16() / (float) Int16.MaxValue;
                 }
-                VRCModLogger.Log("Chime read took {0} ms", stopwatch.ElapsedMilliseconds);
 
                 clip.SetData(data, 0);
                 source.spatialize = false;
@@ -101,11 +99,9 @@ namespace JoinNotifier
 
         public void OnPlayerJoined(Player player)
         {
-            VRCModLogger.Log("Player joined");
             if (!JoinNotifierSettings.ShouldNotifyInCurrentInstance()) return;
-            VRCModLogger.Log("Instance passes");
             if (Environment.TickCount - myLastLevelLoad < 5_000) return;
-            VRCModLogger.Log("Notifying player join");
+            VRCModLogger.Log("[JoinNotifier] Notifying player join");
             if (JoinNotifierSettings.ShouldBlinkIcon())
                 ModManager.StartCoroutine(BlinkIconCoroutine());
             if (JoinNotifierSettings.ShouldPlaySound())
