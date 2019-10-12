@@ -32,19 +32,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="JoinNotifierMod.cs" />
     <Compile Include="JoinNotifierSettings.cs" />
     <Compile Include="NetworkManagerHooks.cs" />
+    <Compile Include="PlayerReflection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnityActionReflection.cs" />
     <Compile Include="VrcAudioManagerReflection.cs" />
     <EmbeddedResource Include="JoinIcon.png" />
     <EmbeddedResource Include="Chime.bin" />
+    <EmbeddedResource Include="DoorClose.bin" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

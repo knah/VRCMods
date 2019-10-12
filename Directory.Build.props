@@ -15,6 +15,9 @@
         <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
             <HintPath>$(MsBuildThisFileDirectory)Libs\UnityEngine.UI.dll</HintPath>
         </Reference>
+        <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>$(MsBuildThisFileDirectory)Libs\UnityEngine.TextRenderingModule.dll</HintPath>
+        </Reference>
         <Reference Include="VRCModLoader, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
             <HintPath>$(MsBuildThisFileDirectory)Libs\VRCModLoader.dll</HintPath>
         </Reference>
