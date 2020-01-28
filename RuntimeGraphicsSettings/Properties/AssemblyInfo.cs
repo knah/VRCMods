@@ -1,16 +1,16 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
-using JoinNotifier;
+using RuntimeGraphicsSettings;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("JoinNotifier")]
+[assembly: AssemblyTitle("RuntimeGraphicsSettings")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("JoinNotifier")]
-[assembly: AssemblyCopyright("Copyright © knah 2019")]
+[assembly: AssemblyProduct("RuntimeGraphicsSettings")]
+[assembly: AssemblyCopyright("Copyright © knah 2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using JoinNotifier;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("C874139C-FABC-4D70-9EEA-49DCBEE699DF")]
+[assembly: Guid("39CB71E8-FB05-492F-8F29-96D1FB803E8D")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -32,5 +32,5 @@ using JoinNotifier;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion(JoinNotifierMod.VersionConst)]
-[assembly: AssemblyFileVersion(JoinNotifierMod.VersionConst)]
+[assembly: AssemblyVersion(RuntimeGraphicsSettingsMod.ModVersion)]
+[assembly: AssemblyFileVersion(RuntimeGraphicsSettingsMod.ModVersion)]
