@@ -18,8 +18,17 @@
         <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
             <HintPath>$(MsBuildThisFileDirectory)Libs\UnityEngine.UI.dll</HintPath>
         </Reference>
+        <Reference Include="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>$(MsBuildThisFileDirectory)Libs\UnityEngine.UIModule.dll</HintPath>
+        </Reference>
         <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
             <HintPath>$(MsBuildThisFileDirectory)Libs\UnityEngine.TextRenderingModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UnityWebRequestModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>$(MsBuildThisFileDirectory)Libs\UnityEngine.UnityWebRequestModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UnityWebRequestWWWModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>$(MsBuildThisFileDirectory)Libs\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
         </Reference>
         <Reference Include="VRCModLoader, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
             <HintPath>$(MsBuildThisFileDirectory)Libs\VRCModLoader.dll</HintPath>
@@ -27,8 +36,11 @@
         <Reference Include="VRCCore-Standalone, Version=0.0.0.0, Culture=neutral, PublicKeyToken=67033c44591afb45">
             <HintPath>$(MsBuildThisFileDirectory)Libs\VRCCore-Standalone.dll</HintPath>
         </Reference>
-        <Reference Include="VRCTools, Version=0.6.1.0, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(MsBuildThisFileDirectory)Libs\VRCTools.0.8.1.dll</HintPath>
+        <Reference Include="VRCCore-Editor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=67033c44591afb45">
+            <HintPath>$(MsBuildThisFileDirectory)Libs\VRCCore-Editor.dll</HintPath>
+        </Reference>
+        <Reference Include="VRCSDK2, Version=0.0.0.0, Culture=neutral, PublicKeyToken=67033c44591afb45">
+            <HintPath>$(MsBuildThisFileDirectory)Libs\VRCSDK2.dll</HintPath>
         </Reference>
     </ItemGroup>
 </Project>

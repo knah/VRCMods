@@ -32,6 +32,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\VRCTools\VRCTools.csproj">
+      <Project>{47f06fb3-c414-426e-a09d-65f23902c16f}</Project>
+      <Name>VRCTools</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="JoinNotifierMod.cs" />
