@@ -9,8 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>JoinNotifier</RootNamespace>
     <AssemblyName>JoinNotifier</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <VrcReferences>true</VrcReferences>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -32,22 +34,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\VRCTools\VRCTools.csproj">
-      <Project>{47f06fb3-c414-426e-a09d-65f23902c16f}</Project>
-      <Name>VRCTools</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="JoinNotifierMod.cs" />
     <Compile Include="JoinNotifierSettings.cs" />
     <Compile Include="NetworkManagerHooks.cs" />
-    <Compile Include="PlayerReflection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UnityActionReflection.cs" />
-    <Compile Include="VrcAudioManagerReflection.cs" />
-    <EmbeddedResource Include="JoinIcon.png" />
-    <EmbeddedResource Include="Chime.bin" />
-    <EmbeddedResource Include="DoorClose.bin" />
+    <EmbeddedResource Include="joinnotifier.assetbundle" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

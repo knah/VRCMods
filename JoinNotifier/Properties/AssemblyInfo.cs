@@ -10,7 +10,7 @@ using JoinNotifier;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("JoinNotifier")]
-[assembly: AssemblyCopyright("Copyright © knah 2019")]
+[assembly: AssemblyCopyright("Copyright © knah 2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

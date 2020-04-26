@@ -1,43 +1,61 @@
-using System.Collections;
-using System.Reflection;
-using UnityEngine;
-using UnityEngine.Events;
+using System;
+using MelonLoader;
 using VRC;
 
 namespace JoinNotifier
 {
     public static class NetworkManagerHooks
     {
-        private static readonly FieldInfo ourNmInstanceField;
-        private static readonly FieldInfo ourPlayerJoinEvent;
-        private static readonly FieldInfo ourPlayerLeftEvent;
+        private static bool IsInitialized;
+        private static bool SeenFire;
+        private static bool AFiredFirst;
+
+        public static event Action<Player> OnJoin;
+        public static event Action<Player> OnLeave;
         
-        private static object GetInstance()
+        public static void EventHandlerA(Player player)
         {
-            return ourNmInstanceField.GetValue(null);
-        }
-
-        static NetworkManagerHooks()
-        {
-            var nmType = typeof(PlayerModManager).Assembly.GetType("NetworkManager");
-            ourNmInstanceField = nmType.GetField("Instance", BindingFlags.Static | BindingFlags.Public);
-            ourPlayerJoinEvent = nmType.GetField("OnPlayerJoinedEvent", BindingFlags.Instance | BindingFlags.Public);
-            ourPlayerLeftEvent = nmType.GetField("OnPlayerLeftEvent", BindingFlags.Instance | BindingFlags.Public);
-        }
-
-        public static IEnumerator WaitForNmInit()
-        {
-            return new WaitWhile(() => GetInstance() == null);
-        }
-
-        public static void AddPlayerJoinHook(UnityAction<Player> action)
-        {
-            new UnityActionReflection<Player>(ourPlayerJoinEvent.FieldType, ourPlayerJoinEvent.GetValue(GetInstance())).Add(action);
+            if (!SeenFire)
+            {
+                AFiredFirst = true;
+                SeenFire = true;
+                
+                MelonModLogger.Log("[JoinNotifier] A fired first");
+            }
+            
+            (AFiredFirst ? OnJoin : OnLeave)?.Invoke(player);
         }
         
-        public static void AddPlayerLeftHook(UnityAction<Player> action)
+        public static void EventHandlerB(Player player)
         {
-            new UnityActionReflection<Player>(ourPlayerLeftEvent.FieldType, ourPlayerLeftEvent.GetValue(GetInstance())).Add(action);
+            if (!SeenFire)
+            {
+                AFiredFirst = false;
+                SeenFire = true;
+                
+                MelonModLogger.Log("[JoinNotifier] B fired first");
+            }
+            
+            (AFiredFirst ? OnLeave : OnJoin)?.Invoke(player);
+        }
+
+        public static void Initialize()
+        {
+            if (IsInitialized) return;
+            if (ReferenceEquals(NetworkManager.field_Internal_Static_NetworkManager_0, null)) return;
+
+            var field0 = NetworkManager.field_Internal_Static_NetworkManager_0.field_Internal_ObjectPublicHaVoUnVoTUnVoVoVoVoUnique_1_Player_0;
+            var field1 = NetworkManager.field_Internal_Static_NetworkManager_0.field_Internal_ObjectPublicHaVoUnVoTUnVoVoVoVoUnique_1_Player_1;
+
+            AddDelegate(field0, EventHandlerA);
+            AddDelegate(field1, EventHandlerB);
+
+            IsInitialized = true;
+        }
+
+        private static void AddDelegate(ObjectPublicHaVoUnVoTUnVoVoVoVoUnique<Player> field, Action<Player> eventHandlerA)
+        {
+            field.field_Private_HashSet_1_UnityAction_1_T_0.Add(eventHandlerA);
         }
     }
 }

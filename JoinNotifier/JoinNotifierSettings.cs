@@ -1,6 +1,6 @@
+using MelonLoader;
 using UnityEngine;
 using VRC.Core;
-using VRCTools;
 
 namespace JoinNotifier
 {
@@ -42,16 +42,16 @@ namespace JoinNotifier
             ModPrefs.RegisterPrefBool(SettingsCategory, SettingLeaveSound, false, "Play sound on leave");
             ModPrefs.RegisterPrefBool(SettingsCategory, SettingLeaveShowName, false, "Show left names");
             
-            ModPrefs.RegisterPrefColor(SettingsCategory, SettingJoinIconColor, new Color(0.50F, 0.75F, 1F), hideFromList: true);
-            ModPrefs.RegisterPrefColor(SettingsCategory, SettingLeaveIconColor, new Color(0.6f, 0.32f, 0.2f), hideFromList: true);
+            // ModPrefs.RegisterPrefColor(SettingsCategory, SettingJoinIconColor, new Color(0.50F, 0.75F, 1F), hideFromList: true);
+            // ModPrefs.RegisterPrefColor(SettingsCategory, SettingLeaveIconColor, new Color(0.6f, 0.32f, 0.2f), hideFromList: true);
             
             ModPrefs.RegisterPrefBool(SettingsCategory, SettingUseUiMixer, true, "Notifications are UI sounds", hideFromList: true);
         }
 
         public static bool ShouldNotifyInCurrentInstance()
         {
-            var instanceType = RoomManagerBase.currentWorldInstance?.InstanceType;
-            if (instanceType == null) return false;
+            var instanceType = RoomManagerBase.field_Internal_Static_ApiWorldInstance_0?.InstanceType;
+            if (instanceType == null) return false;    
             switch (instanceType)
             {
                 case ApiWorldInstance.AccessType.Public:
@@ -78,8 +78,8 @@ namespace JoinNotifier
 
         public static float GetSoundVolume() => ModPrefs.GetFloat(SettingsCategory, SettingSoundVolume);
 
-        public static Color GetJoinIconColor() => ModPrefs.GetColor(SettingsCategory, SettingJoinIconColor);
-        public static Color GetLeaveIconColor() => ModPrefs.GetColor(SettingsCategory, SettingLeaveIconColor);
+        public static Color GetJoinIconColor() => new Color(0.50F, 0.75F, 1F);// ModPrefs.GetColor(SettingsCategory, SettingJoinIconColor);
+        public static Color GetLeaveIconColor() => new Color(0.6f, 0.32f, 0.2f); //ModPrefs.GetColor(SettingsCategory, SettingLeaveIconColor);
 
         public static bool GetUseUiMixer() => ModPrefs.GetBool(SettingsCategory, SettingUseUiMixer);
 
