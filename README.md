@@ -22,6 +22,18 @@ Settings description:
  * PixelLights - maximum amount of pixel lights that can affect an object
  * Texture decimation - Reduces texture resolution by 2^(this setting). A value of 0 means full-resolution textures, a value of 1 means half-res, 2 would be quarter res, and so on.
  * GraphicsTier - Unity Graphics Hardware Tier. Valid values are 1, 2 and 3. Only affects shaders loaded after it was changed. Probably of questionable value in VRChat, as custom shaders rarely support this setting.
+ 
+ ## CoreLimiter
+A mod to automatically limit your game to a certain amount of CPU cores. This can be used to boost performance on some Ryzen CPUs by limiting the game to a single CCX.
+Naturally, limiting the game may reduce maximum possible performance under heavy load, and results are highly dependent on how well the game is multithreaded.
+  
+You should experiment with settings in a CPU-heavy world or scene to measure performance on your specific system. For CPUs with less than 8 cores it might be worth it to reduce used core count or allow hyperthreads.  
+  
+This mod is Windows-only. It likely won't do anything on Intel CPUs, but you're free to experiment with it.    
+
+Settings:
+ * Max Cores (default 4) - the maximum amount of cores that the game may use. 4 is the sweet spot on a 2700X/3700X.
+ * Skip Hyperthreads (default true) - don't assign game to both threads of one core. Works best when enabled on 2700X/3700X.
 
 ## AvatarFav fork (as submodule)
 This fork has VRCModNetwork entirely removed and stores avatar data locally. For those of you who are extra paranoid or malicious.
