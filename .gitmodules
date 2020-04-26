@@ -1,6 +1,3 @@
-[submodule "VRCTools"]
-	path = VRCTools
-	url = git@github.com:knah/VRCTools.git
 [submodule "AvatarFav"]
 	path = AvatarFav
 	url = git@github.com:knah/AvatarFav.git
