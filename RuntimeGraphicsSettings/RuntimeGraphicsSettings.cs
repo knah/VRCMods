@@ -1,5 +1,5 @@
+using MelonLoader;
 using UnityEngine;
-using VRCTools;
 
 namespace RuntimeGraphicsSettings
 {

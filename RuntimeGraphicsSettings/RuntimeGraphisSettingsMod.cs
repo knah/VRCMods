@@ -1,24 +1,23 @@
-using JetBrains.Annotations;
+using MelonLoader;
+using RuntimeGraphicsSettings;
 using UnityEngine;
 using UnityEngine.Rendering;
-using VRCModLoader;
 
+[assembly:MelonModInfo(typeof(RuntimeGraphicsSettingsMod), "Runtime Graphics Settings", RuntimeGraphicsSettingsMod.ModVersion, "knah")]
+[assembly:MelonModGame] // universal
 namespace RuntimeGraphicsSettings
 {
-    [VRCModInfo("Runtime Graphics Settings", ModVersion, "knah")]
-    public class RuntimeGraphicsSettingsMod : VRCMod
+    public class RuntimeGraphicsSettingsMod : MelonMod
     {
-        public const string ModVersion = "0.1.0";
+        public const string ModVersion = "0.2.0";
         
-        [UsedImplicitly]
-        public void OnApplicationStart()
+        public override void OnApplicationStart()
         {
             RuntimeGraphicsSettings.RegisterSettings();
             DoApplySettings();
         }
 
-        [UsedImplicitly]
-        public void OnModSettingsApplied()
+        public override void OnModSettingsApplied()
         {
             DoApplySettings();
         }
@@ -34,7 +33,7 @@ namespace RuntimeGraphicsSettings
                 QualitySettings.antiAliasing = 1;
 
             QualitySettings.anisotropicFiltering = RuntimeGraphicsSettings.AllowAniso
-                ? AnisotropicFiltering.Enable
+                ? AnisotropicFiltering.ForceEnable
                 : AnisotropicFiltering.Disable;
 
             if (RuntimeGraphicsSettings.TextureSizeLimit >= 0)
