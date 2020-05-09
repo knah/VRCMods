@@ -7,6 +7,16 @@ A VRChat mod to notify you when someone joins the instance you're in
 Current features:
  - Visual and audible notifications (configurable)
  - Toggleable per instance type (public/friends/private)
+ 
+## MirrorResolutionUnlimiter
+Headset and display resolutions increase each year, and yet VRChat limits mirror resolution to 2048 pixels per eye. With this mod, that's not the case anymore!  
+Set whatever limit you want, with an option to un-potatoify mirrors that world makers set to potato resolution for their insane reasons. Or you can make all mirrors blurry as a sacrifice to performance gods. It's up to you, really.
+
+Note that increasing mirror texture resolution will increase VRAM usage and lower performance, as your GPU will have to do more work.
+
+Settings:
+ * Max mirror resolution - the maximum size of eye texture for mirror reflections. 2048 is VRChat default, 4096 is mod default.
+ * Force auto resolution - removes mirror resolution limits set by world maker. Off by default.
 
 ## RuntimeGraphicsSettings
 A mod to allow tweaking some graphics settings at runtime to get those extra few frames.
