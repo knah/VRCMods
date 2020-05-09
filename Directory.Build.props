@@ -55,6 +55,11 @@
             <SpecificVersion>false</SpecificVersion>
             <HintPath>$(MsBuildThisFileDirectory)Libs\UnhollowerBaseLib.dll</HintPath>
         </Reference>
+        <Reference Include="UnhollowerRuntimeLib, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <SpecificVersion>false</SpecificVersion>
+            <Private>false</Private>
+            <HintPath>$(MsBuildThisFileDirectory)Libs\UnhollowerRuntimeLib.dll</HintPath>
+        </Reference>
         <Reference Include="Il2Cppmscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=null">
             <SpecificVersion>false</SpecificVersion>
             <Private>false</Private>
@@ -96,6 +101,11 @@
             <SpecificVersion>false</SpecificVersion>
             <Private>false</Private>
             <HintPath>$(MsBuildThisFileDirectory)Libs\VRCSDK2.dll</HintPath>
+        </Reference>
+        <Reference Include="VRCSDKBase, Version=0.0.0.0, Culture=neutral, PublicKeyToken=67033c44591afb45">
+            <SpecificVersion>false</SpecificVersion>
+            <Private>false</Private>
+            <HintPath>$(MsBuildThisFileDirectory)Libs\VRCSDKBase.dll</HintPath>
         </Reference>
     </ItemGroup>
     <PropertyGroup>
