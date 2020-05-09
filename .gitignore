@@ -4,3 +4,4 @@ obj/
 /packages
 Libs/*.dll
 *.user
+/Output
