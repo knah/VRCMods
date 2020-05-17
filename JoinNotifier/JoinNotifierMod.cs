@@ -17,7 +17,7 @@ namespace JoinNotifier
 {
     public class JoinNotifierMod : MelonMod
     {
-        public const string VersionConst = "0.2.1";
+        public const string VersionConst = "0.2.2";
 
         private Image myJoinImage;
         private Image myLeaveImage;
@@ -28,44 +28,60 @@ namespace JoinNotifier
         
         private int myLastLevelLoad;
         private bool myObservedLocalPlayerJoin;
+        
         private AssetBundle myAssetBundle;
-
-        private bool Initialized = false;
+        private Sprite myJoinSprite;
+        private AudioClip myJoinClip;
+        private AudioClip myLeaveClip;
 
         public override void OnApplicationStart()
         {
             MelonModLogger.Log("[JoinNotifier] ApplicationStart");
             JoinNotifierSettings.RegisterSettings();
             MelonModLogger.Log("[JoinNotifier] ApplicationStart done");
-        }
-        
-        public override void OnUpdate()
-        {
-            InitThings();
+
+            MelonCoroutines.Start(InitThings());
         }
 
-        public void InitThings()
+        public IEnumerator InitThings()
         {
-            NetworkManagerHooks.Initialize();
-            if (Initialized) return;
+            MelonModLogger.Log("[JoinNotifier] Waiting for init");
             
-            if (ReferenceEquals(NetworkManager.field_Internal_Static_NetworkManager_0, null)) return;
-            if (ReferenceEquals(VRCAudioManager.field_Private_Static_VRCAudioManager_0, null)) return;
-            if (ReferenceEquals(VRCUiManager.field_Protected_Static_VRCUiManager_0, null)) return;
+            while (ReferenceEquals(NetworkManager.field_Internal_Static_NetworkManager_0, null)) yield return null;
+            while (ReferenceEquals(VRCAudioManager.field_Private_Static_VRCAudioManager_0, null)) yield return null;
+            while (ReferenceEquals(VRCUiManager.field_Protected_Static_VRCUiManager_0, null)) yield return null;
 
             MelonModLogger.Log("[JoinNotifier] Start init");
+            
+            NetworkManagerHooks.Initialize();
 
-            using (var tempStream = new MemoryStream())
+            var tempFile = Path.GetTempFileName();
+            using (var tempStream = new FileStream(tempFile, FileMode.OpenOrCreate, FileAccess.Write))
             {
                 Assembly.GetExecutingAssembly().GetManifestResourceStream("JoinNotifier.joinnotifier.assetbundle").CopyTo(tempStream);
-                myAssetBundle = AssetBundle.LoadFromMemory_Internal(tempStream.ToArray(), 0);
             }
+            myAssetBundle = AssetBundle.LoadFromFile(tempFile);
+            myAssetBundle.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+            
+            var iconLoadRequest = myAssetBundle.LoadAssetAsync("Assets/JoinNotifier/JoinIcon.png", Sprite.Il2CppType);
+            while (!iconLoadRequest.isDone) yield return null;
+            myJoinSprite = iconLoadRequest.asset.Cast<Sprite>();
+            myJoinSprite.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+
+            var joinSoundRequest = myAssetBundle.LoadAssetAsync("Assets/JoinNotifier/Chime.ogg", AudioClip.Il2CppType);
+            while (!joinSoundRequest.isDone) yield return null;
+            myJoinClip = joinSoundRequest.asset.Cast<AudioClip>();
+            myJoinClip.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+            
+            var leaveSoundRequest = myAssetBundle.LoadAssetAsync("Assets/JoinNotifier/DoorClose.ogg", AudioClip.Il2CppType);
+            while (!leaveSoundRequest.isDone) yield return null;
+            myLeaveClip = leaveSoundRequest.asset.Cast<AudioClip>();
+            myLeaveClip.hideFlags |= HideFlags.DontUnloadUnusedAsset;
 
             CreateGameObjects();
+            
             NetworkManagerHooks.OnJoin += OnPlayerJoined;
             NetworkManagerHooks.OnLeave += OnPlayerLeft;
-
-            Initialized = true;
         }
 
         public override void OnModSettingsApplied()
@@ -112,7 +128,7 @@ namespace JoinNotifier
             indicator.SetActive(true);
             indicator.transform.localPosition += Vector3.right * offset;
             var image = indicator.GetComponent<Image>();
-            image.sprite = myAssetBundle.LoadAsset_Internal("Assets/JoinNotifier/JoinIcon.png", Sprite.Il2CppType).Cast<Sprite>();
+            image.sprite = myJoinSprite;
 
             image.enabled = false;
             image.color = colorTint;
@@ -140,10 +156,9 @@ namespace JoinNotifier
             return text;
         }
 
-        private AudioSource CreateAudioSource(string resourceName, GameObject parent)
+        private AudioSource CreateAudioSource(AudioClip clip, GameObject parent)
         {
             var source = parent.AddComponent<AudioSource>();
-            var clip = myAssetBundle.LoadAsset_Internal("Assets/JoinNotifier/" + resourceName, AudioClip.Il2CppType).Cast<AudioClip>();
             source.clip = clip;
             source.spatialize = false;
             source.volume = JoinNotifierSettings.GetSoundVolume();
@@ -168,11 +183,11 @@ namespace JoinNotifier
             MelonModLogger.Log("[JoinNotifier] Creating gameobjects");
 //            var pathToThing = "UserInterface/UnscaledUI/HudContent/Hud/NotificationDotParent/NotificationDot";
             myJoinImage = CreateNotifierImage("join", 0f, JoinNotifierSettings.GetJoinIconColor());
-            myJoinSource = CreateAudioSource("Chime.ogg", myJoinImage.gameObject);
+            myJoinSource = CreateAudioSource(myJoinClip, myJoinImage.gameObject);
             myJoinText = CreateTextNear(myJoinImage, 110f, TextAnchor.LowerRight);
             
             myLeaveImage = CreateNotifierImage("leave", 100f, JoinNotifierSettings.GetLeaveIconColor());
-            myLeaveSource = CreateAudioSource("DoorClose.ogg", myLeaveImage.gameObject);
+            myLeaveSource = CreateAudioSource(myLeaveClip, myLeaveImage.gameObject);
             myLeaveText = CreateTextNear(myLeaveImage, 110f, TextAnchor.LowerLeft);
         }
 
@@ -182,8 +197,6 @@ namespace JoinNotifier
             
             myLastLevelLoad = Environment.TickCount;
             myObservedLocalPlayerJoin = false;
-            
-            CreateGameObjects();
         }
 
         public void OnPlayerJoined(Player player)
@@ -195,8 +208,6 @@ namespace JoinNotifier
                 myLastLevelLoad = Environment.TickCount;
             }
 
-            if (!Initialized) return;
-            
             if (!myObservedLocalPlayerJoin || Environment.TickCount - myLastLevelLoad < 5_000) return;
             if (!JoinNotifierSettings.ShouldNotifyInCurrentInstance()) return;
             var playerName = apiUser.displayName ?? "!null!";
@@ -210,8 +221,6 @@ namespace JoinNotifier
         
         public void OnPlayerLeft(Player player)
         {
-            if (!Initialized) return;
-            
             if (!JoinNotifierSettings.ShouldNotifyInCurrentInstance()) return;
             if (Environment.TickCount - myLastLevelLoad < 5_000) return;
             var playerName = player.field_Private_APIUser_0.displayName ?? "!null!";
