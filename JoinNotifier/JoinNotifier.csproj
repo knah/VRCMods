@@ -13,6 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <VrcReferences>true</VrcReferences>
+    <UseAltLibs>true</UseAltLibs>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>

@@ -3,5 +3,6 @@ bin/
 obj/
 /packages
 Libs/*.dll
+LibsAlt/*.dll
 *.user
 /Output

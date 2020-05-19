@@ -59,3 +59,5 @@ Then, you will have to put mod .dll files in the `Mods` folder of your game dire
 
 ## Building
 To build these, drop required libraries (found in `<vrchat instanll dir>/MelonLoader/Managed` after melonloader installation, list found in `Directory.Build.props`) into Libs folder, then use your IDE of choice to build.
+ * Libs folder is intended for newest libraries (MelonLoader 0.1.1/Unhollower 0.4.0)
+ * LibsAlt folder is intended for compat libraries (MelonLoader 0.1.0/Unhollower 0.3.1)
