@@ -1,11 +1,11 @@
 using System;
+using System.Linq;
 using Il2CppSystem.Collections.Generic;
 using Il2CppSystem.Reflection;
 using MelonLoader;
 using MirrorResolutionUnlimiter;
 using UnhollowerBaseLib;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using VRC.SDKBase;
 
 [assembly:MelonModInfo(typeof(MirrorResolutionUnlimiterMod), "MirrorResolutionUnlimiter", "1.0", "knah")]
@@ -38,10 +38,17 @@ namespace MirrorResolutionUnlimiter
                 var originalMethodPointer = *(IntPtr*) IL2CPP.il2cpp_method_get_from_reflection(methodInfo.Pointer);
                 CompatHook((IntPtr) (&originalMethodPointer), typeof(MirrorResolutionUnlimiterMod).GetMethod(nameof(GetReflectionData), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
             }
-            
-            SceneManager.add_sceneLoaded(new Action<Scene, LoadSceneMode>((_, __) => OnModSettingsApplied()));
-            
+
             OnModSettingsApplied();
+
+            if (AppDomain.CurrentDomain.GetAssemblies().Any(it => it.GetName().Name.StartsWith("UIExpansionKit")))
+            {
+                MelonModLogger.Log("Adding UIExpansionKit buttons");
+                typeof(UiExtensionsAddon)
+                    .GetMethod(nameof(UiExtensionsAddon.Init),
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)!
+                    .Invoke(null, new object[0]);
+            }
         }
 
         private static void CompatHook(IntPtr first, IntPtr second)

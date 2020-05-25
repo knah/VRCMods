@@ -42,6 +42,13 @@
     <ItemGroup>
         <Compile Include="MirrorResolutionUnlimiterMod.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="UiExtensionsAddon.cs" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\UIExpansionKit\UIExpansionKit.csproj">
+        <Project>{85b11d98-e013-4e5d-95f3-5437de63acf4}</Project>
+        <Name>UIExpansionKit</Name>
+      </ProjectReference>
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

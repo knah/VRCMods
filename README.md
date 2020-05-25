@@ -17,6 +17,7 @@ Note that increasing mirror texture resolution will increase VRAM usage and lowe
 Settings:
  * Max mirror resolution - the maximum size of eye texture for mirror reflections. 2048 is VRChat default, 4096 is mod default.
  * Force auto resolution - removes mirror resolution limits set by world maker. Off by default.
+ * Mirror MSAA - changes MSAA specifically for mirrors. Valid values are 0 (same as main camera), 1, 2, 4 and 8. Lower MSAA may lead to "shimmering" and jaggies, especially in VR. 
 
 ## RuntimeGraphicsSettings
 A mod to allow tweaking some graphics settings at runtime to get those extra few frames.
