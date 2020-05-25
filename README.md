@@ -14,6 +14,8 @@ Set whatever limit you want, with an option to un-potatoify mirrors that world m
 
 Note that increasing mirror texture resolution will increase VRAM usage and lower performance, as your GPU will have to do more work.
 
+If UIExpansionKit is installed, Settings page in the main menu will get two buttons to optimize and beautify all visible mirrors in the world.
+
 Settings:
  * Max mirror resolution - the maximum size of eye texture for mirror reflections. 2048 is VRChat default, 4096 is mod default.
  * Force auto resolution - removes mirror resolution limits set by world maker. Off by default.
