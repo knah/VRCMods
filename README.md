@@ -57,11 +57,6 @@ Settings:
  * Max Cores (default 4) - the maximum amount of cores that the game may use. 4 is the sweet spot on a 2700X/3700X.
  * Skip Hyperthreads (default true) - don't assign game to both threads of one core. Works best when enabled on 2700X/3700X.
 
-## AvatarFav fork (as submodule)
-This fork has VRCModNetwork entirely removed and stores avatar data locally. For those of you who are extra paranoid or malicious.
-Avatar search still works, based on locally observed avatars.
-There's no way to import your VRCModNetwork/AvatarFav favorites list.
-
 ## Installation
 Before install:  
 **Tupper (from VRChat Team) said that any modification of the game can lead to a ban, as with these mods**
