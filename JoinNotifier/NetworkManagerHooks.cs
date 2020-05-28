@@ -44,8 +44,8 @@ namespace JoinNotifier
             if (IsInitialized) return;
             if (ReferenceEquals(NetworkManager.field_Internal_Static_NetworkManager_0, null)) return;
 
-            var field0 = NetworkManager.field_Internal_Static_NetworkManager_0.field_Internal_ObjectPublicHaVoTVoUnVoUnVoVoVoUnique_1_Player_0;
-            var field1 = NetworkManager.field_Internal_Static_NetworkManager_0.field_Internal_ObjectPublicHaVoTVoUnVoUnVoVoVoUnique_1_Player_1;
+            var field0 = NetworkManager.field_Internal_Static_NetworkManager_0.field_Internal_ObjectPublicHaVoUnVoTUnVoVoVoVoUnique_1_Player_0;
+            var field1 = NetworkManager.field_Internal_Static_NetworkManager_0.field_Internal_ObjectPublicHaVoUnVoTUnVoVoVoVoUnique_1_Player_1;
 
             AddDelegate(field0, EventHandlerA);
             AddDelegate(field1, EventHandlerB);
@@ -53,7 +53,7 @@ namespace JoinNotifier
             IsInitialized = true;
         }
 
-        private static void AddDelegate(ObjectPublicHaVoTVoUnVoUnVoVoVoUnique<Player> field, Action<Player> eventHandlerA)
+        private static void AddDelegate(ObjectPublicHaVoUnVoTUnVoVoVoVoUnique<Player> field, Action<Player> eventHandlerA)
         {
             field.field_Private_HashSet_1_UnityAction_1_T_0.Add(eventHandlerA);
         }

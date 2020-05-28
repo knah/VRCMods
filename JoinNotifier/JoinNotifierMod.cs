@@ -17,7 +17,7 @@ namespace JoinNotifier
 {
     public class JoinNotifierMod : MelonMod
     {
-        public const string VersionConst = "0.2.2";
+        public const string VersionConst = "0.2.3";
 
         private Image myJoinImage;
         private Image myLeaveImage;
