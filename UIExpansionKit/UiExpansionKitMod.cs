@@ -11,7 +11,7 @@ using UnityEngine.UI;
 using VRCSDK2;
 using Object = UnityEngine.Object;
 
-[assembly:MelonModInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.1.0", "knah")]
+[assembly:MelonModInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.1.1", "knah")]
 [assembly:MelonModGame("VRChat", "VRChat")]
 
 namespace UIExpansionKit
