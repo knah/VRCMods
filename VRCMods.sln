@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UIExpansionKit", "UIExpansi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MirrorResolutionUnlimiter", "MirrorResolutionUnlimiter\MirrorResolutionUnlimiter.csproj", "{C43A909B-85B4-460F-BD6C-976C0EEF73DE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HWIDPatch", "HWIDPatch\HWIDPatch.csproj", "{8C524F7B-6C83-48B4-B262-7C048DAFDA27}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,5 +45,9 @@ Global
 		{C43A909B-85B4-460F-BD6C-976C0EEF73DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C43A909B-85B4-460F-BD6C-976C0EEF73DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C43A909B-85B4-460F-BD6C-976C0EEF73DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C524F7B-6C83-48B4-B262-7C048DAFDA27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C524F7B-6C83-48B4-B262-7C048DAFDA27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C524F7B-6C83-48B4-B262-7C048DAFDA27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C524F7B-6C83-48B4-B262-7C048DAFDA27}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
