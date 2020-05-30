@@ -219,7 +219,7 @@ namespace UIExpansionKit
 
         private void FillQuickMenuExpando(GameObject expando, ExpandedMenu expandedMenu)
         {
-            var expandoRoot = expando.transform.Find("Scroll View/Viewport/Content").Cast<RectTransform>();
+            var expandoRoot = expando.transform.Find("Content/Scroll View/Viewport/Content").Cast<RectTransform>();
             
             expandoRoot.DestroyChildren();
 
