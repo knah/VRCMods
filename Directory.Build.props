@@ -145,6 +145,11 @@
             <Private>false</Private>
             <HintPath>$(MsBuildThisFileDirectory)LibsAlt\UnityEngine.UI.dll</HintPath>
         </Reference>
+        <Reference Include="UnityEngine.ParticleSystemModule, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <SpecificVersion>false</SpecificVersion>
+            <Private>false</Private>
+            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\UnityEngine.ParticleSystemModule.dll</HintPath>
+        </Reference>
         <Reference Include="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
             <SpecificVersion>false</SpecificVersion>
             <Private>false</Private>
