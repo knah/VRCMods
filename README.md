@@ -37,7 +37,8 @@ Settings description:
  * GraphicsTier - Unity Graphics Hardware Tier. Valid values are 1, 2 and 3. Only affects shaders loaded after it was changed. Probably of questionable value in VRChat, as custom shaders rarely support this setting.
  
  ## SparkleBeGone
- This mod allows removing start and and sparkles from VR laser pointers, as well as recoloring them.  
+ This mod allows removing start and end sparkles from VR laser pointers, as well as recoloring them.  
+ It will do nothing on desktop.   
  Settings are fairly self-explanatory.
  
  ## UIExpansionKit
