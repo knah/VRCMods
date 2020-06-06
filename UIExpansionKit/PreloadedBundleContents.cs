@@ -1,4 +1,5 @@
 using System.Collections;
+using UnhollowerRuntimeLib;
 using UnityEngine;
 
 namespace UIExpansionKit
@@ -29,7 +30,7 @@ namespace UIExpansionKit
         {
             IEnumerable Load(string str)
             {
-                var assetBundleRequest = bundle.LoadAssetAsync(str, GameObject.Il2CppType);
+                var assetBundleRequest = bundle.LoadAssetAsync(str, Il2CppType.Of<GameObject>());
                 while (!assetBundleRequest.isDone)
                     yield return null;
                 var objectFromBundle = assetBundleRequest.asset.Cast<GameObject>();

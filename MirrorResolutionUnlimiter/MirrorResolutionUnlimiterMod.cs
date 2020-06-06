@@ -5,6 +5,7 @@ using Il2CppSystem.Reflection;
 using MelonLoader;
 using MirrorResolutionUnlimiter;
 using UnhollowerBaseLib;
+using UnhollowerRuntimeLib;
 using UnityEngine;
 using VRC.SDKBase;
 
@@ -34,7 +35,7 @@ namespace MirrorResolutionUnlimiter
             
             unsafe
             {
-                var methodInfo = VRC_MirrorReflection.Il2CppType.GetMethod(nameof(VRC_MirrorReflection.GetReflectionData), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var methodInfo = Il2CppType.Of<VRC_MirrorReflection>().GetMethod(nameof(VRC_MirrorReflection.GetReflectionData), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
                 var originalMethodPointer = *(IntPtr*) IL2CPP.il2cpp_method_get_from_reflection(methodInfo.Pointer);
                 CompatHook((IntPtr) (&originalMethodPointer), typeof(MirrorResolutionUnlimiterMod).GetMethod(nameof(GetReflectionData), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
             }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using JoinNotifier;
 using MelonLoader;
+using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.UI;
 using VRC;
@@ -63,17 +64,17 @@ namespace JoinNotifier
             myAssetBundle = AssetBundle.LoadFromFile(tempFile);
             myAssetBundle.hideFlags |= HideFlags.DontUnloadUnusedAsset;
             
-            var iconLoadRequest = myAssetBundle.LoadAssetAsync("Assets/JoinNotifier/JoinIcon.png", Sprite.Il2CppType);
+            var iconLoadRequest = myAssetBundle.LoadAssetAsync("Assets/JoinNotifier/JoinIcon.png", Il2CppType.Of<Sprite>());
             while (!iconLoadRequest.isDone) yield return null;
             myJoinSprite = iconLoadRequest.asset.Cast<Sprite>();
             myJoinSprite.hideFlags |= HideFlags.DontUnloadUnusedAsset;
 
-            var joinSoundRequest = myAssetBundle.LoadAssetAsync("Assets/JoinNotifier/Chime.ogg", AudioClip.Il2CppType);
+            var joinSoundRequest = myAssetBundle.LoadAssetAsync("Assets/JoinNotifier/Chime.ogg", Il2CppType.Of<AudioClip>());
             while (!joinSoundRequest.isDone) yield return null;
             myJoinClip = joinSoundRequest.asset.Cast<AudioClip>();
             myJoinClip.hideFlags |= HideFlags.DontUnloadUnusedAsset;
             
-            var leaveSoundRequest = myAssetBundle.LoadAssetAsync("Assets/JoinNotifier/DoorClose.ogg", AudioClip.Il2CppType);
+            var leaveSoundRequest = myAssetBundle.LoadAssetAsync("Assets/JoinNotifier/DoorClose.ogg", Il2CppType.Of<AudioClip>());
             while (!leaveSoundRequest.isDone) yield return null;
             myLeaveClip = leaveSoundRequest.asset.Cast<AudioClip>();
             myLeaveClip.hideFlags |= HideFlags.DontUnloadUnusedAsset;
