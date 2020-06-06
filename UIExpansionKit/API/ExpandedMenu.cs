@@ -49,5 +49,32 @@ namespace UIExpansionKit.API
         /// Big safety menu
         /// </summary>
         SafetyMenu,
+        
+        /// <summary>
+        /// Emote Quick Menu page
+        /// </summary>
+        EmoteQuickMenu,
+        
+        /// <summary>
+        /// Emoji Quick Menu page
+        /// </summary>
+        EmojiQuickMenu,
+        
+        /// <summary>
+        /// Camera Quick Menu page
+        /// </summary>
+        CameraQuickMenu,
+        
+        /// <summary>
+        /// UI Elements Quick Menu page
+        /// </summary>
+        UiElementsQuickMenu,
+        
+        /// <summary>
+        /// Moderation Quick Menu page
+        /// </summary>
+        ModerationQuickMenu,
+        
+        AvatarStatsQuickMenu,
     }
 }

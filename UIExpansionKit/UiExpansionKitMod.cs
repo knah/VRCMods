@@ -35,6 +35,12 @@ namespace UIExpansionKit
             
             (ExpandedMenu.QuickMenu, "UserInterface/QuickMenu/ShortcutMenu", false),
             (ExpandedMenu.UserQuickMenu, "UserInterface/QuickMenu/UserInteractMenu", false),
+            (ExpandedMenu.EmojiQuickMenu, "UserInterface/QuickMenu/EmojiMenu", false),
+            (ExpandedMenu.EmoteQuickMenu, "UserInterface/QuickMenu/EmoteMenu", false),
+            (ExpandedMenu.CameraQuickMenu, "UserInterface/QuickMenu/CameraMenu", false),
+            (ExpandedMenu.ModerationQuickMenu, "UserInterface/QuickMenu/ModerationMenu", false),
+            (ExpandedMenu.UiElementsQuickMenu, "UserInterface/QuickMenu/UIElementsMenu", false),
+            (ExpandedMenu.AvatarStatsQuickMenu, "UserInterface/QuickMenu/AvatarStatsMenu", false),
         };
         
         private readonly Dictionary<ExpandedMenu, GameObject> myMenuRoots = new Dictionary<ExpandedMenu, GameObject>();
