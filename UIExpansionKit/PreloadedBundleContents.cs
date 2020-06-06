@@ -6,72 +6,43 @@ namespace UIExpansionKit
 {
     public class PreloadedBundleContents
     {
-        public GameObject QuickMenuExpando;
-        public GameObject BigMenuExpando;
-        public GameObject SettingsMenuExpando;
+        public readonly GameObject QuickMenuExpando;
+        public readonly GameObject BigMenuExpando;
+        public readonly GameObject SettingsMenuExpando;
         
-        public GameObject QuickMenuButton;
-        public GameObject QuickMenuToggle;
+        public readonly GameObject QuickMenuButton;
+        public readonly GameObject QuickMenuToggle;
 
-        public GameObject SettingsCategory;
-        public GameObject SettingsBool;
-        public GameObject SettingsText;
+        public readonly GameObject SettingsCategory;
+        public readonly GameObject SettingsBool;
+        public readonly GameObject SettingsText;
 
         public readonly GameObject StoredThingsParent;
         
-        public PreloadedBundleContents()
+        public PreloadedBundleContents(AssetBundle bundle)
         {
             StoredThingsParent = new GameObject("ModUiPreloadedBundleContents");
             Object.DontDestroyOnLoad(StoredThingsParent);
             StoredThingsParent.SetActive(false);
-        }
-
-        internal IEnumerator LoadThingsCoroutine(AssetBundle bundle)
-        {
-            IEnumerable Load(string str)
+            
+            GameObject Load(string str)
             {
-                var assetBundleRequest = bundle.LoadAssetAsync(str, Il2CppType.Of<GameObject>());
-                while (!assetBundleRequest.isDone)
-                    yield return null;
-                var objectFromBundle = assetBundleRequest.asset.Cast<GameObject>();
+                var objectFromBundle = bundle.LoadAsset_Internal(str, Il2CppType.Of<GameObject>()).Cast<GameObject>();
                 var newObject = Object.Instantiate(objectFromBundle, StoredThingsParent.transform);
                 newObject.SetActive(true);
-                yield return newObject.NoUnload();
+                return newObject.NoUnload();
             }
 
-            foreach (var loadRes in Load("Assets/ModUI/BigMenuSideExpando.prefab"))
-                if (loadRes == null) yield return null;
-                else BigMenuExpando = (GameObject) loadRes;
-
-            foreach (var loadRes in Load("Assets/ModUI/ModSettingsTopExpando.prefab"))
-                if (loadRes == null) yield return null;
-                else SettingsMenuExpando = (GameObject) loadRes;
+            BigMenuExpando = Load("Assets/ModUI/BigMenuSideExpando.prefab");
+            SettingsMenuExpando = Load("Assets/ModUI/ModSettingsTopExpando.prefab");
+            QuickMenuExpando = Load("Assets/ModUI/QuickMenuExpandoRoot.prefab");
             
-            foreach (var loadRes in Load("Assets/ModUI/QuickMenuExpandoRoot.prefab"))
-                if (loadRes == null) yield return null;
-                else QuickMenuExpando = (GameObject) loadRes;
+            QuickMenuButton = Load("Assets/ModUI/BigMenuSideButton.prefab");
+            QuickMenuToggle = Load("Assets/ModUI/ToggleButton.prefab");
             
-            
-            foreach (var loadRes in Load("Assets/ModUI/BigMenuSideButton.prefab"))
-                if (loadRes == null) yield return null;
-                else QuickMenuButton = (GameObject) loadRes;
-            
-            foreach (var loadRes in Load("Assets/ModUI/ToggleButton.prefab"))
-                if (loadRes == null) yield return null;
-                else QuickMenuToggle = (GameObject) loadRes;
-            
-            
-            foreach (var loadRes in Load("Assets/ModUI/CategoryElement.prefab"))
-                if (loadRes == null) yield return null;
-                else SettingsCategory = (GameObject) loadRes;
-            
-            foreach (var loadRes in Load("Assets/ModUI/CheckboxGroup.prefab"))
-                if (loadRes == null) yield return null;
-                else SettingsBool = (GameObject) loadRes;
-            
-            foreach (var loadRes in Load("Assets/ModUI/TextInputGroup.prefab"))
-                if (loadRes == null) yield return null;
-                else SettingsText = (GameObject) loadRes;
+            SettingsCategory = Load("Assets/ModUI/CategoryElement.prefab");
+            SettingsBool = Load("Assets/ModUI/CheckboxGroup.prefab");
+            SettingsText = Load("Assets/ModUI/TextInputGroup.prefab");
         }
     }
 }

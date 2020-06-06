@@ -56,27 +56,22 @@ namespace JoinNotifier
             
             NetworkManagerHooks.Initialize();
 
-            var tempFile = Path.GetTempFileName();
-            using (var tempStream = new FileStream(tempFile, FileMode.OpenOrCreate, FileAccess.Write))
+            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("JoinNotifier.joinnotifier.assetbundle"))
+            using (var tempStream = new MemoryStream((int) stream.Length))
             {
-                Assembly.GetExecutingAssembly().GetManifestResourceStream("JoinNotifier.joinnotifier.assetbundle").CopyTo(tempStream);
+                stream.CopyTo(tempStream);
+                
+                myAssetBundle = AssetBundle.LoadFromMemory_Internal(tempStream.ToArray(), 0);
+                myAssetBundle.hideFlags |= HideFlags.DontUnloadUnusedAsset;
             }
-            myAssetBundle = AssetBundle.LoadFromFile(tempFile);
-            myAssetBundle.hideFlags |= HideFlags.DontUnloadUnusedAsset;
             
-            var iconLoadRequest = myAssetBundle.LoadAssetAsync("Assets/JoinNotifier/JoinIcon.png", Il2CppType.Of<Sprite>());
-            while (!iconLoadRequest.isDone) yield return null;
-            myJoinSprite = iconLoadRequest.asset.Cast<Sprite>();
+            myJoinSprite = myAssetBundle.LoadAsset_Internal("Assets/JoinNotifier/JoinIcon.png", Il2CppType.Of<Sprite>()).Cast<Sprite>();
             myJoinSprite.hideFlags |= HideFlags.DontUnloadUnusedAsset;
 
-            var joinSoundRequest = myAssetBundle.LoadAssetAsync("Assets/JoinNotifier/Chime.ogg", Il2CppType.Of<AudioClip>());
-            while (!joinSoundRequest.isDone) yield return null;
-            myJoinClip = joinSoundRequest.asset.Cast<AudioClip>();
+            myJoinClip = myAssetBundle.LoadAsset_Internal("Assets/JoinNotifier/Chime.ogg", Il2CppType.Of<AudioClip>()).Cast<AudioClip>();
             myJoinClip.hideFlags |= HideFlags.DontUnloadUnusedAsset;
             
-            var leaveSoundRequest = myAssetBundle.LoadAssetAsync("Assets/JoinNotifier/DoorClose.ogg", Il2CppType.Of<AudioClip>());
-            while (!leaveSoundRequest.isDone) yield return null;
-            myLeaveClip = leaveSoundRequest.asset.Cast<AudioClip>();
+            myLeaveClip = myAssetBundle.LoadAsset_Internal("Assets/JoinNotifier/DoorClose.ogg", Il2CppType.Of<AudioClip>()).Cast<AudioClip>();
             myLeaveClip.hideFlags |= HideFlags.DontUnloadUnusedAsset;
 
             CreateGameObjects();

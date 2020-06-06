@@ -68,14 +68,15 @@ namespace UIExpansionKit
 
         private IEnumerator InitThings()
         {
-            var tempFile = Path.GetTempFileName();
             {
                 using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UIExpansionKit.modui.assetbundle");
-                using var memStream = new FileStream(tempFile, FileMode.OpenOrCreate, FileAccess.Write);
+                using var memStream = new MemoryStream((int) stream.Length);
                 stream.CopyTo(memStream);
+                var assetBundle = AssetBundle.LoadFromMemory_Internal(memStream.ToArray(), 0);
+                assetBundle.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+                
+                myStuffBundle = new PreloadedBundleContents(assetBundle);
             }
-            var assetBundle = AssetBundle.LoadFromFile(tempFile);
-            assetBundle.hideFlags |= HideFlags.DontUnloadUnusedAsset;
 
             while (VRCUiManager.field_Protected_Static_VRCUiManager_0 == null)
                 yield return null;
@@ -83,13 +84,8 @@ namespace UIExpansionKit
             while (QuickMenu.prop_QuickMenu_0 == null)
                 yield return null;
             
-            myStuffBundle = new PreloadedBundleContents();
             // attach it to QuickMenu. VRChat changes render queue on QM contents on world load that makes it render properly
             myStuffBundle.StoredThingsParent.transform.SetParent(QuickMenu.prop_QuickMenu_0.transform);
-            
-            var stuffLoadEnum = myStuffBundle.LoadThingsCoroutine(assetBundle);
-            while (stuffLoadEnum.MoveNext())
-                yield return null;
             
             DecorateFullMenu();
             DecorateMenuPages();
