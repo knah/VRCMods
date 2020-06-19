@@ -131,8 +131,12 @@ namespace SparkleBeGone
                 ourOriginalLateUpdate(thisPtr);
 
                 if (ourDoRecolorSparks) // this affects particles
-                    foreach (var material in pointer.field_Private_ArrayOf_Material_0)
-                        material.SetColor("_TintColor", ourBeamColor);
+                {
+                    var materials = pointer.field_Private_ArrayOf_Material_0;
+                    if (materials != null)
+                        foreach (var material in materials)
+                            material.SetColor("_TintColor", ourBeamColor);
+                }
 
                 if (!ourDoRecolorBeams) return;
                 
