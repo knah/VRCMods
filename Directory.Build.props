@@ -1,5 +1,5 @@
 <Project>
-    <ItemGroup Condition="'$(UseAltLibs)' != 'true'">
+    <ItemGroup>
         <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
             <SpecificVersion>false</SpecificVersion>
             <Private>false</Private>
@@ -39,6 +39,16 @@
             <SpecificVersion>false</SpecificVersion>
             <Private>false</Private>
             <HintPath>$(MsBuildThisFileDirectory)Libs\UnityEngine.TextRenderingModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.ParticleSYstemModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <SpecificVersion>false</SpecificVersion>
+            <Private>false</Private>
+            <HintPath>$(MsBuildThisFileDirectory)Libs\UnityEngine.ParticleSystemModule.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.Postprocessing.Runtime, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <SpecificVersion>false</SpecificVersion>
+            <Private>false</Private>
+            <HintPath>$(MsBuildThisFileDirectory)Libs\Unity.Postprocessing.Runtime.dll</HintPath>
         </Reference>
         <Reference Include="UnityEngine.UnityWebRequestModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
             <SpecificVersion>false</SpecificVersion>
@@ -81,7 +91,7 @@
             <HintPath>$(MsBuildThisFileDirectory)Libs\Il2CppSystem.Core.dll</HintPath>
         </Reference>
     </ItemGroup>
-    <ItemGroup Condition="'$(VrcReferences)' == 'true' and '$(UseAltLibs)' != 'true'">
+    <ItemGroup Condition="'$(VrcReferences)' == 'true'">
         <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
             <SpecificVersion>false</SpecificVersion>
             <Private>false</Private>
@@ -114,126 +124,6 @@
         </Reference>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(UseAltLibs)' == 'true'">
-        <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\UnityEngine.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.AssetBundleModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\UnityEngine.AssetBundleModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\UnityEngine.AudioModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.AnimationModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\UnityEngine.AnimationModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\UnityEngine.CoreModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\UnityEngine.UI.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.ParticleSystemModule, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\UnityEngine.ParticleSystemModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\UnityEngine.UIModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\UnityEngine.TextRenderingModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.UnityWebRequestModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\UnityEngine.UnityWebRequestModule.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.UnityWebRequestWWWModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
-        </Reference>
-        <Reference Include="MelonLoader.ModHandler, Version=0.0.3.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\MelonLoader.ModHandler.dll</HintPath>
-        </Reference>
-        <Reference Include="UnhollowerBaseLib, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\UnhollowerBaseLib.dll</HintPath>
-        </Reference>
-        <Reference Include="UnhollowerRuntimeLib, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\UnhollowerRuntimeLib.dll</HintPath>
-        </Reference>
-        <Reference Include="Il2Cppmscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\Il2Cppmscorlib.dll</HintPath>
-        </Reference>
-        <Reference Include="Il2CppSystem, Version=4.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\Il2CppSystem.dll</HintPath>
-        </Reference>
-        <Reference Include="Il2CppSystem.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\Il2CppSystem.Core.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-    <ItemGroup Condition="'$(VrcReferences)' == 'true' and '$(UseAltLibs)' == 'true'">
-        <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\Assembly-CSharp.dll</HintPath>
-        </Reference>
-        <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\Assembly-CSharp-firstpass.dll</HintPath>
-        </Reference>
-        <Reference Include="VRCCore-Standalone, Version=0.0.0.0, Culture=neutral, PublicKeyToken=67033c44591afb45">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\VRCCore-Standalone.dll</HintPath>
-        </Reference>
-        <Reference Include="VRCCore-Editor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=67033c44591afb45">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\VRCCore-Editor.dll</HintPath>
-        </Reference>
-        <Reference Include="VRCSDK2, Version=0.0.0.0, Culture=neutral, PublicKeyToken=67033c44591afb45">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\VRCSDK2.dll</HintPath>
-        </Reference>
-        <Reference Include="VRCSDKBase, Version=0.0.0.0, Culture=neutral, PublicKeyToken=67033c44591afb45">
-            <SpecificVersion>false</SpecificVersion>
-            <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)LibsAlt\VRCSDKBase.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-    
     <PropertyGroup>
         <OutputPath>$(MsBuildThisFileDirectory)\Output\$(Configuration)\</OutputPath>
     </PropertyGroup>
