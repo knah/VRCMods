@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using MelonLoader;
 using UnityEngine;
@@ -9,6 +10,7 @@ namespace UIExpansionKit.API
     {
         internal static readonly Dictionary<ExpandedMenu, List<ButtonRegistration>> RegisteredButtons = new Dictionary<ExpandedMenu, List<ButtonRegistration>>();
         internal static readonly Dictionary<string, GameObject> CustomCategoryUIs = new Dictionary<string, GameObject>();
+        internal static readonly List<IEnumerator> ExtraWaitCoroutines = new List<IEnumerator>();
         
         /// <summary>
         /// Register a simple button for given menu
@@ -63,6 +65,15 @@ namespace UIExpansionKit.API
             
             public string Text;
             public Action Action;
+        }
+
+        /// <summary>
+        /// Registers a coroutine that will be waited for before creating menu decorations.
+        /// This can be used to delay decoration creation if your mod has async operations required to load custom UI prefabs.
+        /// </summary>
+        public static void RegisterWaitConditionBeforeDecorating(IEnumerator coroutine)
+        {
+            ExtraWaitCoroutines.Add(coroutine);
         }
     }
 }

@@ -22,6 +22,9 @@ namespace UIExpansionKit
 
         private GameObject myModSettingsExpando;
         private Transform myModSettingsExpandoTransform;
+
+        private GameObject myInputPopup;
+        private GameObject myInputKeypadPopup;
         
         private static readonly List<(ExpandedMenu, string, bool isFullMenu)> GameObjectToCategoryList = new List<(ExpandedMenu, string, bool)>
         {
@@ -58,6 +61,10 @@ namespace UIExpansionKit
             // todo: replace with component when custom components are a thing
             foreach (var visibilityTransfer in myVisibilityTransfers)
                 visibilityTransfer.to.SetActive(myHasContents.TryGetValue(visibilityTransfer.to, out var hasContents) && hasContents && visibilityTransfer.from.activeSelf);
+
+            if (myInputPopup != null && myModSettingsExpando != null)
+                if (myInputPopup.activeSelf || myInputKeypadPopup.activeSelf)
+                    myModSettingsExpando.SetActive(false);
         }
 
         public override void OnModSettingsApplied()
@@ -68,6 +75,12 @@ namespace UIExpansionKit
 
         private IEnumerator InitThings()
         {
+            while (VRCUiManager.field_Protected_Static_VRCUiManager_0 == null)
+                yield return null;
+
+            while (QuickMenu.prop_QuickMenu_0 == null)
+                yield return null;
+            
             {
                 using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UIExpansionKit.modui.assetbundle");
                 using var memStream = new MemoryStream((int) stream.Length);
@@ -77,16 +90,30 @@ namespace UIExpansionKit
                 
                 myStuffBundle = new PreloadedBundleContents(assetBundle);
             }
-
-            while (VRCUiManager.field_Protected_Static_VRCUiManager_0 == null)
-                yield return null;
-
-            while (QuickMenu.prop_QuickMenu_0 == null)
-                yield return null;
             
             // attach it to QuickMenu. VRChat changes render queue on QM contents on world load that makes it render properly
             myStuffBundle.StoredThingsParent.transform.SetParent(QuickMenu.prop_QuickMenu_0.transform);
             
+            myInputPopup = GameObject.Find("UserInterface/MenuContent/Popups/InputPopup");
+            myInputKeypadPopup = GameObject.Find("UserInterface/MenuContent/Popups/InputKeypadPopup");
+
+            foreach (var coroutine in ExpansionKitApi.ExtraWaitCoroutines)
+            {
+                while (true)
+                {
+                    try
+                    {
+                        if (!coroutine.MoveNext()) break;
+                    }
+                    catch (Exception ex)
+                    {
+                        MelonModLogger.LogError(
+                            $"Error while waiting for init of coroutine with type {coroutine.GetType().FullName}: {ex.ToString()}");
+                    }
+                    yield return coroutine.Current;
+                }
+            }
+
             DecorateFullMenu();
             DecorateMenuPages();
         }

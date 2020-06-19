@@ -69,6 +69,12 @@ namespace UIExpansionKit
                             {
                                 prefDesc.ValueEdited = value;
                             }));
+                            textSetting.GetComponentInChildren<Button>().onClick.AddListener(new Action(() =>
+                            {
+                                BuiltinUiUtils.ShowInputPopup(prefDesc.DisplayText ?? prefId, textField.text,
+                                    InputField.InputType.Standard, false, "Done", 
+                                    (result, _, __) => prefDesc.ValueEdited = textField.text = result);
+                            }));
                             break;
                         }
                         case ModPrefs.PrefType.BOOL:
@@ -105,6 +111,12 @@ namespace UIExpansionKit
                             {
                                 prefDesc.ValueEdited = value;
                             }));
+                            textSetting.GetComponentInChildren<Button>().onClick.AddListener(new Action(() =>
+                                {
+                                    BuiltinUiUtils.ShowInputPopup(prefDesc.DisplayText ?? prefId, textField.text,
+                                        InputField.InputType.Standard, prefDesc.Type == ModPrefs.PrefType.INT, "Done", 
+                                        (result, _, __) => prefDesc.ValueEdited = textField.text = result);
+                                }));
                             break;
                         }
                         default:
