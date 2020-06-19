@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net472</TargetFramework>
+        <VrcReferences>true</VrcReferences>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\UIExpansionKit\UIExpansionKit.csproj" />
+    </ItemGroup>
+
+</Project>

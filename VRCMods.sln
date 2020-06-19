@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JoinNotifier", "JoinNotifier\JoinNotifier.csproj", "{C874139C-FABC-4D70-9EEA-49DCBEE699DF}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HWIDPatch", "HWIDPatch\HWIDPatch.csproj", "{8C524F7B-6C83-48B4-B262-7C048DAFDA27}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkleBeGone", "SparkleBeGone\SparkleBeGone.csproj", "{5DA19CEB-F684-4916-B8AD-9FFE286A4D63}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmojiPageButtons", "EmojiPageButtons\EmojiPageButtons.csproj", "{73742AF8-B9ED-420E-9C50-2213DCC9EA3C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,5 +57,9 @@ Global
 		{5DA19CEB-F684-4916-B8AD-9FFE286A4D63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5DA19CEB-F684-4916-B8AD-9FFE286A4D63}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5DA19CEB-F684-4916-B8AD-9FFE286A4D63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73742AF8-B9ED-420E-9C50-2213DCC9EA3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73742AF8-B9ED-420E-9C50-2213DCC9EA3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73742AF8-B9ED-420E-9C50-2213DCC9EA3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73742AF8-B9ED-420E-9C50-2213DCC9EA3C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

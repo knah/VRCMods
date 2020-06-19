@@ -1,5 +1,9 @@
 This repository contains my mods for VRChat.
 
+## EmojiPageButtons
+This mod adds page buttons to emoji menu that allow faster switching.  
+Requires UIExpansionKit.  
+![emoji page buttons screenshot](https://imgur.com/gIq2vKw.png)
 
 ## JoinNotifier
 A VRChat mod to notify you when someone joins the instance you're in
@@ -45,7 +49,8 @@ Settings description:
  This mod provides additional UI panels for use by other mods, and a unified mod settings UI.  
  Some settings (currently boolean ones) can be pinned to quick menu for faster access.  
  Refer to [API](UIExpansionKit/API) for mod integration.  
- MirrorResolutionUnlimiter has an [example](MirrorResolutionUnlimiter/MirrorResolutionUnlimiterMod.cs) of soft dependency on this mod
+ MirrorResolutionUnlimiter has an [example](MirrorResolutionUnlimiter/MirrorResolutionUnlimiterMod.cs) of soft dependency on this mod  
+ EmojiPageButtons has an [example](EmojiPageButtons/EmojiPageButtonsMod.cs) for delaying button creation until your mod is done
  
  This mod uses [Google Noto](https://www.google.com/get/noto/) font, licensed under [SIL Open Font License 1.1](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL).  
 
