@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkleBeGone", "SparkleBeG
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmojiPageButtons", "EmojiPageButtons\EmojiPageButtons.csproj", "{73742AF8-B9ED-420E-9C50-2213DCC9EA3C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CameraMinus", "CameraMinus\CameraMinus.csproj", "{4A6FC5B5-CEBA-4385-AB4B-F1B2DBA09DA7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,5 +63,9 @@ Global
 		{73742AF8-B9ED-420E-9C50-2213DCC9EA3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73742AF8-B9ED-420E-9C50-2213DCC9EA3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{73742AF8-B9ED-420E-9C50-2213DCC9EA3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A6FC5B5-CEBA-4385-AB4B-F1B2DBA09DA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A6FC5B5-CEBA-4385-AB4B-F1B2DBA09DA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A6FC5B5-CEBA-4385-AB4B-F1B2DBA09DA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A6FC5B5-CEBA-4385-AB4B-F1B2DBA09DA7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

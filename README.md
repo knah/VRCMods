@@ -1,5 +1,10 @@
 This repository contains my mods for VRChat.
 
+## CameraMinus
+Allows resizing the camera, zooming it in/out and hiding camera lens.  
+This is a lazy rewrite of original [VRCCameraPlus](https://github.com/Slaynash/VRCCameraPlus) by Slaynash.  
+Requires UIExpansionKit - new buttons are added to Camera QuickMenu expansion.  
+
 ## EmojiPageButtons
 This mod adds page buttons to emoji menu that allow faster switching.  
 Requires UIExpansionKit.  
