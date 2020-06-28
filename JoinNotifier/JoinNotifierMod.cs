@@ -19,7 +19,7 @@ namespace JoinNotifier
 {
     public class JoinNotifierMod : MelonMod
     {
-        public const string VersionConst = "0.2.5";
+        public const string VersionConst = "0.2.6";
         
         private readonly List<string> myJoinNames = new List<string>();
         private readonly List<string> myLeaveNames = new List<string>();
@@ -211,14 +211,15 @@ namespace JoinNotifier
 
             if (!myObservedLocalPlayerJoin || Environment.TickCount - myLastLevelLoad < 5_000) return;
             if (!JoinNotifierSettings.ShouldNotifyInCurrentInstance()) return;
-            if (JoinNotifierSettings.ShowFriendsOnly() && !player.prop_APIUser_0.isFriend) return;
+            var isFriendsWith = APIUser.IsFriendsWith(apiUser.id);
+            if (JoinNotifierSettings.ShowFriendsOnly() && !isFriendsWith) return;
             var playerName = apiUser.displayName ?? "!null!";
             if (JoinNotifierSettings.ShouldBlinkIcon(true))
                 MelonCoroutines.Start(BlinkIconCoroutine(myJoinImage));
             if (JoinNotifierSettings.ShouldPlaySound(true))
                myJoinSource.Play();
             if (JoinNotifierSettings.ShouldShowNames(true))
-                MelonCoroutines.Start(ShowName(myJoinText, myJoinNames, playerName, true, apiUser.isFriend));
+                MelonCoroutines.Start(ShowName(myJoinText, myJoinNames, playerName, true, isFriendsWith));
         }
         
         public void OnPlayerLeft(Player player)
@@ -226,14 +227,15 @@ namespace JoinNotifier
             var apiUser = player.field_Private_APIUser_0;
             if (!JoinNotifierSettings.ShouldNotifyInCurrentInstance()) return;
             if (Environment.TickCount - myLastLevelLoad < 5_000) return;
-            if (JoinNotifierSettings.ShowFriendsOnly() && !apiUser.isFriend) return;
+            var isFriendsWith = APIUser.IsFriendsWith(apiUser.id);
+            if (JoinNotifierSettings.ShowFriendsOnly() && !isFriendsWith) return;
             var playerName = player.field_Private_APIUser_0.displayName ?? "!null!";
             if (JoinNotifierSettings.ShouldBlinkIcon(false))
                 MelonCoroutines.Start(BlinkIconCoroutine(myLeaveImage));
             if (JoinNotifierSettings.ShouldPlaySound(false))
                 myLeaveSource.Play();
             if (JoinNotifierSettings.ShouldShowNames(false))
-                MelonCoroutines.Start(ShowName(myLeaveText, myLeaveNames, playerName, false, apiUser.isFriend));
+                MelonCoroutines.Start(ShowName(myLeaveText, myLeaveNames, playerName, false, isFriendsWith));
         }
 
         public IEnumerator ShowName(Text text, List<string> namesList, string name, bool isJoin, bool isFriend)
