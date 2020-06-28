@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using JoinNotifier;
@@ -18,7 +19,10 @@ namespace JoinNotifier
 {
     public class JoinNotifierMod : MelonMod
     {
-        public const string VersionConst = "0.2.4";
+        public const string VersionConst = "0.2.5";
+        
+        private readonly List<string> myJoinNames = new List<string>();
+        private readonly List<string> myLeaveNames = new List<string>();
 
         private Image myJoinImage;
         private Image myLeaveImage;
@@ -140,13 +144,14 @@ namespace JoinNotifier
             gameObject.transform.localScale = Vector3.one;
             gameObject.transform.localPosition = Vector3.up * offset;
             var text = gameObject.GetComponent<Text>();
-            text.color = image.color;
+            text.color = Color.white;
             text.fontStyle = FontStyle.Bold;
             text.horizontalOverflow = HorizontalWrapMode.Overflow;
             text.verticalOverflow = VerticalWrapMode.Overflow;
             text.alignment = alignment;
             text.fontSize = JoinNotifierSettings.GetTextSize();
             text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            text.supportRichText = true;
 
             gameObject.SetActive(true);
             return text;
@@ -206,37 +211,51 @@ namespace JoinNotifier
 
             if (!myObservedLocalPlayerJoin || Environment.TickCount - myLastLevelLoad < 5_000) return;
             if (!JoinNotifierSettings.ShouldNotifyInCurrentInstance()) return;
+            if (JoinNotifierSettings.ShowFriendsOnly() && !player.prop_APIUser_0.isFriend) return;
             var playerName = apiUser.displayName ?? "!null!";
             if (JoinNotifierSettings.ShouldBlinkIcon(true))
                 MelonCoroutines.Start(BlinkIconCoroutine(myJoinImage));
             if (JoinNotifierSettings.ShouldPlaySound(true))
                myJoinSource.Play();
             if (JoinNotifierSettings.ShouldShowNames(true))
-                MelonCoroutines.Start(ShowName(myJoinText, playerName));
+                MelonCoroutines.Start(ShowName(myJoinText, myJoinNames, playerName, true, apiUser.isFriend));
         }
         
         public void OnPlayerLeft(Player player)
         {
+            var apiUser = player.field_Private_APIUser_0;
             if (!JoinNotifierSettings.ShouldNotifyInCurrentInstance()) return;
             if (Environment.TickCount - myLastLevelLoad < 5_000) return;
+            if (JoinNotifierSettings.ShowFriendsOnly() && !apiUser.isFriend) return;
             var playerName = player.field_Private_APIUser_0.displayName ?? "!null!";
             if (JoinNotifierSettings.ShouldBlinkIcon(false))
                 MelonCoroutines.Start(BlinkIconCoroutine(myLeaveImage));
             if (JoinNotifierSettings.ShouldPlaySound(false))
                 myLeaveSource.Play();
             if (JoinNotifierSettings.ShouldShowNames(false))
-                MelonCoroutines.Start(ShowName(myLeaveText, playerName));
+                MelonCoroutines.Start(ShowName(myLeaveText, myLeaveNames, playerName, false, apiUser.isFriend));
         }
 
-        public IEnumerator ShowName(Text text, string name)
+        public IEnumerator ShowName(Text text, List<string> namesList, string name, bool isJoin, bool isFriend)
         {
-            var currentText = text.text ?? "";
-            currentText = currentText.Length == 0 ? name : currentText + "\n" + name;
-            text.text = currentText;
+            var color = JoinNotifierSettings.ShowFriendsInDifferentColor() && isFriend
+                ? (isJoin
+                    ? JoinNotifierSettings.GetFriendJoinIconColor()
+                    : JoinNotifierSettings.GetFriendLeaveIconColor())
+                : (isJoin ? JoinNotifierSettings.GetJoinIconColor() : JoinNotifierSettings.GetLeaveIconColor());
+            var playerLine = $"<color={RenderHex(color)}>{name}</color>";
+
+            namesList.Add(playerLine);
+            
+            text.text = string.Join("\n", namesList);
             yield return new WaitForSeconds(3);
-            currentText = text.text;
-            currentText = currentText.Replace(name, "").Trim('\n');
-            text.text = currentText;
+            namesList.Remove(playerLine);
+            text.text = string.Join("\n", namesList);
+        }
+
+        private static string RenderHex(Color color)
+        {
+            return $"#{(int) (color.r * 255):X2}{(int) (color.g * 255):X2}{(int) (color.b * 255):X2}{(int) (color.a * 255):X2}";
         }
 
         public IEnumerator BlinkIconCoroutine(Image imageToBlink)

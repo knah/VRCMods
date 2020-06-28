@@ -11,6 +11,7 @@ A VRChat mod to notify you when someone joins the instance you're in
 Current features:
  - Visual and audible notifications (configurable)
  - Toggleable per instance type (public/friends/private)
+ - Can be set to highlight friends or show only friends
  
 ## MirrorResolutionUnlimiter
 Headset and display resolutions increase each year, and yet VRChat limits mirror resolution to 2048 pixels per eye. With this mod, that's not the case anymore!  
