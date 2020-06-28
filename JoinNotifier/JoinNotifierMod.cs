@@ -11,7 +11,7 @@ using VRC;
 using VRC.Core;
 using Object = UnityEngine.Object;
 
-[assembly:MelonModInfo(typeof(JoinNotifierMod), "JoinNotifier", JoinNotifierMod.VersionConst, "knah")]
+[assembly:MelonModInfo(typeof(JoinNotifierMod), "JoinNotifier", JoinNotifierMod.VersionConst, "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonModGame("VRChat", "VRChat")]
 
 namespace JoinNotifier

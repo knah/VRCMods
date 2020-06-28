@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
-[assembly:MelonModInfo(typeof(EmojiPageButtonsMod), "Emoji Page Buttons", "1.0.0", "knah")]
+[assembly:MelonModInfo(typeof(EmojiPageButtonsMod), "Emoji Page Buttons", "1.0.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonModGame("VRChat", "VRChat")]
 
 namespace EmojiPageButtons

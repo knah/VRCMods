@@ -9,7 +9,7 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 using VRC.SDKBase;
 
-[assembly:MelonModInfo(typeof(MirrorResolutionUnlimiterMod), "MirrorResolutionUnlimiter", "1.0", "knah")]
+[assembly:MelonModInfo(typeof(MirrorResolutionUnlimiterMod), "MirrorResolutionUnlimiter", "1.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonModGame("VRChat", "VRChat")]
 
 namespace MirrorResolutionUnlimiter
