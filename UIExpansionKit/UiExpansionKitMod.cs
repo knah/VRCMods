@@ -11,7 +11,7 @@ using UnityEngine.UI;
 using VRCSDK2;
 using Object = UnityEngine.Object;
 
-[assembly:MelonModInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.1.2", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonModInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.1.3", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonModGame("VRChat", "VRChat")]
 
 namespace UIExpansionKit
@@ -173,7 +173,13 @@ namespace UIExpansionKit
                     transform.RotateAround(transform.position, transform.right, 30);
                     transform.Cast<RectTransform>().localPosition = new Vector3(55, -700, 5);
 
-                    expando.AddComponent<VRC_UiShape>();
+                    var toggleButton = transform.Find("QuickMenuExpandoToggle");
+                    var content = transform.Find("Content");
+                    toggleButton.gameObject.AddComponent<VRC_UiShape>();
+                    content.gameObject.AddComponent<VRC_UiShape>();
+
+                    if (ExpansionKitSettings.IsQmExpandoStartsCollapsed())
+                        toggleButton.GetComponent<Toggle>().isOn = false;
                     
                     myVisibilityTransfers.Add((gameObject, expando));
                     

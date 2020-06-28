@@ -8,13 +8,18 @@ namespace UIExpansionKit
     {
         private const string KitCategory = "UIExpansionKit";
         private const string PinnedPrefs = "PinnedPrefs";
+        private const string QmExpandoStartsCollapsed = "QmExpandoStartsCollapsed";
 
         internal static void RegisterSettings()
         {
             ModPrefs.RegisterCategory(KitCategory,"UI Expansion Kit");
             
             ModPrefs.RegisterPrefString(KitCategory, PinnedPrefs, "", hideFromList: true);
+            
+            ModPrefs.RegisterPrefBool(KitCategory, QmExpandoStartsCollapsed, false, "Quick Menu extra panel starts hidden");
         }
+
+        public static bool IsQmExpandoStartsCollapsed() => ModPrefs.GetBool(KitCategory, QmExpandoStartsCollapsed);
 
         public static void PinPref(string category, string prefName)
         {
