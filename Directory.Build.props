@@ -20,6 +20,11 @@
             <Private>false</Private>
             <HintPath>$(MsBuildThisFileDirectory)Libs\UnityEngine.AnimationModule.dll</HintPath>
         </Reference>
+        <Reference Include="UnityEngine.ClothModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <SpecificVersion>false</SpecificVersion>
+            <Private>false</Private>
+            <HintPath>$(MsBuildThisFileDirectory)Libs\UnityEngine.ClothModule.dll</HintPath>
+        </Reference>
         <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
             <SpecificVersion>false</SpecificVersion>
             <Private>false</Private>
@@ -40,10 +45,15 @@
             <Private>false</Private>
             <HintPath>$(MsBuildThisFileDirectory)Libs\UnityEngine.TextRenderingModule.dll</HintPath>
         </Reference>
-        <Reference Include="UnityEngine.ParticleSYstemModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
             <SpecificVersion>false</SpecificVersion>
             <Private>false</Private>
             <HintPath>$(MsBuildThisFileDirectory)Libs\UnityEngine.ParticleSystemModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <SpecificVersion>false</SpecificVersion>
+            <Private>false</Private>
+            <HintPath>$(MsBuildThisFileDirectory)Libs\UnityEngine.PhysicsModule.dll</HintPath>
         </Reference>
         <Reference Include="Unity.Postprocessing.Runtime, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
             <SpecificVersion>false</SpecificVersion>

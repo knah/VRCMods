@@ -1,5 +1,24 @@
 This repository contains my mods for VRChat.
 
+## AdvancedSafety
+Features:
+ * Set hard limits on avatar features, such as polygon count, audio sources, and some other things
+   * Reduce crashes
+   * Improve performance
+   * Remove annoying spawn sounds or global sounds
+   * Remove some fullscreen effects (this one is unreliable)
+   * Avatars over the limit are not replaced by a gray robot. Instead, elements over limits are removed, with the rest of the avatar kept intact.
+ * Hide all avatars of a specific author (requires UIExpansionKit, button is in user details menu)
+ * Hide a specific avatar, no matter who uses it (requires UIExpansionKit, button in in user quick menu)
+ * Hide portals from blocked users or non-friends
+   * That blocked asshole will no longer be able to portal drop you
+
+This mod will introduce small lag spikes when avatars are loaded. These should be tolerable compared to VRChat's own lag spikes.  
+All numeric limits are configurable.  
+ * Don't set animators limit to 0 - you will break all humanoid avatars horribly if you do  
+
+Configurable for friends and vanilla "show avatar" button.  
+
 ## CameraMinus
 Allows resizing the camera, zooming it in/out and hiding camera lens.  
 This is a lazy rewrite of original [VRCCameraPlus](https://github.com/Slaynash/VRCCameraPlus) by Slaynash.  
@@ -30,6 +49,12 @@ Settings:
  * Max mirror resolution - the maximum size of eye texture for mirror reflections. 2048 is VRChat default, 4096 is mod default.
  * Force auto resolution - removes mirror resolution limits set by world maker. Off by default.
  * Mirror MSAA - changes MSAA specifically for mirrors. Valid values are 0 (same as main camera), 1, 2, 4 and 8. Lower MSAA may lead to "shimmering" and jaggies, especially in VR. 
+
+## ParticleAndBoneLimiterSettings
+This mod provides an UI for changing VRChat's built-in dynamic bone and particle limiter settings.  
+Refer to VRChat docs [for particle limiter](https://docs.vrchat.com/docs/avatar-particle-system-limits#particle-limiter-configuration-description) and [for dynamic bone limiter](https://docs.vrchat.com/docs/avatar-dynamic-bone-limits) for a detailed description of what these settings do.  
+Changing these settings should not require game restart.  
+Requires UIExpansionKit. Settings are placed into the Mod Settings menu.
 
 ## RuntimeGraphicsSettings
 A mod to allow tweaking some graphics settings at runtime to get those extra few frames.
