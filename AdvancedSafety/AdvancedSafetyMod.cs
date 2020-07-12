@@ -14,6 +14,9 @@ using UnityEngine.Animations;
 using VRC.Core;
 using Object = UnityEngine.Object;
 
+using AMEnumA = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObVRAc1GaApAcObBoUnique;
+using AMEnumB = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObGaVRApBoBoObBoObUnique;
+
 [assembly:MelonModGame("VRChat", "VRChat")]
 [assembly:MelonModInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.0.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
@@ -29,13 +32,37 @@ namespace AdvancedSafety
             unsafe
             {
                 var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils
-                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(VRCAvatarManager).GetMethod(
-                        nameof(VRCAvatarManager.Method_Private_Boolean_GameObject_String_Single_0)))
+                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(AssetManagement).GetMethod(
+                        nameof(AssetManagement.Method_Public_Static_Object_Object_Vector3_Quaternion_Boolean_Boolean_Boolean_0)))
                     .GetValue(null);
                 
-                Imports.Hook((IntPtr)(&originalMethodPointer), typeof(AdvancedSafetyMod).GetMethod(nameof(AttachAvatarHook), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
+                Imports.Hook((IntPtr)(&originalMethodPointer), typeof(AdvancedSafetyMod).GetMethod(nameof(ObjectInstantiatePatch), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
 
-                ourOriginalDelegate = Marshal.GetDelegateForFunctionPointer<AvatarAttachDelegate>(originalMethodPointer);
+                ourOriginalInstantiate = Marshal.GetDelegateForFunctionPointer<ObjectInstantiateDelegate>(originalMethodPointer);
+            }
+            
+            unsafe
+            {
+                var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils
+                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(AMEnumA).GetMethod(
+                        nameof(AMEnumA.MoveNext)))
+                    .GetValue(null);
+                
+                Imports.Hook((IntPtr)(&originalMethodPointer), typeof(AdvancedSafetyMod).GetMethod(nameof(MoveNextPatchA), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
+
+                ourMoveNextA = Marshal.GetDelegateForFunctionPointer<MoveNextDelegate>(originalMethodPointer);
+            }
+
+            unsafe
+            {
+                var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils
+                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(AMEnumB).GetMethod(
+                        nameof(AMEnumB.MoveNext)))
+                    .GetValue(null);
+                
+                Imports.Hook((IntPtr)(&originalMethodPointer), typeof(AdvancedSafetyMod).GetMethod(nameof(MoveNextPatchB), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
+
+                ourMoveNextB = Marshal.GetDelegateForFunctionPointer<MoveNextDelegate>(originalMethodPointer);
             }
             
             PortalHiding.OnApplicationStart();
@@ -53,25 +80,14 @@ namespace AdvancedSafety
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool AvatarAttachDelegate(IntPtr thisPtr, IntPtr gameObjectPtr, IntPtr someString, float scale);
+        private delegate IntPtr ObjectInstantiateDelegate(IntPtr assetPtr, Vector3 pos, Quaternion rot, bool allowCustomShaders, bool isUI, bool validate);
 
-        private static AvatarAttachDelegate ourOriginalDelegate;
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate bool MoveNextDelegate(IntPtr thisPtr);
 
-        private static bool AttachAvatarHook(IntPtr thisPtr, IntPtr gameObjectPtr, IntPtr someString, float scale)
-        {
-            var result = ourOriginalDelegate(thisPtr, gameObjectPtr, someString, scale);
-            try
-            {
-                var avatarManager = new VRCAvatarManager(thisPtr);
-                CleanAvatar(avatarManager, new GameObject(gameObjectPtr));
-            }
-            catch (Exception ex)
-            {
-                MelonModLogger.LogError($"Exception while cleaning avatar: {ex}");
-            }
-
-            return result;
-        }
+        private static ObjectInstantiateDelegate ourOriginalInstantiate;
+        private static MoveNextDelegate ourMoveNextA;
+        private static MoveNextDelegate ourMoveNextB;
 
         private static readonly Queue<GameObject> ourBfsQueue = new Queue<GameObject>();
         public static void CleanAvatar(VRCAvatarManager avatarManager, GameObject go)
@@ -178,8 +194,63 @@ namespace AdvancedSafety
                 yield break;
             
             foreach (var audioSource in audioSourcesList)
-                if (audioSource.isPlaying)
+                if (audioSource != null && audioSource.isPlaying)
                     audioSource.Stop();
+        }
+
+        private static bool MoveNextPatchA(IntPtr thisPtr)
+        {
+            try
+            {
+                using (new AvatarManagerCookie(new AMEnumA(thisPtr).field_Public_VRCAvatarManager_0))
+                    return ourMoveNextA(thisPtr);
+            }
+            catch (Exception ex)
+            {
+                MelonModLogger.LogError($"Error when wrapping avatar creation: {ex}");
+                return false;
+            }
+        }
+        
+        private static bool MoveNextPatchB(IntPtr thisPtr)
+        {
+            try
+            {
+                using (new AvatarManagerCookie(new AMEnumB(thisPtr).field_Public_VRCAvatarManager_0))
+                    return ourMoveNextB(thisPtr);
+            }
+            catch (Exception ex)
+            {
+                MelonModLogger.LogError($"Error when wrapping avatar creation: {ex}");
+                return false;
+            }
+        }
+
+        private static IntPtr ObjectInstantiatePatch(IntPtr assetPtr, Vector3 pos, Quaternion rot, bool allowCustomShaders, bool isUI, bool validate)
+        {
+            if (AvatarManagerCookie.CurrentManager == null || assetPtr == IntPtr.Zero) 
+                return ourOriginalInstantiate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
+            
+            var go = new Object(assetPtr).TryCast<GameObject>();
+            if (go == null)
+                return ourOriginalInstantiate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
+
+            var wasActive = go.activeSelf;
+            go.SetActive(false);
+            var result = ourOriginalInstantiate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
+            go.SetActive(wasActive);
+            if (result == IntPtr.Zero) return result;
+            var instantiated = new GameObject(result);
+            try
+            {
+                CleanAvatar(AvatarManagerCookie.CurrentManager, instantiated);
+            }
+            catch (Exception ex)
+            {
+                MelonModLogger.LogError($"Exception when cleaning avatar: {ex}");
+            }
+            
+            return result;
         }
 
         internal static bool IsAvatarExplicitlyShown(string userId)
@@ -197,6 +268,22 @@ namespace AdvancedSafety
             }
             
             return false;
+        }
+        
+        private readonly struct AvatarManagerCookie : IDisposable
+        {
+            internal static VRCAvatarManager CurrentManager;
+            private readonly VRCAvatarManager myLastManager;
+
+            public AvatarManagerCookie(VRCAvatarManager avatarManager)
+            {
+                myLastManager = CurrentManager;
+                CurrentManager = avatarManager;
+            }
+            public void Dispose()
+            {
+                CurrentManager = myLastManager;
+            }
         }
     }
 }
