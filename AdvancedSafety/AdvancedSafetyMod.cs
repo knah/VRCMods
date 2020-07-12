@@ -114,8 +114,8 @@ namespace AdvancedSafety
             return * (bool*) IL2CPP.il2cpp_object_unbox(result);
         }
 
-        private static readonly Queue<GameObject> ourBfsQueue = new Queue<GameObject>();
-        public static void CleanAvatar(VRCAvatarManager avatarManager, GameObject go)
+        private static readonly PriorityQueue<GameObjectWithPriorityData> ourBfsQueue = new PriorityQueue<GameObjectWithPriorityData>(GameObjectWithPriorityData.IsActiveDepthNumChildrenComparer);
+        private static void CleanAvatar(VRCAvatarManager avatarManager, GameObject go)
         {
             if (!AdvancedSafetySettings.AvatarFilteringEnabled) 
                 return;
@@ -157,8 +157,10 @@ namespace AdvancedSafety
             var componentList = new Il2CppSystem.Collections.Generic.List<Component>();
             var audioSourcesList = new List<AudioSource>();
             
-            void Bfs(GameObject obj)
+            void Bfs(GameObjectWithPriorityData objWithPriority)
             {
+                var obj = objWithPriority.GameObject;
+                
                 if (obj == null) return;
                 scannedObjects++;
 
@@ -190,10 +192,10 @@ namespace AdvancedSafety
                 }
                 
                 foreach (var child in obj.transform) 
-                    ourBfsQueue.Enqueue(child.Cast<Transform>().gameObject);
+                    ourBfsQueue.Enqueue(new GameObjectWithPriorityData(child.Cast<Transform>().gameObject, objWithPriority.Depth + 1));
             }
             
-            Bfs(go);
+            Bfs(new GameObjectWithPriorityData(go, 0));;
             while (ourBfsQueue.Count > 0) 
                 Bfs(ourBfsQueue.Dequeue());
 
@@ -309,6 +311,36 @@ namespace AdvancedSafety
             {
                 CurrentManager = myLastManager;
             }
+        }
+
+        private readonly struct GameObjectWithPriorityData
+        {
+            public readonly GameObject GameObject;
+            public readonly bool IsActive;
+            public readonly int NumChildren;
+            public readonly int Depth;
+
+            public GameObjectWithPriorityData(GameObject go, int depth)
+            {
+                GameObject = go;
+                Depth = depth;
+                IsActive = go.activeSelf;
+                NumChildren = go.transform.childCount;
+            }
+
+            public int Priority => Depth + NumChildren;
+
+            private sealed class IsActiveDepthNumChildrenRelationalComparer : IComparer<GameObjectWithPriorityData>
+            {
+                public int Compare(GameObjectWithPriorityData x, GameObjectWithPriorityData y)
+                {
+                    var isActiveComparison = -x.IsActive.CompareTo(y.IsActive);
+                    if (isActiveComparison != 0) return isActiveComparison;
+                    return x.Priority.CompareTo(y.Priority);
+                }
+            }
+
+            public static IComparer<GameObjectWithPriorityData> IsActiveDepthNumChildrenComparer { get; } = new IsActiveDepthNumChildrenRelationalComparer();
         }
     }
 }
