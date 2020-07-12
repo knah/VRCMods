@@ -41,6 +41,7 @@ namespace AdvancedSafety
             
             ModPrefs.RegisterPrefBool(SettingsCategory, nameof(HidePortalsFromBlockedUsers), true, "Hide portals from blocked users");
             ModPrefs.RegisterPrefBool(SettingsCategory, nameof(HidePortalsFromNonFriends), false, "Hide portals from non-friends");
+            ModPrefs.RegisterPrefBool(SettingsCategory, nameof(HidePortalsCreatedTooClose), true, "Hide portals created too close to local player");
             
             OnModSettingsApplied();
         }
@@ -75,6 +76,7 @@ namespace AdvancedSafety
 
         public static bool HidePortalsFromBlockedUsers;
         public static bool HidePortalsFromNonFriends;
+        public static bool HidePortalsCreatedTooClose;
 
         public static void OnModSettingsApplied()
         {
