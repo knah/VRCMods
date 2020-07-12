@@ -202,7 +202,8 @@ namespace AdvancedSafety
             if (!AdvancedSafetySettings.AllowSpawnSounds)
                 MelonCoroutines.Start(CheckSpawnSounds(go, audioSourcesList));
 
-            MelonModLogger.Log($"Cleaned avatar ({avatarManager.prop_ApiAvatar_0?.name}) in {start.ElapsedMilliseconds}ms, scanned {scannedObjects} things, destroyed {destroyedObjects} things");
+            if (Imports.IsDebugMode())
+                MelonModLogger.Log($"Cleaned avatar ({avatarManager.prop_ApiAvatar_0?.name}) in {start.ElapsedMilliseconds}ms, scanned {scannedObjects} things, destroyed {destroyedObjects} things");
         }
 
         private static IEnumerator CheckSpawnSounds(GameObject go, List<AudioSource> audioSourcesList)
