@@ -9,6 +9,7 @@ using AdvancedSafety;
 using MelonLoader;
 using UIExpansionKit;
 using UnhollowerBaseLib;
+using UnhollowerBaseLib.Runtime;
 using UnityEngine;
 using UnityEngine.Animations;
 using VRC.Core;
@@ -50,7 +51,7 @@ namespace AdvancedSafety
                 
                 Imports.Hook((IntPtr)(&originalMethodPointer), typeof(AdvancedSafetyMod).GetMethod(nameof(MoveNextPatchA), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
 
-                ourMoveNextA = Marshal.GetDelegateForFunctionPointer<MoveNextDelegate>(originalMethodPointer);
+                ourMoveNextA = originalMethodPointer;
             }
 
             unsafe
@@ -62,7 +63,20 @@ namespace AdvancedSafety
                 
                 Imports.Hook((IntPtr)(&originalMethodPointer), typeof(AdvancedSafetyMod).GetMethod(nameof(MoveNextPatchB), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
 
-                ourMoveNextB = Marshal.GetDelegateForFunctionPointer<MoveNextDelegate>(originalMethodPointer);
+                ourMoveNextB = originalMethodPointer;
+            }
+
+            unsafe
+            {
+                var originalMethodInfo = (Il2CppMethodInfo*) (IntPtr) UnhollowerUtils
+                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(AMEnumB).GetMethod(
+                        nameof(AMEnumB.MoveNext)))
+                    .GetValue(null);
+
+                var methodInfoCopy = (Il2CppMethodInfo*) Marshal.AllocHGlobal(Marshal.SizeOf<Il2CppMethodInfo>());
+                *methodInfoCopy = *originalMethodInfo;
+
+                ourInvokeMethodInfo = (IntPtr) methodInfoCopy;
             }
             
             PortalHiding.OnApplicationStart();
@@ -86,8 +100,19 @@ namespace AdvancedSafety
         private delegate bool MoveNextDelegate(IntPtr thisPtr);
 
         private static ObjectInstantiateDelegate ourOriginalInstantiate;
-        private static MoveNextDelegate ourMoveNextA;
-        private static MoveNextDelegate ourMoveNextB;
+        private static IntPtr ourMoveNextA;
+        private static IntPtr ourMoveNextB;
+
+        private static IntPtr ourInvokeMethodInfo;
+
+        private unsafe static bool SafeInvokeMoveNext(IntPtr methodPtr, IntPtr thisPtr)
+        {
+            var exc = IntPtr.Zero;
+            ((Il2CppMethodInfo*) ourInvokeMethodInfo)->methodPointer = methodPtr;
+            var result = IL2CPP.il2cpp_runtime_invoke(ourInvokeMethodInfo, thisPtr, (void**) IntPtr.Zero, ref exc);
+            Il2CppException.RaiseExceptionIfNecessary(exc);
+            return * (bool*) IL2CPP.il2cpp_object_unbox(result);
+        }
 
         private static readonly Queue<GameObject> ourBfsQueue = new Queue<GameObject>();
         public static void CleanAvatar(VRCAvatarManager avatarManager, GameObject go)
@@ -203,7 +228,7 @@ namespace AdvancedSafety
             try
             {
                 using (new AvatarManagerCookie(new AMEnumA(thisPtr).field_Public_VRCAvatarManager_0))
-                    return ourMoveNextA(thisPtr);
+                    return SafeInvokeMoveNext(ourMoveNextA, thisPtr);
             }
             catch (Exception ex)
             {
@@ -217,7 +242,7 @@ namespace AdvancedSafety
             try
             {
                 using (new AvatarManagerCookie(new AMEnumB(thisPtr).field_Public_VRCAvatarManager_0))
-                    return ourMoveNextB(thisPtr);
+                    return SafeInvokeMoveNext(ourMoveNextA, thisPtr);
             }
             catch (Exception ex)
             {
