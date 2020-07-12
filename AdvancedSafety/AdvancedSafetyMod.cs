@@ -242,7 +242,7 @@ namespace AdvancedSafety
             try
             {
                 using (new AvatarManagerCookie(new AMEnumB(thisPtr).field_Public_VRCAvatarManager_0))
-                    return SafeInvokeMoveNext(ourMoveNextA, thisPtr);
+                    return SafeInvokeMoveNext(ourMoveNextB, thisPtr);
             }
             catch (Exception ex)
             {
