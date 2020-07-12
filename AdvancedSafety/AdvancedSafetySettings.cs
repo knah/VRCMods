@@ -36,6 +36,7 @@ namespace AdvancedSafety
             ModPrefs.RegisterPrefInt(SettingsCategory, nameof(MaxAnimators), 64, "Max animators");
             
             ModPrefs.RegisterPrefInt(SettingsCategory, nameof(MaxLights), 2, "Max lights");
+            ModPrefs.RegisterPrefInt(SettingsCategory, nameof(MaxComponents), 4_000, "Max total components");
             ModPrefs.RegisterPrefBool(SettingsCategory, nameof(AllowUiLayer), false, "Allow UI layer on avatars");
             
             ModPrefs.RegisterPrefBool(SettingsCategory, nameof(HidePortalsFromBlockedUsers), true, "Hide portals from blocked users");
@@ -68,6 +69,7 @@ namespace AdvancedSafety
         public static int MaxRigidBodies;
         public static int MaxAnimators;
         public static int MaxLights;
+        public static int MaxComponents;
 
         public static bool HeuristicallyRemoveScreenSpaceBullshit;
 

@@ -96,9 +96,6 @@ namespace AdvancedSafety
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr ObjectInstantiateDelegate(IntPtr assetPtr, Vector3 pos, Quaternion rot, bool allowCustomShaders, bool isUI, bool validate);
 
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool MoveNextDelegate(IntPtr thisPtr);
-
         private static ObjectInstantiateDelegate ourOriginalInstantiate;
         private static IntPtr ourMoveNextA;
         private static IntPtr ourMoveNextB;
@@ -151,6 +148,7 @@ namespace AdvancedSafety
             var seenRigidbodies = 0;
             var seenAnimators = 0;
             var seenLights = 0;
+            var seenComponents = 0;
 
             var animator = go.GetComponent<Animator>();
 
@@ -189,6 +187,9 @@ namespace AdvancedSafety
                     component.TryCast<Light>()?.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenLights, AdvancedSafetySettings.MaxLights);
                     
                     component.TryCast<Renderer>()?.VisitRenderer(ref scannedObjects, ref destroyedObjects, ref seenPolys, ref seenMaterials, obj);
+                    
+                    if (ReferenceEquals(component.TryCast<Transform>(), null))
+                        component.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenComponents, AdvancedSafetySettings.MaxComponents);
                 }
                 
                 foreach (var child in obj.transform) 
