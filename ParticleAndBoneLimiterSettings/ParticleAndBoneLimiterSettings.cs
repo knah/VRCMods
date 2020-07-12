@@ -13,7 +13,7 @@ using VRC.Core;
 using Object = UnityEngine.Object;
 
 [assembly: MelonModGame("VRChat", "VRChat")]
-[assembly: MelonModInfo(typeof(ParticleAndBoneLimiterSettingsMod), "Particle and DynBone limiter settings UI", "1.0.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly: MelonModInfo(typeof(ParticleAndBoneLimiterSettingsMod), "Particle and DynBone limiter settings UI", "1.1.0", "knah", "https://github.com/knah/VRCMods")]
 
 namespace ParticleAndBoneLimiterSettings
 {
@@ -79,7 +79,7 @@ namespace ParticleAndBoneLimiterSettings
             var textPrefab = CustomParticleSettingsUiHandler.UixBundle.SettingsText;
             
             var boolSetting = Object.Instantiate(CustomParticleSettingsUiHandler.UixBundle.SettingsBool, categoryUiContent, false);
-            boolSetting.GetComponentInChildren<Text>().text = "Enable particle limiter";
+            boolSetting.GetComponentInChildren<Text>().text = "Enable particle limiter (restart required)";
             var mainToggle = boolSetting.transform.Find("Toggle").GetComponent<Toggle>();
             mainToggle.isOn = LocalConfig.GetList("betas").Contains("particle_system_limiter");
             mainToggle.onValueChanged.AddListener(new Action<bool>(
@@ -92,7 +92,10 @@ namespace ParticleAndBoneLimiterSettings
                     }
                     else
                         list.Remove("particle_system_limiter");
-                    LocalConfig.SetValue("betas", list);
+                    
+                    var newList = new Il2CppSystem.Collections.Generic.List<Il2CppSystem.Object>();
+                    foreach (var s in list) newList.Add((Il2CppSystem.String) s);
+                    LocalConfig.SetValue("betas", newList);
                 }));
             var pinToggle = boolSetting.transform.Find("PinToggle");
             pinToggle.gameObject.SetActive(false);
@@ -124,10 +127,14 @@ namespace ParticleAndBoneLimiterSettings
             
             var reloadButton = Object.Instantiate(CustomParticleSettingsUiHandler.UixBundle.QuickMenuButton, categoryUiContent, false);
             var reloadButtonText = reloadButton.GetComponentInChildren<Text>();
-            reloadButtonText.text = "Click to reload all avatars and apply current limits";
-            reloadButtonText.resizeTextMaxSize *= 2;
-            reloadButtonText.fontSize *= 2;
-            reloadButton.GetComponent<Button>().onClick.AddListener(new Action(ReloadAllAvatars));
+            reloadButtonText.text = "Click to apply limits and reload all avatars (particle limits need world rejoin)";
+            reloadButtonText.resizeTextMaxSize = reloadButtonText.resizeTextMaxSize * 15 / 10;
+            reloadButtonText.fontSize = reloadButtonText.fontSize * 15 / 10;
+            reloadButton.GetComponent<Button>().onClick.AddListener(new Action(() =>
+            {
+                Object.FindObjectOfType<VRCAvatarManager>().Start(); // this triggers particle system limit reload
+                ReloadAllAvatars();
+            }));
         }
         
         private static void ReloadAllAvatars() {
