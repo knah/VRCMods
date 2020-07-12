@@ -177,16 +177,16 @@ namespace AdvancedSafety
                 {
                     if(component == null) continue;
 
-                    ComponentAdjustment.VisitAudioSource(component.TryCast<AudioSource>(), ref scannedObjects, ref destroyedObjects, ref seenAudioSources, obj, audioSourcesList);
-                    ComponentAdjustment.VisitConstraint(component.TryCast<IConstraint>(), ref scannedObjects, ref destroyedObjects, ref seenConstraints, obj);
-                    ComponentAdjustment.VisitCloth(component.TryCast<Cloth>(), ref scannedObjects, ref destroyedObjects, ref seenClothVertices, obj);
-                    ComponentAdjustment.VisitCollider(component.TryCast<Collider>(), ref scannedObjects, ref destroyedObjects, ref seenColliders, obj);
+                    component.TryCast<AudioSource>()?.VisitAudioSource(ref scannedObjects, ref destroyedObjects, ref seenAudioSources, obj, audioSourcesList);
+                    component.TryCast<IConstraint>()?.VisitConstraint(ref scannedObjects, ref destroyedObjects, ref seenConstraints, obj);
+                    component.TryCast<Cloth>()?.VisitCloth(ref scannedObjects, ref destroyedObjects, ref seenClothVertices, obj);
+                    component.TryCast<Rigidbody>()?.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenRigidbodies, AdvancedSafetySettings.MaxRigidBodies);
                     
-                    ComponentAdjustment.VisitGeneric(component.TryCast<Rigidbody>(), ref scannedObjects, ref destroyedObjects, ref seenRigidbodies, AdvancedSafetySettings.MaxRigidBodies);
-                    ComponentAdjustment.VisitGeneric(component.TryCast<Animator>(), ref scannedObjects, ref destroyedObjects, ref seenAnimators, AdvancedSafetySettings.MaxAnimators);
-                    ComponentAdjustment.VisitGeneric(component.TryCast<Light>(), ref scannedObjects, ref destroyedObjects, ref seenLights, AdvancedSafetySettings.MaxLights);
+                    component.TryCast<Collider>()?.VisitCollider(ref scannedObjects, ref destroyedObjects, ref seenColliders, obj);
+                    component.TryCast<Animator>()?.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenAnimators, AdvancedSafetySettings.MaxAnimators);
+                    component.TryCast<Light>()?.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenLights, AdvancedSafetySettings.MaxLights);
                     
-                    ComponentAdjustment.VisitRenderer(component.TryCast<Renderer>(), ref scannedObjects, ref destroyedObjects, ref seenPolys, ref seenMaterials, obj);
+                    component.TryCast<Renderer>()?.VisitRenderer(ref scannedObjects, ref destroyedObjects, ref seenPolys, ref seenMaterials, obj);
                 }
                 
                 foreach (var child in obj.transform) 

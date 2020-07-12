@@ -7,10 +7,8 @@ namespace AdvancedSafety
 {
     public static class ComponentAdjustment
     {
-        public static void VisitAudioSource(AudioSource audioSource, ref int totalCount, ref int deletedCount, ref int specificCount, GameObject obj, System.Collections.Generic.List<AudioSource> sourcesOutList)
+        public static void VisitAudioSource(this AudioSource audioSource, ref int totalCount, ref int deletedCount, ref int specificCount, GameObject obj, System.Collections.Generic.List<AudioSource> sourcesOutList)
         {
-            if (audioSource == null) return;
-
             totalCount++;
             
             if (specificCount++ >= AdvancedSafetySettings.MaxAudioSources)
@@ -45,10 +43,8 @@ namespace AdvancedSafety
             }
         }
 
-        public static void VisitConstraint(IConstraint constraint, ref int totalCount, ref int deletedCount, ref int specificCount, GameObject obj)
+        public static void VisitConstraint(this IConstraint constraint, ref int totalCount, ref int deletedCount, ref int specificCount, GameObject obj)
         {
-            if (constraint == null) return;
-
             totalCount++;
 
             if (specificCount++ > AdvancedSafetySettings.MaxConstraints)
@@ -58,10 +54,8 @@ namespace AdvancedSafety
             }
         }
 
-        public static void VisitCollider(Collider collider, ref int totalCount, ref int deletedCount, ref int specificCount, GameObject obj)
+        public static void VisitCollider(this Collider collider, ref int totalCount, ref int deletedCount, ref int specificCount, GameObject obj)
         {
-            if (collider == null) return;
-
             totalCount++;
 
             if (specificCount++ >= AdvancedSafetySettings.MaxColliders)
@@ -78,10 +72,8 @@ namespace AdvancedSafety
             }
         }
         
-        public static void VisitGeneric(Component rigidbody, ref int totalCount, ref int deletedCount, ref int specificCount, int maxComponents)
+        public static void VisitGeneric(this Component rigidbody, ref int totalCount, ref int deletedCount, ref int specificCount, int maxComponents)
         {
-            if (rigidbody == null) return;
-
             totalCount++;
 
             if (specificCount++ >= maxComponents)
@@ -91,10 +83,8 @@ namespace AdvancedSafety
             }
         }
 
-        public static void VisitCloth(Cloth cloth, ref int totalCount, ref int deletedCount, ref int specificCount, GameObject obj)
+        public static void VisitCloth(this Cloth cloth, ref int totalCount, ref int deletedCount, ref int specificCount, GameObject obj)
         {
-            if (cloth == null) return;
-
             totalCount++;
 
             var numVertices = 0;
@@ -109,10 +99,8 @@ namespace AdvancedSafety
         
         private static readonly List<Material> ourMaterialsList = new List<Material>();
         
-        public static void VisitRenderer(Renderer renderer, ref int totalCount, ref int deletedCount, ref int polyCount, ref int materialCount, GameObject obj)
+        public static void VisitRenderer(this Renderer renderer, ref int totalCount, ref int deletedCount, ref int polyCount, ref int materialCount, GameObject obj)
         {
-            if (renderer == null) return;
-
             totalCount++;
             
             var skinnedMeshRenderer = renderer.TryCast<SkinnedMeshRenderer>();
