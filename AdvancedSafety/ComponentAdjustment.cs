@@ -32,14 +32,21 @@ namespace AdvancedSafety
             if (!AdvancedSafetySettings.AllowGlobalSounds)
             {
                 var spatializer = obj.GetComponent<ONSPAudioSource>();
-                if (spatializer == null) spatializer = obj.AddComponent<ONSPAudioSource>();
-                spatializer.enabled = true;
+                if (spatializer != null)
+                {
+                    spatializer.enabled = true;
+                    spatializer.far = Mathf.Min(spatializer.far, 10f);
+                    spatializer.volumetricRadius = Mathf.Min(spatializer.volumetricRadius, 10f);
+                    spatializer.near = Mathf.Min(spatializer.near, 1f);
+                    spatializer.enableSpatialization = true;
+                    spatializer.gain = Mathf.Min(spatializer.gain, 1f);
+                }
+                
                 audioSource.spatialize = true;
-                spatializer.far = Mathf.Min(spatializer.far, 10f);
-                spatializer.volumetricRadius = Mathf.Min(spatializer.volumetricRadius, 10f);
-                spatializer.near = Mathf.Min(spatializer.near, 1f);
-                spatializer.enableSpatialization = true;
-                spatializer.gain = Mathf.Min(spatializer.gain, 1f);
+                audioSource.volume = Mathf.Max(audioSource.volume, 1f);
+                audioSource.maxDistance = Mathf.Max(audioSource.maxDistance, 10f);
+                audioSource.minDistance = Mathf.Max(audioSource.minDistance, 1f);
+                audioSource.spatialBlend = 1f;
             }
         }
 
