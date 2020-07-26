@@ -10,16 +10,16 @@ using MelonLoader;
 using UIExpansionKit;
 using UnhollowerBaseLib;
 using UnhollowerBaseLib.Runtime;
+using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
 using UnityEngine.Animations;
 using VRC.Core;
-using Object = UnityEngine.Object;
-
 using AMEnumA = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObVRAc1GaApAcObBoUnique;
 using AMEnumB = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObGaVRApBoBoObBoObUnique;
+using Object = UnityEngine.Object;
 
 [assembly:MelonModGame("VRChat", "VRChat")]
-[assembly:MelonModInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.1.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonModInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.1.2", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
 namespace AdvancedSafety
@@ -30,16 +30,45 @@ namespace AdvancedSafety
         {
             AdvancedSafetySettings.RegisterSettings();
 
-            unsafe
-            {
-                var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils
-                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(AssetManagement).GetMethod(
-                        nameof(AssetManagement.Method_Public_Static_Object_Object_Vector3_Quaternion_Boolean_Boolean_Boolean_0)))
-                    .GetValue(null);
-                
-                Imports.Hook((IntPtr)(&originalMethodPointer), typeof(AdvancedSafetyMod).GetMethod(nameof(ObjectInstantiatePatch), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
+            XrefScanMethodDb.RegisterType<AssetManagement>();
+            var matchingMethods = typeof(AssetManagement)
+                .GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly).Where(it =>
+                    it.Name.StartsWith("Method_Public_Static_Object_Object_Vector3_Quaternion_Boolean_Boolean_Boolean_") && it.GetParameters().Length == 6).ToList();
 
-                ourOriginalInstantiate = Marshal.GetDelegateForFunctionPointer<ObjectInstantiateDelegate>(originalMethodPointer);
+            MethodBase patchTarget = null;
+            foreach (var methodInfo in typeof(AssetManagement).GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly))
+            {
+                foreach (var it in XrefScanner.XrefScan(methodInfo))
+                {
+                    if (it.Type != XrefType.Method) continue;
+                    var methodBase = it.TryResolve();
+                    if (methodBase == null) continue;
+                    if (matchingMethods.Contains(methodBase))
+                    {
+                        patchTarget = methodBase;
+                        goto haveTarget;
+                    }
+                }
+            }
+            
+            haveTarget:
+            if (patchTarget != null)
+            {
+                unsafe
+                {
+                    var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(patchTarget).GetValue(null);
+
+                    Imports.Hook((IntPtr) (&originalMethodPointer),
+                        typeof(AdvancedSafetyMod).GetMethod(nameof(ObjectInstantiatePatch),
+                            BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
+
+                    ourOriginalInstantiate =
+                        Marshal.GetDelegateForFunctionPointer<ObjectInstantiateDelegate>(originalMethodPointer);
+                }
+            }
+            else
+            {
+                MelonModLogger.LogError("Patch target for object instantiation not found, avatar filtering will not work");
             }
             
             unsafe
@@ -203,7 +232,7 @@ namespace AdvancedSafety
             if (!AdvancedSafetySettings.AllowSpawnSounds)
                 MelonCoroutines.Start(CheckSpawnSounds(go, audioSourcesList));
 
-            if (Imports.IsDebugMode())
+            if (Imports.IsDebugMode() || destroyedObjects > 100)
                 MelonModLogger.Log($"Cleaned avatar ({avatarManager.prop_ApiAvatar_0?.name}) in {start.ElapsedMilliseconds}ms, scanned {scannedObjects} things, destroyed {destroyedObjects} things");
         }
 

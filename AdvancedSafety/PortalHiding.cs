@@ -85,7 +85,7 @@ namespace AdvancedSafety
             yield return null; // let it get initialized properly for photon
             yield return null;
 
-            go.SetActive(false);
+            if (go != null) go.SetActive(false);
         }
 
         private static bool IsBlockedEitherWay(string userId)
