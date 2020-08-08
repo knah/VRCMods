@@ -9,6 +9,7 @@ namespace UIExpansionKit
         private const string KitCategory = "UIExpansionKit";
         private const string PinnedPrefs = "PinnedPrefs";
         private const string QmExpandoStartsCollapsed = "QmExpandoStartsCollapsed";
+        private const string CategoriesStartCollapsed = "CategoriesStartCollapsed";
 
         internal static void RegisterSettings()
         {
@@ -17,9 +18,11 @@ namespace UIExpansionKit
             MelonPrefs.RegisterString(KitCategory, PinnedPrefs, "", hideFromList: true);
             
             MelonPrefs.RegisterBool(KitCategory, QmExpandoStartsCollapsed, false, "Quick Menu extra panel starts hidden");
+            MelonPrefs.RegisterBool(KitCategory, CategoriesStartCollapsed, false, "Settings categories start collapsed");
         }
 
         public static bool IsQmExpandoStartsCollapsed() => MelonPrefs.GetBool(KitCategory, QmExpandoStartsCollapsed);
+        public static bool IsCategoriesStartCollapsed() => MelonPrefs.GetBool(KitCategory, CategoriesStartCollapsed);
 
         public static void PinPref(string category, string prefName)
         {

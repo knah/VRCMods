@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using MelonLoader;
 using UIExpansionKit.API;
@@ -12,6 +13,7 @@ namespace UIExpansionKit
     public static class ModSettingsHandler
     {
         private static PreloadedBundleContents ourStuffBundle;
+        private static readonly Dictionary<string, bool> ourCategoryExpanded = new Dictionary<string, bool>(); 
 
         public static void Initialize(PreloadedBundleContents stuffBundle)
         {
@@ -51,6 +53,25 @@ namespace UIExpansionKit
                 var categoryUi = Object.Instantiate(categoryPrefab, settingsContentRoot, false);
                 categoryUi.GetComponentInChildren<Text>().text = MelonPrefs.GetCategoryDisplayName(categoryId);
                 var categoryUiContent = categoryUi.transform.Find("CategoryEntries");
+                var expandButtonTransform = categoryUi.transform.Find("ExpandButton");
+                var expandButton = expandButtonTransform.GetComponent<Button>();
+                var expandButtonText = expandButtonTransform.GetComponentInChildren<Text>();
+
+                void SetExpanded(bool expanded)
+                {
+                    expandButtonText.text = expanded ? "^" : "V";
+                    categoryUiContent.gameObject.SetActive(expanded);
+                }
+                
+                expandButton.onClick.AddListener(new Action(() =>
+                {
+                    SetExpanded(ourCategoryExpanded[categoryId] = !ourCategoryExpanded[categoryId]);
+                }));
+
+                if (!ourCategoryExpanded.ContainsKey(categoryId))
+                    ourCategoryExpanded[categoryId] = !ExpansionKitSettings.IsCategoriesStartCollapsed();
+                
+                SetExpanded(ourCategoryExpanded[categoryId]);
                 
                 foreach (var valuePair in prefsToPopulate)
                 {

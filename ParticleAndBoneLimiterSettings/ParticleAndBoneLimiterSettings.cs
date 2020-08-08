@@ -13,13 +13,14 @@ using VRC.Core;
 using Object = UnityEngine.Object;
 
 [assembly: MelonModGame("VRChat", "VRChat")]
-[assembly: MelonModInfo(typeof(ParticleAndBoneLimiterSettingsMod), "Particle and DynBone limiter settings UI", "1.1.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly: MelonModInfo(typeof(ParticleAndBoneLimiterSettingsMod), "Particle and DynBone limiter settings UI", "1.1.1", "knah", "https://github.com/knah/VRCMods")]
 
 namespace ParticleAndBoneLimiterSettings
 {
     public class ParticleAndBoneLimiterSettingsMod : MelonMod
     {
         private const string SettingsCategory = "VrcParticleLimiter";
+        private static bool ourIsExpanded;
         
         public override void OnApplicationStart()
         {
@@ -39,6 +40,8 @@ namespace ParticleAndBoneLimiterSettings
 
             while (field.GetValue(mod) == null)
                 yield return null;
+
+            ourIsExpanded = !ExpansionKitSettings.IsCategoriesStartCollapsed();
 
             var prefabs = CustomParticleSettingsUiHandler.UixBundle = (PreloadedBundleContents) field.GetValue(mod);
 
@@ -75,6 +78,22 @@ namespace ParticleAndBoneLimiterSettings
         internal static void InitializeSettingsCategory(GameObject categoryUi)
         {
             var categoryUiContent = categoryUi.transform.Find("CategoryEntries");
+            var expandButtonTransform = categoryUi.transform.Find("ExpandButton");
+            var expandButton = expandButtonTransform.GetComponent<Button>();
+            var expandButtonText = expandButtonTransform.GetComponentInChildren<Text>();
+
+            void SetExpanded(bool expanded)
+            {
+                expandButtonText.text = expanded ? "^" : "V";
+                categoryUiContent.gameObject.SetActive(expanded);
+            }
+                
+            expandButton.onClick.AddListener(new Action(() =>
+            {
+                SetExpanded(ourIsExpanded = !ourIsExpanded);
+            }));
+            
+            SetExpanded(ourIsExpanded);
 
             var textPrefab = CustomParticleSettingsUiHandler.UixBundle.SettingsText;
             
