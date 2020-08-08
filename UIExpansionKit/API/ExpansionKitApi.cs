@@ -44,7 +44,7 @@ namespace UIExpansionKit.API
         /// <summary>
         /// Sets the specified GameObject as a prefab for given settings category. The prefab will be instantiated each time "Undo changes" is pressed, in addition to instantiating it on menu creation.
         /// </summary>
-        /// <param name="categoryName">String passed as first parameter of <see cref="ModPrefs.RegisterCategory"/></param>
+        /// <param name="categoryName">String passed as first parameter of <see cref="MelonPrefs.RegisterCategory"/></param>
         /// <param name="categoryUi">Prefab that acts as category settings UI</param>
         public static void RegisterCustomSettingsCategory(string categoryName, GameObject categoryUi)
         {

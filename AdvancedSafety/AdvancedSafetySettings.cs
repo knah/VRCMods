@@ -9,39 +9,39 @@ namespace AdvancedSafety
 
         public static void RegisterSettings()
         {
-            ModPrefs.RegisterCategory(SettingsCategory, "Advanced safety");
+            MelonPrefs.RegisterCategory(SettingsCategory, "Advanced safety");
             
-            ModPrefs.RegisterPrefBool(SettingsCategory, nameof(AvatarFilteringEnabled), true, "Enable avatar filtering");
-            ModPrefs.RegisterPrefBool(SettingsCategory, nameof(IncludeFriends), false, "Friends are affected by avatar filtering");
-            ModPrefs.RegisterPrefBool(SettingsCategory, nameof(AbideByShowAvatar), true, "\"Show avatar\" bypasses avatar filtering");
+            MelonPrefs.RegisterBool(SettingsCategory, nameof(AvatarFilteringEnabled), true, "Enable avatar filtering");
+            MelonPrefs.RegisterBool(SettingsCategory, nameof(IncludeFriends), false, "Friends are affected by avatar filtering");
+            MelonPrefs.RegisterBool(SettingsCategory, nameof(AbideByShowAvatar), true, "\"Show avatar\" bypasses avatar filtering");
 
-            ModPrefs.RegisterPrefBool(SettingsCategory, nameof(AvatarFilteringOnlyInPublic), false, "Do avatar filtering only in public instances");
-            ModPrefs.RegisterPrefBool(SettingsCategory, nameof(IncludeFriendsInHides), false, "Friends are affected by avatar hiding");
-            ModPrefs.RegisterPrefBool(SettingsCategory, nameof(HidesAbideByShowAvatar), true, "\"Show avatar\" bypasses avatar hiding");
+            MelonPrefs.RegisterBool(SettingsCategory, nameof(AvatarFilteringOnlyInPublic), false, "Do avatar filtering only in public instances");
+            MelonPrefs.RegisterBool(SettingsCategory, nameof(IncludeFriendsInHides), false, "Friends are affected by avatar hiding");
+            MelonPrefs.RegisterBool(SettingsCategory, nameof(HidesAbideByShowAvatar), true, "\"Show avatar\" bypasses avatar hiding");
 
-            ModPrefs.RegisterPrefBool(SettingsCategory, nameof(AllowSpawnSounds), false, "Allow avatar spawn sounds");
-            ModPrefs.RegisterPrefBool(SettingsCategory, nameof(AllowGlobalSounds), false, "Allow global sounds on avatars");
-            ModPrefs.RegisterPrefInt(SettingsCategory, nameof(MaxAudioSources), 16, "Max audio sources");
+            MelonPrefs.RegisterBool(SettingsCategory, nameof(AllowSpawnSounds), false, "Allow avatar spawn sounds");
+            MelonPrefs.RegisterBool(SettingsCategory, nameof(AllowGlobalSounds), false, "Allow global sounds on avatars");
+            MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxAudioSources), 16, "Max audio sources");
 
-            ModPrefs.RegisterPrefInt(SettingsCategory, nameof(MaxPolygons), 2_000_000, "Max polygons");
-            ModPrefs.RegisterPrefInt(SettingsCategory, nameof(MaxMaterialSlots), 100, "Max material slots");
-            ModPrefs.RegisterPrefBool(SettingsCategory, nameof(HeuristicallyRemoveScreenSpaceBullshit), true, "Try to remove fullscreen effects");
+            MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxPolygons), 2_000_000, "Max polygons");
+            MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxMaterialSlots), 100, "Max material slots");
+            MelonPrefs.RegisterBool(SettingsCategory, nameof(HeuristicallyRemoveScreenSpaceBullshit), true, "Try to remove fullscreen effects");
             
-            ModPrefs.RegisterPrefInt(SettingsCategory, nameof(MaxConstraints), 200, "Max constraints");
-            ModPrefs.RegisterPrefInt(SettingsCategory, nameof(MaxColliders), 32, "Max colliders");
-            ModPrefs.RegisterPrefInt(SettingsCategory, nameof(MaxRigidBodies), 32, "Max rigidbodies");
+            MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxConstraints), 200, "Max constraints");
+            MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxColliders), 32, "Max colliders");
+            MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxRigidBodies), 32, "Max rigidbodies");
 
-            ModPrefs.RegisterPrefInt(SettingsCategory, nameof(MaxClothVertices), 10_000, "Max cloth vertices");
-            ModPrefs.RegisterPrefInt(SettingsCategory, nameof(MaxTransforms), 1000, "Max bones/transforms");
-            ModPrefs.RegisterPrefInt(SettingsCategory, nameof(MaxAnimators), 64, "Max animators");
+            MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxClothVertices), 10_000, "Max cloth vertices");
+            MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxTransforms), 1000, "Max bones/transforms");
+            MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxAnimators), 64, "Max animators");
             
-            ModPrefs.RegisterPrefInt(SettingsCategory, nameof(MaxLights), 2, "Max lights");
-            ModPrefs.RegisterPrefInt(SettingsCategory, nameof(MaxComponents), 4_000, "Max total components");
-            ModPrefs.RegisterPrefBool(SettingsCategory, nameof(AllowUiLayer), false, "Allow UI layer on avatars");
+            MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxLights), 2, "Max lights");
+            MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxComponents), 4_000, "Max total components");
+            MelonPrefs.RegisterBool(SettingsCategory, nameof(AllowUiLayer), false, "Allow UI layer on avatars");
             
-            ModPrefs.RegisterPrefBool(SettingsCategory, nameof(HidePortalsFromBlockedUsers), true, "Hide portals from blocked users");
-            ModPrefs.RegisterPrefBool(SettingsCategory, nameof(HidePortalsFromNonFriends), false, "Hide portals from non-friends");
-            ModPrefs.RegisterPrefBool(SettingsCategory, nameof(HidePortalsCreatedTooClose), true, "Hide portals created too close to local player");
+            MelonPrefs.RegisterBool(SettingsCategory, nameof(HidePortalsFromBlockedUsers), true, "Hide portals from blocked users");
+            MelonPrefs.RegisterBool(SettingsCategory, nameof(HidePortalsFromNonFriends), false, "Hide portals from non-friends");
+            MelonPrefs.RegisterBool(SettingsCategory, nameof(HidePortalsCreatedTooClose), true, "Hide portals created too close to local player");
             
             OnModSettingsApplied();
         }
@@ -83,10 +83,10 @@ namespace AdvancedSafety
             foreach (var fieldInfo in typeof(AdvancedSafetySettings).GetFields(BindingFlags.Static | BindingFlags.Public))
             {
                 if (fieldInfo.FieldType == typeof(int))
-                    fieldInfo.SetValue(null, ModPrefs.GetInt(SettingsCategory, fieldInfo.Name));
+                    fieldInfo.SetValue(null, MelonPrefs.GetInt(SettingsCategory, fieldInfo.Name));
                 
                 if (fieldInfo.FieldType == typeof(bool))
-                    fieldInfo.SetValue(null, ModPrefs.GetBool(SettingsCategory, fieldInfo.Name));
+                    fieldInfo.SetValue(null, MelonPrefs.GetBool(SettingsCategory, fieldInfo.Name));
             }
         }
     }

@@ -17,9 +17,9 @@ namespace CoreLimiter
 
         public override void OnApplicationStart()
         {
-            ModPrefs.RegisterCategory(CoreLimiterPrefCategory, "Core Limiter");
-            ModPrefs.RegisterPrefInt(CoreLimiterPrefCategory, MaxCoresPref, 4, "Maximum cores");
-            ModPrefs.RegisterPrefBool(CoreLimiterPrefCategory, SkipHyperThreadsPref, true, "Don't use both threads of a core");
+            MelonPrefs.RegisterCategory(CoreLimiterPrefCategory, "Core Limiter");
+            MelonPrefs.RegisterInt(CoreLimiterPrefCategory, MaxCoresPref, 4, "Maximum cores");
+            MelonPrefs.RegisterBool(CoreLimiterPrefCategory, SkipHyperThreadsPref, true, "Don't use both threads of a core");
             
             MelonModLogger.Log($"[CoreLimiter] Have {Environment.ProcessorCount} processor cores");
 
@@ -36,9 +36,9 @@ namespace CoreLimiter
             var processorCount = Environment.ProcessorCount;
             long mask = 0;
 
-            var targetNumCores = ModPrefs.GetInt(CoreLimiterPrefCategory, MaxCoresPref);
+            var targetNumCores = MelonPrefs.GetInt(CoreLimiterPrefCategory, MaxCoresPref);
             var targetBit = processorCount - 1;
-            var bitStep = ModPrefs.GetBool(CoreLimiterPrefCategory, SkipHyperThreadsPref) ? 2 : 1;
+            var bitStep = MelonPrefs.GetBool(CoreLimiterPrefCategory, SkipHyperThreadsPref) ? 2 : 1;
             for (var i = 0; i < targetNumCores && targetBit > 0; i++)
             {
                 mask |= 1L << targetBit;

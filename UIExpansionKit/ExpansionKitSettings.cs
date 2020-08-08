@@ -12,14 +12,14 @@ namespace UIExpansionKit
 
         internal static void RegisterSettings()
         {
-            ModPrefs.RegisterCategory(KitCategory,"UI Expansion Kit");
+            MelonPrefs.RegisterCategory(KitCategory,"UI Expansion Kit");
             
-            ModPrefs.RegisterPrefString(KitCategory, PinnedPrefs, "", hideFromList: true);
+            MelonPrefs.RegisterString(KitCategory, PinnedPrefs, "", hideFromList: true);
             
-            ModPrefs.RegisterPrefBool(KitCategory, QmExpandoStartsCollapsed, false, "Quick Menu extra panel starts hidden");
+            MelonPrefs.RegisterBool(KitCategory, QmExpandoStartsCollapsed, false, "Quick Menu extra panel starts hidden");
         }
 
-        public static bool IsQmExpandoStartsCollapsed() => ModPrefs.GetBool(KitCategory, QmExpandoStartsCollapsed);
+        public static bool IsQmExpandoStartsCollapsed() => MelonPrefs.GetBool(KitCategory, QmExpandoStartsCollapsed);
 
         public static void PinPref(string category, string prefName)
         {
@@ -34,13 +34,13 @@ namespace UIExpansionKit
         internal static void SetPinnedPrefs(IEnumerable<(string category, string name)> prefs)
         {
             var raw = string.Join(";", prefs.Select(it => $"{it.category},{it.name}"));
-            var prefDesc = ModPrefs.GetPrefs()[KitCategory][PinnedPrefs];
+            var prefDesc = MelonPrefs.GetPreferences()[KitCategory][PinnedPrefs];
             prefDesc.ValueEdited = raw;
         }
 
         public static IEnumerable<(string category, string name)> ListPinnedPrefs(bool fromTempStore)
         {
-            var raw = fromTempStore ? ModPrefs.GetPrefs()[KitCategory][PinnedPrefs].ValueEdited ?? "" : ModPrefs.GetString(KitCategory, PinnedPrefs) ?? "";
+            var raw = fromTempStore ? MelonPrefs.GetPreferences()[KitCategory][PinnedPrefs].ValueEdited ?? "" : MelonPrefs.GetString(KitCategory, PinnedPrefs) ?? "";
             var parts = raw.Split(';');
             return parts.Select(it => it.Split(',')).Where(it => it.Length == 2).Select(it => (it[0], it[1]));
         }

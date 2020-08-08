@@ -29,10 +29,10 @@ namespace MirrorResolutionUnlimiter
 
         public override void OnApplicationStart()
         {
-            ModPrefs.RegisterCategory(ModCategory, "Mirror Resolution");
-            ModPrefs.RegisterPrefInt(ModCategory, MaxResPref, 4096, "Max eye texture size");
-            ModPrefs.RegisterPrefInt(ModCategory, MirrorMsaaPref, 0, "Mirror MSAA (0=default)");
-            ModPrefs.RegisterPrefBool(ModCategory, AllMirrorsAutoPref, false, "Force auto resolution");
+            MelonPrefs.RegisterCategory(ModCategory, "Mirror Resolution");
+            MelonPrefs.RegisterInt(ModCategory, MaxResPref, 4096, "Max eye texture size");
+            MelonPrefs.RegisterInt(ModCategory, MirrorMsaaPref, 0, "Mirror MSAA (0=default)");
+            MelonPrefs.RegisterBool(ModCategory, AllMirrorsAutoPref, false, "Force auto resolution");
             
             unsafe
             {
@@ -61,9 +61,9 @@ namespace MirrorResolutionUnlimiter
 
         public override void OnModSettingsApplied()
         {
-            ourMaxEyeResolution = ModPrefs.GetInt(ModCategory, MaxResPref);
-            ourAllMirrorsAuto = ModPrefs.GetBool(ModCategory, AllMirrorsAutoPref);
-            ourMirrorMsaa = ModPrefs.GetInt(ModCategory, MirrorMsaaPref);
+            ourMaxEyeResolution = MelonPrefs.GetInt(ModCategory, MaxResPref);
+            ourAllMirrorsAuto = MelonPrefs.GetBool(ModCategory, AllMirrorsAutoPref);
+            ourMirrorMsaa = MelonPrefs.GetInt(ModCategory, MirrorMsaaPref);
             if (ourMirrorMsaa != 1 && ourMirrorMsaa != 2 && ourMirrorMsaa != 4 && ourMirrorMsaa != 8)
                 ourMirrorMsaa = 0;
         }

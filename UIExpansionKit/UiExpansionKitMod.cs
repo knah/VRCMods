@@ -237,7 +237,7 @@ namespace UIExpansionKit
             myVisibilityTransfers.Add((fullMenuRoot.transform.Find("Screens/Settings").gameObject, myModSettingsExpando));
             myHasContents[myModSettingsExpando] = true;
 
-            myModSettingsExpandoTransform.Find("Content/ApplyButton").GetComponent<Button>().onClick.AddListener(new Action(ModPrefs.SaveConfig));
+            myModSettingsExpandoTransform.Find("Content/ApplyButton").GetComponent<Button>().onClick.AddListener(new Action(MelonPrefs.SaveConfig));
 
             myModSettingsExpandoTransform.Find("Content/RefreshButton").GetComponent<Button>().onClick
                 .AddListener(new Action(() => MelonCoroutines.Start(ModSettingsHandler.PopulateSettingsPanel(settingsContentRoot))));
@@ -288,17 +288,17 @@ namespace UIExpansionKit
             
             foreach (var (category, name) in ExpansionKitSettings.ListPinnedPrefs(false))
             {
-                if (!ModPrefs.GetPrefs().TryGetValue(category, out var categoryMap)) continue;
+                if (!MelonPrefs.GetPreferences().TryGetValue(category, out var categoryMap)) continue;
                 if (!categoryMap.TryGetValue(name, out var prefDesc)) continue;
 
                 var toggleButton = Object.Instantiate(toggleButtonPrefab, expandoRoot, false);
                 toggleButton.GetComponentInChildren<Text>().text = prefDesc.DisplayText ?? name;
                 var toggle = toggleButton.GetComponent<Toggle>();
-                toggle.isOn = ModPrefs.GetBool(category, name);
+                toggle.isOn = MelonPrefs.GetBool(category, name);
                 toggle.onValueChanged.AddListener(new Action<bool>(isOn =>
                 {
                     prefDesc.ValueEdited = isOn.ToString().ToLowerInvariant();
-                    ModPrefs.SaveConfig();
+                    MelonPrefs.SaveConfig();
                 }));
                 
                 myHasContents[expando] = true;

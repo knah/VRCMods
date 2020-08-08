@@ -25,8 +25,8 @@ namespace ParticleAndBoneLimiterSettings
         {
             ClassInjector.RegisterTypeInIl2Cpp<CustomParticleSettingsUiHandler>();
 
-            ModPrefs.RegisterCategory(SettingsCategory, "Particle and DynBone limits");
-            ModPrefs.RegisterPrefBool(SettingsCategory, "dummy", false, "ignore this", true);
+            MelonPrefs.RegisterCategory(SettingsCategory, "Particle and DynBone limits");
+            MelonPrefs.RegisterBool(SettingsCategory, "dummy", false, "ignore this", true);
 
             ExpansionKitApi.RegisterWaitConditionBeforeDecorating(WaitForUixPrefabsAndRegister());
         }
@@ -43,7 +43,7 @@ namespace ParticleAndBoneLimiterSettings
             var prefabs = CustomParticleSettingsUiHandler.UixBundle = (PreloadedBundleContents) field.GetValue(mod);
 
             var rootPrefab = Object.Instantiate(prefabs.SettingsCategory, prefabs.StoredThingsParent.transform, false);
-            rootPrefab.GetComponentInChildren<Text>().text = ModPrefs.GetCategoryDisplayName(SettingsCategory);
+            rootPrefab.GetComponentInChildren<Text>().text = MelonPrefs.GetCategoryDisplayName(SettingsCategory);
             rootPrefab.SetActive(true);
             rootPrefab.AddComponent<CustomParticleSettingsUiHandler>();
 

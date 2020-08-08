@@ -40,16 +40,16 @@ namespace SparkleBeGone
         
         public override void OnApplicationStart()
         {
-            ModPrefs.RegisterCategory(SettingsCategory, "Sparkle Be Gone");
+            MelonPrefs.RegisterCategory(SettingsCategory, "Sparkle Be Gone");
             
-            ModPrefs.RegisterPrefBool(SettingsCategory, StartSparkleSetting, false, "Show start sparkle");
-            ModPrefs.RegisterPrefBool(SettingsCategory, EndSparksSetting, false, "Show end sparks");
-            ModPrefs.RegisterPrefBool(SettingsCategory, EndFlareSetting, true, "Show end flare");
+            MelonPrefs.RegisterBool(SettingsCategory, StartSparkleSetting, false, "Show start sparkle");
+            MelonPrefs.RegisterBool(SettingsCategory, EndSparksSetting, false, "Show end sparks");
+            MelonPrefs.RegisterBool(SettingsCategory, EndFlareSetting, true, "Show end flare");
             
-            ModPrefs.RegisterPrefBool(SettingsCategory, RecolorSparksSetting, false, "Recolor sparks");
-            ModPrefs.RegisterPrefBool(SettingsCategory, RecolorBeamsSetting, true, "Recolor beams");
+            MelonPrefs.RegisterBool(SettingsCategory, RecolorSparksSetting, false, "Recolor sparks");
+            MelonPrefs.RegisterBool(SettingsCategory, RecolorBeamsSetting, true, "Recolor beams");
             
-            ModPrefs.RegisterPrefString(SettingsCategory, BeamColorSetting, "25 50 255 255", "Beam color (r g b a)");
+            MelonPrefs.RegisterString(SettingsCategory, BeamColorSetting, "25 50 255 255", "Beam color (r g b a)");
 
             var method = typeof(VRCSpaceUiPointer).GetMethod(nameof(VRCSpaceUiPointer.LateUpdate), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
@@ -109,17 +109,17 @@ namespace SparkleBeGone
                 myOriginalLaserTexture.hideFlags |= HideFlags.DontUnloadUnusedAsset;
             }
 
-            var targetTexture = ModPrefs.GetBool(SettingsCategory, RecolorBeamsSetting) ? myWhiteLaserTexture : myOriginalLaserTexture;
+            var targetTexture = MelonPrefs.GetBool(SettingsCategory, RecolorBeamsSetting) ? myWhiteLaserTexture : myOriginalLaserTexture;
             leftHand.GetComponent<LineRenderer>().material.mainTexture = targetTexture;
             rightHand.GetComponent<LineRenderer>().material.mainTexture = targetTexture;
 
             AdjustParticleSystems(leftHand.gameObject);
             AdjustParticleSystems(rightHand.gameObject);
 
-            var color = DecodeColor(ModPrefs.GetString(SettingsCategory, BeamColorSetting));
+            var color = DecodeColor(MelonPrefs.GetString(SettingsCategory, BeamColorSetting));
             ourBeamColor = color;
-            ourDoRecolorSparks = ModPrefs.GetBool(SettingsCategory, RecolorSparksSetting);
-            ourDoRecolorBeams = ModPrefs.GetBool(SettingsCategory, RecolorBeamsSetting);
+            ourDoRecolorSparks = MelonPrefs.GetBool(SettingsCategory, RecolorSparksSetting);
+            ourDoRecolorBeams = MelonPrefs.GetBool(SettingsCategory, RecolorBeamsSetting);
         }
 
         private static void CursorLateUpdatePatch(IntPtr thisPtr)
@@ -163,9 +163,9 @@ namespace SparkleBeGone
             var endFlare = cursorRoot.transform.Find("plasma_beam_flare_blue");
             var endSparks = endFlare.Find("plasma_beam_spark_002");
             
-            startParticle.GetComponent<ParticleSystem>().enableEmission = ModPrefs.GetBool(SettingsCategory, StartSparkleSetting); 
-            endFlare.GetComponent<ParticleSystem>().enableEmission = ModPrefs.GetBool(SettingsCategory, EndFlareSetting); 
-            endSparks.GetComponent<ParticleSystem>().enableEmission = ModPrefs.GetBool(SettingsCategory, EndSparksSetting);
+            startParticle.GetComponent<ParticleSystem>().enableEmission = MelonPrefs.GetBool(SettingsCategory, StartSparkleSetting); 
+            endFlare.GetComponent<ParticleSystem>().enableEmission = MelonPrefs.GetBool(SettingsCategory, EndFlareSetting); 
+            endSparks.GetComponent<ParticleSystem>().enableEmission = MelonPrefs.GetBool(SettingsCategory, EndSparksSetting);
         }
     }
 }

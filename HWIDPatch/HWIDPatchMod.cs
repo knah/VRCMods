@@ -20,17 +20,17 @@ namespace HWIDPatch
             try
             {
                 var settingsCategory = "HWIDPatch";
-                ModPrefs.RegisterCategory(settingsCategory, "HWID Patch");
-                ModPrefs.RegisterPrefString(settingsCategory, "HWID", "", hideFromList: true);
+                MelonPrefs.RegisterCategory(settingsCategory, "HWID Patch");
+                MelonPrefs.RegisterString(settingsCategory, "HWID", "", hideFromList: true);
 
-                var newId = ModPrefs.GetString(settingsCategory, "HWID");
+                var newId = MelonPrefs.GetString(settingsCategory, "HWID");
                 if (newId.Length != SystemInfo.deviceUniqueIdentifier.Length)
                 {
                     var random = new System.Random(Environment.TickCount);
                     var bytes = new byte[SystemInfo.deviceUniqueIdentifier.Length / 2];
                     random.NextBytes(bytes);
                     newId = string.Join("", bytes.Select(it => it.ToString("x2")));
-                    ModPrefs.SetString(settingsCategory, "HWID", newId);
+                    MelonPrefs.SetString(settingsCategory, "HWID", newId);
                 }
 
                 ourGeneratedHwidString = new Il2CppSystem.Object(IL2CPP.ManagedStringToIl2Cpp(newId));
