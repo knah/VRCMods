@@ -45,7 +45,7 @@ namespace MirrorResolutionUnlimiter
 
             if (AppDomain.CurrentDomain.GetAssemblies().Any(it => it.GetName().Name.StartsWith("UIExpansionKit")))
             {
-                MelonModLogger.Log("Adding UIExpansionKit buttons");
+                MelonLogger.Log("Adding UIExpansionKit buttons");
                 typeof(UiExtensionsAddon)
                     .GetMethod(nameof(UiExtensionsAddon.Init),
                         System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)!
@@ -120,7 +120,7 @@ namespace MirrorResolutionUnlimiter
             }
             catch (Exception ex)
             {
-                MelonModLogger.LogError("Exception happened in GetReflectionData override; crash will likely follow: " + ex);
+                MelonLogger.LogError("Exception happened in GetReflectionData override; crash will likely follow: " + ex);
                 return IntPtr.Zero;
             }
         }

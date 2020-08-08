@@ -68,7 +68,7 @@ namespace AdvancedSafety
             }
             else
             {
-                MelonModLogger.LogError("Patch target for object instantiation not found, avatar filtering will not work");
+                MelonLogger.LogError("Patch target for object instantiation not found, avatar filtering will not work");
             }
             
             unsafe
@@ -233,7 +233,7 @@ namespace AdvancedSafety
                 MelonCoroutines.Start(CheckSpawnSounds(go, audioSourcesList));
 
             if (Imports.IsDebugMode() || destroyedObjects > 100)
-                MelonModLogger.Log($"Cleaned avatar ({avatarManager.prop_ApiAvatar_0?.name}) in {start.ElapsedMilliseconds}ms, scanned {scannedObjects} things, destroyed {destroyedObjects} things");
+                MelonLogger.Log($"Cleaned avatar ({avatarManager.prop_ApiAvatar_0?.name}) in {start.ElapsedMilliseconds}ms, scanned {scannedObjects} things, destroyed {destroyedObjects} things");
         }
 
         private static IEnumerator CheckSpawnSounds(GameObject go, List<AudioSource> audioSourcesList)
@@ -265,7 +265,7 @@ namespace AdvancedSafety
             }
             catch (Exception ex)
             {
-                MelonModLogger.LogError($"Error when wrapping avatar creation: {ex}");
+                MelonLogger.LogError($"Error when wrapping avatar creation: {ex}");
                 return false;
             }
         }
@@ -279,7 +279,7 @@ namespace AdvancedSafety
             }
             catch (Exception ex)
             {
-                MelonModLogger.LogError($"Error when wrapping avatar creation: {ex}");
+                MelonLogger.LogError($"Error when wrapping avatar creation: {ex}");
                 return false;
             }
         }
@@ -305,7 +305,7 @@ namespace AdvancedSafety
             }
             catch (Exception ex)
             {
-                MelonModLogger.LogError($"Exception when cleaning avatar: {ex}");
+                MelonLogger.LogError($"Exception when cleaning avatar: {ex}");
             }
             
             return result;

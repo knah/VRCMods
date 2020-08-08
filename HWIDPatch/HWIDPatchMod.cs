@@ -39,7 +39,7 @@ namespace HWIDPatch
                 var icallAddress = IL2CPP.il2cpp_resolve_icall(icallName);
                 if (icallAddress == IntPtr.Zero)
                 {
-                    MelonModLogger.LogError("Can't resolve the icall, not patching");
+                    MelonLogger.LogError("Can't resolve the icall, not patching");
                     return;
                 }
                 
@@ -47,13 +47,13 @@ namespace HWIDPatch
                     typeof(HWIDPatchMod).GetMethod(nameof(GetDeviceIdPatch),
                         BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
 
-                MelonModLogger.Log("Patched HWID; below two should match:");
-                MelonModLogger.Log($"Current: {SystemInfo.deviceUniqueIdentifier}");
-                MelonModLogger.Log($"Target:  {newId}");
+                MelonLogger.Log("Patched HWID; below two should match:");
+                MelonLogger.Log($"Current: {SystemInfo.deviceUniqueIdentifier}");
+                MelonLogger.Log($"Target:  {newId}");
             }
             catch (Exception ex)
             {
-                MelonModLogger.LogError(ex.ToString());
+                MelonLogger.LogError(ex.ToString());
             }
         }
 

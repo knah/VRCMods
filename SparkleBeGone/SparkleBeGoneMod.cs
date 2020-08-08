@@ -146,7 +146,7 @@ namespace SparkleBeGone
             }
             catch (Exception ex)
             {
-                MelonModLogger.LogError(ex.ToString());
+                MelonLogger.LogError(ex.ToString());
             }
         }
 

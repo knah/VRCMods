@@ -120,7 +120,7 @@ namespace UIExpansionKit
                             break;
                         }
                         default:
-                            MelonModLogger.LogError($"Unknown mod pref type {prefDesc.Type}");
+                            MelonLogger.LogError($"Unknown mod pref type {prefDesc.Type}");
                             break;
                     }
                 }

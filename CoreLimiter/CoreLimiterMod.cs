@@ -21,7 +21,7 @@ namespace CoreLimiter
             MelonPrefs.RegisterInt(CoreLimiterPrefCategory, MaxCoresPref, 4, "Maximum cores");
             MelonPrefs.RegisterBool(CoreLimiterPrefCategory, SkipHyperThreadsPref, true, "Don't use both threads of a core");
             
-            MelonModLogger.Log($"[CoreLimiter] Have {Environment.ProcessorCount} processor cores");
+            MelonLogger.Log($"[CoreLimiter] Have {Environment.ProcessorCount} processor cores");
 
             ApplyAffinity();
         }
@@ -46,7 +46,7 @@ namespace CoreLimiter
             }
             
             var process = Process.GetCurrentProcess().Handle;
-            MelonModLogger.Log($"[CoreLimiter] Assigning affinity mask: {mask}");
+            MelonLogger.Log($"[CoreLimiter] Assigning affinity mask: {mask}");
             SetProcessAffinityMask(process, new IntPtr(mask));
         }
         

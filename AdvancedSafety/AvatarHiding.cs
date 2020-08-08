@@ -116,7 +116,7 @@ namespace AdvancedSafety
                 if (ourBlockedAvatarAuthors.ContainsKey(apiAvatar.authorId) ||
                     ourBlockedAvatars.ContainsKey(apiAvatar.id))
                 {
-                    MelonModLogger.Log(
+                    MelonLogger.Log(
                         $"Hiding avatar on {apiUser.displayName} because it or its author is hidden");
                     denyReason = 3;
                     return false;
@@ -124,7 +124,7 @@ namespace AdvancedSafety
             }
             catch (Exception ex)
             {
-                MelonModLogger.LogError($"Exception in CanUseCustomAvatarPatch: {ex}");
+                MelonLogger.LogError($"Exception in CanUseCustomAvatarPatch: {ex}");
             }
 
             return result;

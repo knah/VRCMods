@@ -41,22 +41,22 @@ namespace JoinNotifier
 
         public override void OnApplicationStart()
         {
-            MelonModLogger.Log("ApplicationStart");
+            MelonLogger.Log("ApplicationStart");
             JoinNotifierSettings.RegisterSettings();
-            // MelonModLogger.Log("ApplicationStart done");
+            // MelonLogger.Log("ApplicationStart done");
 
             MelonCoroutines.Start(InitThings());
         }
 
         public IEnumerator InitThings()
         {
-            MelonModLogger.Log("Waiting for init");
+            MelonLogger.Log("Waiting for init");
             
             while (ReferenceEquals(NetworkManager.field_Internal_Static_NetworkManager_0, null)) yield return null;
             while (ReferenceEquals(VRCAudioManager.field_Private_Static_VRCAudioManager_0, null)) yield return null;
             while (ReferenceEquals(VRCUiManager.field_Protected_Static_VRCUiManager_0, null)) yield return null;
 
-            MelonModLogger.Log("Start init");
+            MelonLogger.Log("Start init");
             
             NetworkManagerHooks.Initialize();
 
@@ -86,7 +86,7 @@ namespace JoinNotifier
 
         public override void OnModSettingsApplied()
         {
-            MelonModLogger.Log("Settings apply start");
+            MelonLogger.Log("Settings apply start");
             if (myJoinSource != null)
             {
                 myJoinSource.volume = JoinNotifierSettings.GetSoundVolume();
@@ -116,7 +116,7 @@ namespace JoinNotifier
                 myLeaveText.fontSize = JoinNotifierSettings.GetTextSize();
                 myLeaveText.color = JoinNotifierSettings.GetLeaveIconColor();
             }
-            MelonModLogger.Log("Settings apply done");
+            MelonLogger.Log("Settings apply done");
         }
 
         private Image CreateNotifierImage(string name, float offset, Color colorTint)
@@ -177,11 +177,11 @@ namespace JoinNotifier
             var hudRoot = GameObject.Find("UserInterface/UnscaledUI/HudContent/Hud");
             if (hudRoot == null)
             {
-                MelonModLogger.Log("Not creating gameobjects - no hud root");
+                MelonLogger.Log("Not creating gameobjects - no hud root");
                 return;
             }
             
-            MelonModLogger.Log("Creating gameobjects");
+            MelonLogger.Log("Creating gameobjects");
 //            var pathToThing = "UserInterface/UnscaledUI/HudContent/Hud/NotificationDotParent/NotificationDot";
             myJoinImage = CreateNotifierImage("join", 0f, JoinNotifierSettings.GetJoinIconColor());
             myJoinSource = CreateAudioSource(myJoinClip, myJoinImage.gameObject);
@@ -194,7 +194,7 @@ namespace JoinNotifier
 
         public override void OnLevelWasInitialized(int level)
         {
-            // MelonModLogger.Log("Scene load");
+            // MelonLogger.Log("Scene load");
             
             myLastLevelLoad = Environment.TickCount;
             myObservedLocalPlayerJoin = false;

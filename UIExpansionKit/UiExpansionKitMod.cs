@@ -107,7 +107,7 @@ namespace UIExpansionKit
                     }
                     catch (Exception ex)
                     {
-                        MelonModLogger.LogError(
+                        MelonLogger.LogError(
                             $"Error while waiting for init of coroutine with type {coroutine.GetType().FullName}: {ex.ToString()}");
                     }
                     yield return coroutine.Current;
@@ -120,7 +120,7 @@ namespace UIExpansionKit
 
         private void DecorateMenuPages()
         {
-            MelonModLogger.Log($"Decorating menus");
+            MelonLogger.Log($"Decorating menus");
             
             var quickMenuExpandoPrefab = myStuffBundle.QuickMenuExpando;
             var quickMenuRoot = QuickMenu.prop_QuickMenu_0.gameObject;
@@ -137,7 +137,7 @@ namespace UIExpansionKit
                 var gameObject = GameObject.Find(gameObjectPath);
                 if (gameObject == null)
                 {
-                    MelonModLogger.LogError($"GameObject at path {gameObjectPath} for category {categoryEnum} was not found, not decorating");
+                    MelonLogger.LogError($"GameObject at path {gameObjectPath} for category {categoryEnum} was not found, not decorating");
                     continue;
                 }
 
