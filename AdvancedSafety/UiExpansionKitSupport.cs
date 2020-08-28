@@ -104,7 +104,7 @@ namespace AdvancedSafety
         
         private static void ReloadAllAvatars() {
             var vrcPlayer = VRCPlayer.field_Internal_Static_VRCPlayer_0;
-            vrcPlayer.StartCoroutine(vrcPlayer.Method_Private_IEnumerator_Boolean_0(false));
+            vrcPlayer.StartCoroutine(vrcPlayer.Method_Private_IEnumerator_Boolean_PDM_0(false));
         }
     }
 }
