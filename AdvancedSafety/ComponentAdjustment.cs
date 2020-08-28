@@ -34,7 +34,6 @@ namespace AdvancedSafety
                 var spatializer = obj.GetComponent<ONSPAudioSource>();
                 if (spatializer != null)
                 {
-                    spatializer.enabled = true;
                     spatializer.far = Mathf.Min(spatializer.far, 10f);
                     spatializer.volumetricRadius = Mathf.Min(spatializer.volumetricRadius, 10f);
                     spatializer.near = Mathf.Min(spatializer.near, 1f);
@@ -42,7 +41,6 @@ namespace AdvancedSafety
                     spatializer.gain = Mathf.Min(spatializer.gain, 1f);
                 }
                 
-                audioSource.spatialize = true;
                 audioSource.volume = Mathf.Max(audioSource.volume, 1f);
                 audioSource.maxDistance = Mathf.Max(audioSource.maxDistance, 10f);
                 audioSource.minDistance = Mathf.Max(audioSource.minDistance, 1f);
