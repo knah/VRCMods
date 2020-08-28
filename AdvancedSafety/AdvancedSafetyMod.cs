@@ -123,7 +123,7 @@ namespace AdvancedSafety
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate IntPtr ObjectInstantiateDelegate(IntPtr assetPtr, Vector3 pos, Quaternion rot, bool allowCustomShaders, bool isUI, bool validate);
+        private delegate IntPtr ObjectInstantiateDelegate(IntPtr assetPtr, Vector3 pos, Quaternion rot, byte allowCustomShaders, byte isUI, byte validate);
 
         private static ObjectInstantiateDelegate ourOriginalInstantiate;
         private static IntPtr ourMoveNextA;
@@ -152,9 +152,6 @@ namespace AdvancedSafety
             
             var vrcPlayer = avatarManager.field_Private_VRCPlayer_0;
             if (vrcPlayer == null) return;
-            
-            if (vrcPlayer == VRCPlayer.field_Internal_Static_VRCPlayer_0) // never apply to self
-                return;
             
             var userId = vrcPlayer.prop_Player_0?.prop_APIUser_0?.id ?? "";
             if (!AdvancedSafetySettings.IncludeFriends && APIUser.IsFriendsWith(userId))
@@ -284,11 +281,18 @@ namespace AdvancedSafety
             }
         }
 
-        private static IntPtr ObjectInstantiatePatch(IntPtr assetPtr, Vector3 pos, Quaternion rot, bool allowCustomShaders, bool isUI, bool validate)
+        private static IntPtr ObjectInstantiatePatch(IntPtr assetPtr, Vector3 pos, Quaternion rot, byte allowCustomShaders, byte isUI, byte validate)
         {
             if (AvatarManagerCookie.CurrentManager == null || assetPtr == IntPtr.Zero) 
                 return ourOriginalInstantiate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
-            
+
+            var avatarManager = AvatarManagerCookie.CurrentManager;
+            var vrcPlayer = avatarManager.field_Private_VRCPlayer_0;
+            if (vrcPlayer == null) return ourOriginalInstantiate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
+
+            if (vrcPlayer == VRCPlayer.field_Internal_Static_VRCPlayer_0) // never apply to self
+                return ourOriginalInstantiate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
+
             var go = new Object(assetPtr).TryCast<GameObject>();
             if (go == null)
                 return ourOriginalInstantiate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
