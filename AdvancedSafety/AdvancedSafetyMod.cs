@@ -19,7 +19,7 @@ using AMEnumB = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumerat
 using Object = UnityEngine.Object;
 
 [assembly:MelonModGame("VRChat", "VRChat")]
-[assembly:MelonModInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.1.2", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonModInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.2.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
 namespace AdvancedSafety

@@ -13,7 +13,7 @@ using VRC.Core;
 using Object = UnityEngine.Object;
 
 [assembly: MelonModGame("VRChat", "VRChat")]
-[assembly: MelonModInfo(typeof(ParticleAndBoneLimiterSettingsMod), "Particle and DynBone limiter settings UI", "1.1.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly: MelonModInfo(typeof(ParticleAndBoneLimiterSettingsMod), "Particle and DynBone limiter settings UI", "1.1.2", "knah", "https://github.com/knah/VRCMods")]
 
 namespace ParticleAndBoneLimiterSettings
 {
