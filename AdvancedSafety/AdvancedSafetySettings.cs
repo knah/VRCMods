@@ -33,10 +33,12 @@ namespace AdvancedSafety
 
             MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxClothVertices), 10_000, "Max cloth vertices");
             MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxTransforms), 1000, "Max bones/transforms");
-            MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxAnimators), 64, "Max animators");
+            MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxDepth), 50, "Max transforms depth");
             
+            MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxAnimators), 64, "Max animators");
             MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxLights), 2, "Max lights");
             MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxComponents), 4_000, "Max total components");
+            
             MelonPrefs.RegisterBool(SettingsCategory, nameof(AllowUiLayer), false, "Allow UI layer on avatars");
             
             MelonPrefs.RegisterBool(SettingsCategory, nameof(HidePortalsFromBlockedUsers), true, "Hide portals from blocked users");
@@ -71,6 +73,7 @@ namespace AdvancedSafety
         public static int MaxAnimators;
         public static int MaxLights;
         public static int MaxComponents;
+        public static int MaxDepth;
 
         public static bool HeuristicallyRemoveScreenSpaceBullshit;
 

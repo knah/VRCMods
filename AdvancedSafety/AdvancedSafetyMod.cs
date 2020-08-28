@@ -195,6 +195,13 @@ namespace AdvancedSafety
                     return;
                 }
 
+                if (objWithPriority.Depth >= AdvancedSafetySettings.MaxDepth)
+                {
+                    Object.DestroyImmediate(obj, true);
+                    destroyedObjects++;
+                    return;
+                }
+
                 if (!AdvancedSafetySettings.AllowUiLayer && (obj.layer == 12 || obj.layer == 5))
                     obj.layer = 9;
 
