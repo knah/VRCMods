@@ -9,8 +9,8 @@ using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
-[assembly:MelonModGame("VRChat", "VRChat")]
-[assembly:MelonModInfo(typeof(SparkleBeGoneMod), "SparkleBeGone", "1.0.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonGame("VRChat", "VRChat")]
+[assembly:MelonInfo(typeof(SparkleBeGoneMod), "SparkleBeGone", "1.0.1", "knah", "https://github.com/knah/VRCMods")]
 
 namespace SparkleBeGone
 {

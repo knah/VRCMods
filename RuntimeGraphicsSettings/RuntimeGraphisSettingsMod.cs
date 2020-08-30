@@ -3,8 +3,8 @@ using RuntimeGraphicsSettings;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-[assembly:MelonModInfo(typeof(RuntimeGraphicsSettingsMod), "Runtime Graphics Settings", RuntimeGraphicsSettingsMod.ModVersion, "knah", "https://github.com/knah/VRCMods")]
-[assembly:MelonModGame] // universal
+[assembly:MelonInfo(typeof(RuntimeGraphicsSettingsMod), "Runtime Graphics Settings", RuntimeGraphicsSettingsMod.ModVersion, "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonGame] // universal
 namespace RuntimeGraphicsSettings
 {
     public class RuntimeGraphicsSettingsMod : MelonMod

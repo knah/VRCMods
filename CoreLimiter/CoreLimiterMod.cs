@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 using CoreLimiter;
 using MelonLoader;
 
-[assembly:MelonModInfo(typeof(CoreLimiterMod), "Core Limiter", "1.0", "knah", "https://github.com/knah/VRCMods")]
-[assembly:MelonModGame]
+[assembly:MelonInfo(typeof(CoreLimiterMod), "Core Limiter", "1.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonGame]
 
 namespace CoreLimiter
 {

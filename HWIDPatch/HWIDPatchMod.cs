@@ -6,8 +6,8 @@ using MelonLoader;
 using UnhollowerBaseLib;
 using UnityEngine;
 
-[assembly:MelonModInfo(typeof(HWIDPatchMod), "HWIDPatch", "1.0", "knah", "https://github.com/knah/VRCMods")]
-[assembly:MelonModGame()]
+[assembly:MelonInfo(typeof(HWIDPatchMod), "HWIDPatch", "1.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonGame()]
 
 namespace HWIDPatch
 {

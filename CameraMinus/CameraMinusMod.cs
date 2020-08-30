@@ -5,8 +5,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using VRC.UserCamera;
 
-[assembly:MelonModGame("VRChat", "VRChat")]
-[assembly:MelonModInfo(typeof(CameraMinusMod), "CameraMinus", "1.0.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonGame("VRChat", "VRChat")]
+[assembly:MelonInfo(typeof(CameraMinusMod), "CameraMinus", "1.0.0", "knah", "https://github.com/knah/VRCMods")]
 
 namespace CameraMinus
 {
