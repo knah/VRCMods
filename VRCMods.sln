@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdvancedSafety", "AdvancedS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParticleAndBoneLimiterSettings", "ParticleAndBoneLimiterSettings\ParticleAndBoneLimiterSettings.csproj", "{B728D26B-01CC-4880-B9DF-0BB141BD80AB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoSteamAtAll", "NoSteamAtAll\NoSteamAtAll.csproj", "{2BE973E0-E16C-4BAF-9266-E58304C24637}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,5 +81,9 @@ Global
 		{B728D26B-01CC-4880-B9DF-0BB141BD80AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B728D26B-01CC-4880-B9DF-0BB141BD80AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B728D26B-01CC-4880-B9DF-0BB141BD80AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BE973E0-E16C-4BAF-9266-E58304C24637}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BE973E0-E16C-4BAF-9266-E58304C24637}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BE973E0-E16C-4BAF-9266-E58304C24637}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BE973E0-E16C-4BAF-9266-E58304C24637}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -132,6 +132,11 @@
             <Private>false</Private>
             <HintPath>$(MsBuildThisFileDirectory)Libs\VRCSDKBase.dll</HintPath>
         </Reference>
+        <Reference Include="Facepunch.Steamworks.Win64, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <SpecificVersion>false</SpecificVersion>
+            <Private>false</Private>
+            <HintPath>$(MsBuildThisFileDirectory)Libs\Facepunch.Steamworks.Win64.dll</HintPath>
+        </Reference>
     </ItemGroup>
 
     <PropertyGroup>

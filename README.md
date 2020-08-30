@@ -50,6 +50,11 @@ Settings:
  * Force auto resolution - removes mirror resolution limits set by world maker. Off by default.
  * Mirror MSAA - changes MSAA specifically for mirrors. Valid values are 0 (same as main camera), 1, 2, 4 and 8. Lower MSAA may lead to "shimmering" and jaggies, especially in VR. 
 
+## NoSteamAtAll
+Makes the game unable to access Steam. At all.    
+This prevents it from getting your SteamID, which means that it won't get sent to everyone in the instance. No more assholes taking a peek at your Steam profile!    
+**This will also make you unable to log in via Steam.** Additionally, you may experience different voice quality. Nothing too bad though, it would be the same as what Oculus Store users get.
+
 ## ParticleAndBoneLimiterSettings
 This mod provides an UI for changing VRChat's built-in dynamic bone and particle limiter settings.  
 Refer to VRChat docs [for particle limiter](https://docs.vrchat.com/docs/avatar-particle-system-limits#particle-limiter-configuration-description) and [for dynamic bone limiter](https://docs.vrchat.com/docs/avatar-dynamic-bone-limits) for a detailed description of what these settings do.  
