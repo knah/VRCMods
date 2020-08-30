@@ -30,7 +30,6 @@ namespace AdvancedSafety
         {
             AdvancedSafetySettings.RegisterSettings();
 
-            XrefScanMethodDb.RegisterType<AssetManagement>();
             var matchingMethods = typeof(AssetManagement)
                 .GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly).Where(it =>
                     it.Name.StartsWith("Method_Public_Static_Object_Object_Vector3_Quaternion_Boolean_Boolean_Boolean_") && it.GetParameters().Length == 6).ToList();
@@ -111,7 +110,7 @@ namespace AdvancedSafety
             PortalHiding.OnApplicationStart();
             AvatarHiding.OnApplicationStart();
             
-            if(Main.Mods.Any(it => it.InfoAttribute.SystemType.Name == nameof(UiExpansionKitMod)))
+            if(MelonHandler.Mods.Any(it => it.Info.SystemType.Name == nameof(UiExpansionKitMod)))
             {
                 typeof(UiExpansionKitSupport).GetMethod(nameof(UiExpansionKitSupport.OnApplicationStart), BindingFlags.Static | BindingFlags.Public)!.Invoke(null, new object[0]);
             }
@@ -229,7 +228,7 @@ namespace AdvancedSafety
                     ourBfsQueue.Enqueue(new GameObjectWithPriorityData(child.Cast<Transform>().gameObject, objWithPriority.Depth + 1));
             }
             
-            Bfs(new GameObjectWithPriorityData(go, 0));;
+            Bfs(new GameObjectWithPriorityData(go, 0));
             while (ourBfsQueue.Count > 0) 
                 Bfs(ourBfsQueue.Dequeue());
 
