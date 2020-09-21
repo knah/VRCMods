@@ -10,22 +10,24 @@ using MelonLoader;
 using UIExpansionKit;
 using UnhollowerBaseLib;
 using UnhollowerBaseLib.Runtime;
-using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
 using UnityEngine.Animations;
 using VRC.Core;
 using AMEnumA = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObVRAc1GaApAcObBoUnique;
 using AMEnumB = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObGaVRApBoBoObBoObUnique;
+using AMEnumC = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObVRAc1GaApAcObObUnique;
 using Object = UnityEngine.Object;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.2.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.2.1", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
 namespace AdvancedSafety
 {
     public class AdvancedSafetyMod : MelonMod
     {
+        private static List<object> ourPinnedDelegates = new List<object>();
+        
         public override void OnApplicationStart()
         {
             AdvancedSafetySettings.RegisterSettings();
@@ -34,40 +36,23 @@ namespace AdvancedSafety
                 .GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly).Where(it =>
                     it.Name.StartsWith("Method_Public_Static_Object_Object_Vector3_Quaternion_Boolean_Boolean_Boolean_") && it.GetParameters().Length == 6).ToList();
 
-            MethodBase patchTarget = null;
-            foreach (var methodInfo in typeof(AssetManagement).GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly))
-            {
-                foreach (var it in XrefScanner.XrefScan(methodInfo))
-                {
-                    if (it.Type != XrefType.Method) continue;
-                    var methodBase = it.TryResolve();
-                    if (methodBase == null) continue;
-                    if (matchingMethods.Contains(methodBase))
-                    {
-                        patchTarget = methodBase;
-                        goto haveTarget;
-                    }
-                }
-            }
-            
-            haveTarget:
-            if (patchTarget != null)
+            foreach (var matchingMethod in matchingMethods)
             {
                 unsafe
                 {
-                    var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(patchTarget).GetValue(null);
+                    var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(matchingMethod).GetValue(null);
 
-                    Imports.Hook((IntPtr) (&originalMethodPointer),
-                        typeof(AdvancedSafetyMod).GetMethod(nameof(ObjectInstantiatePatch),
-                            BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
+                    ObjectInstantiateDelegate originalInstantiateDelegate = null;
 
-                    ourOriginalInstantiate =
-                        Marshal.GetDelegateForFunctionPointer<ObjectInstantiateDelegate>(originalMethodPointer);
+                    ObjectInstantiateDelegate replacement = (assetPtr, pos, rot, allowCustomShaders, isUI, validate) =>
+                        ObjectInstantiatePatch(assetPtr, pos, rot, allowCustomShaders, isUI, validate, originalInstantiateDelegate);
+
+                    ourPinnedDelegates.Add(replacement);
+
+                    Imports.Hook((IntPtr) (&originalMethodPointer), Marshal.GetFunctionPointerForDelegate(replacement));
+
+                    originalInstantiateDelegate = Marshal.GetDelegateForFunctionPointer<ObjectInstantiateDelegate>(originalMethodPointer);
                 }
-            }
-            else
-            {
-                MelonLogger.LogError("Patch target for object instantiation not found, avatar filtering will not work");
             }
             
             unsafe
@@ -92,6 +77,18 @@ namespace AdvancedSafety
                 Imports.Hook((IntPtr)(&originalMethodPointer), typeof(AdvancedSafetyMod).GetMethod(nameof(MoveNextPatchB), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
 
                 ourMoveNextB = originalMethodPointer;
+            }
+            
+            unsafe
+            {
+                var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils
+                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(AMEnumC).GetMethod(
+                        nameof(AMEnumC.MoveNext)))
+                    .GetValue(null);
+                
+                Imports.Hook((IntPtr)(&originalMethodPointer), typeof(AdvancedSafetyMod).GetMethod(nameof(MoveNextPatchC), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
+
+                ourMoveNextC = originalMethodPointer;
             }
 
             unsafe
@@ -124,9 +121,9 @@ namespace AdvancedSafety
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr ObjectInstantiateDelegate(IntPtr assetPtr, Vector3 pos, Quaternion rot, byte allowCustomShaders, byte isUI, byte validate);
 
-        private static ObjectInstantiateDelegate ourOriginalInstantiate;
         private static IntPtr ourMoveNextA;
         private static IntPtr ourMoveNextB;
+        private static IntPtr ourMoveNextC;
 
         private static IntPtr ourInvokeMethodInfo;
 
@@ -287,25 +284,40 @@ namespace AdvancedSafety
             }
         }
 
-        private static IntPtr ObjectInstantiatePatch(IntPtr assetPtr, Vector3 pos, Quaternion rot, byte allowCustomShaders, byte isUI, byte validate)
+        private static bool MoveNextPatchC(IntPtr thisPtr)
         {
-            if (AvatarManagerCookie.CurrentManager == null || assetPtr == IntPtr.Zero) 
-                return ourOriginalInstantiate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
+            try
+            {
+                using (new AvatarManagerCookie(new AMEnumC(thisPtr).field_Public_VRCAvatarManager_0))
+                    return SafeInvokeMoveNext(ourMoveNextC, thisPtr);
+            }
+            catch (Exception ex)
+            {
+                MelonLogger.LogError($"Error when wrapping avatar creation: {ex}");
+                return false;
+            }
+        }
+
+        private static IntPtr ObjectInstantiatePatch(IntPtr assetPtr, Vector3 pos, Quaternion rot,
+            byte allowCustomShaders, byte isUI, byte validate, ObjectInstantiateDelegate originalInstantiateDelegate)
+        {
+            if (AvatarManagerCookie.CurrentManager == null || assetPtr == IntPtr.Zero)
+                return originalInstantiateDelegate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
 
             var avatarManager = AvatarManagerCookie.CurrentManager;
             var vrcPlayer = avatarManager.field_Private_VRCPlayer_0;
-            if (vrcPlayer == null) return ourOriginalInstantiate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
+            if (vrcPlayer == null) return originalInstantiateDelegate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
 
             if (vrcPlayer == VRCPlayer.field_Internal_Static_VRCPlayer_0) // never apply to self
-                return ourOriginalInstantiate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
+                return originalInstantiateDelegate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
 
             var go = new Object(assetPtr).TryCast<GameObject>();
             if (go == null)
-                return ourOriginalInstantiate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
+                return originalInstantiateDelegate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
 
             var wasActive = go.activeSelf;
             go.SetActive(false);
-            var result = ourOriginalInstantiate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
+            var result = originalInstantiateDelegate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
             go.SetActive(wasActive);
             if (result == IntPtr.Zero) return result;
             var instantiated = new GameObject(result);
