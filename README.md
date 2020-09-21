@@ -37,6 +37,12 @@ Current features:
  - Toggleable per instance type (public/friends/private)
  - Can be set to highlight friends or show only friends
  
+## LocalPlayerPrefs
+This mod moves game settings storage from Windows registry to UserData folder.  
+This can make using multiple accounts easier by having separate installs for them.  
+Do note that some settings will stay in registry (the ones that Unity itself uses as opposed to game code).  
+There's also no import from registry, so expect to have to log in again after installing this mod. 
+ 
 ## MirrorResolutionUnlimiter
 Headset and display resolutions increase each year, and yet VRChat limits mirror resolution to 2048 pixels per eye. With this mod, that's not the case anymore!  
 Set whatever limit you want, with an option to un-potatoify mirrors that world makers set to potato resolution for their insane reasons. Or you can make all mirrors blurry as a sacrifice to performance gods. It's up to you, really.
