@@ -21,7 +21,8 @@ namespace CameraMinus
             
             ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.CameraQuickMenu, "Zoom in", ZoomIn);
             ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.CameraQuickMenu, "Zoom out", ZoomOut);
-            
+            ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.CameraQuickMenu, "Zoom Reset", ZoomReset);
+
             ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.CameraQuickMenu, "Enlarge camera", Enlarge);
             ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.CameraQuickMenu, "Shrink camera", Shrink);
         }
@@ -30,18 +31,14 @@ namespace CameraMinus
         {
             var cameraController = UserCameraController.field_Internal_Static_UserCameraController_0;
             if (cameraController == null) return;
-            var oldPosition = cameraController.photoCamera.transform.position;
-            cameraController.transform.localScale *= 1.5f;
-            cameraController.photoCamera.transform.position = oldPosition;
+            cameraController.viewFinder.transform.localScale *= 1.5f;
         }
         
         private void Shrink()
         {
             var cameraController = UserCameraController.field_Internal_Static_UserCameraController_0;
             if (cameraController == null) return;
-            var oldPosition = cameraController.photoCamera.transform.position;
-            cameraController.transform.localScale /= 1.5f;
-            cameraController.photoCamera.transform.position = oldPosition;
+            cameraController.viewFinder.transform.localScale /= 1.5f;
         }
 
         private void SetToggleLensButton(GameObject obj)
@@ -79,6 +76,14 @@ namespace CameraMinus
             foreach (var camera in cameraController.GetComponentsInChildren<Camera>())
                 if (camera.fieldOfView < 170)
                     camera.fieldOfView += 10;
+        }
+
+        private void ZoomReset()
+        {
+            var cameraController = UserCameraController.field_Internal_Static_UserCameraController_0;
+            if (cameraController == null) return;
+            foreach (var camera in cameraController.GetComponentsInChildren<Camera>())
+                camera.fieldOfView = 60;
         }
     }
 }
