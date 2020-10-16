@@ -29,6 +29,10 @@ This mod adds page buttons to emoji menu that allow faster switching.
 Requires UIExpansionKit.  
 ![emoji page buttons screenshot](https://imgur.com/gIq2vKw.png)
 
+## Finitizer
+This mod fixes a set of issues arising from invalid floating point values being accepted from remote users.  
+**It might have a minor impact on performance that scales with player and pickup count**. Only use this mod if you frequent publics.
+
 ## JoinNotifier
 A VRChat mod to notify you when someone joins the instance you're in
 

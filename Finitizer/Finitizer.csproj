@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net472</TargetFramework>
+        <VrcReferences>true</VrcReferences>
+        <Version>1.0.0.0</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+</Project>

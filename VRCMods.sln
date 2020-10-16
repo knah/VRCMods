@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoSteamAtAll", "NoSteamAtAl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LocalPlayerPrefs", "LocalPlayerPrefs\LocalPlayerPrefs.csproj", "{0DF69680-B5E0-4E1F-A047-634160E0E0E8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Finitizer", "Finitizer\Finitizer.csproj", "{C79764DC-E140-4E43-8BF8-BB8369AB14E5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,5 +93,9 @@ Global
 		{0DF69680-B5E0-4E1F-A047-634160E0E0E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DF69680-B5E0-4E1F-A047-634160E0E0E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0DF69680-B5E0-4E1F-A047-634160E0E0E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C79764DC-E140-4E43-8BF8-BB8369AB14E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C79764DC-E140-4E43-8BF8-BB8369AB14E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C79764DC-E140-4E43-8BF8-BB8369AB14E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C79764DC-E140-4E43-8BF8-BB8369AB14E5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
