@@ -4,7 +4,7 @@
         <VrcReferences>true</VrcReferences>
         <LangVersion>latest</LangVersion>
         <UseAltLibs>true</UseAltLibs>
-        <AssemblyVersion>0.1.4.0</AssemblyVersion>
+        <AssemblyVersion>0.1.5.0</AssemblyVersion>
     </PropertyGroup>
     <ItemGroup>
         <EmbeddedResource Include="modui.assetbundle" />

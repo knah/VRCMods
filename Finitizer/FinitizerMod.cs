@@ -9,7 +9,7 @@ using UnhollowerBaseLib;
 using UnityEngine;
 using PhotonSerializers = ObjectPublicAbstractSealedSiDiSi2ObSiObSiSiSiUnique;
 
-[assembly:MelonInfo(typeof(FinitizerMod), "Finitizer", "1.0.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(FinitizerMod), "Finitizer", "1.0.1", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace Finitizer
@@ -23,7 +23,7 @@ namespace Finitizer
 
         public IEnumerator InitThings()
         {
-            while (VRCUiManager.field_Protected_Static_VRCUiManager_0 == null)
+            while (VRCUiManager.prop_VRCUiManager_0 == null)
                 yield return null;
 
             ApplyPatches();

@@ -11,13 +11,15 @@ using UnityEngine.UI;
 using VRCSDK2;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.1.4", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.1.5", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace UIExpansionKit
 {
     public class UiExpansionKitMod : MelonMod
     {
+        internal static UiExpansionKitMod Instance;
+        
         private PreloadedBundleContents myStuffBundle;
 
         private GameObject myModSettingsExpando;
@@ -49,9 +51,13 @@ namespace UIExpansionKit
         private readonly Dictionary<ExpandedMenu, GameObject> myMenuRoots = new Dictionary<ExpandedMenu, GameObject>();
         private readonly List<(GameObject from, GameObject to)> myVisibilityTransfers = new List<(GameObject from, GameObject to)>();
         private readonly Dictionary<GameObject, bool> myHasContents = new Dictionary<GameObject, bool>();
+
+        public PreloadedBundleContents StuffBundle => myStuffBundle;
         
         public override void OnApplicationStart()
         {
+            Instance = this;
+            
             ExpansionKitSettings.RegisterSettings();
             MelonCoroutines.Start(InitThings());
         }
@@ -75,7 +81,7 @@ namespace UIExpansionKit
 
         private IEnumerator InitThings()
         {
-            while (VRCUiManager.field_Protected_Static_VRCUiManager_0 == null)
+            while (VRCUiManager.prop_VRCUiManager_0 == null)
                 yield return null;
 
             while (QuickMenu.prop_QuickMenu_0 == null)
@@ -126,7 +132,7 @@ namespace UIExpansionKit
             var quickMenuRoot = QuickMenu.prop_QuickMenu_0.gameObject;
             
             var fullMenuExpandoPrefab = myStuffBundle.BigMenuExpando;
-            var fullMenuRoot = VRCUiManager.field_Protected_Static_VRCUiManager_0.menuContent;
+            var fullMenuRoot = VRCUiManager.prop_VRCUiManager_0.menuContent;
             
             foreach (var valueTuple in GameObjectToCategoryList)
             {
@@ -221,7 +227,7 @@ namespace UIExpansionKit
 
         private void DecorateFullMenu()
         {
-            var fullMenuRoot = VRCUiManager.field_Protected_Static_VRCUiManager_0.menuContent;
+            var fullMenuRoot = VRCUiManager.prop_VRCUiManager_0.menuContent;
 
             var settingsExpandoPrefab = myStuffBundle.SettingsMenuExpando;
             myModSettingsExpando = Object.Instantiate(settingsExpandoPrefab, fullMenuRoot.transform, false);

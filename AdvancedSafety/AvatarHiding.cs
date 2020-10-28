@@ -60,7 +60,7 @@ namespace AdvancedSafety
             {
                 var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils
                     .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(FeaturePermissionManager).GetMethod(
-                        nameof(FeaturePermissionManager.Method_Public_Boolean_String_byref_EnumPublicSealedva5vUnique_0)))
+                        nameof(FeaturePermissionManager.Method_Public_Boolean_APIUser_byref_EnumPublicSealedva5vUnique_0)))
                     .GetValue(null);
 
                 Imports.Hook((IntPtr)(&originalMethodPointer), typeof(AvatarHiding).GetMethod(nameof(CanUseCustomAvatarPatch), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
@@ -84,9 +84,9 @@ namespace AdvancedSafety
                 return ourSwitchAvatar(thisPtr, apiAvatarPtr, someString, someFloat, someDelegate);
         }
 
-        private static bool CanUseCustomAvatarPatch(IntPtr thisPtr, IntPtr userIdPtr, ref int denyReason)
+        private static bool CanUseCustomAvatarPatch(IntPtr thisPtr, IntPtr apiUserPtr, ref int denyReason)
         {
-            var result = ourCanUseCustomAvatarDelegate(thisPtr, userIdPtr, ref denyReason);
+            var result = ourCanUseCustomAvatarDelegate(thisPtr, apiUserPtr, ref denyReason);
             try
             {
                 if (!SwitchAvatarCookie.ourInSwitch || SwitchAvatarCookie.ourApiAvatar == null)

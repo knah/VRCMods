@@ -24,7 +24,7 @@ namespace AdvancedSafety
 
             myTimeAccumulator = 0;
             
-            var player = myQuickMenu.field_Private_VRCPlayer_0;
+            var player = myQuickMenu.field_Private_Player_0.prop_VRCPlayer_0;
             if (player == null) return;
 
             UiExpansionKitSupport.QuickMenuUpdateTick(player);

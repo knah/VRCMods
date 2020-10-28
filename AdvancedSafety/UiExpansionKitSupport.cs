@@ -29,7 +29,7 @@ namespace AdvancedSafety
 
         private static void OnHideAvatarClick()
         {
-            var apiAvatar = QuickMenu.prop_QuickMenu_0.field_Private_VRCPlayer_0?.prop_VRCAvatarManager_0?.prop_ApiAvatar_0;
+            var apiAvatar = QuickMenu.prop_QuickMenu_0.field_Private_Player_0?.prop_VRCPlayer_0?.prop_VRCAvatarManager_0?.prop_ApiAvatar_0;
             if (apiAvatar == null) return;
 
             if (AvatarHiding.ourBlockedAvatars.ContainsKey(apiAvatar.id))
@@ -71,7 +71,7 @@ namespace AdvancedSafety
             while (VRCUiManager.prop_VRCUiManager_0 == null || QuickMenu.prop_QuickMenu_0 == null)
                 yield return null;
 
-            VRCUiManager.field_Protected_Static_VRCUiManager_0.Method_Public_add_Void_Action_1_VRCUiPage_0(new Action<VRCUiPage>(OnPageShown));
+            VRCUiManager.prop_VRCUiManager_0.Method_Internal_add_Void_Action_1_VRCUiPage_0(new Action<VRCUiPage>(OnPageShown));
         }
 
         private static void OnPageShown(VRCUiPage obj)

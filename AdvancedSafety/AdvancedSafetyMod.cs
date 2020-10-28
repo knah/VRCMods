@@ -18,8 +18,10 @@ using AMEnumB = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumerat
 using AMEnumC = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObVRAc1GaApAcObObUnique;
 using Object = UnityEngine.Object;
 
+using ModerationManager = ObjectPublicObLi1ApSiLi1ApBoSiUnique;
+
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.2.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.2.2", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
 namespace AdvancedSafety
@@ -143,7 +145,7 @@ namespace AdvancedSafety
                 return;
             
             if (AdvancedSafetySettings.AvatarFilteringOnlyInPublic &&
-                RoomManagerBase.field_Internal_Static_ApiWorldInstance_0?.InstanceType != ApiWorldInstance.AccessType.Public)
+                RoomManager.field_Internal_Static_ApiWorldInstance_0?.InstanceType != ApiWorldInstance.AccessType.Public)
                 return;
             
             var vrcPlayer = avatarManager.field_Private_VRCPlayer_0;
@@ -335,13 +337,7 @@ namespace AdvancedSafety
 
         internal static bool IsAvatarExplicitlyShown(string userId)
         {
-            foreach (var playerModeration in ModerationManager.prop_ModerationManager_0.field_Private_List_1_ApiPlayerModeration_0)
-            {
-                if (playerModeration.moderationType == ApiPlayerModeration.ModerationType.ShowAvatar && playerModeration.targetUserId == userId)
-                    return true;
-            }
-            
-            foreach (var playerModeration in ModerationManager.prop_ModerationManager_0.field_Private_List_1_ApiPlayerModeration_1)
+            foreach (var playerModeration in ModerationManager.prop_ObjectPublicObLi1ApSiLi1ApBoSiUnique_0.field_Private_List_1_ApiPlayerModeration_0)
             {
                 if (playerModeration.moderationType == ApiPlayerModeration.ModerationType.ShowAvatar && playerModeration.targetUserId == userId)
                     return true;
