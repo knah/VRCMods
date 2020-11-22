@@ -10,6 +10,8 @@ namespace UIExpansionKit
         private const string PinnedPrefs = "PinnedPrefs";
         private const string QmExpandoStartsCollapsed = "QmExpandoStartsCollapsed";
         private const string CategoriesStartCollapsed = "CategoriesStartCollapsed";
+        private const string QmExpandoMinRows = "QmExpandoMinRows";
+        private const string QmExpandoMaxRows = "QmExpandoMaxRows";
 
         internal static void RegisterSettings()
         {
@@ -19,10 +21,23 @@ namespace UIExpansionKit
             
             MelonPrefs.RegisterBool(KitCategory, QmExpandoStartsCollapsed, false, "Quick Menu extra panel starts hidden");
             MelonPrefs.RegisterBool(KitCategory, CategoriesStartCollapsed, false, "Settings categories start collapsed");
+            
+            MelonPrefs.RegisterInt(KitCategory, QmExpandoMinRows, 1, "Minimum rows in Quick Menu extra panel");
+            MelonPrefs.RegisterInt(KitCategory, QmExpandoMaxRows, 3, "Maximum rows in Quick Menu extra panel");
         }
 
         public static bool IsQmExpandoStartsCollapsed() => MelonPrefs.GetBool(KitCategory, QmExpandoStartsCollapsed);
         public static bool IsCategoriesStartCollapsed() => MelonPrefs.GetBool(KitCategory, CategoriesStartCollapsed);
+
+        public static int ClampQuickMenuExpandoRowCount(int targetCount)
+        {
+            var min = MelonPrefs.GetInt(KitCategory, QmExpandoMinRows);
+            var max = MelonPrefs.GetInt(KitCategory, QmExpandoMaxRows);
+
+            if (targetCount < min) return min;
+            if (targetCount > max) return max;
+            return targetCount;
+        }
 
         public static void PinPref(string category, string prefName)
         {

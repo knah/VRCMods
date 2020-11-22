@@ -75,6 +75,9 @@ namespace UIExpansionKit.API
         /// </summary>
         ModerationQuickMenu,
         
+        /// <summary>
+        /// Avatar stats Quick Menu page
+        /// </summary>
         AvatarStatsQuickMenu,
     }
 }

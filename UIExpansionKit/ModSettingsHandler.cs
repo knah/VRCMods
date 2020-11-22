@@ -29,6 +29,7 @@ namespace UIExpansionKit
             var categoryPrefab = ourStuffBundle.SettingsCategory;
             var boolPrefab = ourStuffBundle.SettingsBool;
             var textPrefab = ourStuffBundle.SettingsText;
+            var comboBoxPrefab = ourStuffBundle.SettingsComboBox;
 
             settingsContentRoot.DestroyChildren();
 
@@ -82,20 +83,50 @@ namespace UIExpansionKit
                     {
                         case MelonPrefs.MelonPreferenceType.STRING:
                         {
-                            var textSetting = Object.Instantiate(textPrefab, categoryUiContent, false);
-                            textSetting.GetComponentInChildren<Text>().text = prefDesc.DisplayText ?? prefId;
-                            var textField = textSetting.GetComponentInChildren<InputField>();
-                            textField.text = MelonPrefs.GetString(categoryId, prefId);
-                            textField.onValueChanged.AddListener(new Action<string>(value =>
+                            if (ExpansionKitApi.EnumSettings.TryGetValue((categoryId, prefId), out var enumValues))
                             {
-                                prefDesc.ValueEdited = value;
-                            }));
-                            textSetting.GetComponentInChildren<Button>().onClick.AddListener(new Action(() =>
+                                var comboSetting = Object.Instantiate(comboBoxPrefab, categoryUiContent, false);
+                                comboSetting.GetComponentInChildren<Text>().text = prefDesc.DisplayText ?? prefId;
+                                var dropdown = comboSetting.GetComponentInChildren<Dropdown>();
+                                var options = new Il2CppSystem.Collections.Generic.List<Dropdown.OptionData>();
+                                var currentValue = MelonPrefs.GetString(categoryId, prefId);
+                                var selectedIndex = enumValues.Count;
+                                for (var i = 0; i < enumValues.Count; i++)
+                                {
+                                    var valueTuple = enumValues[i];
+                                    options.Add(new Dropdown.OptionData(valueTuple.DisplayName));
+                                    if (currentValue == valueTuple.SettingsValue)
+                                        selectedIndex = i;
+                                }
+                                if (enumValues.All(it => it.SettingsValue != currentValue)) 
+                                    options.Add(new Dropdown.OptionData(currentValue));
+                                dropdown.options = options;
+                                dropdown.value = selectedIndex;
+                                dropdown.onValueChanged.AddListener(new Action<int>(value =>
+                                {
+                                    prefDesc.ValueEdited = value >= enumValues.Count
+                                        ? currentValue
+                                        : enumValues[value].SettingsValue;
+                                }));
+                            }
+                            else
                             {
-                                BuiltinUiUtils.ShowInputPopup(prefDesc.DisplayText ?? prefId, textField.text,
-                                    InputField.InputType.Standard, false, "Done", 
-                                    (result, _, __) => prefDesc.ValueEdited = textField.text = result);
-                            }));
+                                var textSetting = Object.Instantiate(textPrefab, categoryUiContent, false);
+                                textSetting.GetComponentInChildren<Text>().text = prefDesc.DisplayText ?? prefId;
+                                var textField = textSetting.GetComponentInChildren<InputField>();
+                                textField.text = MelonPrefs.GetString(categoryId, prefId);
+                                textField.onValueChanged.AddListener(new Action<string>(value =>
+                                {
+                                    prefDesc.ValueEdited = value;
+                                }));
+                                textSetting.GetComponentInChildren<Button>().onClick.AddListener(new Action(() =>
+                                {
+                                    BuiltinUiUtils.ShowInputPopup(prefDesc.DisplayText ?? prefId, textField.text,
+                                        InputField.InputType.Standard, false, "Done",
+                                        (result, _, __) => prefDesc.ValueEdited = textField.text = result);
+                                }));
+                            }
+
                             break;
                         }
                         case MelonPrefs.MelonPreferenceType.BOOL:
