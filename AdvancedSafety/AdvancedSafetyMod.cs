@@ -21,7 +21,7 @@ using Object = UnityEngine.Object;
 using ModerationManager = ObjectPublicObLi1ApSiLi1ApBoSiUnique;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.2.2", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.2.3", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
 namespace AdvancedSafety
@@ -46,8 +46,8 @@ namespace AdvancedSafety
 
                     ObjectInstantiateDelegate originalInstantiateDelegate = null;
 
-                    ObjectInstantiateDelegate replacement = (assetPtr, pos, rot, allowCustomShaders, isUI, validate) =>
-                        ObjectInstantiatePatch(assetPtr, pos, rot, allowCustomShaders, isUI, validate, originalInstantiateDelegate);
+                    ObjectInstantiateDelegate replacement = (assetPtr, pos, rot, allowCustomShaders, isUI, validate, nativeMethodPointer) =>
+                        ObjectInstantiatePatch(assetPtr, pos, rot, allowCustomShaders, isUI, validate, nativeMethodPointer, originalInstantiateDelegate);
 
                     ourPinnedDelegates.Add(replacement);
 
@@ -121,7 +121,7 @@ namespace AdvancedSafety
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate IntPtr ObjectInstantiateDelegate(IntPtr assetPtr, Vector3 pos, Quaternion rot, byte allowCustomShaders, byte isUI, byte validate);
+        private delegate IntPtr ObjectInstantiateDelegate(IntPtr assetPtr, Vector3 pos, Quaternion rot, byte allowCustomShaders, byte isUI, byte validate, IntPtr nativeMethodPointer);
 
         private static IntPtr ourMoveNextA;
         private static IntPtr ourMoveNextB;
@@ -265,6 +265,12 @@ namespace AdvancedSafety
                 using (new AvatarManagerCookie(new AMEnumA(thisPtr).field_Public_VRCAvatarManager_0))
                     return SafeInvokeMoveNext(ourMoveNextA, thisPtr);
             }
+            catch (Il2CppException ex)
+            {
+                if (Imports.IsDebugMode())
+                    MelonLogger.Log($"Caught top-level native exception: {ex}");
+                return false;
+            }
             catch (Exception ex)
             {
                 MelonLogger.LogError($"Error when wrapping avatar creation: {ex}");
@@ -278,6 +284,12 @@ namespace AdvancedSafety
             {
                 using (new AvatarManagerCookie(new AMEnumB(thisPtr).field_Public_VRCAvatarManager_0))
                     return SafeInvokeMoveNext(ourMoveNextB, thisPtr);
+            }
+            catch (Il2CppException ex)
+            {
+                if (Imports.IsDebugMode())
+                    MelonLogger.Log($"Caught top-level native exception: {ex}");
+                return false;
             }
             catch (Exception ex)
             {
@@ -293,6 +305,12 @@ namespace AdvancedSafety
                 using (new AvatarManagerCookie(new AMEnumC(thisPtr).field_Public_VRCAvatarManager_0))
                     return SafeInvokeMoveNext(ourMoveNextC, thisPtr);
             }
+            catch (Il2CppException ex)
+            {
+                if (Imports.IsDebugMode())
+                    MelonLogger.Log($"Caught top-level native exception: {ex}");
+                return false;
+            }
             catch (Exception ex)
             {
                 MelonLogger.LogError($"Error when wrapping avatar creation: {ex}");
@@ -301,25 +319,25 @@ namespace AdvancedSafety
         }
 
         private static IntPtr ObjectInstantiatePatch(IntPtr assetPtr, Vector3 pos, Quaternion rot,
-            byte allowCustomShaders, byte isUI, byte validate, ObjectInstantiateDelegate originalInstantiateDelegate)
+            byte allowCustomShaders, byte isUI, byte validate, IntPtr nativeMethodPointer, ObjectInstantiateDelegate originalInstantiateDelegate)
         {
             if (AvatarManagerCookie.CurrentManager == null || assetPtr == IntPtr.Zero)
-                return originalInstantiateDelegate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
+                return originalInstantiateDelegate(assetPtr, pos, rot, allowCustomShaders, isUI, validate, nativeMethodPointer);
 
             var avatarManager = AvatarManagerCookie.CurrentManager;
             var vrcPlayer = avatarManager.field_Private_VRCPlayer_0;
-            if (vrcPlayer == null) return originalInstantiateDelegate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
+            if (vrcPlayer == null) return originalInstantiateDelegate(assetPtr, pos, rot, allowCustomShaders, isUI, validate, nativeMethodPointer);
 
             if (vrcPlayer == VRCPlayer.field_Internal_Static_VRCPlayer_0) // never apply to self
-                return originalInstantiateDelegate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
+                return originalInstantiateDelegate(assetPtr, pos, rot, allowCustomShaders, isUI, validate, nativeMethodPointer);
 
             var go = new Object(assetPtr).TryCast<GameObject>();
             if (go == null)
-                return originalInstantiateDelegate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
+                return originalInstantiateDelegate(assetPtr, pos, rot, allowCustomShaders, isUI, validate, nativeMethodPointer);
 
             var wasActive = go.activeSelf;
             go.SetActive(false);
-            var result = originalInstantiateDelegate(assetPtr, pos, rot, allowCustomShaders, isUI, validate);
+            var result = originalInstantiateDelegate(assetPtr, pos, rot, allowCustomShaders, isUI, validate, nativeMethodPointer);
             go.SetActive(wasActive);
             if (result == IntPtr.Zero) return result;
             var instantiated = new GameObject(result);

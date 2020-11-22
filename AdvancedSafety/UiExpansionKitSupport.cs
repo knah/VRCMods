@@ -19,10 +19,10 @@ namespace AdvancedSafety
         {
             ClassInjector.RegisterTypeInIl2Cpp<QuickMenuHideAvatarButtonHandler>();
             
-            ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.UserDetailsMenu, "Hide all avatars by this author", OnHideBigClick, ConsumeHideBigInstance);
-            ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.UserQuickMenu, "Hide this avatar (on anyone)", OnHideAvatarClick, ConsumeOnHideAvatar);
+            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.UserDetailsMenu).AddSimpleButton("Hide all avatars by this author", OnHideBigClick, ConsumeHideBigInstance);
+            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.UserQuickMenu).AddSimpleButton("Hide this avatar (on anyone)", OnHideAvatarClick, ConsumeOnHideAvatar);
             
-            ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.SettingsMenu, "Reload all avatars", ReloadAllAvatars);
+            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.SettingsMenu).AddSimpleButton("Reload all avatars", ReloadAllAvatars);
 
             MelonCoroutines.Start(InitThings());
         }

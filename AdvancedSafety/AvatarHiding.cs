@@ -70,7 +70,7 @@ namespace AdvancedSafety
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool SwitchAvatarDelegate(IntPtr thisPtr, IntPtr apiAvatarPtr, IntPtr someString, float someFloat, IntPtr someDelegate);
+        private delegate bool SwitchAvatarDelegate(IntPtr thisPtr, IntPtr apiAvatarPtr, IntPtr someString, float someFloat, IntPtr someDelegate, IntPtr nativeMethodInfo);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate bool CanUseCustomAvatarDelegate(IntPtr thisPtr, IntPtr userId, ref int denyReason);
@@ -78,10 +78,10 @@ namespace AdvancedSafety
         private static SwitchAvatarDelegate ourSwitchAvatar;
         private static CanUseCustomAvatarDelegate ourCanUseCustomAvatarDelegate;
         
-        private static bool SwitchAvatarPatch(IntPtr thisPtr, IntPtr apiAvatarPtr, IntPtr someString, float someFloat, IntPtr someDelegate)
+        private static bool SwitchAvatarPatch(IntPtr thisPtr, IntPtr apiAvatarPtr, IntPtr someString, float someFloat, IntPtr someDelegate, IntPtr nativeMethodInfo)
         {
             using (new SwitchAvatarCookie(new VRCAvatarManager(thisPtr), apiAvatarPtr == IntPtr.Zero ? null : new ApiAvatar(apiAvatarPtr)))
-                return ourSwitchAvatar(thisPtr, apiAvatarPtr, someString, someFloat, someDelegate);
+                return ourSwitchAvatar(thisPtr, apiAvatarPtr, someString, someFloat, someDelegate, nativeMethodInfo);
         }
 
         private static bool CanUseCustomAvatarPatch(IntPtr thisPtr, IntPtr apiUserPtr, ref int denyReason)
