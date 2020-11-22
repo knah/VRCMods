@@ -36,7 +36,7 @@ namespace ParticleAndBoneLimiterSettings
         {
             var field = typeof(UiExpansionKitMod).GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
                 .Single(it => it.FieldType == typeof(PreloadedBundleContents));
-            var mod = Main.Mods.Single(it => it is UiExpansionKitMod);
+            var mod = MelonHandler.Mods.Single(it => it is UiExpansionKitMod);
 
             while (field.GetValue(mod) == null)
                 yield return null;
