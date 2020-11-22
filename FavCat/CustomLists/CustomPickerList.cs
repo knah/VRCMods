@@ -194,12 +194,16 @@ namespace FavCat.CustomLists
                 return;
             }
 
-            var currentViewportStart = (int) (myContentScrollRect.horizontalNormalizedPosition * (myModels.Count - myDisplayedRows * myColumns + myDisplayedRows - 1) / myDisplayedRows - 1);
+            var clampedNormalizedPosition = Mathf.Clamp01(myContentScrollRect.horizontalNormalizedPosition);
+            var currentViewportStart = (int) (clampedNormalizedPosition * (myModels.Count - myDisplayedRows * myColumns + myDisplayedRows - 1) / myDisplayedRows - 1);
             if (currentViewportStart < 0) currentViewportStart = 0;
 
             var currentViewportEnd = currentViewportStart + myColumns + 2;
 
-            myCountText.text = $"{currentViewportStart * myDisplayedRows} / {myModels.Count}";
+            if (myModels.Count <= myDisplayedRows * myColumns)
+                myCountText.text = myModels.Count.ToString();
+            else
+                myCountText.text = $"{(int) (clampedNormalizedPosition * myModels.Count + 0.5f)} / {myModels.Count}";
 
             var pickersToRecycle = myPickersByCoordinate
                 .Where(it => it.Key.X < currentViewportStart || it.Key.X > currentViewportEnd).ToList();

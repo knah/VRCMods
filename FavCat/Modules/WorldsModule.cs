@@ -101,37 +101,34 @@ namespace FavCat.Modules
         }
 
         protected override bool FavButtonsOnLists => false;
-        protected override void SortModelList(string sortCriteria, string category, List<StoredWorld> list)
+        protected override void SortModelList(string sortCriteria, string category, List<(StoredFavorite?, StoredWorld)> avatars)
         {
             var inverted = sortCriteria.Length > 0 && sortCriteria[0] == '!';
-            Comparison<StoredWorld> comparison;
+            Comparison<(StoredFavorite? Fav, StoredWorld Model)> comparison;
             switch (sortCriteria)
             {
                 case "name":
                 case "!name":
                 default:
-                    comparison = (a, b) => string.Compare(a.Name, b.Name, StringComparison.InvariantCultureIgnoreCase) * (inverted ? -1 : 1); 
+                    comparison = (a, b) => string.Compare(a.Model.Name, b.Model.Name, StringComparison.InvariantCultureIgnoreCase) * (inverted ? -1 : 1); 
                     break;
                 case "updated":
                 case "!updated":
-                    comparison = (a, b) => a.UpdatedAt.CompareTo(b.UpdatedAt) * (inverted ? -1 : 1);
+                    comparison = (a, b) => a.Model.UpdatedAt.CompareTo(b.Model.UpdatedAt) * (inverted ? -1 : 1);
                     break;
                 case "created":
                 case "!created":
-                    comparison = (a, b) => a.CreatedAt.CompareTo(b.CreatedAt) * (inverted ? -1 : 1);
+                    comparison = (a, b) => a.Model.CreatedAt.CompareTo(b.Model.CreatedAt) * (inverted ? -1 : 1);
                     break;
                 case "added":
                 case "!added":
-                    comparison = (a, b) => Favorites.GetFavoritedTime(a.WorldId, category).CompareTo(Favorites.GetFavoritedTime(b.WorldId, category)) * (inverted ? -1 : 1);
+                    comparison = (a, b) => (a.Fav?.AddedOn ?? DateTime.MinValue).CompareTo(b.Fav?.AddedOn ?? DateTime.MinValue) * (inverted ? -1 : 1);
                     break;
             }
-            list.Sort(comparison);
+            avatars.Sort(comparison);
         }
 
-        protected override IPickerElement WrapModel(StoredWorld model)
-        {
-            return new DbWorldAdapter(model);
-        }
+        protected override IPickerElement WrapModel(StoredFavorite? favorite, StoredWorld model) => new DbWorldAdapter(model, favorite);
 
         protected internal override void RefreshFavButtons()
         { 

@@ -80,26 +80,26 @@ namespace FavCat.Modules
         }
 
         protected override bool FavButtonsOnLists => false;
-        protected override void SortModelList(string sortCriteria, string category, List<StoredPlayer> list)
+        protected override void SortModelList(string sortCriteria, string category, List<(StoredFavorite?, StoredPlayer)> avatars)
         {
             var inverted = sortCriteria.Length > 0 && sortCriteria[0] == '!';
-            Comparison<StoredPlayer> comparison;
+            Comparison<(StoredFavorite? Fav, StoredPlayer Model)> comparison;
             switch (sortCriteria)
             {
                 case "name":
                 case "!name":
                 default:
-                    comparison = (a, b) => string.Compare(a.Name, b.Name, StringComparison.InvariantCultureIgnoreCase) * (inverted ? -1 : 1); 
+                    comparison = (a, b) => string.Compare(a.Model.Name, b.Model.Name, StringComparison.InvariantCultureIgnoreCase) * (inverted ? -1 : 1); 
                     break;
                 case "added":
                 case "!added":
-                    comparison = (a, b) => Favorites.GetFavoritedTime(a.PlayerId, category).CompareTo(Favorites.GetFavoritedTime(b.PlayerId, category)) * (inverted ? -1 : 1);
+                    comparison = (a, b) => (a.Fav?.AddedOn ?? DateTime.MinValue).CompareTo(b.Fav?.AddedOn ?? DateTime.MinValue) * (inverted ? -1 : 1);
                     break;
             }
-            list.Sort(comparison);
+            avatars.Sort(comparison);
         }
 
-        protected override IPickerElement WrapModel(StoredPlayer model) => new DbPlayerAdapter(model);
+        protected override IPickerElement WrapModel(StoredFavorite? favorite, StoredPlayer model) => new DbPlayerAdapter(model, favorite);
 
         protected internal override void RefreshFavButtons()
         {

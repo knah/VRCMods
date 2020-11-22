@@ -32,6 +32,14 @@ namespace FavCat.Database
 
             myUpdateThreadQueue.Enqueue(() =>
             {
+                var preExisting = myStoredWorlds.FindById(world.id);
+                if (preExisting != null)
+                {
+                    if (world.assetUrl == null) world.supportedPlatforms = preExisting.SupportedPlatforms;
+                
+                    world.description ??= preExisting.Description;
+                }
+                
                 var storedWorld = new StoredWorld
                 {
                     WorldId = world.id,

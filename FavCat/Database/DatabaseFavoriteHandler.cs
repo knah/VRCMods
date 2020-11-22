@@ -49,9 +49,9 @@ namespace FavCat.Database
             OnCategoryContentsChanged?.Invoke(category);
         }
 
-        public IEnumerable<T> ListFavorites(string category)
+        public IEnumerable<(StoredFavorite, T)> ListFavorites(string category)
         {
-            return myStoredFavorites.FindAll().Where(it => it.Category == category).Select(it => myObjectStore.FindById(it.ObjectId)).Where(it => it != null);
+            return myStoredFavorites.Find(it => it.Category == category).Select(it => (it, myObjectStore.FindById(it.ObjectId))).Where(it => it.Item2 != null);
         }
 
         private StoredFavorite? GetFavorite(string objectId, string category)
@@ -84,11 +84,6 @@ namespace FavCat.Database
         public IEnumerable<StoredCategory> GetCategories()
         {
             return myStoredCategories.FindAll();
-        }
-
-        public DateTime GetFavoritedTime(string objectId, string category)
-        {
-            return GetFavorite(objectId, category)?.AddedOn ?? DateTime.MinValue;
         }
 
         public void DeleteFavorite(string id, string categoryName)

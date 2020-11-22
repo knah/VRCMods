@@ -7,10 +7,12 @@ namespace FavCat.Adapters
     internal class DbAvatarAdapter : IPickerElement, IStoredModelAdapter<StoredAvatar>
     {
         private readonly StoredAvatar myAvatar;
+        private readonly StoredFavorite? myFavorite;
 
-        public DbAvatarAdapter(StoredAvatar avatar)
+        public DbAvatarAdapter(StoredAvatar avatar, StoredFavorite? favorite)
         {
             myAvatar = avatar;
+            myFavorite = favorite;
         }
 
         public string Name => myAvatar.Name;
@@ -22,5 +24,6 @@ namespace FavCat.Adapters
         public bool IsInaccessible => IsPrivate && myAvatar.AuthorId != APIUser.CurrentUser.id;
 
         public StoredAvatar Model => myAvatar;
+        public StoredFavorite? StoredFavorite => myFavorite;
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using FavCat.Adapters;
@@ -66,10 +67,34 @@ namespace FavCat.Modules
         protected override void OnFavButtonClicked(StoredCategory storedCategory)
         {
             ApiAvatar currentApiAvatar = myPageAvatar.avatar.field_Internal_ApiAvatar_0;
-            if (FavCatMod.Database.AvatarFavorites.IsFavorite(currentApiAvatar.id, storedCategory.CategoryName))
-                FavCatMod.Database.AvatarFavorites.DeleteFavorite(currentApiAvatar.id, storedCategory.CategoryName);
+            OnFavButtonClicked(storedCategory, currentApiAvatar.id, false);
+        }
+
+        private void OnFavButtonClicked(StoredCategory storedCategory, string avatarId, bool disallowRecursiveRequests)
+        {
+            if (FavCatMod.Database.myStoredAvatars.FindById(avatarId) == null)
+            {
+                if (disallowRecursiveRequests)
+                    return;
+                
+                // something showed an unknown avatar, request it before favoriting
+                new ApiAvatar { id = avatarId }.Fetch(new Action<ApiContainer>(_ =>
+                {
+                    MelonCoroutines.Start(ReFavAfterDelay(storedCategory, avatarId));
+                }));
+                return;
+            }
+
+            if (FavCatMod.Database.AvatarFavorites.IsFavorite(avatarId, storedCategory.CategoryName))
+                FavCatMod.Database.AvatarFavorites.DeleteFavorite(avatarId, storedCategory.CategoryName);
             else
-                FavCatMod.Database.AvatarFavorites.AddFavorite(currentApiAvatar.id, storedCategory.CategoryName);
+                FavCatMod.Database.AvatarFavorites.AddFavorite(avatarId, storedCategory.CategoryName);
+        }
+
+        private IEnumerator ReFavAfterDelay(StoredCategory category, string id)
+        {
+            yield return new WaitForSeconds(0.25f);
+            OnFavButtonClicked(category, id, true);
         }
 
         protected internal override void RefreshFavButtons()
@@ -92,10 +117,12 @@ namespace FavCat.Modules
         protected override void OnPickerSelected(IPickerElement model)
         {
             var avatar = new ApiAvatar() {id = model.Id};
-            MelonLogger.Log($"Performing an API request for {model.Id}");
+            if (Imports.IsDebugMode())
+                MelonLogger.Log($"Performing an API request for {model.Id}");
             avatar.Fetch(new Action<ApiContainer>((_) =>
             {
-                MelonLogger.Log($"Done an API request for {model.Id}");
+                if (Imports.IsDebugMode())
+                    MelonLogger.Log($"Done an API request for {model.Id}");
 
                 var canUse = avatar.releaseStatus == "public" || avatar.authorId == APIUser.CurrentUser.id;
                 if (!canUse)
@@ -139,30 +166,30 @@ namespace FavCat.Modules
         }
 
         protected override bool FavButtonsOnLists => true;
-        protected override IPickerElement WrapModel(StoredAvatar model) => new DbAvatarAdapter(model);
+        protected override IPickerElement WrapModel(StoredFavorite? favorite, StoredAvatar model) => new DbAvatarAdapter(model, favorite);
 
-        protected override void SortModelList(string sortCriteria, string category, List<StoredAvatar> avatars)
+        protected override void SortModelList(string sortCriteria, string category, List<(StoredFavorite?, StoredAvatar)> avatars)
         {
             var inverted = sortCriteria.Length > 0 && sortCriteria[0] == '!';
-            Comparison<StoredAvatar> comparison;
+            Comparison<(StoredFavorite? Fav, StoredAvatar Model)> comparison;
             switch (sortCriteria)
             {
                 case "name":
                 case "!name":
                 default:
-                    comparison = (a, b) => string.Compare(a.Name, b.Name, StringComparison.InvariantCultureIgnoreCase) * (inverted ? -1 : 1); 
+                    comparison = (a, b) => string.Compare(a.Model.Name, b.Model.Name, StringComparison.InvariantCultureIgnoreCase) * (inverted ? -1 : 1); 
                     break;
                 case "updated":
                 case "!updated":
-                    comparison = (a, b) => a.UpdatedAt.CompareTo(b.UpdatedAt) * (inverted ? -1 : 1);
+                    comparison = (a, b) => a.Model.UpdatedAt.CompareTo(b.Model.UpdatedAt) * (inverted ? -1 : 1);
                     break;
                 case "created":
                 case "!created":
-                    comparison = (a, b) => a.CreatedAt.CompareTo(b.CreatedAt) * (inverted ? -1 : 1);
+                    comparison = (a, b) => a.Model.CreatedAt.CompareTo(b.Model.CreatedAt) * (inverted ? -1 : 1);
                     break;
                 case "added":
                 case "!added":
-                    comparison = (a, b) => FavCatMod.Database.AvatarFavorites.GetFavoritedTime(a.AvatarId, category).CompareTo(FavCatMod.Database.AvatarFavorites.GetFavoritedTime(b.AvatarId, category)) * (inverted ? -1 : 1);
+                    comparison = (a, b) => (a.Fav?.AddedOn ?? DateTime.MinValue).CompareTo(b.Fav?.AddedOn ?? DateTime.MinValue) * (inverted ? -1 : 1);
                     break;
             }
             avatars.Sort(comparison);

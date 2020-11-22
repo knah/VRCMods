@@ -23,9 +23,9 @@ namespace FavCat.Modules
         protected const string ExpandEnforcerGameObjectName = "ExpandEnforcer";
         
         protected readonly Dictionary<string, CustomPickerList> PickerLists = new Dictionary<string, CustomPickerList>();
-        private readonly ICustomShowableLayoutedMenu myListSortingMenu;
         protected readonly CustomPickerList SearchList;
         private readonly Transform myListsParent;
+        private readonly bool myHasUpdateAndCreationDates;
         protected readonly DatabaseFavoriteHandler<T> Favorites;
         private readonly ExpandedMenu myExpandedMenu;
 
@@ -39,8 +39,8 @@ namespace FavCat.Modules
         protected abstract void OnPickerSelected(IPickerElement picker);
         protected abstract void OnFavButtonClicked(StoredCategory storedCategory);
         protected abstract bool FavButtonsOnLists { get; }
-        protected abstract void SortModelList(string sortCriteria, string category, List<T> list);
-        protected abstract IPickerElement WrapModel(T model);
+        protected abstract void SortModelList(string sortCriteria, string category, List<(StoredFavorite?, T)> list);
+        protected abstract IPickerElement WrapModel(StoredFavorite? favorite, T model);
         protected internal abstract void RefreshFavButtons();
         protected abstract void SearchButtonClicked();
 
@@ -54,27 +54,8 @@ namespace FavCat.Modules
             ExpansionKitApi.GetExpandedMenu(myExpandedMenu).AddSimpleButton("New Category", CreateCategory);
             ExpansionKitApi.GetExpandedMenu(myExpandedMenu).AddSimpleButton("More FavCat...", ShowExtraOptionsMenu);
             
-            myListSortingMenu = ExpansionKitApi.CreateCustomFullMenuPopup(LayoutDescription.WideSlimList);
-            
-            myListSortingMenu.AddSimpleButton("Name (ascending)", () => UpdateSelectedListSort("name"));
-            myListSortingMenu.AddSimpleButton("Name (descending)", () => UpdateSelectedListSort("!name"));
-            
-            myListSortingMenu.AddSimpleButton("Date favorited (new first)", () => UpdateSelectedListSort("!added"));
-            myListSortingMenu.AddSimpleButton("Date favorited (old first)", () => UpdateSelectedListSort("added"));
-
-            if (hasUpdateAndCreationDates)
-            {
-                myListSortingMenu.AddSimpleButton("Date updated (new first)", () => UpdateSelectedListSort("!updated"));
-                myListSortingMenu.AddSimpleButton("Date updated (old first)", () => UpdateSelectedListSort("updated"));
-
-                myListSortingMenu.AddSimpleButton("Date created (new first)", () => UpdateSelectedListSort("!created"));
-                myListSortingMenu.AddSimpleButton("Date created (old first)", () => UpdateSelectedListSort("created"));
-            }
-
-            myListSortingMenu.AddSpacer();
-            myListSortingMenu.AddSimpleButton("Cancel", myListSortingMenu.Hide);
-
             myListsParent = listsParent;
+            myHasUpdateAndCreationDates = hasUpdateAndCreationDates;
 
             var knownCategories = Favorites.GetCategories().ToList();
             if (knownCategories.Count == 0)
@@ -151,6 +132,34 @@ namespace FavCat.Modules
             }
         }
 
+        private void ShowListSortingMenu()
+        {
+            var myListSortingMenu = ExpansionKitApi.CreateCustomFullMenuPopup(LayoutDescription.WideSlimList);
+            
+            myListSortingMenu.AddSimpleButton("Name (ascending)", () => UpdateSelectedListSort("name", myListSortingMenu));
+            myListSortingMenu.AddSimpleButton("Name (descending)", () => UpdateSelectedListSort("!name", myListSortingMenu));
+
+            if (myCurrentlySelectedCategory.CategoryName != SearchCategoryName)
+            {
+                myListSortingMenu.AddSimpleButton("Date favorited (new first)", () => UpdateSelectedListSort("!added", myListSortingMenu));
+                myListSortingMenu.AddSimpleButton("Date favorited (old first)", () => UpdateSelectedListSort("added", myListSortingMenu));
+            }
+
+            if (myHasUpdateAndCreationDates)
+            {
+                myListSortingMenu.AddSimpleButton("Date updated (new first)", () => UpdateSelectedListSort("!updated", myListSortingMenu));
+                myListSortingMenu.AddSimpleButton("Date updated (old first)", () => UpdateSelectedListSort("updated", myListSortingMenu));
+
+                myListSortingMenu.AddSimpleButton("Date created (new first)", () => UpdateSelectedListSort("!created", myListSortingMenu));
+                myListSortingMenu.AddSimpleButton("Date created (old first)", () => UpdateSelectedListSort("created", myListSortingMenu));
+            }
+
+            myListSortingMenu.AddSpacer();
+            myListSortingMenu.AddSimpleButton("Cancel", myListSortingMenu.Hide);
+            
+            myListSortingMenu.Show(true);
+        }
+
         private void OnSearchListShown()
         {
             foreach (var customPickerList in PickerLists) customPickerList.Value.gameObject.SetActive(false);
@@ -179,7 +188,7 @@ namespace FavCat.Modules
                     {
                         var newCategory = new StoredCategory
                         {
-                            CategoryName = s, SortType = "!added"
+                            CategoryName = s, SortType = "!added", VisibleRows = 1
                         };
                         Favorites.UpdateCategory(newCategory);
                         CreateList(newCategory);
@@ -251,7 +260,7 @@ namespace FavCat.Modules
             
             listSettingsMenu.AddSimpleButton("Rename", RenameSelectedList);
             listSettingsMenu.AddSimpleButton($"Move", MoveSelectedList);
-            listSettingsMenu.AddSimpleButton($"Sort (current: {HumanSort(category)}", () => myListSortingMenu.Show(true));
+            listSettingsMenu.AddSimpleButton($"Sort (current: {HumanSort(category)}", ShowListSortingMenu);
 
             listSettingsMenu.AddSpacer();
             listSettingsMenu.AddSpacer();
@@ -491,11 +500,11 @@ namespace FavCat.Modules
 
         protected void UpdateListElements(string categoryName, CustomPickerList list, bool reuseList = false)
         {
-            var favs = reuseList
-                ? list.Models.OfType<IStoredModelAdapter<T>>().Select(it => it.Model).ToList()
+            List<(StoredFavorite Favorite, T Model)> favs = reuseList
+                ? list.Models.OfType<IStoredModelAdapter<T>>().Select(it => (it.StoredFavorite, it.Model)).ToList()
                 : Favorites.ListFavorites(categoryName).ToList();
             SortModelList(list.Category.SortType, categoryName, favs);
-            list.SetList(favs.Select(WrapModel), false);
+            list.SetList(favs.Select(it => WrapModel(it.Favorite, it.Model)), false);
         }
 
         protected List<StoredCategory> GetCategoriesInSortedOrder()
@@ -520,14 +529,14 @@ namespace FavCat.Modules
 
         protected void ProcessSearchResults()
         {
-            var results = mySearchResult?.ToList();
+            var results = mySearchResult?.Select(it => ((StoredFavorite?) null, it)).ToList();
             mySearchResult = null;
             if (results == null) return;
             
             MelonLogger.Log("Local search done, {0} results", results.Count);
 
             SortModelList(SearchList.Category.SortType, SearchCategoryName, results);
-            SearchList.SetList(results.Select(WrapModel), true);
+            SearchList.SetList(results.Select(it => WrapModel(null, it.it)), true);
             
             SetSearchListHeaderAndScrollToIt($"Search results ({LastSearchRequest})");
         }
@@ -546,13 +555,13 @@ namespace FavCat.Modules
             myListsParent.GetComponentInParent<ScrollRect>().verticalNormalizedPosition = 0f;
         }
         
-        private void UpdateSelectedListSort(string sort)
+        private void UpdateSelectedListSort(string sort, IShowableMenu menuToHide)
         {
             myCurrentlySelectedCategory.SortType = sort;
             Favorites.UpdateCategory(myCurrentlySelectedCategory);
             UpdateListElements(myCurrentlySelectedCategory.CategoryName, myCurrentlySelectedList, true);
             
-            myListSortingMenu.Hide();
+            menuToHide.Hide();
         }
 
         private void ShowExtraOptionsMenu()

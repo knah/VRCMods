@@ -6,10 +6,12 @@ namespace FavCat.Adapters
     public class DbPlayerAdapter : IPickerElement, IStoredModelAdapter<StoredPlayer>
     {
         private readonly StoredPlayer myPlayer;
+        private readonly StoredFavorite? myFavorite;
 
-        public DbPlayerAdapter(StoredPlayer player)
+        public DbPlayerAdapter(StoredPlayer player, StoredFavorite? favorite)
         {
             myPlayer = player;
+            myFavorite = favorite;
         }
 
         public string Id => myPlayer.PlayerId;
@@ -20,5 +22,6 @@ namespace FavCat.Adapters
         public bool SupportsDesktop => false;
         public bool SupportsQuest => false;
         public StoredPlayer Model => myPlayer;
+        public StoredFavorite? StoredFavorite => myFavorite;
     }
 }

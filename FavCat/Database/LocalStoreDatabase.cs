@@ -68,9 +68,8 @@ namespace FavCat.Database
                     {
                         MelonLogger.LogError($"Exception in DB update thread: {ex}");
                     }
-                }
-
-                Thread.Sleep(100);
+                } else
+                    Thread.Sleep(100);
             }
         }
 
