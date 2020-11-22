@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <VrcReferences>true</VrcReferences>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
+    <ClearOutputDirectory>False</ClearOutputDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="LiteDB" Version="5.0.9" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.2" />
+  </ItemGroup>
+  <Import Project="$(MsBuildThisFileDirectory)/../ILRepack/ILRepack.Lib.MSBuild.Task.targets" />
+  <ItemGroup>
+    <None Remove="extraui" />
+    <EmbeddedResource Include="extraui" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UIExpansionKit\UIExpansionKit.csproj" />
+  </ItemGroup>
+
+  <Target Name="ILRepack" AfterTargets="Build">
+    <PropertyGroup>
+      <WorkingDirectory>$(OutputPath)</WorkingDirectory>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <InputAssemblies Include="$(OutputPath)/$(AssemblyName).dll" />
+      <InputAssemblies Include="$(OutputPath)/LiteDB.dll" />
+      <InputAssemblies Include="$(OutputPath)/SixLabors.ImageSharp.dll" />
+      <InputAssemblies Include="$(OutputPath)/System.Memory.dll" />
+      <InputAssemblies Include="$(OutputPath)/System.Buffers.dll" />
+      <InputAssemblies Include="$(OutputPath)/System.Runtime.CompilerServices.Unsafe.dll" />
+
+      <IlRepackLibs Include="$(OutputPath)" />
+      <IlRepackLibs Include="$(MsBuildThisFileDirectory)/../Libs" />
+    </ItemGroup>
+    <Message Text="MERGING: @(InputAssemblies->'%(Filename)') into $(OutputAssembly)" Importance="High" />
+    <ILRepack Internalize="true" LibraryPath="@(IlRepackLibs)" OutputFile="$(OutputPath)/$(AssemblyName)-merged.dll" InputAssemblies="@(InputAssemblies)" />
+  </Target>
+</Project>
