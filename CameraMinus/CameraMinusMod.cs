@@ -6,24 +6,28 @@ using UnityEngine.UI;
 using VRC.UserCamera;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(CameraMinusMod), "CameraMinus", "1.0.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(CameraMinusMod), "CameraMinus", "1.1.0", "knah", "https://github.com/knah/VRCMods")]
 
 namespace CameraMinus
 {
     public class CameraMinusMod : MelonMod
     {
-        private bool LensShown = true;
-        private Text ShowButtonText = null;
-        
         public override void OnApplicationStart()
         {
-            ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.CameraQuickMenu, "Hide camera lens", ToggleLens, SetToggleLensButton);
+            var customMenu = ExpansionKitApi.CreateCustomQuickMenuPage(LayoutDescription.QuickMenu3Columns);
+            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.CameraQuickMenu).AddSimpleButton("CameraMinus", () => customMenu.Show());
             
-            ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.CameraQuickMenu, "Zoom in", ZoomIn);
-            ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.CameraQuickMenu, "Zoom out", ZoomOut);
-            
-            ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.CameraQuickMenu, "Enlarge camera", Enlarge);
-            ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.CameraQuickMenu, "Shrink camera", Shrink);
+            customMenu.AddToggleButton("Camera lens visible", ToggleLens, GetLensState);
+            customMenu.AddSimpleButton("Enlarge camera", Enlarge);
+            customMenu.AddSimpleButton("Shrink camera", Shrink);
+
+            customMenu.AddSimpleButton("Reset zoom", ZoomReset);
+            customMenu.AddSimpleButton("Zoom in", ZoomIn);
+            customMenu.AddSimpleButton("Zoom out", ZoomOut);
+
+            customMenu.AddSpacer();
+            customMenu.AddSpacer();
+            customMenu.AddSimpleButton("Back", () => customMenu.Hide());
         }
 
         private void Enlarge()
@@ -44,23 +48,22 @@ namespace CameraMinus
             cameraController.photoCamera.transform.position = oldPosition;
         }
 
-        private void SetToggleLensButton(GameObject obj)
-        {
-            ShowButtonText = obj.GetComponentInChildren<Text>();
-
-            ShowButtonText.text = LensShown ? "Hide camera lens" : "Show camera lens";
-        }
-
-        private void ToggleLens()
+        private void ToggleLens(bool enabled)
         {
             var cameraController = UserCameraController.field_Internal_Static_UserCameraController_0;
             if (cameraController == null) return;
-            
-            LensShown = !LensShown;
-            ShowButtonText.text = LensShown ? "Hide camera lens" : "Show camera lens";
 
             var lensMesh = cameraController.photoCamera.transform.Find("camera_lens_mesh");
-            lensMesh.gameObject.SetActive(LensShown);
+            lensMesh.gameObject.SetActive(enabled);
+        }
+
+        private bool GetLensState()
+        {
+            var cameraController = UserCameraController.field_Internal_Static_UserCameraController_0;
+            if (cameraController == null) return true;
+            
+            var lensMesh = cameraController.photoCamera.transform.Find("camera_lens_mesh");
+            return lensMesh.gameObject.activeSelf;
         }
 
         private void ZoomIn()
@@ -70,6 +73,14 @@ namespace CameraMinus
             foreach (var camera in cameraController.GetComponentsInChildren<Camera>())
                 if (camera.fieldOfView > 10)
                     camera.fieldOfView -= 10;
+        }
+        
+        private void ZoomReset()
+        {
+            var cameraController = UserCameraController.field_Internal_Static_UserCameraController_0;
+            if (cameraController == null) return;
+            foreach (var camera in cameraController.GetComponentsInChildren<Camera>())
+                camera.fieldOfView = 60;
         }
         
         private void ZoomOut()
