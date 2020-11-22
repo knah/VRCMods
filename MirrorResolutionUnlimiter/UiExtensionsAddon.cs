@@ -14,8 +14,8 @@ namespace MirrorResolutionUnlimiter
         
         public static void Init()
         {
-            ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.SettingsMenu, "Optimize mirrors", OptimizeMirrors);
-            ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.SettingsMenu, "Beautify mirrors", BeautifyMirrors);
+            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.SettingsMenu).AddSimpleButton("Optimize mirrors", OptimizeMirrors);
+            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.SettingsMenu).AddSimpleButton("Beautify mirrors", BeautifyMirrors);
         }
 
         private static void BeautifyMirrors()

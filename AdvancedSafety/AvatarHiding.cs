@@ -60,7 +60,7 @@ namespace AdvancedSafety
             {
                 var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils
                     .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(FeaturePermissionManager).GetMethod(
-                        nameof(FeaturePermissionManager.Method_Public_Boolean_String_byref_EnumPublicSealedva5vUnique_0)))
+                        nameof(FeaturePermissionManager.Method_Public_Boolean_APIUser_byref_EnumPublicSealedva5vUnique_0)))
                     .GetValue(null);
 
                 Imports.Hook((IntPtr)(&originalMethodPointer), typeof(AvatarHiding).GetMethod(nameof(CanUseCustomAvatarPatch), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
@@ -70,7 +70,7 @@ namespace AdvancedSafety
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool SwitchAvatarDelegate(IntPtr thisPtr, IntPtr apiAvatarPtr, IntPtr someString, float someFloat, IntPtr someDelegate);
+        private delegate bool SwitchAvatarDelegate(IntPtr thisPtr, IntPtr apiAvatarPtr, IntPtr someString, float someFloat, IntPtr someDelegate, IntPtr nativeMethodInfo);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate bool CanUseCustomAvatarDelegate(IntPtr thisPtr, IntPtr userId, ref int denyReason);
@@ -78,15 +78,15 @@ namespace AdvancedSafety
         private static SwitchAvatarDelegate ourSwitchAvatar;
         private static CanUseCustomAvatarDelegate ourCanUseCustomAvatarDelegate;
         
-        private static bool SwitchAvatarPatch(IntPtr thisPtr, IntPtr apiAvatarPtr, IntPtr someString, float someFloat, IntPtr someDelegate)
+        private static bool SwitchAvatarPatch(IntPtr thisPtr, IntPtr apiAvatarPtr, IntPtr someString, float someFloat, IntPtr someDelegate, IntPtr nativeMethodInfo)
         {
             using (new SwitchAvatarCookie(new VRCAvatarManager(thisPtr), apiAvatarPtr == IntPtr.Zero ? null : new ApiAvatar(apiAvatarPtr)))
-                return ourSwitchAvatar(thisPtr, apiAvatarPtr, someString, someFloat, someDelegate);
+                return ourSwitchAvatar(thisPtr, apiAvatarPtr, someString, someFloat, someDelegate, nativeMethodInfo);
         }
 
-        private static bool CanUseCustomAvatarPatch(IntPtr thisPtr, IntPtr userIdPtr, ref int denyReason)
+        private static bool CanUseCustomAvatarPatch(IntPtr thisPtr, IntPtr apiUserPtr, ref int denyReason)
         {
-            var result = ourCanUseCustomAvatarDelegate(thisPtr, userIdPtr, ref denyReason);
+            var result = ourCanUseCustomAvatarDelegate(thisPtr, apiUserPtr, ref denyReason);
             try
             {
                 if (!SwitchAvatarCookie.ourInSwitch || SwitchAvatarCookie.ourApiAvatar == null)

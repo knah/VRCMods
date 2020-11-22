@@ -19,7 +19,7 @@ namespace JoinNotifier
 {
     public class JoinNotifierMod : MelonMod
     {
-        public const string VersionConst = "0.2.6";
+        public const string VersionConst = "0.2.7";
         
         private readonly List<string> myJoinNames = new List<string>();
         private readonly List<string> myLeaveNames = new List<string>();
@@ -54,7 +54,7 @@ namespace JoinNotifier
             
             while (ReferenceEquals(NetworkManager.field_Internal_Static_NetworkManager_0, null)) yield return null;
             while (ReferenceEquals(VRCAudioManager.field_Private_Static_VRCAudioManager_0, null)) yield return null;
-            while (ReferenceEquals(VRCUiManager.field_Protected_Static_VRCUiManager_0, null)) yield return null;
+            while (ReferenceEquals(VRCUiManager.prop_VRCUiManager_0, null)) yield return null;
 
             MelonLogger.Log("Start init");
             

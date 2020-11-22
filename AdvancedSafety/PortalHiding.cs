@@ -8,6 +8,8 @@ using UnityEngine;
 using VRC;
 using VRC.Core;
 
+using ModerationManager = ObjectPublicObLi1ApSiLi1ApBoSiUnique;
+
 namespace AdvancedSafety
 {
     public static class PortalHiding
@@ -50,7 +52,7 @@ namespace AdvancedSafety
                 if (objectName != "Portals/PortalInternalDynamic") return;
                 var apiUser = player.prop_APIUser_0;
                 if (apiUser == null) return;
-                if (APIUser._currentUser?.id == apiUser.id) return;
+                if (APIUser.CurrentUser?.id == apiUser.id) return;
                 
                 if (Imports.IsDebugMode())
                     MelonLogger.Log($"User {apiUser.displayName} dropped a portal");
@@ -92,7 +94,7 @@ namespace AdvancedSafety
         {
             if (userId == null) return false;
             
-            var moderationManager = ModerationManager.prop_ModerationManager_0;
+            var moderationManager = ModerationManager.prop_ObjectPublicObLi1ApSiLi1ApBoSiUnique_0;
             if (moderationManager == null) return false;
             if (APIUser.CurrentUser?.id == userId)
                 return false;
@@ -103,11 +105,6 @@ namespace AdvancedSafety
                     return true;
             }
             
-            foreach (var playerModeration in moderationManager.field_Private_List_1_ApiPlayerModeration_1)
-            {
-                if (playerModeration != null && playerModeration.moderationType == ApiPlayerModeration.ModerationType.Block && playerModeration.targetUserId == userId)
-                    return true;
-            }
             return false;
             
         }

@@ -60,7 +60,7 @@ namespace EmojiPageButtons
                 }
 
                 var index1 = index;
-                ExpansionKitApi.RegisterSimpleMenuButton(ExpandedMenu.EmojiQuickMenu, "", () =>
+                ExpansionKitApi.GetExpandedMenu(ExpandedMenu.EmojiQuickMenu).AddSimpleButton("", () =>
                 {
                     emojiMenu.pages[emojiMenu.field_Private_Int32_0].SetActive(false);
                     pageGo.SetActive(true);

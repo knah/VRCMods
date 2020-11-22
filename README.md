@@ -1,4 +1,4 @@
-This repository contains my mods for VRChat.
+This repository contains my mods for VRChat. Join the [VRChat Modding Group discord](https://discord.gg/rCqKSvR) for support and more mods!
 
 ## AdvancedSafety
 Features:
@@ -28,6 +28,85 @@ Requires UIExpansionKit - new buttons are added to Camera QuickMenu expansion.
 This mod adds page buttons to emoji menu that allow faster switching.  
 Requires UIExpansionKit.  
 ![emoji page buttons screenshot](https://imgur.com/gIq2vKw.png)
+
+## FavCat
+An all-in-one local favorites mod. Unlimited favorite lists with unlimited favorites in them and a searchable local database of content and players.  
+**Requires UIExpansionKit 0.2.0 or newer**  
+#### Features:
+* Unlimited lists (categories) for favorites, each of unlimited size
+* Lag-free even with large lists
+* Freely changeable list height
+* Avatar, world, and player favorites supported
+* Modifiable list order and multiple list sorting options
+* Fully searchable database of everything you have ever seen
+* Changeable database location (**it's recommended to store the database in a directory backed up to cloud storage, such as Dropbox or OneDrive**, see below for setup)
+* Local image cache for even better performance
+* Categorize your own private avatars
+* Import avatar favorites from other local favorite mods (read below)
+* Exchange search database with friends (read below)
+* Many more small things
+
+#### Known limitations
+* Player favorites don't show online status
+* Lists with over a thousand elements can take a bit of time on game startup/list creation
+
+#### Changing database location
+Steps to change database location:
+1. Run VRChat with the mod at least once
+2. Make sure that VRChat is closed
+3. Navigate to VRChat install directory (i.e. by clicking "Browse Local Files" in Steam)
+4. Navigate to `UserData` folder and open `modprefs.ini` with Notepad or other text editor
+5. Find the line with `[FavCat]`
+6. Find the line with `DatabasePath` under it
+7. Change the value to absolute path to new storage folder. The new line should look like this: `DatabasePath=C:\Users\username\OneDrive` (with your own path, naturally)
+8. Save and close the text file
+9. Copy the two (or four) database files (`favcat-favs.db` and `favacat-store.db`, and `favcat-favs-log.db` and `favcat-store-log.db` if they exist) from the old location (they are in `UserData` by default) to the new one.
+
+If you want to move the image cache, use the same steps as above, but modify the line with `ImageCachePath` and copy `favcat-images.db` instead. It's not recommended to store the image cache in cloud storage due to its big size.
+
+#### Importing avatar favorites from other local favorite mods
+You can import favorites from other local favorite mods that use text files for storage.
+1. Run VRChat with the mod at least once
+2. Navigate to VRChat install directory (i.e. by clicking "Browse Local Files" in Steam)
+3. Find the avatar list of the mod you want to import from. Places to look like are `UserData` folder, game folder, or a mod-specific folder, such as `404Mods`. The avatar list would usually be a plain text file or a JSON file - both are supported.
+4. **Copy** the file to `UserData/FavCatImport` folder
+5. In-game, click "More FavCat" on any big menu page, then click "Import databases and text files"
+6. Import process can take some time. Once it is done, a new list will appear in the menu. It's safe to close the game and reopen it - import will continue from where it left off (you'll need to click the button again though). Once it is done, the corresponding list will be deleted from `UserData/FavCatImport` folder.
+
+#### Sharing search database with friends
+You can exchange the search database with friends to be able to find things they have seen. **Only accept databases from friends you trust - an intentionally malformed database can overwrite parts of yours with garbage**  
+How to send database to a friend:
+1. Run VRChat with the mod at least once (duh)
+2. Make sure that VRChat is closed
+3. Navigate to where your database is stored (see "Changing database location")
+4. Make sure that there is no file named `favcat-store-log.db`. If there is one, it means that the game was not closed properly. In that case, run the game again, and use "Exit VRChat" button in settings menu to close it.
+5. Send `favcat-store.db` to your friend.
+
+How to receive database from a friend:
+1. Run VRChat with the mod at least once
+2. Navigate to VRChat install directory (i.e. by clicking "Browse Local Files" in Steam)
+3. Put the database your friend sent you into `UserData/FavCatImport` folder. If you want to import multiple databases at once, you can rename them, as long as .db extension is kept.
+4. In-game, click "More FavCat" on any big menu page, then click "Import databases and text files"
+5. Import process can take some time. Once it is done, the corresponding database will be deleted from `UserData/FavCatImport` folder.
+
+Note that your favorites are stored in `favcat-favs.db` - don't send it to your friends, favorite import is not supported. Most certainly don't send `favcat-images.db` to your friends - it's just a boring image cache.
+
+#### Used libraries:
+* [LiteDB](https://github.com/mbdavid/LiteDB) for all data storage
+* [ImageSharp](https://github.com/SixLabors/ImageSharp), because unity is bad at loading images from streams on background thread
+
+A long time ago this was based on Slaynash's [AvatarFav](https://github.com/Slaynash/AvatarFav) and [VRCTools](https://github.com/Slaynash/VRCTools), both licensed under the [MIT license](https://github.com/Slaynash/VRCTools/blob/master/LICENSE). Who knows how much of that still remains inside?
+
+
+## Finitizer
+This mod fixes a set of issues arising from invalid floating point values being accepted from remote users.  
+**It might have a minor impact on performance that scales with player and pickup count**. Only use this mod if you frequent publics.
+
+## Friends+ Home
+Allows changing instance type of your home world to whatever you want.  
+Setting it to public will choose a random populated public instance if one is available.  
+UIExpansionKit 0.2.0 or newer recommended for in-game settings.  
+Known instance types are `Public`, `FriendOfGuests`, `FriendsOnly`, `InvitePlus` and `InviteOnly` (if you wish to edit modprefs.ini by hand)
 
 ## JoinNotifier
 A VRChat mod to notify you when someone joins the instance you're in
@@ -113,6 +192,9 @@ This mod is Windows-only. It likely won't do anything on Intel CPUs, but you're 
 Settings:
  * Max Cores (default 4) - the maximum amount of cores that the game may use. 4 is the sweet spot on a 2700X/3700X.
  * Skip Hyperthreads (default true) - don't assign game to both threads of one core. Works best when enabled on 2700X/3700X.
+
+## ILRepack
+There's a copy of [ILRepack.Lib.MSBuild.Task](https://github.com/ravibpatel/ILRepack.Lib.MSBuild.Task) and [ILRepack](https://github.com/gluck/il-repack) built for netcore/MSBuild 16 shipped with the repo.
 
 ## Installation
 Before install:  

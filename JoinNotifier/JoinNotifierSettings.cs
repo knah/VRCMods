@@ -58,7 +58,7 @@ namespace JoinNotifier
 
         public static bool ShouldNotifyInCurrentInstance()
         {
-            var instanceType = RoomManagerBase.field_Internal_Static_ApiWorldInstance_0?.InstanceType;
+            var instanceType = RoomManager.field_Internal_Static_ApiWorldInstance_0?.InstanceType;
             if (instanceType == null) return false;    
             switch (instanceType)
             {
