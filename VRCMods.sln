@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LocalPlayerPrefs", "LocalPl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Finitizer", "Finitizer\Finitizer.csproj", "{C79764DC-E140-4E43-8BF8-BB8369AB14E5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FriendsPlusHome", "FriendsPlusHome\FriendsPlusHome.csproj", "{73AD53B4-57CE-4065-953B-99AB0D0BD595}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,5 +99,9 @@ Global
 		{C79764DC-E140-4E43-8BF8-BB8369AB14E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C79764DC-E140-4E43-8BF8-BB8369AB14E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C79764DC-E140-4E43-8BF8-BB8369AB14E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73AD53B4-57CE-4065-953B-99AB0D0BD595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73AD53B4-57CE-4065-953B-99AB0D0BD595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73AD53B4-57CE-4065-953B-99AB0D0BD595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73AD53B4-57CE-4065-953B-99AB0D0BD595}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

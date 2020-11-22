@@ -33,6 +33,12 @@ Requires UIExpansionKit.
 This mod fixes a set of issues arising from invalid floating point values being accepted from remote users.  
 **It might have a minor impact on performance that scales with player and pickup count**. Only use this mod if you frequent publics.
 
+## Friends+ Home
+Allows changing instance type of your home world to whatever you want.  
+Setting it to public will choose a random populated public instance if one is available.  
+UIExpansionKit 0.2.0 or newer recommended for in-game settings.  
+Known instance types are `Public`, `FriendOfGuests`, `FriendsOnly`, `InvitePlus` and `InviteOnly` (if you wish to edit modprefs.ini by hand)
+
 ## JoinNotifier
 A VRChat mod to notify you when someone joins the instance you're in
 
