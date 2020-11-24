@@ -577,7 +577,7 @@ namespace FavCat.Modules
             customMenu.AddSpacer();
             
             if (ImportFolderProcessor.ImportRunning)
-                customMenu.AddSimpleButton("Import running...", () => { });
+                customMenu.AddLabel(ImportFolderProcessor.ImportStatusOuter + "\n" + ImportFolderProcessor.ImportStatusInner);
             else
                 customMenu.AddSimpleButton("Import databases and text files", () =>
                 {

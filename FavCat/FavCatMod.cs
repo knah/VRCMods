@@ -20,7 +20,7 @@ using VRC.Core;
 using Object = UnityEngine.Object;
 using ImageDownloaderClosure = ImageDownloader.ObjectCompilerGeneratedNPrivateSealedUnimObUnique;
 
-[assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.0.1", "knah")]
+[assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.0.2", "knah")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace FavCat
@@ -57,8 +57,6 @@ namespace FavCat
             Database.ImageHandler.TrimCache(FavCatSettings.MaxCacheSizeBytes).NoAwait();
 
             ExpansionKitApi.RegisterWaitConditionBeforeDecorating(WaitForInitDone());
-
-            MelonCoroutines.Start(OnUIManagerInit());
         }
 
         internal CustomPickerList CreateCustomList(Transform parent)
@@ -80,17 +78,14 @@ namespace FavCat
                 yield return null;
         }
 
-        public IEnumerator OnUIManagerInit()
+        public override void VRChat_OnUiManagerInit()
         {
-            MelonLogger.Log("WaitForUIManager");
-            while (VRCUiManager.prop_VRCUiManager_0 == null)
-                yield return null;
-            
             AssetsHandler.Load();
 
             try
             {
-                AvatarModule = new AvatarModule();
+                if (FavCatSettings.IsEnableAvatarFavs)
+                    AvatarModule = new AvatarModule();
             }
             catch (Exception ex)
             {
@@ -99,7 +94,8 @@ namespace FavCat
 
             try
             {
-                myWorldsModule = new WorldsModule();
+                if (FavCatSettings.IsEnableWorldFavs)
+                    myWorldsModule = new WorldsModule();
             }
             catch (Exception ex)
             {
@@ -108,7 +104,8 @@ namespace FavCat
             
             try
             {
-                myPlayerModule = new PlayersModule();
+                if (FavCatSettings.IsEnablePlayerFavs)
+                    myPlayerModule = new PlayersModule();
             }
             catch (Exception ex)
             {

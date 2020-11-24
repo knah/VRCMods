@@ -39,7 +39,7 @@ namespace FavCat.Database
                 var allFileInfos = new List<(LiteFileInfo<string>, StoredImageInfo)>();
                 var runningSums = new List<long>();
                 foreach (var liteFileInfo in myFileDatabase.FileStorage.FindAll())
-                    allFileInfos.Add((liteFileInfo, myImageInfos.FindById(liteFileInfo.Id)));
+                    allFileInfos.Add((liteFileInfo, myImageInfos.FindById(liteFileInfo.Id) ?? new StoredImageInfo { LastAccessed = DateTime.MinValue, Id = liteFileInfo.Id}));
 
                 allFileInfos.Sort((a, b) => a.Item2.LastAccessed.CompareTo(b.Item2.LastAccessed));
                 long totalSize = 0;
@@ -69,25 +69,43 @@ namespace FavCat.Database
             });
         }
 
-        public async void LoadImageAsync(string url, Action<Texture2D?> onDone)
+        public async Task LoadImageAsync(string url, Action<Texture2D?> onDone)
         {
-            if (!myFileDatabase.FileStorage.Exists(url))
+            try
             {
-                onDone(null);
-                return;
+                if (!myFileDatabase.FileStorage.Exists(url))
+                {
+                    onDone(null);
+                    return;
+                }
+
+                await Task.Run(() => { }).ConfigureAwait(false);
+
+                using var imageStream = myFileDatabase.FileStorage.OpenRead(url);
+                using var image = await Image.LoadAsync<Rgba32>(imageStream).ConfigureAwait(false);
+
+                var newImageInfo = new StoredImageInfo {Id = url, LastAccessed = DateTime.UtcNow};
+                myImageInfos.Upsert(newImageInfo);
+
+                await FavCatMod.YieldToMainThread();
+
+                try
+                {
+                    onDone(CreateTextureFromImage(image));
+                }
+                catch (Exception ex)
+                {
+                    MelonLogger.LogError($"Exception in onDone callback: {ex}");
+                }
             }
-
-            await Task.Run(() => { }).ConfigureAwait(false);
-
-            using var imageStream = myFileDatabase.FileStorage.OpenRead(url);
-            using var image = await Image.LoadAsync<Rgba32>(imageStream).ConfigureAwait(false);
-
-            var newImageInfo = new StoredImageInfo {Id = url, LastAccessed = DateTime.UtcNow};
-            myImageInfos.Upsert(newImageInfo);
-
-            await FavCatMod.YieldToMainThread();
-
-            onDone(CreateTextureFromImage(image));
+            catch (Exception ex)
+            {
+                if (Imports.IsDebugMode())
+                    MelonLogger.LogWarning($"Exception in image load, will delete offending image: {ex}");
+                myFileDatabase.FileStorage.Delete(url);
+                myImageInfos.Delete(url);
+                onDone(AssetsHandler.PreviewLoading.texture);
+            }
         }
 
         private static unsafe Texture2D CreateTextureFromImage(Image<Rgba32> image)

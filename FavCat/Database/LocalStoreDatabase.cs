@@ -30,9 +30,11 @@ namespace FavCat.Database
 
         public LocalStoreDatabase(string databasePath, string imageCachePath)
         {
-            myStoreDatabase = new LiteDatabase(new ConnectionString {Filename = $"{databasePath}/favcat-store.db", Connection = ConnectionType.Direct});
-            myFavDatabase = new LiteDatabase(new ConnectionString {Filename = $"{databasePath}/favcat-favs.db", Connection = ConnectionType.Direct});
-            myImageDatabase = new LiteDatabase(new ConnectionString {Filename = $"{imageCachePath}/favcat-images.db", Connection = ConnectionType.Direct});
+            var connectionType = FavCatSettings.ConnectionType;
+            
+            myStoreDatabase = new LiteDatabase(new ConnectionString {Filename = $"{databasePath}/favcat-store.db", Connection = connectionType});
+            myFavDatabase = new LiteDatabase(new ConnectionString {Filename = $"{databasePath}/favcat-favs.db", Connection = connectionType});
+            myImageDatabase = new LiteDatabase(new ConnectionString {Filename = $"{imageCachePath}/favcat-images.db", Connection = connectionType});
             
             myStoreDatabase.Mapper.EmptyStringToNull = false;
             myFavDatabase.Mapper.EmptyStringToNull = false;

@@ -71,7 +71,7 @@ namespace FavCat
                 
                     foreach (var action in list) 
                         action(tex);
-                });
+                }).NoAwait();
                 return;
             }
             

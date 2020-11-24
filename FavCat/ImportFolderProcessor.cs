@@ -14,10 +14,14 @@ namespace FavCat
     public static class ImportFolderProcessor
     {
         public static bool ImportRunning { get; private set; }
+
+        public static string ImportStatusOuter { get; private set; } = "Not importing";
+        public static string ImportStatusInner { get; private set; } = "";
         
         public static async Task ProcessImportsFolder()
         {
             ImportRunning = true;
+            ImportStatusOuter = "Import running...";
             
             var databases = new List<string>();
             var textFiles = new List<string>();
@@ -28,11 +32,13 @@ namespace FavCat
                 else
                     textFiles.Add(file);
             }
-            
-            foreach (var file in databases)
+
+            for (var i = 0; i < databases.Count; i++)
             {
+                var file = databases[i];
                 try
                 {
+                    ImportStatusOuter = $"Importing database {i + 1}/{databases.Count}";
                     await MergeInForeignStore(file);
                     File.Delete(file);
                 }
@@ -41,11 +47,13 @@ namespace FavCat
                     MelonLogger.Log($"Import of {file} failed: {ex}");
                 }
             }
-            
-            foreach (var textFile in textFiles)
+
+            for (var i = 0; i < textFiles.Count; i++)
             {
+                var textFile = textFiles[i];
                 try
                 {
+                    ImportStatusOuter = $"Importing file {i + 1}/{textFiles.Count}";
                     await ProcessTextFile(textFile);
                 }
                 catch (Exception ex)
@@ -77,16 +85,23 @@ namespace FavCat
                     {
                         var avatarId = match.Value;
                         toAdd.Add(avatarId);
-                        if (FavCatMod.Database.myStoredAvatars.FindById(avatarId) == null)
-                        {
-                            await FavCatMod.YieldToMainThread();
-                            new ApiAvatar {id = avatarId}.Fetch(); // it will get intercepted and stored
-                            await Task.Delay(TimeSpan.FromSeconds(10f + Random.Range(5f, 10f))).ConfigureAwait(false);
-                        }
                     }
                 }
             }
 
+            for (var i = 0; i < toAdd.Count; i++)
+            {
+                ImportStatusInner = $"Fetching avatar {i + 1}/{toAdd.Count}";
+                var avatarId = toAdd[i];
+                if (FavCatMod.Database.myStoredAvatars.FindById(avatarId) == null)
+                {
+                    await FavCatMod.YieldToMainThread();
+                    new ApiAvatar {id = avatarId}.Fetch(); // it will get intercepted and stored
+                    await Task.Delay(TimeSpan.FromSeconds(10f + Random.Range(0f, 5f))).ConfigureAwait(false);
+                }
+            }
+
+            ImportStatusInner = "Creating favorites list";
             await FavCatMod.YieldToMainThread();
             var userId = APIUser.CurrentUser.id;
             var categoryName = $"Imported from {fileName}";
@@ -129,7 +144,8 @@ namespace FavCat
                 var storedAvatars = storeDatabase.GetCollection<StoredAvatar>("avatars");
                 var storedPlayers = storeDatabase.GetCollection<StoredPlayer>("players");
                 var storedWorlds = storeDatabase.GetCollection<StoredWorld>("worlds");
-                
+
+                ImportStatusInner = "Importing avatars";
                 foreach (var storedAvatar in storedAvatars.FindAll())
                 {
                     var existingStored = FavCatMod.Database.myStoredAvatars.FindById(storedAvatar.AvatarId);
@@ -137,6 +153,7 @@ namespace FavCat
                         FavCatMod.Database.myStoredAvatars.Upsert(storedAvatar);
                 }
                 
+                ImportStatusInner = "Importing players";
                 foreach (var storedPlayer in storedPlayers.FindAll())
                 {
                     var existingStored = FavCatMod.Database.myStoredPlayers.FindById(storedPlayer.PlayerId);
@@ -144,6 +161,7 @@ namespace FavCat
                         FavCatMod.Database.myStoredPlayers.Upsert(storedPlayer);
                 }
                 
+                ImportStatusInner = "Importing worlds";
                 foreach (var storedWorld in storedWorlds.FindAll())
                 {
                     var existingStored = FavCatMod.Database.myStoredWorlds.FindById(storedWorld.WorldId);
