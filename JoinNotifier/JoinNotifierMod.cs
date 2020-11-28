@@ -19,7 +19,7 @@ namespace JoinNotifier
 {
     public class JoinNotifierMod : MelonMod
     {
-        public const string VersionConst = "0.2.7";
+        public const string VersionConst = "0.2.7.1";
         
         private readonly List<string> myJoinNames = new List<string>();
         private readonly List<string> myLeaveNames = new List<string>();
@@ -41,9 +41,7 @@ namespace JoinNotifier
 
         public override void OnApplicationStart()
         {
-            MelonLogger.Log("ApplicationStart");
             JoinNotifierSettings.RegisterSettings();
-            // MelonLogger.Log("ApplicationStart done");
 
             MelonCoroutines.Start(InitThings());
         }
@@ -202,7 +200,8 @@ namespace JoinNotifier
 
         public void OnPlayerJoined(Player player)
         {
-            var apiUser = player.field_Private_APIUser_0;
+            var apiUser = player?.field_Private_APIUser_0;
+            if (apiUser == null) return;
             if (APIUser.CurrentUser.id == apiUser.id)
             {
                 myObservedLocalPlayerJoin = true;
@@ -224,12 +223,13 @@ namespace JoinNotifier
         
         public void OnPlayerLeft(Player player)
         {
-            var apiUser = player.field_Private_APIUser_0;
+            var apiUser = player?.field_Private_APIUser_0;
+            if (apiUser == null) return;
             if (!JoinNotifierSettings.ShouldNotifyInCurrentInstance()) return;
             if (Environment.TickCount - myLastLevelLoad < 5_000) return;
             var isFriendsWith = APIUser.IsFriendsWith(apiUser.id);
             if (JoinNotifierSettings.ShowFriendsOnly() && !isFriendsWith) return;
-            var playerName = player.field_Private_APIUser_0.displayName ?? "!null!";
+            var playerName = apiUser.displayName ?? "!null!";
             if (JoinNotifierSettings.ShouldBlinkIcon(false))
                 MelonCoroutines.Start(BlinkIconCoroutine(myLeaveImage));
             if (JoinNotifierSettings.ShouldPlaySound(false))
