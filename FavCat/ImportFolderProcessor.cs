@@ -29,7 +29,7 @@ namespace FavCat
             {
                 if (file.EndsWith(".db")) 
                     databases.Add(file);
-                else
+                else if(FavCatMod.Instance.AvatarModule != null)
                     textFiles.Add(file);
             }
 
