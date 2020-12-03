@@ -94,6 +94,18 @@ namespace FavCat
                 
                 foreach (var action in list) 
                     action(tex);
+            }), new Action(() =>
+            {
+                if (!Textures.TryGetValue(url, out var oldTex) || !oldTex)
+                    Textures[url] = AssetsHandler.PreviewError.texture;
+
+                if (!InFlightRequests.TryGetValue(url, out var list))
+                    return;
+
+                InFlightRequests.Remove(url);
+                
+                foreach (var action in list) 
+                    action(AssetsHandler.PreviewError.texture);
             }));
         }
 
