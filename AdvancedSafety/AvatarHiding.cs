@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using MelonLoader;
 using UnhollowerBaseLib;
+using UnhollowerBaseLib.Attributes;
 using VRC;
 using VRC.Core;
 
@@ -59,8 +60,10 @@ namespace AdvancedSafety
             unsafe
             {
                 var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils
-                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(FeaturePermissionManager).GetMethod(
-                        nameof(FeaturePermissionManager.Method_Public_Boolean_APIUser_byref_EnumPublicSealedva5vUnique_0)))
+                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(FeaturePermissionManager).GetMethods()
+                        .Single(it =>
+                            it.Name.StartsWith("Method_Public_Boolean_APIUser_byref_EnumPublicSealedva5vUnique_") &&
+                            it.GetCustomAttribute<CallerCountAttribute>().Count > 0))
                     .GetValue(null);
 
                 Imports.Hook((IntPtr)(&originalMethodPointer), typeof(AvatarHiding).GetMethod(nameof(CanUseCustomAvatarPatch), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
