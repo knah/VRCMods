@@ -100,11 +100,12 @@ namespace ParticleAndBoneLimiterSettings
             var boolSetting = Object.Instantiate(CustomParticleSettingsUiHandler.UixBundle.SettingsBool, categoryUiContent, false);
             boolSetting.GetComponentInChildren<Text>().text = "Enable particle limiter (restart required)";
             var mainToggle = boolSetting.transform.Find("Toggle").GetComponent<Toggle>();
-            mainToggle.isOn = LocalConfig.GetList("betas").Contains("particle_system_limiter");
+            var localConfig = ConfigManager.LocalConfig.Cast<LocalConfig>();
+            mainToggle.isOn = localConfig.GetList("betas").Contains("particle_system_limiter");
             mainToggle.onValueChanged.AddListener(new Action<bool>(
                 isSet =>
                 {
-                    var list = LocalConfig.GetList("betas");
+                    var list = localConfig.GetList("betas");
                     if (isSet)
                     {
                         if (!list.Contains("particle_system_limiter")) list.Add("particle_system_limiter");
@@ -114,7 +115,7 @@ namespace ParticleAndBoneLimiterSettings
                     
                     var newList = new Il2CppSystem.Collections.Generic.List<Il2CppSystem.Object>();
                     foreach (var s in list) newList.Add((Il2CppSystem.String) s);
-                    LocalConfig.SetValue("betas", newList);
+                    localConfig.SetValue("betas", newList);
                 }));
             var pinToggle = boolSetting.transform.Find("PinToggle");
             pinToggle.gameObject.SetActive(false);
@@ -128,13 +129,13 @@ namespace ParticleAndBoneLimiterSettings
                 var textSetting = Object.Instantiate(textPrefab, categoryUiContent, false);
                 textSetting.GetComponentInChildren<Text>().text = prefDesc;
                 var textField = textSetting.GetComponentInChildren<InputField>();
-                textField.text = LocalConfig.GetInt(prefId, defaultValue).ToString();
+                textField.text = localConfig.GetInt(prefId, defaultValue).ToString();
                 textField.contentType = InputField.ContentType.IntegerNumber;
                 textField.onValueChanged.AddListener(new Action<string>(value =>
                 {
                     int parsedValue;
                     if(int.TryParse(textField.text, out parsedValue))
-                        LocalConfig.SetValue(prefId, new Il2CppSystem.Double { m_value = parsedValue }.BoxIl2CppObject());
+                        localConfig.SetValue(prefId, new Il2CppSystem.Double { m_value = parsedValue }.BoxIl2CppObject());
                 }));
                 textSetting.GetComponentInChildren<Button>().onClick.AddListener(new Action(() =>
                 {
