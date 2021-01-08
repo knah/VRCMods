@@ -86,6 +86,16 @@ namespace FavCat.Database
             return myStoredCategories.FindAll();
         }
 
+        public void DeleteFavoriteFromAllCategories(string id)
+        {
+            var favs = myStoredFavorites.Find(it => it.ObjectId == id).ToList();
+            foreach (var storedFavorite in favs) 
+                myStoredFavorites.Delete(storedFavorite.FavoriteId);
+            
+            foreach (var affectedCategory in favs.Select(it => it.Category).Distinct())
+                OnCategoryContentsChanged?.Invoke(affectedCategory);
+        }
+
         public void DeleteFavorite(string id, string categoryName)
         {
             var favorite = GetFavorite(id, categoryName);

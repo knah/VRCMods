@@ -97,7 +97,7 @@ namespace FavCat
                 {
                     await FavCatMod.YieldToMainThread();
                     new ApiAvatar {id = avatarId}.Fetch(); // it will get intercepted and stored
-                    await Task.Delay(TimeSpan.FromSeconds(10f + Random.Range(0f, 5f))).ConfigureAwait(false);
+                    await Task.Delay(TimeSpan.FromSeconds(5f + Random.Range(0f, 5f))).ConfigureAwait(false);
                 }
             }
 

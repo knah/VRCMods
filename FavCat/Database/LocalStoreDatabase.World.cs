@@ -63,5 +63,11 @@ namespace FavCat.Database
                 myStoredWorlds.Upsert(storedWorld);
             });
         }
+        
+        public void CompletelyDeleteWorld(string worldId)
+        {
+            myStoredWorlds.Delete(worldId);
+            WorldFavorites.DeleteFavoriteFromAllCategories(worldId);
+        }
     }
 }

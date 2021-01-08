@@ -593,7 +593,15 @@ namespace FavCat.Modules
                 Process.Start("https://github.com/knah/VRCMods#favcat");
             });
             
-            customMenu.AddSpacer();
+            if (ReFetchFavoritesProcessor.ImportRunning)
+                customMenu.AddLabel(ReFetchFavoritesProcessor.ImportStatusOuter + " " + ReFetchFavoritesProcessor.ImportStatusInner);
+            else
+                customMenu.AddSimpleButton("Re-fetch favorites", () =>
+                {
+                    customMenu.Hide();
+                    ReFetchFavoritesProcessor.ReFetchFavorites().NoAwait();
+                });
+            
             customMenu.AddSpacer();
             
             customMenu.AddSimpleButton("Close", customMenu.Hide);

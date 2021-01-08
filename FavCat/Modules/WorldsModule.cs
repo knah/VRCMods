@@ -86,12 +86,37 @@ namespace FavCat.Modules
             return randomList.transform.parent;
         }
 
+        private string myLastRequestedWorld = "";
         protected override void OnPickerSelected(IPickerElement picker)
         {
+            if (picker.Id == myLastRequestedWorld) 
+                return;
+
+            myLastRequestedWorld = picker.Id;
             var world = new ApiWorld {id = picker.Id};
             world.Fetch(new Action<ApiContainer>(_ =>
             {
+                myLastRequestedWorld = "";
                 UiWorldList.Method_Public_Static_Void_ApiWorld_0(world);
+            }), new Action<ApiContainer>(c =>
+            {
+                myLastRequestedWorld = "";
+                if (Imports.IsDebugMode())
+                    MelonLogger.Log("API request errored with " + c.Code + " - " + c.Error);
+                if (c.Code == 404)
+                {
+                    FavCatMod.Database.CompletelyDeleteWorld(picker.Id);
+                    var menu = ExpansionKitApi.CreateCustomFullMenuPopup(LayoutDescription.WideSlimList);
+                    menu.AddSpacer();
+                    menu.AddSpacer();
+                    menu.AddLabel("This world is not available anymore (deleted)");
+                    menu.AddLabel("It has been removed from all favorite lists");
+                    menu.AddSpacer();
+                    menu.AddSpacer();
+                    menu.AddSpacer();
+                    menu.AddSimpleButton("Close", menu.Hide);
+                    menu.Show();
+                }
             }));
         }
 

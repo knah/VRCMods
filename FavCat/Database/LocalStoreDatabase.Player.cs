@@ -41,5 +41,11 @@ namespace FavCat.Database
                 callback(list);
             }).NoAwait();
         }
+        
+        public void CompletelyDeletePlayer(string userId)
+        {
+            myStoredPlayers.Delete(userId);
+            PlayerFavorites.DeleteFavoriteFromAllCategories(userId);
+        }
     }
 }

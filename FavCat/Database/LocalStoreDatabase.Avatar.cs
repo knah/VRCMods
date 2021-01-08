@@ -88,5 +88,11 @@ namespace FavCat.Database
                 myStoredAvatars.Upsert(storedAvatar);
             });
         }
+
+        public void CompletelyDeleteAvatar(string avatarId)
+        {
+            myStoredAvatars.Delete(avatarId);
+            AvatarFavorites.DeleteFavoriteFromAllCategories(avatarId);
+        }
     }
 }

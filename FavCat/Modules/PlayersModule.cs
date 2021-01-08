@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using FavCat.Adapters;
 using FavCat.CustomLists;
 using FavCat.Database.Stored;
+using MelonLoader;
 using UIExpansionKit.API;
 using UnityEngine;
 using UnityEngine.UI;
@@ -69,9 +70,38 @@ namespace FavCat.Modules
             return randomList.transform.parent;
         }
 
+        private string myLastRequestedPlayer = "";
         protected override void OnPickerSelected(IPickerElement picker)
         {
-            APIUser.FetchUser(picker.Id, new Action<APIUser>(ShowUserPage), new Action<string>(_ => { }));
+            if (picker.Id == myLastRequestedPlayer) 
+                return;
+
+            myLastRequestedPlayer = picker.Id;
+            var user = new APIUser {id = picker.Id};
+            user.Fetch(new Action<ApiContainer>(_ =>
+            {
+                myLastRequestedPlayer = "";
+                ShowUserPage(user);
+            }), new Action<ApiContainer>(c =>
+            {
+                myLastRequestedPlayer = "";
+                if (Imports.IsDebugMode())
+                    MelonLogger.Log("API request errored with " + c.Code + " - " + c.Error);
+                if (c.Code == 404)
+                {
+                    FavCatMod.Database.CompletelyDeleteWorld(picker.Id);
+                    var menu = ExpansionKitApi.CreateCustomFullMenuPopup(LayoutDescription.WideSlimList);
+                    menu.AddSpacer();
+                    menu.AddSpacer();
+                    menu.AddLabel("This world is not available anymore (deleted)");
+                    menu.AddLabel("It has been removed from all favorite lists");
+                    menu.AddSpacer();
+                    menu.AddSpacer();
+                    menu.AddSpacer();
+                    menu.AddSimpleButton("Close", menu.Hide);
+                    menu.Show();
+                }
+            }));
         }
 
         protected override void OnFavButtonClicked(StoredCategory storedCategory)

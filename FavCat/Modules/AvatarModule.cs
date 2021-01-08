@@ -134,6 +134,24 @@ namespace FavCat.Modules
                     myPageAvatar.avatar.Refresh(avatar);
 
                 RefreshFavButtons();
+            }), new Action<ApiContainer>(c =>
+            {
+                if (Imports.IsDebugMode())
+                    MelonLogger.Log("API request errored with " + c.Code + " - " + c.Error);
+                if (c.Code == 404)
+                {
+                    FavCatMod.Database.CompletelyDeleteAvatar(model.Id);
+                    var menu = ExpansionKitApi.CreateCustomFullMenuPopup(LayoutDescription.WideSlimList);
+                    menu.AddSpacer();
+                    menu.AddSpacer();
+                    menu.AddLabel("This avatar is not available anymore (deleted)");
+                    menu.AddLabel("It has been removed from all favorite lists");
+                    menu.AddSpacer();
+                    menu.AddSpacer();
+                    menu.AddSpacer();
+                    menu.AddSimpleButton("Close", menu.Hide);
+                    menu.Show();
+                }
             }));
         }
 
