@@ -24,10 +24,12 @@ namespace AdvancedSafety
 
             myTimeAccumulator = 0;
             
-            var player = myQuickMenu.field_Private_Player_0.prop_VRCPlayer_0;
+            var player = myQuickMenu.field_Private_Player_0;
             if (player == null) return;
+            var vrcPlayer = player.prop_VRCPlayer_0;
+            if (vrcPlayer == null) return;
 
-            UiExpansionKitSupport.QuickMenuUpdateTick(player);
+            UiExpansionKitSupport.QuickMenuUpdateTick(vrcPlayer);
         }
     }
 }
