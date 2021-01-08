@@ -106,7 +106,8 @@ namespace FavCat.CustomLists
 
         private void OnDisable()
         {
-            myImage.texture = null;
+            if (myImage != null)
+                myImage.texture = null;
         }
     }
 }
