@@ -18,7 +18,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using VRC.Core;
 using Object = UnityEngine.Object;
-using ImageDownloaderClosure = ImageDownloader.ObjectCompilerGeneratedNPrivateSealedUnimObUnique;
+using ImageDownloaderClosure = ImageDownloader.ObjectCompilerGeneratedNPrivateSealedImStcaBoisimStInAcimUnique;
 
 [assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.0.3", "knah")]
 [assembly:MelonGame("VRChat", "VRChat")]
