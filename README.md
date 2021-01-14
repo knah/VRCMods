@@ -175,6 +175,11 @@ Settings description:
  
  This mod uses [Google Noto](https://www.google.com/get/noto/) font, licensed under [SIL Open Font License 1.1](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL).  
 
+## View Point Tweaker
+This mod allows you to move view point ("view ball") on avatars. The tweak will affect only you, but other players will see your adjusted head position correctly.  
+Adjusted view points are saved per avatar.  
+**Requires UI Expansion Kit 0.2.0+**. The menu to tweak view point can be found in UI Elements Quick Menu submenu.  
+Do note that the coordinates displayed in that menu are local offset of the view point, not the coordinates you set in avatar descriptor.
  
  ## HWIDPatch
 This mod allows you to fake your Hardware ID. This mod creates a new ID on launch and saves it for future launches. The ID can be changed in `modprefs.ini` afterwards. Set it to empty string to generate a new one.  
