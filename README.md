@@ -115,6 +115,10 @@ Current features:
  - Visual and audible notifications (configurable)
  - Toggleable per instance type (public/friends/private)
  - Can be set to highlight friends or show only friends
+
+## Lag Free Screenshots
+This mod significantly improves screenshot taking performance for handheld camera in VR and F12 key in desktop mode. Benefits are especially noticeable with higher resolution screenshots (4K/8K).  
+Additionally you can set your screenshots to be saved as JPEG files instead of PNG to save on file size. JPEG encoding takes a bit of time though, but it doesn't freeze your game anyway so why even care?
  
 ## LocalPlayerPrefs
 This mod moves game settings storage from Windows registry to UserData folder.  
