@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FavCat.Database.Stored;
 using MelonLoader;
@@ -31,12 +32,8 @@ namespace FavCat.Database
         {
             MelonLogger.Log($"Running local player search for text {text}");
             Task.Run(() => {
-                var list = new List<StoredPlayer>();
-                foreach (var stored in myStoredPlayers.FindAll())
-                {
-                    if (stored.Name.IndexOf(text, StringComparison.InvariantCultureIgnoreCase) != -1)
-                        list.Add(stored);
-                }
+                var searchText = text.ToLowerInvariant();
+                var list = myStoredPlayers.Find(stored => stored.Name.Contains(searchText)).ToList();
 
                 callback(list);
             }).NoAwait();

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FavCat.Database.Stored;
 using MelonLoader;
@@ -13,14 +14,11 @@ namespace FavCat.Database
         {
             MelonLogger.Log($"Running local world search for text {text}");
             Task.Run(() => {
-                var list = new List<StoredWorld>();
-                foreach (var stored in myStoredWorlds.FindAll())
-                {
-                    if (stored.Name.IndexOf(text, StringComparison.InvariantCultureIgnoreCase) != -1 ||
-                        (stored.Description ?? "").IndexOf(text, StringComparison.InvariantCultureIgnoreCase) != -1 ||
-                        stored.AuthorName.IndexOf(text, StringComparison.InvariantCultureIgnoreCase) != -1)
-                        list.Add(stored);
-                }
+                var searchText = text.ToLowerInvariant();
+                var list = myStoredWorlds.Find(stored =>
+                    stored.Name.ToLower().Contains(searchText) ||
+                    stored.Description != null && stored.Description.ToLower().Contains(searchText) ||
+                    stored.AuthorName.ToLower().Contains(searchText)).ToList();
 
                 callback(list);
             }).NoAwait();

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FavCat.Database.Stored;
 using MelonLoader;
@@ -14,16 +15,14 @@ namespace FavCat.Database
             MelonLogger.Log($"Running local avatar search for text {text}");
             var ownerId = APIUser.CurrentUser.id;
             Task.Run(() => {
-                var list = new List<StoredAvatar>();
-                foreach (var stored in myStoredAvatars.FindAll())
-                {
-                    if (stored.ReleaseStatus != "public" && stored.AuthorId != ownerId) continue;
-
-                    if (stored.Name.IndexOf(text, StringComparison.InvariantCultureIgnoreCase) != -1 ||
-                        (stored.Description ?? "").IndexOf(text, StringComparison.InvariantCultureIgnoreCase) != -1 ||
-                        stored.AuthorName.IndexOf(text, StringComparison.InvariantCultureIgnoreCase) != -1)
-                        list.Add(stored);
-                }
+                var searchText = text.ToLowerInvariant();
+                var list = myStoredAvatars
+                    .Find(stored =>
+                        (stored.Name.ToLower().Contains(searchText) ||
+                        stored.Description != null && stored.Description.ToLower().Contains(searchText) ||
+                        stored.AuthorName.ToLower().Contains(searchText)) 
+                        && (stored.ReleaseStatus == "public" || stored.AuthorId == ownerId))
+                    .ToList();
 
                 callback(list);
             }).NoAwait();
@@ -34,14 +33,9 @@ namespace FavCat.Database
             MelonLogger.Log($"Running local avatar search for user {userId}");
             var ownerId = APIUser.CurrentUser.id;
             Task.Run(() => {
-                var list = new List<StoredAvatar>();
-                foreach (var stored in myStoredAvatars.FindAll())
-                {
-                    if (stored.ReleaseStatus != "public" && stored.AuthorId != ownerId) continue;
-
-                    if (stored.AuthorId == userId)
-                        list.Add(stored);
-                }
+                var list = myStoredAvatars.Find(stored =>
+                        stored.AuthorId == userId && (stored.ReleaseStatus == "public" || stored.AuthorId == ownerId))
+                    .ToList();
 
                 callback(list);
             }).NoAwait();
