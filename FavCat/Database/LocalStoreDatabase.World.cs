@@ -26,37 +26,38 @@ namespace FavCat.Database
         
         public void UpdateStoredWorld(ApiWorld world)
         {
-            if (string.IsNullOrEmpty(world.id) || string.IsNullOrEmpty(world.name)) return;
+            var id = world.id;
+            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(world.name)) return;
+            
+            var storedWorld = new StoredWorld
+            {
+                WorldId = id,
+                AuthorId = world.authorId,
+                Name = world.name,
+                Description = world.description,
+                AuthorName = world.authorName,
+                ThumbnailUrl = world.thumbnailImageUrl,
+                ImageUrl = world.imageUrl,
+                ReleaseStatus = world.releaseStatus,
+                Platform = world.platform,
+                Version = world.version,
+                CreatedAt = DateTime.FromBinary(world.created_at.ToBinary()),
+                UpdatedAt = DateTime.FromBinary(world.updated_at.ToBinary()),
+                SupportedPlatforms = world.supportedPlatforms,
+
+                Capacity = world.capacity,
+                Tags = world.tags.ToArray(),
+            };
 
             myUpdateThreadQueue.Enqueue(() =>
             {
-                var preExisting = myStoredWorlds.FindById(world.id);
+                var preExisting = myStoredWorlds.FindById(id);
                 if (preExisting != null)
                 {
-                    if (world.assetUrl == null) world.supportedPlatforms = preExisting.SupportedPlatforms;
+                    if (world.assetUrl == null) storedWorld.SupportedPlatforms = preExisting.SupportedPlatforms;
                 
-                    world.description ??= preExisting.Description;
+                    storedWorld.Description ??= preExisting.Description;
                 }
-                
-                var storedWorld = new StoredWorld
-                {
-                    WorldId = world.id,
-                    AuthorId = world.authorId,
-                    Name = world.name,
-                    Description = world.description,
-                    AuthorName = world.authorName,
-                    ThumbnailUrl = world.thumbnailImageUrl,
-                    ImageUrl = world.imageUrl,
-                    ReleaseStatus = world.releaseStatus,
-                    Platform = world.platform,
-                    Version = world.version,
-                    CreatedAt = DateTime.FromBinary(world.created_at.ToBinary()),
-                    UpdatedAt = DateTime.FromBinary(world.updated_at.ToBinary()),
-                    SupportedPlatforms = world.supportedPlatforms,
-
-                    Capacity = world.capacity,
-                    Tags = world.tags.ToArray(),
-                };
 
                 myStoredWorlds.Upsert(storedWorld);
             });

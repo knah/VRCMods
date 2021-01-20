@@ -15,15 +15,15 @@ namespace FavCat.Database
             if (string.IsNullOrEmpty(player.id) || string.IsNullOrEmpty(player.displayName))
                 return;
             
+            var storedPlayer = new StoredPlayer
+            {
+                PlayerId = player.id,
+                Name = player.displayName,
+                ThumbnailUrl = player.currentAvatarThumbnailImageUrl
+            };
+            
             myUpdateThreadQueue.Enqueue(() =>
             {
-                var storedPlayer = new StoredPlayer
-                {
-                    PlayerId = player.id,
-                    Name = player.displayName,
-                    ThumbnailUrl = player.currentAvatarThumbnailImageUrl
-                };
-
                 myStoredPlayers.Upsert(storedPlayer);
             });
         }

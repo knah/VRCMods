@@ -40,8 +40,6 @@ namespace FavCat.Database
                 callback(list);
             }).NoAwait();
         }
-        
-        
 
         private StoredAvatar? GetAvatar(string id)
         {
@@ -50,34 +48,35 @@ namespace FavCat.Database
 
         public void UpdateStoredAvatar(ApiAvatar avatar)
         {
-            if (string.IsNullOrEmpty(avatar.id) || string.IsNullOrEmpty(avatar.name)) return;
+            var id = avatar.id;
+            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(avatar.name)) return;
+            
+            var storedAvatar = new StoredAvatar
+            {
+                AvatarId = id,
+                AuthorId = avatar.authorId,
+                Name = avatar.name,
+                Description = avatar.description,
+                AuthorName = avatar.authorName,
+                ThumbnailUrl = avatar.thumbnailImageUrl,
+                ImageUrl = avatar.imageUrl,
+                ReleaseStatus = avatar.releaseStatus,
+                Platform = avatar.platform,
+                CreatedAt = DateTime.FromBinary(avatar.created_at.ToBinary()),
+                UpdatedAt = DateTime.FromBinary(avatar.updated_at.ToBinary()),
+                SupportedPlatforms = avatar.supportedPlatforms
+            };
             
             myUpdateThreadQueue.Enqueue(() =>
             {
-                var preExisting = GetAvatar(avatar.id);
+                var preExisting = GetAvatar(id);
             
                 if (preExisting != null)
                 {
-                    if (avatar.assetUrl == null) avatar.supportedPlatforms = preExisting.SupportedPlatforms;
+                    if (avatar.assetUrl == null) storedAvatar.SupportedPlatforms = preExisting.SupportedPlatforms;
                 
-                    avatar.description ??= preExisting.Description;
+                    storedAvatar.Description ??= preExisting.Description;
                 }
-
-                var storedAvatar = new StoredAvatar
-                {
-                    AvatarId = avatar.id,
-                    AuthorId = avatar.authorId,
-                    Name = avatar.name,
-                    Description = avatar.description,
-                    AuthorName = avatar.authorName,
-                    ThumbnailUrl = avatar.thumbnailImageUrl,
-                    ImageUrl = avatar.imageUrl,
-                    ReleaseStatus = avatar.releaseStatus,
-                    Platform = avatar.platform,
-                    CreatedAt = DateTime.FromBinary(avatar.created_at.ToBinary()),
-                    UpdatedAt = DateTime.FromBinary(avatar.updated_at.ToBinary()),
-                    SupportedPlatforms = avatar.supportedPlatforms
-                };
 
                 myStoredAvatars.Upsert(storedAvatar);
             });
