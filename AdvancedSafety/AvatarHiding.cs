@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using Harmony;
 using MelonLoader;
 using UnhollowerBaseLib;
 using UnhollowerBaseLib.Attributes;
@@ -21,7 +22,7 @@ namespace AdvancedSafety
         internal static readonly Dictionary<string, string> ourBlockedAvatarAuthors = new Dictionary<string, string>();
         internal static readonly Dictionary<string, string> ourBlockedAvatars = new Dictionary<string, string>();
         
-        public static void OnApplicationStart()
+        public static void OnApplicationStart(HarmonyInstance harmony)
         {
             if (File.Exists(BlockedAvatarsMakersFilePath))
             {
@@ -56,19 +57,14 @@ namespace AdvancedSafety
 
                 ourSwitchAvatar = Marshal.GetDelegateForFunctionPointer<SwitchAvatarDelegate>(originalMethodPointer);
             }
-            
-            unsafe
+
+            foreach (var methodInfo in typeof(FeaturePermissionManager).GetMethods()
+                .Where(it =>
+                    it.Name.StartsWith("Method_Public_Boolean_APIUser_byref_EnumPublicSealedva5vUnique_") &&
+                    it.GetCustomAttribute<CallerCountAttribute>().Count > 0))
             {
-                var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils
-                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(FeaturePermissionManager).GetMethods()
-                        .Single(it =>
-                            it.Name.StartsWith("Method_Public_Boolean_APIUser_byref_EnumPublicSealedva5vUnique_") &&
-                            it.GetCustomAttribute<CallerCountAttribute>().Count > 0))
-                    .GetValue(null);
-
-                Imports.Hook((IntPtr)(&originalMethodPointer), typeof(AvatarHiding).GetMethod(nameof(CanUseCustomAvatarPatch), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
-
-                ourCanUseCustomAvatarDelegate = Marshal.GetDelegateForFunctionPointer<CanUseCustomAvatarDelegate>(originalMethodPointer);
+                harmony.Patch(methodInfo,
+                    postfix: new HarmonyMethod(typeof(AvatarHiding), nameof(CanUseCustomAvatarPostfix)));
             }
         }
 
@@ -87,50 +83,47 @@ namespace AdvancedSafety
                 return ourSwitchAvatar(thisPtr, apiAvatarPtr, someString, someFloat, someDelegate, nativeMethodInfo);
         }
 
-        private static bool CanUseCustomAvatarPatch(IntPtr thisPtr, IntPtr apiUserPtr, ref int denyReason)
+        private static void CanUseCustomAvatarPostfix(ref bool __result)
         {
-            var result = ourCanUseCustomAvatarDelegate(thisPtr, apiUserPtr, ref denyReason);
             try
             {
                 if (!SwitchAvatarCookie.ourInSwitch || SwitchAvatarCookie.ourApiAvatar == null)
-                    return result;
+                    return;
                 
                 var apiAvatar = SwitchAvatarCookie.ourApiAvatar;
                 var avatarManager = SwitchAvatarCookie.ourAvatarManager;
 
                 var vrcPlayer = avatarManager.field_Private_VRCPlayer_0;
-                if (vrcPlayer == null) return result;
+                if (vrcPlayer == null) return;
 
                 if (vrcPlayer == VRCPlayer.field_Internal_Static_VRCPlayer_0) // never apply to self
-                    return result;
+                    return;
 
                 var apiUser = vrcPlayer.prop_Player_0?.prop_APIUser_0;
                 if (apiUser == null)
-                    return result;
+                    return;
 
                 var userId = apiUser.id;
                 if (!AdvancedSafetySettings.IncludeFriendsInHides && APIUser.IsFriendsWith(userId))
-                    return result;
+                    return;
 
                 if (AdvancedSafetySettings.HidesAbideByShowAvatar &&
                     AdvancedSafetyMod.IsAvatarExplicitlyShown(userId))
-                    return result;
+                    return;
 
                 if (ourBlockedAvatarAuthors.ContainsKey(apiAvatar.authorId) ||
                     ourBlockedAvatars.ContainsKey(apiAvatar.id))
                 {
                     MelonLogger.Log(
                         $"Hiding avatar on {apiUser.displayName} because it or its author is hidden");
-                    denyReason = 3;
-                    return false;
+                    // denyReason = 3;
+                    __result = false;
                 }
             }
             catch (Exception ex)
             {
                 MelonLogger.LogError($"Exception in CanUseCustomAvatarPatch: {ex}");
             }
-
-            return result;
         }
 
         private struct SwitchAvatarCookie : IDisposable

@@ -92,6 +92,8 @@ namespace AdvancedSafety
         {
             totalCount++;
 
+            cloth.clothSolverFrequency = Mathf.Max(cloth.clothSolverFrequency, 300f);
+
             var numVertices = 0;
             var skinnedMesh = obj.GetComponent<SkinnedMeshRenderer>()?.sharedMesh;
             if (skinnedMesh == null || (specificCount += (numVertices = skinnedMesh.vertexCount)) >= AdvancedSafetySettings.MaxClothVertices)

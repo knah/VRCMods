@@ -21,7 +21,7 @@ using Object = UnityEngine.Object;
 using ModerationManager = ObjectPublicObLi1ApSiLi1ApBoSiUnique;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.2.4", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.2.5", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
 namespace AdvancedSafety
@@ -107,7 +107,7 @@ namespace AdvancedSafety
             }
             
             PortalHiding.OnApplicationStart();
-            AvatarHiding.OnApplicationStart();
+            AvatarHiding.OnApplicationStart(harmonyInstance);
             
             if(MelonHandler.Mods.Any(it => it.Info.SystemType.Name == nameof(UiExpansionKitMod)))
             {
