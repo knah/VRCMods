@@ -6,7 +6,7 @@ namespace UIExpansionKit.API
     public struct LayoutDescription
     {
         /// <summary>
-        /// Number of columns in grid layout of this menu. DOes not change menu width.
+        /// Number of columns in grid layout of this menu. Does not change menu width.
         /// </summary>
         public int NumColumns;
         
