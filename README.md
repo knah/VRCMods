@@ -108,6 +108,41 @@ Setting it to public will choose a random populated public instance if one is av
 UIExpansionKit 0.2.0 or newer recommended for in-game settings.  
 Known instance types are `Public`, `FriendOfGuests`, `FriendsOnly`, `InvitePlus` and `InviteOnly` (if you wish to edit modprefs.ini by hand)
 
+## IKTweaks
+This mod offers a customized VRIK solver for full body tracking, and a few other IK-related tweaks.  
+Features:
+* No more viewpoint drift in FBT. Instead, your spine bends (up to a limit), or your hip drifts (above the limit).
+* No more weird chest rotations when laying down or upside down
+* No more weird spine/neck stretching
+* Remote players see the new IK too, there's no mismatch between what you and others see
+* Support for universal calibration - calibrate once for all avatars, even ones using different rigs or proportions
+* Support for per-avatar calibration saving (when not using universal calibration)
+* Half-click head follow calibration: hold one trigger to freeze the avatar in place to be able to look at your feet
+* Support for elbow, knee and chest trackers (read below)
+* Optional local NetIK pass to ensure you see the same thing as remote players (not necessary for Index Controller users)
+* Disable FBT even if you have trackers connected, for when you're charging them from your PC
+
+It's recommended to use a normal humanoid rig without any rig hacks (so no neck fix, no FBT fix, no inverted hip, no zero-length spine bones).  
+It requires at least three trackers (legs and hip). 3-point (no trackers) and 4-point (hip tracker) modes are not affected by the mod.
+
+### Using additional trackers
+You need to enable additional trackers in mod settings before you're able to use them.  
+To use knee trackers, there are no additional requirements - just calibrate normally.  
+To use elbow or chest trackers, you'll need to stand straight and T-pose your arms during calibration.  
+Chest tracker is kinda useless and janky, so don't bother buying a tracker for it.  
+It's recommended to put elbow/knee trackers as close to the joint they're tracking as possible (but not on the joint itself). For arms, the recommended position is on the outer surface of the lower or upper arm next to the elbow.  
+If you're using additional trackers, your avatar should generally match your physical proportions - that is, all body parts should line up reasonably well without real height hacks.
+
+### Partial source code
+This mod includes parts of FinalIK, which is a paid Unity Store asset, therefore source code for those is not provided.  
+If you want to build the mod yourself, you'll need to do the following:
+* Get a copy of FinalIK from asset store
+* Copy the VRIK solver, VRIK component and TwistRelaxer component into mod sources folder
+* Rename them to match with what the rest of mod source expects
+* Add the following line to start of `RootMotionNew.FinalIK.IKSolverVR.Spine.FABRIKPass` : `weight = Mathf.Clamp01(weight - pelvisPositionWeight);`
+* Remove `RootMotionNew.FinalIK.IKSolverVR.Spine.SolvePelvis` from the original VRIK solver
+* Fix compilation if broken
+
 ## JoinNotifier
 A VRChat mod to notify you when someone joins the instance you're in
 
@@ -215,3 +250,10 @@ Then, you will have to put mod .dll files in the `Mods` folder of your game dire
 ## Building
 To build these, drop required libraries (found in `<vrchat instanll dir>/MelonLoader/Managed` after melonloader installation, list found in `Directory.Build.props`) into Libs folder, then use your IDE of choice to build.
  * Libs folder is intended for newest libraries (MelonLoader 0.2.2)
+
+## License
+With the following exceptions, all mods here are provided under the terms of [GNU GPLv3 license](LICENSE)
+* ILRepack.Lib.MSBuild.Task is covered by [its own license](https://github.com/ravibpatel/ILRepack.Lib.MSBuild.Task/blob/master/LICENSE.md)
+* ILRepack is covered by [Apache 2.0 license](https://github.com/gluck/il-repack/blob/master/LICENSE)
+* UI Expansion Kit is additionally covered by [LGPLv3](UIExpansionKit/COPYING.LESSER) to allow other mods to link to it
+* IKTweaks source code is not covered by a permissive license and provided for reference purposes only

@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+    <VrcReferences>true</VrcReferences>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="iktweaks" />
+    <EmbeddedResource Include="iktweaks" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UIExpansionKit\UIExpansionKit.csproj" />
+  </ItemGroup>
+</Project>
