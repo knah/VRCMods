@@ -71,11 +71,7 @@ namespace AdvancedSafety
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate bool SwitchAvatarDelegate(IntPtr thisPtr, IntPtr apiAvatarPtr, IntPtr someString, float someFloat, IntPtr someDelegate, IntPtr nativeMethodInfo);
 
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate bool CanUseCustomAvatarDelegate(IntPtr thisPtr, IntPtr userId, ref int denyReason);
-
         private static SwitchAvatarDelegate ourSwitchAvatar;
-        private static CanUseCustomAvatarDelegate ourCanUseCustomAvatarDelegate;
         
         private static bool SwitchAvatarPatch(IntPtr thisPtr, IntPtr apiAvatarPtr, IntPtr someString, float someFloat, IntPtr someDelegate, IntPtr nativeMethodInfo)
         {
