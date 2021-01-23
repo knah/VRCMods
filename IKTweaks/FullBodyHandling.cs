@@ -36,7 +36,6 @@ namespace IKTweaks
             
             var vrik = fbbik.GetComponent<VRIK_New>();
             
-            fbbik.enabled = false;
             fbbik.skipSolverUpdate = true;
             if (LastInitializedController.field_Private_FBBIKHeadEffector_0 != null)
             {
@@ -99,7 +98,8 @@ namespace IKTweaks
                 vrik.solver.rightArm.rotationWeight = 1;
             }
 
-            vrik.solver.IKPositionWeight = IkTweaksSettings.IgnoreAnimations ? 1 : fbbik.solver.IKPositionWeight;
+            vrik.enabled = fbbik.enabled;
+            vrik.solver.IKPositionWeight = fbbik.solver.IKPositionWeight;
             
             vrik.solver.spine.maxNeckAngleFwd = IkTweaksSettings.MaxNeckAngleFwd;
             vrik.solver.spine.maxNeckAngleBack = IkTweaksSettings.MaxNeckAngleBack;
@@ -160,7 +160,7 @@ namespace IKTweaks
                 var muscles = new Il2CppStructArray<float>(HumanTrait.MuscleCount);
                 vrik.solver.OnPreUpdate += () =>
                 {
-                    if (!IkTweaksSettings.IgnoreAnimations) return;
+                    if (!IkTweaksSettings.IgnoreAnimations || vrik.solver.IKPositionWeight < 0.9f) return;
                     
                     var hipPos = hips.position;
                     var hipRot = hips.rotation;
@@ -264,9 +264,6 @@ namespace IKTweaks
             // vrik.solver.spine.bodyOffsetWhenNotEvenCrouching = -2f;
 
             vrik.solver.IKPositionWeight = 1f;
-            
-            vrik.solver.leftLeg.bendGoal = source.field_Private_FullBodyBipedIK_0.solver.leftLegChain.bendConstraint.bendGoal;
-            vrik.solver.rightLeg.bendGoal = source.field_Private_FullBodyBipedIK_0.solver.rightLegChain.bendConstraint.bendGoal;
 
             vrik.solver.leftLeg.bendGoalWeight = vrik.solver.rightLeg.bendGoalWeight = 0.75f;
 
@@ -315,9 +312,9 @@ namespace IKTweaks
             return true;
         }
 
-        private static bool LateUpdatePrefix()
+        private static bool LateUpdatePrefix(FullBodyBipedIK __instance)
         {
-            if (IkTweaksSettings.FullBodyVrIk && LastCalibrationWasInCustomIk)
+            if (IkTweaksSettings.FullBodyVrIk && LastCalibrationWasInCustomIk && LastInitializedController.field_Private_FullBodyBipedIK_0 == __instance)
                 return false;
 
             return true;
@@ -351,6 +348,10 @@ namespace IKTweaks
                 new HarmonyMethod(typeof(FullBodyHandling), nameof(FbbIkInitPostfix)));
 
             harmony.Patch(AccessTools.Method(typeof(FullBodyBipedIK), nameof(FullBodyBipedIK.LateUpdate)),
+                new HarmonyMethod(typeof(FullBodyHandling), nameof(LateUpdatePrefix)));
+            harmony.Patch(AccessTools.Method(typeof(FullBodyBipedIK), nameof(FullBodyBipedIK.Update)),
+                new HarmonyMethod(typeof(FullBodyHandling), nameof(LateUpdatePrefix)));
+            harmony.Patch(AccessTools.Method(typeof(FullBodyBipedIK), nameof(FullBodyBipedIK.FixedUpdate)),
                 new HarmonyMethod(typeof(FullBodyHandling), nameof(LateUpdatePrefix)));
 
             harmony.Patch(AccessTools.Method(typeof(VRCTrackingManager), nameof(VRCTrackingManager.Method_Public_Static_Boolean_String_0)),
