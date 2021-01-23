@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,6 +26,9 @@ namespace ViewPointTweaker
         private static Transform ourCurrentHeadOffsetTransform;
         private static Dictionary<string, (float X, float Y, float Z)> ourSavedViewpoints =
             new Dictionary<string, (float X, float Y, float Z)>();
+
+        private static VRCVrCameraSteam ourSteamCamera;
+        private static Transform ourCameraTransform;
         
         private bool myHighPrecisionMoves;
         
@@ -39,6 +43,22 @@ namespace ViewPointTweaker
                     nameof(HeadAlignmentInitPatch))));
             
             LoadViewpoints();
+        }
+
+        public override void VRChat_OnUiManagerInit()
+        {
+            foreach (var vrcTracking in VRCTrackingManager.field_Private_Static_VRCTrackingManager_0.field_Private_List_1_VRCTracking_0)
+            {
+                var trackingSteam = vrcTracking.TryCast<VRCTrackingSteam>();
+                if(trackingSteam == null) continue;
+
+                ourSteamCamera = trackingSteam.GetComponentInChildren<VRCVrCameraSteam>();
+                ourCameraTransform = trackingSteam.transform.Find("SteamCamera/[CameraRig]/Neck/Camera (head)/Camera (eye)");
+
+                return;
+            }
+            
+            MelonLogger.LogError("Steam tracking not found, things will break");
         }
 
         private void SaveViewpoints()
@@ -71,10 +91,30 @@ namespace ViewPointTweaker
             var avatarId = localPlayer.prop_ApiAvatar_0?.id;
             if (avatarId == null) return;
             if (ourSavedViewpoints.TryGetValue(avatarId, out var triple))
-                xform.localPosition = new Vector3(triple.X, triple.Y, triple.Z);
-            
+            {
+                var offset = new Vector3(triple.X, triple.Y, triple.Z);
+                SetViewPointOffset(offset);
+                MelonCoroutines.Start(SetOffsetAgainLater(offset));
+            }
+
             if (Imports.IsDebugMode())
                 MelonLogger.Log("Head alignment set hook");
+        }
+
+        private static IEnumerator SetOffsetAgainLater(Vector3 offset)
+        {
+            for (var i = 0; i < 3; i++)
+                yield return null;
+            
+            SetViewPointOffset(offset);
+        }
+
+        private static void SetViewPointOffset(Vector3 offset)
+        {
+            ourCurrentHeadOffsetTransform.localPosition = offset;
+            ourSteamCamera.field_Private_Vector3_0 = -offset / ourSteamCamera.transform.lossyScale.x;
+            if (ourCameraTransform != null)
+                ourCameraTransform.localPosition = -offset / ourCameraTransform.lossyScale.x;
         }
 
         private void ShowViewpointMenu()
@@ -118,7 +158,7 @@ namespace ViewPointTweaker
             void DoMove(Vector3 direction)
             {
                 var localPosition = ourCurrentHeadOffsetTransform.localPosition + direction * (myHighPrecisionMoves ? 0.001f : 0.01f);
-                ourCurrentHeadOffsetTransform.localPosition = localPosition;
+                SetViewPointOffset(localPosition);
 
                 xLabel.text = $"X:\n{localPosition.x:F3}";
                 yLabel.text = $"Y:\n{localPosition.y:F3}";
@@ -142,7 +182,7 @@ namespace ViewPointTweaker
 
             menu.AddSimpleButton("Reset", () =>
             {
-                ourCurrentHeadOffsetTransform.localPosition = ourCurrentDefaultOffset;
+                SetViewPointOffset(ourCurrentDefaultOffset);
                 DoMove(Vector3.zero);
             });
             menu.AddSpacer();
