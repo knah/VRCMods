@@ -102,6 +102,7 @@ namespace IKTweaks
                 var newPuck = Object.Instantiate(puckPrefab, trackersParent, true);
                 newPuck.name = "Puck" + (i + 4);
                 newPuck.GetComponent<SteamVR_TrackedObject>().index = SteamVR_TrackedObject.EnumNPublicSealedvaNoHmDe18DeDeDeDeDeUnique.None;
+                newPuck.SetActive(false);
                 newPucks[i + 5] = newPuck;
                 newUints[i + 5] = UInt32.MaxValue;
             }
