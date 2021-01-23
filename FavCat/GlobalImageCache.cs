@@ -18,8 +18,14 @@ namespace FavCat
         private static readonly Dictionary<string, List<Action<Texture2D>>> InFlightRequests = new Dictionary<string, List<Action<Texture2D>>>();
         private static readonly Dictionary<string, Texture2D> Textures = new Dictionary<string, Texture2D>();
         
-        public static void DownloadImage(string url, Action<Texture2D> onDone)
+        public static void DownloadImage(string? url, Action<Texture2D> onDone)
         {
+            if (url == null)
+            {
+                onDone(AssetsHandler.PreviewError.texture);
+                return;
+            }
+
             if (Textures.TryGetValue(url, out var tex) && tex)
             {
                 onDone(tex);
@@ -134,8 +140,10 @@ namespace FavCat
             RunRequest(RequestOrderQueue.Dequeue());
         }
 
-        public static void CancelRequest(string url, Action<Texture2D> callback)
+        public static void CancelRequest(string? url, Action<Texture2D> callback)
         {
+            if (url == null) return;
+            
             if (QueuedRequests.TryGetValue(url, out var queuedList))
                 queuedList.Remove(callback);
 
