@@ -297,6 +297,8 @@ namespace IKTweaks
             await ManualCalibrateCoro(avatarRoot);
             
             await IKTweaksMod.AwaitVeryLateUpdate();
+
+            if (!avatarRoot) return;
             
             await ApplyStoredCalibration(avatarRoot, avatarId);
         }
