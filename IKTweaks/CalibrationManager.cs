@@ -301,15 +301,10 @@ namespace IKTweaks
             await ApplyStoredCalibration(avatarRoot, avatarId);
         }
 
-        private static Vector3 GetLocalPosition(Transform parent, Transform child)
-        {
-            return parent.InverseTransformPoint(child.position);
-        }
-
-        private static Quaternion GetLocalRotation(Transform parent, Transform child)
-        {
-            return Quaternion.Inverse(parent.rotation) * child.rotation;
-        }
+        private static Vector3 GetLocalPosition(Transform parent, Transform child) => parent.InverseTransformPoint(child.position);
+        private static Vector3 GetLocalPosition(Transform parent, Vector3 childPosition) => parent.InverseTransformPoint(childPosition);
+        private static Quaternion GetLocalRotation(Transform parent, Transform child) => Quaternion.Inverse(parent.rotation) * child.rotation;
+        private static Quaternion GetLocalRotation(Transform parent, Quaternion childRotation) => Quaternion.Inverse(parent.rotation) * childRotation;
 
         private static int spammy = 0;
         private static async Task ManualCalibrateCoro(GameObject avatarRoot)
@@ -330,10 +325,15 @@ namespace IKTweaks
             playerApi.PushAnimations(BundleHolder.TPoseController);
 
             var headTarget = FullBodyHandling.LastInitializedController.field_Private_FBBIKHeadEffector_0.transform;
+            var headsetTracker = headTarget.parent;
             
             SetTrackerVisibility(true);
 
             var oldHipPos = hips.position;
+            var oldHipRot = hips.rotation;
+
+            var preClickHeadPos = Vector3.zero;
+            var preClickHeadRot = Quaternion.identity;
 
             var mirrorCloneRoot = avatarRootTransform.parent.Find("_AvatarMirrorClone");
             Transform mirrorHips = null;
@@ -361,14 +361,39 @@ namespace IKTweaks
                 if (IkTweaksSettings.CalibrateHalfFreeze && trigger1 + trigger2 > 0.75f)
                 {
                     hips.position = oldHipPos;
-                    if (mirrorHips != null) mirrorHips.position = oldHipPos;
+                    hips.rotation = oldHipRot;
+                    
+                    if (mirrorHips != null)
+                    {
+                        mirrorHips.position = oldHipPos;
+                        mirrorHips.rotation = oldHipRot;
+                    }
                 }
-                else if(IkTweaksSettings.CalibrateFollowHead)
+                else if(IkTweaksSettings.CalibrateFollowHead || willUniversallyCalibrate)
                 {
                     var delta = headTarget.position - head.position;
                     hips.position += delta;
                     if (mirrorHips != null) mirrorHips.position = hips.position;
                     oldHipPos = hips.position;
+                    oldHipRot = hips.rotation;
+                    
+                    preClickHeadPos = headsetTracker.position;
+                    preClickHeadRot = headsetTracker.rotation;
+                }
+                else
+                { 
+                    // legacy calibration
+                    hips.position = oldHipPos;
+                    hips.rotation = oldHipRot;
+                    
+                    if (mirrorHips != null)
+                    {
+                        mirrorHips.position = oldHipPos;
+                        mirrorHips.rotation = oldHipRot;
+                    }
+                    
+                    preClickHeadPos = headsetTracker.position;
+                    preClickHeadRot = headsetTracker.rotation;
                 }
 
                 if (trigger1 + trigger2 > 1.75f || willUniversallyCalibrate)
@@ -453,8 +478,9 @@ namespace IKTweaks
                 Save(avatarId, point, storedData);
             }
 
-            void StoreBendGoal(CalibrationPoint point, (Transform tracker, Transform bone)? pair, Vector3 offset)
+            void StoreBendGoal(CalibrationPoint point, (Transform tracker, Transform bone)? pair, Vector3 offset, ref float weight)
             {
+                weight = 0f;
                 if (pair == null) return;
 
                 var tracker = pair.Value.tracker;
@@ -473,6 +499,8 @@ namespace IKTweaks
                         GetLocalRotation(tracker.parent, tracker), serial);
                     UniversalData[point] = avatarSpaceData;
                 }
+
+                weight = 1f;
             }
 
             var hipsTracker = GetTracker(HumanBodyBones.Hips);
@@ -496,8 +524,8 @@ namespace IKTweaks
                 var leftElbowTracker = GetTracker(HumanBodyBones.LeftLowerArm);
                 var rightElbowTracker = GetTracker(HumanBodyBones.RightLowerArm);
 
-                StoreBendGoal(CalibrationPoint.LeftElbow, leftElbowTracker, avatarForward * -0.1f);
-                StoreBendGoal(CalibrationPoint.RightElbow, rightElbowTracker, avatarForward * -0.1f);
+                StoreBendGoal(CalibrationPoint.LeftElbow, leftElbowTracker, avatarForward * -0.1f, ref FullBodyHandling.LeftElbowWeight);
+                StoreBendGoal(CalibrationPoint.RightElbow, rightElbowTracker, avatarForward * -0.1f, ref FullBodyHandling.RightElbowWeight);
             }
 
             if (IkTweaksSettings.UseKneeTrackers)
@@ -505,15 +533,15 @@ namespace IKTweaks
                 var leftKneeTracker = GetTracker(HumanBodyBones.LeftLowerLeg);
                 var rightKneeTracker = GetTracker(HumanBodyBones.RightLowerLeg);
 
-                StoreBendGoal(CalibrationPoint.LeftKnee, leftKneeTracker, avatarForward * 0.1f);
-                StoreBendGoal(CalibrationPoint.RightKnee, rightKneeTracker, avatarForward * 0.1f);
+                StoreBendGoal(CalibrationPoint.LeftKnee, leftKneeTracker, avatarForward * 0.1f, ref FullBodyHandling.LeftKneeWeight);
+                StoreBendGoal(CalibrationPoint.RightKnee, rightKneeTracker, avatarForward * 0.1f, ref FullBodyHandling.RightKneeWeight);
             }
 
             if (IkTweaksSettings.UseChestTracker)
             {
                 var chestTracker = GetTracker(HumanBodyBones.UpperChest, HumanBodyBones.Chest);
 
-                StoreBendGoal(CalibrationPoint.Chest, chestTracker, avatarForward * .5f);
+                StoreBendGoal(CalibrationPoint.Chest, chestTracker, avatarForward * .5f, ref FullBodyHandling.ChestWeight);
             }
 
             StoreHand(new Vector3(15, 90 + 10, 0), HumanBodyBones.LeftHand, CalibrationPoint.LeftHand);
@@ -521,9 +549,11 @@ namespace IKTweaks
 
             if (!willUniversallyCalibrate)
             {
+                var trackerParent = hipsTracker.Value.Tracker.parent;
+                
                 UniversalData[CalibrationPoint.Head] = new CalibrationData(
-                    GetLocalPosition(hipsTracker.Value.Tracker.parent, headTarget.parent),
-                    GetLocalRotation(hipsTracker.Value.Tracker.parent, headTarget.parent), "HEAD");
+                    GetLocalPosition(trackerParent, preClickHeadPos),
+                    GetLocalRotation(trackerParent, preClickHeadRot), "HEAD");
             }
 
             playerApi.PopAnimations();
