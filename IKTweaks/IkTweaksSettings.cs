@@ -32,7 +32,10 @@ namespace IKTweaks
 
             MelonPrefs.RegisterBool(IkTweaksCategory, nameof(CalibrateStorePerAvatar), true, "Store calibration per avatar (when not using universal calibration)");
             MelonPrefs.RegisterBool(IkTweaksCategory, nameof(DisableFbt), false, "Disable FBT even if trackers are present");
-            MelonPrefs.RegisterBool(IkTweaksCategory, nameof(PinHipRotation), false, "Enforce hip rotation match");
+            MelonPrefs.RegisterBool(IkTweaksCategory, nameof(PinHipRotation), true, "Enforce hip rotation match");
+            
+            MelonPrefs.RegisterBool(IkTweaksCategory, nameof(DoHipShifting), true, "Shift hip pivot (support inverted hip)");
+            MelonPrefs.RegisterBool(IkTweaksCategory, nameof(PreStraightenSpine), true, "Pre-straighten spine (improve IK stability)");
 
             MelonPrefs.RegisterBool(IkTweaksCategory, nameof(StraightenNeck), false, "Straighten neck");
             MelonPrefs.RegisterInt(IkTweaksCategory, nameof(SpineRelaxIterations), 10, "Spine Relax Iterations (max 25)");
@@ -75,6 +78,8 @@ namespace IKTweaks
         public static float StraightSpineAngle;
         public static float StraightSpinePower;
         public static bool PinHipRotation;
+        public static bool DoHipShifting;
+        public static bool PreStraightenSpine;
 
         internal static void OnSettingsApplied()
         {

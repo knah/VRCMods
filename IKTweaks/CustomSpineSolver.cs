@@ -68,8 +68,21 @@ namespace RootMotionNew.FinalIK
 				var middleLegPosition = (mySolver.legs[0].thigh.readPosition + mySolver.legs[1].thigh.readPosition) / 2;
 				var hipLocalOffset = Quaternion.Inverse(pelvis.readRotation) * (middleLegPosition - pelvis.readPosition);
 
-				pelvis.solverPosition += pelvis.solverRotation * hipLocalOffset;
-				IKPositionPelvis += IKRotationPelvis * hipLocalOffset;
+				if (IkTweaksSettings.DoHipShifting)
+				{
+					pelvis.solverPosition += pelvis.solverRotation * hipLocalOffset;
+					IKPositionPelvis += IKRotationPelvis * hipLocalOffset;
+				}
+
+				if (IkTweaksSettings.PreStraightenSpine)
+				{
+					for (var i = 1; i < bones.Length - 1; i++)
+					{
+						var rotation = Quaternion.FromToRotation(bones[i].solverPosition - bones[i + 1].solverPosition,
+							bones[i - 1].solverPosition - bones[i].solverPosition);
+						VirtualBone.RotateBy(bones, i, rotation);
+					}
+				}
 
 				var minAngle = 0f;
 				var maxAngle = 1f;
@@ -141,10 +154,44 @@ namespace RootMotionNew.FinalIK
 					currentAngle = (minAngle + maxAngle) / 2;
 				}
 
-				pelvis.solverPosition -= pelvis.solverRotation * hipLocalOffset;
-				IKPositionPelvis -= IKRotationPelvis * hipLocalOffset;
+				if (IkTweaksSettings.DoHipShifting)
+				{
+					pelvis.solverPosition -= pelvis.solverRotation * hipLocalOffset;
+					IKPositionPelvis -= IKRotationPelvis * hipLocalOffset;
+				}
 
 				head.solverRotation = headSolverRotation;
+			}
+		}
+
+		partial class Leg
+		{
+			protected static Vector3 PlanarBendNormal(Vector3 root, Vector3 target, Vector3 goal)
+			{
+				return Vector3.Cross(goal - root, target - root).normalized;
+			}
+			
+			public override void ApplyOffsets()
+			{
+				ApplyPositionOffset(footPositionOffset, 1f);
+				ApplyRotationOffset(footRotationOffset, 1f);
+
+				// Heel position offset
+				Quaternion fromTo = Quaternion.FromToRotation(footPosition - position,
+					footPosition + heelPositionOffset - position);
+				footPosition = position + fromTo * (footPosition - position);
+				footRotation = fromTo * footRotation;
+
+				if (bendGoal != null && bendGoalWeight > 0f)
+				{
+					bendNormal = PlanarBendNormal(bones[0].solverPosition, footPosition, bendGoal.position);
+				}
+
+				if (swivelOffset != 0f)
+				{
+					bendNormal = Quaternion.AngleAxis(swivelOffset, thigh.solverPosition - lastBone.solverPosition) * bendNormal;
+					thigh.solverRotation = Quaternion.AngleAxis(-swivelOffset, thigh.solverRotation * thigh.axis) * thigh.solverRotation;
+				}
 			}
 		}
 	}
