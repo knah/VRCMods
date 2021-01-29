@@ -127,26 +127,38 @@ namespace IKTweaks
 
             vrik.solver.spine.hipRotationPinning = IkTweaksSettings.PinHipRotation;
         }
-        
-        public static void CopyCurrentSettings(VRCFbbIkController source, VRIK_New target)
-        {
-            var solver = target.solver;
-            var sourceSolver = source.field_Private_FullBodyBipedIK_0.solver;
-            
-            solver.spine.headTarget = source.field_Private_FBBIKHeadEffector_0.transform;
-            // solver.leftArm.target = sourceSolver.leftHandEffector.target;
-            // solver.rightArm.target = sourceSolver.rightHandEffector.target;
 
-            // MelonLogger.Log($"Current VRIK settings after copy: head {solver.spine.headTarget.name} hips {solver.spine.pelvisTarget.name} rhand {solver.rightArm.target.name} lhand {solver.leftArm.target.name} rleg {solver.rightLeg.target?.name}  lleg {solver.leftLeg.target?.name}");
+        public enum BoneResetMask
+        {
+            Never,
+            Spine,
+            LeftArm,
+            RightArm,
+            LeftLeg,
+            RightLeg,
         }
 
-        private static readonly bool[] BoneResetMask = {true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false,
-            false, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true,
-            true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
-            true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false,
-            false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-            false, false, false, false, false, false, false, false, false, false, false, false
-        }; 
+        private static readonly string[] ourNeverBones = {"Index", "Thumb", "Middle", "Ring", "Little", "Jaw", "Eye"};
+        private static readonly string[] ourArmBones = {"Arm", "Forearm", "Hand", "Shoulder"};
+        private static readonly string[] ourLegBones = {"Leg", "Foot", "Toes"};
+
+        private static BoneResetMask JudgeBone(string name)
+        {
+            if (ourNeverBones.Any(name.Contains))
+                return BoneResetMask.Never;
+
+            if (ourArmBones.Any(name.Contains))
+            {
+                return name.Contains("Left") ? BoneResetMask.LeftArm : BoneResetMask.RightArm;
+            }
+
+            if (ourLegBones.Any(name.Contains))
+                return name.Contains("Left") ? BoneResetMask.LeftLeg : BoneResetMask.RightLeg;
+
+            return BoneResetMask.Spine;
+        }
+
+        private static readonly BoneResetMask[] ourBoneResetMasks = HumanTrait.MuscleName.Select(JudgeBone).ToArray(); 
 
         internal static void PreSetupVrIk(GameObject targetGameObject)
         {
@@ -160,7 +172,7 @@ namespace IKTweaks
                 var muscles = new Il2CppStructArray<float>(HumanTrait.MuscleCount);
                 vrik.solver.OnPreUpdate += () =>
                 {
-                    if (!IkTweaksSettings.IgnoreAnimations || vrik.solver.IKPositionWeight < 0.9f) return;
+                    if (vrik.solver.IKPositionWeight < 0.9f) return;
                     
                     var hipPos = hips.position;
                     var hipRot = hips.rotation;
@@ -168,8 +180,37 @@ namespace IKTweaks
                     handler.GetHumanPose(out var bodyPos, out var bodyRot, muscles);
                     
                     for (var i = 0; i < muscles.Count; i++)
-                        if (BoneResetMask[i])
-                            muscles[i] = 0f;
+                    {
+                        if (IkTweaksSettings.IgnoreAnimations)
+                        {
+                            muscles[i] *= ourBoneResetMasks[i] == BoneResetMask.Never ? 1 : 0;
+                            continue;
+                        }
+                        
+                        switch (ourBoneResetMasks[i])
+                        {
+                            case BoneResetMask.Never:
+                                break;
+                            case BoneResetMask.Spine:
+                                muscles[i] *= 1 - vrik.solver.spine.pelvisPositionWeight;
+                                break;
+                            case BoneResetMask.LeftArm:
+                                muscles[i] *= 1 - vrik.solver.leftArm.positionWeight;
+                                break;
+                            case BoneResetMask.RightArm:
+                                muscles[i] *= 1 - vrik.solver.rightArm.positionWeight;
+                                break;
+                            case BoneResetMask.LeftLeg:
+                                muscles[i] *= 1 - vrik.solver.leftLeg.positionWeight;
+                                break;
+                            case BoneResetMask.RightLeg:
+                                muscles[i] *= 1 - vrik.solver.rightLeg.positionWeight;
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
+                            
+                    }
 
                     handler.SetHumanPose(ref bodyPos, ref bodyRot, muscles);
 
@@ -276,7 +317,7 @@ namespace IKTweaks
             
             vrik.solver.Reset();
 
-            CopyCurrentSettings(source, vrik);
+            vrik.solver.spine.headTarget = source.field_Private_FBBIKHeadEffector_0.transform;
 
             return vrik;
         }

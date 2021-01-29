@@ -35,9 +35,9 @@ namespace IKTweaks
             MelonPrefs.RegisterBool(IkTweaksCategory, nameof(PinHipRotation), true, "Enforce hip rotation match");
             
             MelonPrefs.RegisterBool(IkTweaksCategory, nameof(DoHipShifting), true, "Shift hip pivot (support inverted hip)");
-            MelonPrefs.RegisterBool(IkTweaksCategory, nameof(PreStraightenSpine), true, "Pre-straighten spine (improve IK stability)");
-
-            MelonPrefs.RegisterBool(IkTweaksCategory, nameof(StraightenNeck), false, "Straighten neck");
+            MelonPrefs.RegisterBool(IkTweaksCategory, nameof(PreStraightenSpine), false, "Pre-straighten spine (improve IK stability)");
+            MelonPrefs.RegisterBool(IkTweaksCategory, nameof(StraightenNeck), true, "Straighten neck");
+            
             MelonPrefs.RegisterInt(IkTweaksCategory, nameof(SpineRelaxIterations), 10, "Spine Relax Iterations (max 25)");
             MelonPrefs.RegisterFloat(IkTweaksCategory, nameof(MaxSpineAngleFwd), 30, "Max spine angle forward (degrees)");
             MelonPrefs.RegisterFloat(IkTweaksCategory, nameof(MaxSpineAngleBack), 30, "Max spine angle back (degrees)");

@@ -78,9 +78,19 @@ namespace RootMotionNew.FinalIK
 				{
 					for (var i = 1; i < bones.Length - 1; i++)
 					{
-						var rotation = Quaternion.FromToRotation(bones[i].solverPosition - bones[i + 1].solverPosition,
-							bones[i - 1].solverPosition - bones[i].solverPosition);
+						var rotation = Quaternion.FromToRotation(bones[i + 1].solverPosition - bones[i].solverPosition,
+							bones[i].solverPosition - bones[i - 1].solverPosition);
 						VirtualBone.RotateBy(bones, i, rotation);
+					}
+				}
+
+				if (IkTweaksSettings.StraightenNeck)
+				{
+					if (neckIndex >= 0)
+					{
+						var rotation = Quaternion.FromToRotation(bones[neckIndex + 1].solverPosition - bones[neckIndex].solverPosition,
+							bones[neckIndex].solverPosition - bones[neckIndex - 1].solverPosition);
+						VirtualBone.RotateBy(bones, neckIndex, rotation);
 					}
 				}
 
@@ -133,13 +143,24 @@ namespace RootMotionNew.FinalIK
 						var targetAngle = j == neckIndex
 							? Mathf.Clamp01(currentAngle * neckBendPriority) * maxNeckAngle
 							: currentAngle * maxSpineAngle;
-						if (j == neckIndex && IkTweaksSettings.StraightenNeck) VirtualBone.RotateBy(bones, j, bones[j].readRotation * Quaternion.Inverse(bones[j].solverRotation));
 						VirtualBone.RotateBy(bones, j, Quaternion.AngleAxis(targetAngle, rotationNormal));
 					}
 
-					VirtualBone.RotateBy(bones, hipRotationPinning ? 1 : 0,
-						Quaternion.FromToRotation(head.solverPosition - pelvis.solverPosition,
-							headSolverPosition - IKPositionPelvis));
+					if (hipRotationPinning)
+					{
+						var od = pelvis.solverPosition - bones[1].solverPosition;
+						var p = Vector3.Dot(od, targetToHead);
+						var q = od.sqrMagnitude - (bones[1].solverPosition - head.solverPosition).sqrMagnitude;
+						var t = -p + Mathf.Sqrt(p * p - q);
+						var headRotateToTarget = pelvis.solverPosition + targetToHead * t;
+						VirtualBone.RotateBy(bones, 1,
+							Quaternion.FromToRotation(head.solverPosition - bones[1].solverPosition,
+								headRotateToTarget - bones[1].solverPosition));
+					}
+					else
+						VirtualBone.RotateBy(bones,
+							Quaternion.FromToRotation(head.solverPosition - pelvis.solverPosition,
+								headSolverPosition - IKPositionPelvis));
 
 					delta = headSolverPosition - head.solverPosition;
 					foreach (VirtualBone bone in bones) bone.solverPosition += delta;
@@ -170,28 +191,19 @@ namespace RootMotionNew.FinalIK
 			{
 				return Vector3.Cross(goal - root, target - root).normalized;
 			}
+
+			public void ApplyBendGoal()
+			{
+				if (bendGoal != null && bendGoalWeight > 0f)
+					bendNormal = PlanarBendNormal(bones[0].solverPosition, position, bendGoal.position);
+			}
 			
 			public override void ApplyOffsets()
 			{
-				ApplyPositionOffset(footPositionOffset, 1f);
-				ApplyRotationOffset(footRotationOffset, 1f);
-
-				// Heel position offset
-				Quaternion fromTo = Quaternion.FromToRotation(footPosition - position,
-					footPosition + heelPositionOffset - position);
-				footPosition = position + fromTo * (footPosition - position);
-				footRotation = fromTo * footRotation;
-
-				if (bendGoal != null && bendGoalWeight > 0f)
-				{
-					bendNormal = PlanarBendNormal(bones[0].solverPosition, footPosition, bendGoal.position);
-				}
-
-				if (swivelOffset != 0f)
-				{
-					bendNormal = Quaternion.AngleAxis(swivelOffset, thigh.solverPosition - lastBone.solverPosition) * bendNormal;
-					thigh.solverRotation = Quaternion.AngleAxis(-swivelOffset, thigh.solverRotation * thigh.axis) * thigh.solverRotation;
-				}
+				var oldWeight = bendGoalWeight;
+				bendGoalWeight = 0f;
+				ApplyOffsetsOld();
+				bendGoalWeight = oldWeight;
 			}
 		}
 	}
