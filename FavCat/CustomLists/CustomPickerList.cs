@@ -131,7 +131,7 @@ namespace FavCat.CustomLists
                 transform.Find("Header/HomeButton").GetComponent<Button>().onClick.AddListener((Action) HomeClick);
                 transform.Find("Header/EndButton").GetComponent<Button>().onClick.AddListener((Action) EndClick);
 
-                myContentScrollRect = transform.Find("Scroll View").GetComponent<ScrollRect>();
+                myContentScrollRect = AddScrollRectEx(transform.Find("Scroll View"));
                 myContentScrollRect.onValueChanged.AddListener((Action<Vector2>) ScrollValueChanged);
 
                 SetAvatarListSizing(myIsAvatarListSizing);
@@ -145,6 +145,28 @@ namespace FavCat.CustomLists
             {
                 MelonLogger.LogError(ex.ToString());
             }
+        }
+
+        private static ScrollRectEx AddScrollRectEx(Transform scrollView)
+        {
+            var rect = scrollView.GetComponent<ScrollRectEx>();
+            if (rect == null)
+            {
+                rect = scrollView.gameObject.AddComponent<ScrollRectEx>();
+
+                rect.content = scrollView.Find("Viewport/ContentRoot").Cast<RectTransform>();
+                rect.horizontal = true;
+                rect.vertical = false;
+                rect.movementType = ScrollRect.MovementType.Elastic;
+                rect.elasticity = 0.1f;
+                rect.inertia = true;
+                rect.decelerationRate = 0.135f;
+                rect.scrollSensitivity = 1;
+                rect.viewport = scrollView.Find("Viewport").Cast<RectTransform>();
+                rect.horizontalScrollbar = null;
+            }
+
+            return rect;
         }
 
         [HideFromIl2Cpp]

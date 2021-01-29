@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using MelonLoader;
@@ -10,7 +11,7 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(SparkleBeGoneMod), "SparkleBeGone", "1.0.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(SparkleBeGoneMod), "SparkleBeGone", "1.0.2", "knah", "https://github.com/knah/VRCMods")]
 
 namespace SparkleBeGone
 {
@@ -100,8 +101,8 @@ namespace SparkleBeGone
 
             if (cursorManager == null) return;
 
-            var leftHand = cursorManager.handLeftCursor;
-            var rightHand = cursorManager.handRightCursor;
+            var leftHand = cursorManager.transform.Find("LeftHandBeam").GetComponent<VRCUiCursor>();
+            var rightHand = cursorManager.transform.Find("RightHandBeam").GetComponent<VRCUiCursor>();
 
             if (myOriginalLaserTexture == null)
             {
@@ -140,7 +141,7 @@ namespace SparkleBeGone
 
                 if (!ourDoRecolorBeams) return;
                 
-                var lineRenderer = pointer.lineRenderer;
+                var lineRenderer = pointer.field_Public_LineRenderer_0;
                 if (lineRenderer != null)
                     lineRenderer.startColor = lineRenderer.endColor = ourBeamColor;
             }

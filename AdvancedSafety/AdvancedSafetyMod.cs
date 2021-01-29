@@ -13,15 +13,15 @@ using UnhollowerBaseLib.Runtime;
 using UnityEngine;
 using UnityEngine.Animations;
 using VRC.Core;
-using AMEnumA = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObVRAc1GaApAcObBoUnique;
-using AMEnumB = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObGaVRApBoBoObBoObUnique;
-using AMEnumC = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObVRAc1GaApAcObObUnique;
+using AMEnumA = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObAcOb1GaondoAconUnique;
+using AMEnumB = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObGaobApObapBoisfrUnique;
+using AMEnumC = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObAcOb1GaonPrAconUnique;
 using Object = UnityEngine.Object;
 
-using ModerationManager = ObjectPublicObLi1ApSiLi1ApBoSiUnique;
+using ModerationManager = VRC.Management.ModerationManager;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.2.5", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.2.6", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
 namespace AdvancedSafety
@@ -262,7 +262,7 @@ namespace AdvancedSafety
         {
             try
             {
-                using (new AvatarManagerCookie(new AMEnumA(thisPtr).field_Public_VRCAvatarManager_0))
+                using (new AvatarManagerCookie(new AMEnumA(thisPtr).__4__this))
                     return SafeInvokeMoveNext(ourMoveNextA, thisPtr);
             }
             catch (Il2CppException ex)
@@ -282,7 +282,7 @@ namespace AdvancedSafety
         {
             try
             {
-                using (new AvatarManagerCookie(new AMEnumB(thisPtr).field_Public_VRCAvatarManager_0))
+                using (new AvatarManagerCookie(new AMEnumB(thisPtr).__4__this))
                     return SafeInvokeMoveNext(ourMoveNextB, thisPtr);
             }
             catch (Il2CppException ex)
@@ -302,7 +302,7 @@ namespace AdvancedSafety
         {
             try
             {
-                using (new AvatarManagerCookie(new AMEnumC(thisPtr).field_Public_VRCAvatarManager_0))
+                using (new AvatarManagerCookie(new AMEnumC(thisPtr).__4__this))
                     return SafeInvokeMoveNext(ourMoveNextC, thisPtr);
             }
             catch (Il2CppException ex)
@@ -355,7 +355,7 @@ namespace AdvancedSafety
 
         internal static bool IsAvatarExplicitlyShown(string userId)
         {
-            foreach (var playerModeration in ModerationManager.prop_ObjectPublicObLi1ApSiLi1ApBoSiUnique_0.field_Private_List_1_ApiPlayerModeration_0)
+            foreach (var playerModeration in ModerationManager.prop_ModerationManager_0.field_Private_List_1_ApiPlayerModeration_0)
             {
                 if (playerModeration.moderationType == ApiPlayerModeration.ModerationType.ShowAvatar && playerModeration.targetUserId == userId)
                     return true;

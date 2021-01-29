@@ -13,7 +13,7 @@ using UnityEngine.UI;
 using VRCSDK2;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.2.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.2.1", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace UIExpansionKit
@@ -48,6 +48,7 @@ namespace UIExpansionKit
             (ExpandedMenu.ModerationQuickMenu, "UserInterface/QuickMenu/ModerationMenu", false),
             (ExpandedMenu.UiElementsQuickMenu, "UserInterface/QuickMenu/UIElementsMenu", false),
             (ExpandedMenu.AvatarStatsQuickMenu, "UserInterface/QuickMenu/AvatarStatsMenu", false),
+            (ExpandedMenu.InvitesTab, "UserInterface/QuickMenu/QuickModeMenus/QuickModeNotificationsMenu", false),
         };
         
         private readonly Dictionary<ExpandedMenu, GameObject> myMenuRoots = new Dictionary<ExpandedMenu, GameObject>();
@@ -144,7 +145,7 @@ namespace UIExpansionKit
             var quickMenuRoot = QuickMenu.prop_QuickMenu_0.gameObject;
             
             var fullMenuExpandoPrefab = myStuffBundle.BigMenuExpando;
-            var fullMenuRoot = VRCUiManager.prop_VRCUiManager_0.menuContent;
+            var fullMenuRoot = VRCUiManager.prop_VRCUiManager_0.field_Public_GameObject_0;
             
             foreach (var valueTuple in GameObjectToCategoryList)
             {
@@ -193,7 +194,7 @@ namespace UIExpansionKit
                     var transform = expando.transform;
                     transform.localScale = Vector3.one * 4.2f; // looks like the original menu already has scale of 0.001
                     transform.RotateAround(transform.position, transform.right, 30);
-                    transform.Cast<RectTransform>().localPosition = new Vector3(55, -700, 5);
+                    transform.Cast<RectTransform>().localPosition = new Vector3(55, -1000, 5);
 
                     var toggleButton = transform.Find("QuickMenuExpandoToggle");
                     var content = transform.Find("Content");
@@ -255,7 +256,7 @@ namespace UIExpansionKit
 
         private void DecorateFullMenu()
         {
-            var fullMenuRoot = VRCUiManager.prop_VRCUiManager_0.menuContent;
+            var fullMenuRoot = VRCUiManager.prop_VRCUiManager_0.field_Public_GameObject_0;
 
             var settingsExpandoPrefab = myStuffBundle.SettingsMenuExpando;
             myModSettingsExpando = Object.Instantiate(settingsExpandoPrefab, fullMenuRoot.transform, false);

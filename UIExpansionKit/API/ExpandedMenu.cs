@@ -79,5 +79,10 @@ namespace UIExpansionKit.API
         /// Avatar stats Quick Menu page
         /// </summary>
         AvatarStatsQuickMenu,
+        
+        /// <summary>
+        /// The invites tab in quick menu
+        /// </summary>
+        InvitesTab,
     }
 }

@@ -2,11 +2,10 @@ using CameraMinus;
 using MelonLoader;
 using UIExpansionKit.API;
 using UnityEngine;
-using UnityEngine.UI;
 using VRC.UserCamera;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(CameraMinusMod), "CameraMinus", "1.1.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(CameraMinusMod), "CameraMinus", "1.1.1", "knah", "https://github.com/knah/VRCMods")]
 
 namespace CameraMinus
 {
@@ -34,14 +33,14 @@ namespace CameraMinus
         {
             var cameraController = UserCameraController.field_Internal_Static_UserCameraController_0;
             if (cameraController == null) return;
-            cameraController.viewFinder.transform.localScale *= 1.5f;
+            cameraController.transform.Find("ViewFinder").localScale *= 1.5f;
         }
         
         private void Shrink()
         {
             var cameraController = UserCameraController.field_Internal_Static_UserCameraController_0;
             if (cameraController == null) return;
-            cameraController.viewFinder.transform.localScale /= 1.5f;
+            cameraController.transform.Find("ViewFinder").localScale /= 1.5f;
         }
 
         private void ToggleLens(bool enabled)
@@ -49,7 +48,7 @@ namespace CameraMinus
             var cameraController = UserCameraController.field_Internal_Static_UserCameraController_0;
             if (cameraController == null) return;
 
-            var lensMesh = cameraController.photoCamera.transform.Find("camera_lens_mesh");
+            var lensMesh = cameraController.transform.Find("PhotoCamera/camera_lens_mesh");
             lensMesh.gameObject.SetActive(enabled);
         }
 
@@ -58,7 +57,7 @@ namespace CameraMinus
             var cameraController = UserCameraController.field_Internal_Static_UserCameraController_0;
             if (cameraController == null) return true;
             
-            var lensMesh = cameraController.photoCamera.transform.Find("camera_lens_mesh");
+            var lensMesh = cameraController.transform.Find("PhotoCamera/camera_lens_mesh");
             return lensMesh.gameObject.activeSelf;
         }
 

@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using FavCat.Adapters;
 using FavCat.CustomLists;
 using FavCat.Database.Stored;
 using MelonLoader;
 using UIExpansionKit.API;
+using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
 using UnityEngine.UI;
 using VRC.Core;
@@ -26,7 +28,7 @@ namespace FavCat.Modules
         private void ShowFavMenu()
         {
             var availableListsMenu = ExpansionKitApi.CreateCustomFullMenuPopup(LayoutDescription.WideSlimList);
-            var currentUser = PageUserInfo.user;
+            var currentUser = PageUserInfo.field_Public_APIUser_0;
             
             var storedCategories = GetCategoriesInSortedOrder();
 
@@ -156,9 +158,26 @@ namespace FavCat.Modules
                     : PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa9vUnique.OnlineFriend)
                 : PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa9vUnique.NotFriends;
 
-            PageUserInfo
-                .Method_Public_Void_APIUser_EnumNPublicSealedvaNoOnOfSeReBlInFa9vUnique_EnumNPublicSealedvaNoInFrOnOfSeInFa9vUnique_0(
-                    user, friendState, UiUserList.EnumNPublicSealedvaNoInFrOnOfSeInFa9vUnique.FavoriteFriends);
+            SetUserPageUser(PageUserInfo, user, friendState, UiUserList.EnumNPublicSealedvaNoInFrOnOfSeInFa9vUnique.FavoriteFriends);
+        }
+
+        private static
+            Action<PageUserInfo, APIUser, PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa9vUnique,
+                UiUserList.EnumNPublicSealedvaNoInFrOnOfSeInFa9vUnique>? ourSetUserInfo;
+
+        private void SetUserPageUser(PageUserInfo pageUserInfo, APIUser user, PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa9vUnique enumA,
+            UiUserList.EnumNPublicSealedvaNoInFrOnOfSeInFa9vUnique enumB)
+        {
+            if (ourSetUserInfo == null)
+            {
+                var targetMethod = typeof(PageUserInfo).GetMethods().Single(it =>
+                    it.Name.StartsWith("Method_Public_Void_APIUser_EnumNPublicSealedvaNoOnOfSeReBlInFa9vUnique_EnumNPublicSealedvaNoInFrOnOfSeInFa9vUnique_") && XrefScanner.XrefScan(it).Any(jt => jt.Type == XrefType.Global && jt.ReadAsObject()?.ToString() == "online in a private world"));
+                ourSetUserInfo = (Action<PageUserInfo, APIUser, PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa9vUnique,
+                    UiUserList.EnumNPublicSealedvaNoInFrOnOfSeInFa9vUnique>) Delegate.CreateDelegate(typeof(Action<PageUserInfo, APIUser, PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa9vUnique,
+                    UiUserList.EnumNPublicSealedvaNoInFrOnOfSeInFa9vUnique>), targetMethod);
+            }
+
+            ourSetUserInfo(pageUserInfo, user, enumA, enumB);
         }
     }
 }

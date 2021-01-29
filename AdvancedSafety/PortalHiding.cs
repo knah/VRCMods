@@ -7,8 +7,7 @@ using UnhollowerBaseLib;
 using UnityEngine;
 using VRC;
 using VRC.Core;
-
-using ModerationManager = ObjectPublicObLi1ApSiLi1ApBoSiUnique;
+using VRC.Management;
 
 namespace AdvancedSafety
 {
@@ -94,7 +93,7 @@ namespace AdvancedSafety
         {
             if (userId == null) return false;
             
-            var moderationManager = ModerationManager.prop_ObjectPublicObLi1ApSiLi1ApBoSiUnique_0;
+            var moderationManager = ModerationManager.prop_ModerationManager_0;
             if (moderationManager == null) return false;
             if (APIUser.CurrentUser?.id == userId)
                 return false;

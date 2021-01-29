@@ -50,8 +50,8 @@ namespace FavCat.Modules
             
             VRCUiManager.prop_VRCUiManager_0.Method_Public_Void_String_Boolean_0("UserInterface/MenuContent/Screens/Avatar", false);
             SetSearchListHeaderAndScrollToIt("Search running...");
-            LastSearchRequest = "Created by " + PlayersModule.PageUserInfo.user.displayName;
-            FavCatMod.Database.RunBackgroundAvatarSearchByUser(PlayersModule.PageUserInfo.user.id, AcceptSearchResult);
+            LastSearchRequest = "Created by " + PlayersModule.PageUserInfo.field_Public_APIUser_0.displayName;
+            FavCatMod.Database.RunBackgroundAvatarSearchByUser(PlayersModule.PageUserInfo.field_Public_APIUser_0.id, AcceptSearchResult);
         }
 
         private static Transform GetListsParent()
@@ -66,7 +66,7 @@ namespace FavCat.Modules
         
         protected override void OnFavButtonClicked(StoredCategory storedCategory)
         {
-            ApiAvatar currentApiAvatar = myPageAvatar.avatar.field_Internal_ApiAvatar_0;
+            ApiAvatar currentApiAvatar = myPageAvatar.field_Public_SimpleAvatarPedestal_0.field_Internal_ApiAvatar_0;
             OnFavButtonClicked(storedCategory, currentApiAvatar.id, false);
         }
 
@@ -99,7 +99,7 @@ namespace FavCat.Modules
 
         protected internal override void RefreshFavButtons()
         {
-            var apiAvatar = myPageAvatar != null ? myPageAvatar.avatar != null ? myPageAvatar.avatar.field_Internal_ApiAvatar_0 : null : null;
+            var apiAvatar = myPageAvatar != null ? myPageAvatar.field_Public_SimpleAvatarPedestal_0 != null ? myPageAvatar.field_Public_SimpleAvatarPedestal_0.field_Internal_ApiAvatar_0 : null : null;
 
             foreach (var customPickerList in PickerLists)
             {
@@ -127,11 +127,11 @@ namespace FavCat.Modules
                 var canUse = avatar.releaseStatus == "public" || avatar.authorId == APIUser.CurrentUser.id;
                 if (!canUse)
                 {
-                    myPageAvatar.avatar.DisplayErrorAvatar();
-                    myPageAvatar.avatar.field_Internal_ApiAvatar_0 = avatar; // set it directly here because refreshing will load it
+                    myPageAvatar.field_Public_SimpleAvatarPedestal_0.DisplayErrorAvatar();
+                    myPageAvatar.field_Public_SimpleAvatarPedestal_0.field_Internal_ApiAvatar_0 = avatar; // set it directly here because refreshing will load it
                 }
                 else
-                    myPageAvatar.avatar.Refresh(avatar);
+                    myPageAvatar.field_Public_SimpleAvatarPedestal_0.Refresh(avatar);
 
                 RefreshFavButtons();
             }), new Action<ApiContainer>(c =>
@@ -159,10 +159,10 @@ namespace FavCat.Modules
         {
             if (!myInitialised) return;
 
-            if (myPageAvatar.avatar != null && myPageAvatar.avatar.field_Internal_ApiAvatar_0 != null &&
-                !myCurrentUiAvatarId.Equals(myPageAvatar.avatar.field_Internal_ApiAvatar_0?.id))
+            if (myPageAvatar.field_Public_SimpleAvatarPedestal_0 != null && myPageAvatar.field_Public_SimpleAvatarPedestal_0.field_Internal_ApiAvatar_0 != null &&
+                !myCurrentUiAvatarId.Equals(myPageAvatar.field_Public_SimpleAvatarPedestal_0.field_Internal_ApiAvatar_0?.id))
             {
-                var apiAvatar = myPageAvatar != null ? myPageAvatar.avatar != null ? myPageAvatar.avatar.field_Internal_ApiAvatar_0 : null : null;
+                var apiAvatar = myPageAvatar != null ? myPageAvatar.field_Public_SimpleAvatarPedestal_0 != null ? myPageAvatar.field_Public_SimpleAvatarPedestal_0.field_Internal_ApiAvatar_0 : null : null;
                 
                 myCurrentUiAvatarId = apiAvatar?.id ?? "";
 

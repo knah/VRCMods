@@ -19,9 +19,10 @@ using UIExpansionKit.API;
 using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
 using UnityEngine.Rendering;
+using VRC.UserCamera;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.0.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.0.1", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -40,7 +41,7 @@ namespace LagFreeScreenshots
         public override void OnApplicationStart()
         {
             harmonyInstance.Patch(
-                typeof(ObjectPublicCaUnique.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObCaInObNu1InSiBoUnique).GetMethod("MoveNext"),
+                typeof(CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObreInCareObcaNuInUnique).GetMethod("MoveNext"),
                 new HarmonyMethod(AccessTools.Method(typeof(LagFreeScreenshotsMod), nameof(MoveNextPatch))));
             
             MelonPrefs.RegisterCategory(SettingsCategory, "Lag Free Screenshots");
@@ -68,14 +69,14 @@ namespace LagFreeScreenshots
             ourToEndOfFrame.Flush();
         }
 
-        public static bool MoveNextPatch(ref bool __result, ObjectPublicCaUnique.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObCaInObNu1InSiBoUnique __instance)
+        public static bool MoveNextPatch(ref bool __result, CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObreInCareObcaNuInUnique __instance)
         {
             if (!MelonPrefs.GetBool(SettingsCategory, SettingEnableMod))
                 return true;
             
             __result = false;
-            TakeScreenshot(__instance.field_Public_Camera_0, __instance.field_Public_Int32_0,
-                __instance.field_Public_Int32_1, __instance.field_Public_Boolean_0).ContinueWith(t =>
+            TakeScreenshot(__instance.cam, __instance.resWidth,
+                __instance.resHeight, __instance.alpha).ContinueWith(t =>
             {
                 if (t.IsFaulted)
                     MelonLogger.LogWarning($"Free-floating task failed with exception: {t.Exception}");
@@ -200,7 +201,7 @@ namespace LagFreeScreenshots
         static string GetPath(int w, int h)
         {
             ourOurGetPathMethod ??= (Func<int, int, string>) Delegate.CreateDelegate(typeof(Func<int, int, string>),
-                typeof(ObjectPublicCaUnique)
+                typeof(CameraUtil)
                     .GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly).Single(it =>
                         it.Name.StartsWith("Method_Private_Static_String_Int32_Int32_") && XrefScanner.XrefScan(it)
                             .Any(jt => jt.Type == XrefType.Global &&

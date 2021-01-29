@@ -18,9 +18,9 @@ using UnityEngine;
 using UnityEngine.Networking;
 using VRC.Core;
 using Object = UnityEngine.Object;
-using ImageDownloaderClosure = ImageDownloader.ObjectCompilerGeneratedNPrivateSealedImStcaBoisimStInAcimUnique;
+using ImageDownloaderClosure = ImageDownloader.__c__DisplayClass11_1;
 
-[assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.0.6", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.0.7", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace FavCat
@@ -165,7 +165,7 @@ namespace FavCat
 
         static ApiSnifferPatch()
         {
-            ImageDownloaderClosureType = typeof(ImageDownloader).GetNestedTypes().Single(it => it.GetMethod("Method_Internal_Void_AsyncOperation_0") != null);
+            ImageDownloaderClosureType = typeof(ImageDownloader).GetNestedTypes().Single(it => it.GetMethod(nameof(ImageDownloaderClosure._DownloadImageInternal_b__0)) != null);
             WebRequestField = ImageDownloaderClosureType.GetProperties().Single(it => it.PropertyType == typeof(UnityWebRequest)).GetMethod;
             NestedClosureField = ImageDownloaderClosureType.GetProperties().SingleOrDefault(it => it.PropertyType.IsNested && it.PropertyType.DeclaringType == typeof(ImageDownloader))?.GetMethod;
             Type? possibleNestedClosureType = NestedClosureField?.ReturnType;
@@ -188,7 +188,7 @@ namespace FavCat
 
             unsafe
             {
-                var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(ImageDownloaderClosureType.GetMethod(nameof(ImageDownloaderClosure.Method_Internal_Void_AsyncOperation_0))).GetValue(null);
+                var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(ImageDownloaderClosureType.GetMethod(nameof(ImageDownloaderClosure._DownloadImageInternal_b__0))).GetValue(null);
                 Imports.Hook((IntPtr) (&originalMethodPointer), typeof(ApiSnifferPatch).GetMethod(nameof(ImageSnifferPatch))!.MethodHandle.GetFunctionPointer());
                 ourOriginalOnDone = Marshal.GetDelegateForFunctionPointer<ImageDownloaderOnDoneDelegate>(originalMethodPointer);
             }

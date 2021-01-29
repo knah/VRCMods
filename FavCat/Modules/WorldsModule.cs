@@ -35,7 +35,7 @@ namespace FavCat.Modules
             while (Time.time < endTime && myPageWorldInfo.gameObject.activeSelf)
             {
                 yield return null;
-                myPageWorldInfo.newInstanceButton.interactable = true;
+                myPageWorldInfo.transform.Find("WorldButtons/NewButton").GetComponent<Button>().interactable = true;
             }
         } 
 

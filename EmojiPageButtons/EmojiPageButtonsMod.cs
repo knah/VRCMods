@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(EmojiPageButtonsMod), "Emoji Page Buttons", "1.0.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(EmojiPageButtonsMod), "Emoji Page Buttons", "1.0.1", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace EmojiPageButtons
@@ -37,9 +37,9 @@ namespace EmojiPageButtons
             storeGo.transform.SetParent(emojiMenu.transform);
             storeGo.SetActive(false);
 
-            for (var index = 0; index < emojiMenu.pages.Count; index++)
+            for (var index = 0; index < emojiMenu.field_Public_List_1_GameObject_0.Count; index++)
             {
-                var pageGo = emojiMenu.pages[index];
+                var pageGo = emojiMenu.field_Public_List_1_GameObject_0[index];
 
                 var clone = new GameObject($"Page{index}Button", new []{Il2CppType.Of<RectTransform>()});
                 clone.transform.SetParent(storeGo.transform, false);
@@ -62,7 +62,7 @@ namespace EmojiPageButtons
                 var index1 = index;
                 ExpansionKitApi.GetExpandedMenu(ExpandedMenu.EmojiQuickMenu).AddSimpleButton("", () =>
                 {
-                    emojiMenu.pages[emojiMenu.field_Private_Int32_0].SetActive(false);
+                    emojiMenu.field_Public_List_1_GameObject_0[emojiMenu.field_Private_Int32_0].SetActive(false);
                     pageGo.SetActive(true);
                     emojiMenu.field_Private_Int32_0 = index1;
                 }, buttonGo =>

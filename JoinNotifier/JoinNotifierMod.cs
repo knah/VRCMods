@@ -7,6 +7,7 @@ using JoinNotifier;
 using MelonLoader;
 using UnhollowerRuntimeLib;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.UI;
 using VRC;
 using VRC.Core;
@@ -19,7 +20,7 @@ namespace JoinNotifier
 {
     public class JoinNotifierMod : MelonMod
     {
-        public const string VersionConst = "0.2.7.1";
+        public const string VersionConst = "0.2.7.2";
         
         private readonly List<string> myJoinNames = new List<string>();
         private readonly List<string> myLeaveNames = new List<string>();
@@ -39,6 +40,8 @@ namespace JoinNotifier
         private AudioClip myJoinClip;
         private AudioClip myLeaveClip;
 
+        private AudioMixerGroup uiGroup;
+
         public override void OnApplicationStart()
         {
             JoinNotifierSettings.RegisterSettings();
@@ -53,6 +56,8 @@ namespace JoinNotifier
             while (ReferenceEquals(NetworkManager.field_Internal_Static_NetworkManager_0, null)) yield return null;
             while (ReferenceEquals(VRCAudioManager.field_Private_Static_VRCAudioManager_0, null)) yield return null;
             while (ReferenceEquals(VRCUiManager.prop_VRCUiManager_0, null)) yield return null;
+
+            uiGroup = VRCAudioManager.field_Private_Static_VRCAudioManager_0.field_Public_AudioMixerGroup_0;
 
             MelonLogger.Log("Start init");
             
@@ -88,13 +93,13 @@ namespace JoinNotifier
             if (myJoinSource != null)
             {
                 myJoinSource.volume = JoinNotifierSettings.GetSoundVolume();
-                myJoinSource.outputAudioMixerGroup = JoinNotifierSettings.GetUseUiMixer() ? VRCAudioManager.field_Private_Static_VRCAudioManager_0.uiGroup : null;
+                myJoinSource.outputAudioMixerGroup = JoinNotifierSettings.GetUseUiMixer() ? uiGroup : null;
             }
 
             if (myLeaveSource != null)
             {
                 myLeaveSource.volume = JoinNotifierSettings.GetSoundVolume();
-                myLeaveSource.outputAudioMixerGroup = JoinNotifierSettings.GetUseUiMixer() ? VRCAudioManager.field_Private_Static_VRCAudioManager_0.uiGroup : null;
+                myLeaveSource.outputAudioMixerGroup = JoinNotifierSettings.GetUseUiMixer() ? uiGroup : null;
             }
 
             if (myJoinImage != null)
@@ -164,7 +169,7 @@ namespace JoinNotifier
             source.loop = false;
             source.playOnAwake = false;
             if (JoinNotifierSettings.GetUseUiMixer())
-                source.outputAudioMixerGroup = VRCAudioManager.field_Private_Static_VRCAudioManager_0.uiGroup;
+                source.outputAudioMixerGroup = uiGroup;
             return source;
         }
 
