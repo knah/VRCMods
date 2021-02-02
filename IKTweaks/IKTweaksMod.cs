@@ -15,7 +15,7 @@ using Valve.VR;
 using Delegate = Il2CppSystem.Delegate;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.2", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -86,13 +86,13 @@ namespace IKTweaks
             }));
 
             var steamVrControllerManager = CalibrationManager.GetControllerManager();
-            var puckPrefab = steamVrControllerManager.objects.First(it =>
-                it != steamVrControllerManager.left && it != steamVrControllerManager.right);
+            var puckPrefab = steamVrControllerManager.field_Public_ArrayOf_GameObject_0.First(it =>
+                it != steamVrControllerManager.field_Public_GameObject_1 && it != steamVrControllerManager.field_Public_GameObject_0);
             var newPucks = new Il2CppReferenceArray<GameObject>(5 + 6);
             var newUints = new Il2CppStructArray<uint>(5 + 6);
             for (var i = 0; i < 5; i++)
             {
-                newPucks[i] = steamVrControllerManager.objects[i];
+                newPucks[i] = steamVrControllerManager.field_Public_ArrayOf_GameObject_0[i];
                 newUints[i] = steamVrControllerManager.field_Private_ArrayOf_UInt32_0[i];
             }
 
@@ -101,13 +101,13 @@ namespace IKTweaks
             {
                 var newPuck = Object.Instantiate(puckPrefab, trackersParent, true);
                 newPuck.name = "Puck" + (i + 4);
-                newPuck.GetComponent<SteamVR_TrackedObject>().index = SteamVR_TrackedObject.EnumNPublicSealedvaNoHmDe18DeDeDeDeDeUnique.None;
+                newPuck.GetComponent<SteamVR_TrackedObject>().field_Public_EnumNPublicSealedvaNoHmDe18DeDeDeDeDeUnique_0 = SteamVR_TrackedObject.EnumNPublicSealedvaNoHmDe18DeDeDeDeDeUnique.None;
                 newPuck.SetActive(false);
                 newPucks[i + 5] = newPuck;
                 newUints[i + 5] = UInt32.MaxValue;
             }
 
-            steamVrControllerManager.objects = newPucks;
+            steamVrControllerManager.field_Public_ArrayOf_GameObject_0 = newPucks;
             steamVrControllerManager.field_Private_ArrayOf_UInt32_0 = newUints;
 
             steamVrControllerManager.Method_Private_Void_VREvent_t_PDM_1(new VREvent_t());
