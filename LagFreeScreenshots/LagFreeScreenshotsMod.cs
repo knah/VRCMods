@@ -21,6 +21,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using VRC.UserCamera;
 using Object = UnityEngine.Object;
+using CameraUtil = ObjectPublicCaSiVeUnique;
 
 [assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.0.1", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
@@ -41,7 +42,7 @@ namespace LagFreeScreenshots
         public override void OnApplicationStart()
         {
             harmonyInstance.Patch(
-                typeof(CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObreInCareObcaNuInUnique).GetMethod("MoveNext"),
+                typeof(CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObBosareInAcre2StUnique).GetMethod("MoveNext"),
                 new HarmonyMethod(AccessTools.Method(typeof(LagFreeScreenshotsMod), nameof(MoveNextPatch))));
             
             MelonPrefs.RegisterCategory(SettingsCategory, "Lag Free Screenshots");
@@ -69,7 +70,7 @@ namespace LagFreeScreenshots
             ourToEndOfFrame.Flush();
         }
 
-        public static bool MoveNextPatch(ref bool __result, CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObreInCareObcaNuInUnique __instance)
+        public static bool MoveNextPatch(ref bool __result, CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObBosareInAcre2StUnique __instance)
         {
             if (!MelonPrefs.GetBool(SettingsCategory, SettingEnableMod))
                 return true;
