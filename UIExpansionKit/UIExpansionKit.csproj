@@ -4,9 +4,10 @@
         <VrcReferences>true</VrcReferences>
         <LangVersion>latest</LangVersion>
         <UseAltLibs>true</UseAltLibs>
-        <AssemblyVersion>0.2.1.0</AssemblyVersion>
+        <AssemblyVersion>0.2.2.0</AssemblyVersion>
     </PropertyGroup>
     <ItemGroup>
         <EmbeddedResource Include="modui.assetbundle" />
+        <EmbeddedResource Include="_dummy_.dll" />
     </ItemGroup>
 </Project>

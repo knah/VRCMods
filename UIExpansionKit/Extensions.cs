@@ -15,5 +15,13 @@ namespace UIExpansionKit
             obj.hideFlags |= HideFlags.DontUnloadUnusedAsset;
             return obj;
         }
+
+        public static T GetOrAddComponent<T>(this GameObject obj) where T: Component
+        {
+            var result = obj.GetComponent<T>();
+            if (result == null) 
+                result  = obj.AddComponent<T>();
+            return result;
+        }
     }
 }

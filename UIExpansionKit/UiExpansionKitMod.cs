@@ -13,7 +13,7 @@ using UnityEngine.UI;
 using VRCSDK2;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.2.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.2.2", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace UIExpansionKit
@@ -25,6 +25,7 @@ namespace UIExpansionKit
         private PreloadedBundleContents myStuffBundle;
 
         private GameObject myModSettingsExpando;
+        private GameObject mySettingsPage;
         private Transform myModSettingsExpandoTransform;
 
         private GameObject myInputPopup;
@@ -52,13 +53,19 @@ namespace UIExpansionKit
         };
         
         private readonly Dictionary<ExpandedMenu, GameObject> myMenuRoots = new Dictionary<ExpandedMenu, GameObject>();
-        private readonly List<(GameObject from, GameObject to)> myVisibilityTransfers = new List<(GameObject from, GameObject to)>();
-        private readonly Dictionary<GameObject, bool> myHasContents = new Dictionary<GameObject, bool>();
+        private readonly Dictionary<ExpandedMenu, GameObject> myVisibilitySources = new Dictionary<ExpandedMenu, GameObject>();
+        private readonly Dictionary<ExpandedMenu, bool> myHasContents = new Dictionary<ExpandedMenu, bool>();
 
         public PreloadedBundleContents StuffBundle => myStuffBundle;
 
         public event Action QuickMenuClosed;
         public event Action FullMenuClosed;
+        public event Action<ExpandedMenu> OnMenuOpened;
+
+        public UiExpansionKitMod()
+        {
+            LoaderIntegrityCheck.CheckIntegrity();
+        }
         
         public override void OnApplicationStart()
         {
@@ -69,21 +76,23 @@ namespace UIExpansionKit
             MelonCoroutines.Start(InitThings());
         }
 
-        public override void OnUpdate()
-        {
-            // todo: replace with component when custom components are a thing
-            foreach (var visibilityTransfer in myVisibilityTransfers)
-                visibilityTransfer.to.SetActive(myHasContents.TryGetValue(visibilityTransfer.to, out var hasContents) && hasContents && visibilityTransfer.from.activeSelf);
-
-            if (myInputPopup != null && myModSettingsExpando != null)
-                if (myInputPopup.activeSelf || myInputKeypadPopup.activeSelf)
-                    myModSettingsExpando.SetActive(false);
-        }
-
         public override void OnModSettingsApplied()
         {
             if (myMenuRoots.TryGetValue(ExpandedMenu.QuickMenu, out var menuRoot))
+            {
                 FillQuickMenuExpando(menuRoot, ExpandedMenu.QuickMenu);
+                UpdateCategoryVisibility(ExpandedMenu.QuickMenu);
+            }
+        }
+
+        private void UpdateCategoryVisibility(ExpandedMenu category)
+        {
+            if (myMenuRoots.TryGetValue(category, out var menuRoot) &&
+                myHasContents.TryGetValue(category, out var hasContents) &&
+                myVisibilitySources.TryGetValue(category, out var visibilitySource))
+            {
+                menuRoot.SetActive(hasContents && visibilitySource.activeInHierarchy);
+            }
         }
 
         private IEnumerator InitThings()
@@ -109,6 +118,13 @@ namespace UIExpansionKit
             
             myInputPopup = GameObject.Find("UserInterface/MenuContent/Popups/InputPopup");
             myInputKeypadPopup = GameObject.Find("UserInterface/MenuContent/Popups/InputKeypadPopup");
+
+            var listener = myInputPopup.GetOrAddComponent<EnableDisableListener>();
+            listener.OnEnabled += UpdateModSettingsVisibility;
+            listener.OnDisabled += UpdateModSettingsVisibility;
+            listener = myInputKeypadPopup.GetOrAddComponent<EnableDisableListener>();
+            listener.OnEnabled += UpdateModSettingsVisibility;
+            listener.OnDisabled += UpdateModSettingsVisibility;
 
             foreach (var coroutine in ExpansionKitApi.ExtraWaitCoroutines)
             {
@@ -159,6 +175,8 @@ namespace UIExpansionKit
                     MelonLogger.LogError($"GameObject at path {gameObjectPath} for category {categoryEnum} was not found, not decorating");
                     continue;
                 }
+                
+                myVisibilitySources[categoryEnum] = gameObject;
 
                 if (isBigMenu)
                 {
@@ -180,10 +198,16 @@ namespace UIExpansionKit
                             gameObject.transform.Find("AvatarModel").gameObject.SetActive(!willBeRight);
                     }));
                     
-                    myVisibilityTransfers.Add((gameObject, expando));
-                    
+                    var listener = gameObject.GetOrAddComponent<EnableDisableListener>();
+                    listener.OnEnabled += () =>
+                    {
+                        expando.SetActive(myHasContents[categoryEnum]);
+                        OnMenuOpened?.Invoke(categoryEnum);
+                    };
+                    listener.OnDisabled += () => expando.SetActive(false);
+
                     FillBigMenuExpando(expando, categoryEnum);
-                    
+
                     SetLayerRecursively(expando, gameObject.layer);
                 }
                 else
@@ -204,17 +228,25 @@ namespace UIExpansionKit
                     if (ExpansionKitSettings.IsQmExpandoStartsCollapsed())
                         toggleButton.GetComponent<Toggle>().isOn = false;
                     
-                    myVisibilityTransfers.Add((gameObject, expando));
+                    var listener = gameObject.GetOrAddComponent<EnableDisableListener>();
+                    listener.OnEnabled += () =>
+                    {
+                        expando.SetActive(myHasContents[categoryEnum]);
+                        OnMenuOpened?.Invoke(categoryEnum);
+                    };
+                    listener.OnDisabled += () => expando.SetActive(false);
                     
                     FillQuickMenuExpando(expando, categoryEnum);
 
-                    expando.AddComponent<EnableDisableListener>().OnEnabled += () =>
+                    expando.GetOrAddComponent<EnableDisableListener>().OnEnabled += () =>
                     {
                         MelonCoroutines.Start(ResizeExpandoAfterDelay(expando));
                     };
                     
                     SetLayerRecursively(expando, quickMenuRoot.layer);
                 }
+                
+                UpdateCategoryVisibility(valueTuple.Item1);
             }
         }
 
@@ -249,9 +281,14 @@ namespace UIExpansionKit
 
             if (ExpansionKitApi.ExpandedMenus.TryGetValue(categoryEnum, out var registrations))
             {
-                myHasContents[expando] = true;
+                myHasContents[categoryEnum] = true;
                 registrations.PopulateButtons(expandoRoot, false, false);
             }
+        }
+
+        private void UpdateModSettingsVisibility()
+        {
+            myModSettingsExpando.SetActive(mySettingsPage.activeInHierarchy && !(myInputPopup.activeSelf || myInputKeypadPopup.activeSelf));
         }
 
         private void DecorateFullMenu()
@@ -264,13 +301,16 @@ namespace UIExpansionKit
             myModSettingsExpandoTransform.localScale = Vector3.one * 1.52f;
             myModSettingsExpandoTransform.localPosition = new Vector3(-755, -550, -10);
             myModSettingsExpando.AddComponent<VRC_UiShape>();
+            myModSettingsExpando.SetActive(false);
 
             ModSettingsHandler.Initialize(myStuffBundle);
             var settingsContentRoot = myModSettingsExpando.transform.Find("Content/Scroll View/Viewport/Content").Cast<RectTransform>();
             MelonCoroutines.Start(ModSettingsHandler.PopulateSettingsPanel(settingsContentRoot));
-            
-            myVisibilityTransfers.Add((fullMenuRoot.transform.Find("Screens/Settings").gameObject, myModSettingsExpando));
-            myHasContents[myModSettingsExpando] = true;
+
+            mySettingsPage = fullMenuRoot.transform.Find("Screens/Settings").gameObject;
+            var settingsMenuListener = mySettingsPage.GetOrAddComponent<EnableDisableListener>();
+            settingsMenuListener.OnEnabled += UpdateModSettingsVisibility;
+            settingsMenuListener.OnDisabled += UpdateModSettingsVisibility;
 
             myModSettingsExpandoTransform.Find("Content/ApplyButton").GetComponent<Button>().onClick.AddListener(new Action(MelonPrefs.SaveConfig));
 
@@ -295,13 +335,13 @@ namespace UIExpansionKit
 
             var toggleButtonPrefab = myStuffBundle.QuickMenuToggle;
 
-            myHasContents[expando] = false;
+            myHasContents[expandedMenu] = false;
 
             if (ExpansionKitApi.ExpandedMenus.TryGetValue(expandedMenu, out var registrations))
             {
                 registrations.PopulateButtons(expandoRoot, true, false);
 
-                myHasContents[expando] = true;
+                myHasContents[expandedMenu] = true;
             }
 
             if (expandedMenu == ExpandedMenu.QuickMenu)
@@ -321,7 +361,7 @@ namespace UIExpansionKit
                         MelonPrefs.SaveConfig();
                     }));
                     
-                    myHasContents[expando] = true;
+                    myHasContents[expandedMenu] = true;
                 }
             }
             
