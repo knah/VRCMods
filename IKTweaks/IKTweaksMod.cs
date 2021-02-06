@@ -23,6 +23,8 @@ namespace IKTweaks
     public class IKTweaksMod : MelonMod
     {
         private static readonly Queue<Action> ourToMainThreadQueue = new Queue<Action>();
+        
+        internal static GameObject ourRandomPuck;
 
         public override void OnApplicationStart()
         {
@@ -95,6 +97,8 @@ namespace IKTweaks
                 newUints[i] = steamVrControllerManager.field_Private_ArrayOf_UInt32_0[i];
             }
 
+            ourRandomPuck = puckPrefab;
+
             var trackersParent = puckPrefab.transform.parent;
             for (var i = 0; i < 6; i++)
             {
@@ -117,7 +121,6 @@ namespace IKTweaks
         public override void OnUpdate()
         {
             VrIkHandling.Update();
-            FullBodyHandling.Update();
             ourHadUpdateThisFrame = false;
         }
 

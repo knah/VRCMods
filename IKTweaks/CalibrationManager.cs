@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Il2CppSystem.Text;
 using MelonLoader;
+using UnhollowerBaseLib;
 using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
 using Valve.VR;
@@ -135,9 +136,18 @@ namespace IKTweaks
         {
             // await IKTweaksMod.AwaitLateUpdate();
 
-            var gameObject = avatarRoot;
-            FullBodyHandling.PreSetupVrIk(gameObject);
-            var vrik = FullBodyHandling.SetupVrIk(FullBodyHandling.LastInitializedController, gameObject);
+            var dummyMuscles = new Il2CppStructArray<float>(HumanTrait.MuscleCount);
+
+            // Enforce T-pose for IK setup - otherwise animations can break knee bend angles and the like
+            var animator = avatarRoot.GetComponent<Animator>();
+            var poseHandler = new HumanPoseHandler(animator.avatar, avatarRoot.transform);
+            poseHandler.GetHumanPose(out var position, out var rotation, dummyMuscles);
+            rotation = Quaternion.identity;
+            for (var i = 0; i < TPoseMuscles.Length; i++) dummyMuscles[i] = TPoseMuscles[i];
+            poseHandler.SetHumanPose(ref position, ref rotation, dummyMuscles);
+            
+            FullBodyHandling.PreSetupVrIk(avatarRoot);
+            var vrik = FullBodyHandling.SetupVrIk(FullBodyHandling.LastInitializedController, avatarRoot);
 
             foreach (var target in ourTargets)
                 Object.DestroyImmediate(target);

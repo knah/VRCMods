@@ -16,6 +16,7 @@ namespace IKTweaks
     public class FullBodyHandling
     {
         internal static VRCFbbIkController LastInitializedController;
+        internal static VRIK_New LastInitializedVRIK;
 
         internal static float LeftElbowWeight = 0f;
         internal static float RightElbowWeight = 0f;
@@ -35,6 +36,8 @@ namespace IKTweaks
             var fbbik = LastInitializedController.field_Private_FullBodyBipedIK_0;
             
             var vrik = fbbik.GetComponent<VRIK_New>();
+
+            var firstPuckDisabled = !IKTweaksMod.ourRandomPuck.activeInHierarchy;
             
             fbbik.skipSolverUpdate = true;
             if (LastInitializedController.field_Private_FBBIKHeadEffector_0 != null)
@@ -49,7 +52,7 @@ namespace IKTweaks
                 // lastInitedController.field_Private_FBBIKHeadEffector_0.rotationWeight = 0f;
 
                 if (vrik == null) return;
-                if (!IkTweaksSettings.IgnoreAnimations)
+                if (!IkTweaksSettings.IgnoreAnimations || firstPuckDisabled)
                 {
                     vrik.solver.spine.positionWeight = LastInitializedController.field_Private_FBBIKHeadEffector_0.positionWeight;
                     vrik.solver.spine.rotationWeight = LastInitializedController.field_Private_FBBIKHeadEffector_0.rotationWeight;
@@ -63,22 +66,26 @@ namespace IKTweaks
             
             if (vrik == null) return;
 
-            if (!IkTweaksSettings.IgnoreAnimations)
+            if (!IkTweaksSettings.IgnoreAnimations || firstPuckDisabled)
             {
-                vrik.solver.leftLeg.positionWeight = fbbik.solver.leftFootEffector.positionWeight;
-                vrik.solver.leftLeg.rotationWeight = fbbik.solver.leftFootEffector.rotationWeight;
+                var leftLegMappingWeight = fbbik.solver.leftLegMapping.weight;
+                vrik.solver.leftLeg.positionWeight = fbbik.solver.leftFootEffector.positionWeight * leftLegMappingWeight;
+                vrik.solver.leftLeg.rotationWeight = fbbik.solver.leftFootEffector.rotationWeight * leftLegMappingWeight;
 
-                vrik.solver.rightLeg.positionWeight = fbbik.solver.rightFootEffector.positionWeight;
-                vrik.solver.rightLeg.rotationWeight = fbbik.solver.rightFootEffector.rotationWeight;
-
+                var rightLegMappingWeight = fbbik.solver.rightLegMapping.weight;
+                vrik.solver.rightLeg.positionWeight = fbbik.solver.rightFootEffector.positionWeight * rightLegMappingWeight;
+                vrik.solver.rightLeg.rotationWeight = fbbik.solver.rightFootEffector.rotationWeight * rightLegMappingWeight;
+                
                 vrik.solver.spine.pelvisPositionWeight = fbbik.solver.bodyEffector.positionWeight;
                 vrik.solver.spine.pelvisRotationWeight = fbbik.solver.bodyEffector.rotationWeight;
 
-                vrik.solver.leftArm.positionWeight = fbbik.solver.leftHandEffector.positionWeight;
-                vrik.solver.leftArm.rotationWeight = fbbik.solver.leftHandEffector.rotationWeight;
+                var leftArmMappingWeight = fbbik.solver.leftArmMapping.weight;
+                vrik.solver.leftArm.positionWeight = fbbik.solver.leftHandEffector.positionWeight * leftArmMappingWeight;
+                vrik.solver.leftArm.rotationWeight = fbbik.solver.leftHandEffector.rotationWeight * leftArmMappingWeight;
 
-                vrik.solver.rightArm.positionWeight = fbbik.solver.rightHandEffector.positionWeight;
-                vrik.solver.rightArm.rotationWeight = fbbik.solver.rightHandEffector.rotationWeight;
+                var rightArmMappingWeight = fbbik.solver.rightArmMapping.weight;
+                vrik.solver.rightArm.positionWeight = fbbik.solver.rightHandEffector.positionWeight * rightArmMappingWeight;
+                vrik.solver.rightArm.rotationWeight = fbbik.solver.rightHandEffector.rotationWeight * rightArmMappingWeight;
             }
             else
             {
@@ -181,7 +188,7 @@ namespace IKTweaks
                     
                     for (var i = 0; i < muscles.Count; i++)
                     {
-                        if (IkTweaksSettings.IgnoreAnimations)
+                        if (IkTweaksSettings.IgnoreAnimations && IKTweaksMod.ourRandomPuck.activeInHierarchy)
                         {
                             muscles[i] *= ourBoneResetMasks[i] == BoneResetMask.Never ? 1 : 0;
                             continue;
@@ -233,6 +240,8 @@ namespace IKTweaks
                     hips.rotation = hipRot;
                 };
             }
+
+            LastInitializedVRIK = vrik;
 
             vrik.enabled = false;
         }
@@ -355,8 +364,40 @@ namespace IKTweaks
 
         private static bool LateUpdatePrefix(FullBodyBipedIK __instance)
         {
-            if (IkTweaksSettings.FullBodyVrIk && LastCalibrationWasInCustomIk && LastInitializedController.field_Private_FullBodyBipedIK_0 == __instance)
+            if (IkTweaksSettings.FullBodyVrIk && LastCalibrationWasInCustomIk &&
+                LastInitializedController.field_Private_FullBodyBipedIK_0 == __instance)
+            {
+                Update();
+                if(LastInitializedVRIK != null)
+                    LastInitializedVRIK.LateUpdate_ManualDrive();
                 return false;
+            }
+
+            return true;
+        }
+        
+        private static bool FixedUpdatePrefix(FullBodyBipedIK __instance)
+        {
+            if (IkTweaksSettings.FullBodyVrIk && LastCalibrationWasInCustomIk &&
+                LastInitializedController.field_Private_FullBodyBipedIK_0 == __instance)
+            {
+                if(LastInitializedVRIK != null)
+                    LastInitializedVRIK.FixedUpdate_ManualDrive();
+                return false;
+            }
+
+            return true;
+        }
+        
+        private static bool UpdatePrefix(FullBodyBipedIK __instance)
+        {
+            if (IkTweaksSettings.FullBodyVrIk && LastCalibrationWasInCustomIk &&
+                LastInitializedController.field_Private_FullBodyBipedIK_0 == __instance)
+            {
+                if(LastInitializedVRIK != null)
+                    LastInitializedVRIK.Update_ManualDrive();
+                return false;
+            }
 
             return true;
         }
@@ -391,9 +432,9 @@ namespace IKTweaks
             harmony.Patch(AccessTools.Method(typeof(FullBodyBipedIK), nameof(FullBodyBipedIK.LateUpdate)),
                 new HarmonyMethod(typeof(FullBodyHandling), nameof(LateUpdatePrefix)));
             harmony.Patch(AccessTools.Method(typeof(FullBodyBipedIK), nameof(FullBodyBipedIK.Update)),
-                new HarmonyMethod(typeof(FullBodyHandling), nameof(LateUpdatePrefix)));
+                new HarmonyMethod(typeof(FullBodyHandling), nameof(UpdatePrefix)));
             harmony.Patch(AccessTools.Method(typeof(FullBodyBipedIK), nameof(FullBodyBipedIK.FixedUpdate)),
-                new HarmonyMethod(typeof(FullBodyHandling), nameof(LateUpdatePrefix)));
+                new HarmonyMethod(typeof(FullBodyHandling), nameof(FixedUpdatePrefix)));
 
             harmony.Patch(AccessTools.Method(typeof(VRCTrackingManager), nameof(VRCTrackingManager.Method_Public_Static_Boolean_String_0)),
                 new HarmonyMethod(typeof(FullBodyHandling), nameof(IsCalibratedForAvatarPrefix)));
