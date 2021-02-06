@@ -70,10 +70,10 @@
             <Private>false</Private>
             <HintPath>$(MsBuildThisFileDirectory)Libs\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
         </Reference>
-        <Reference Include="MelonLoader.ModHandler, Version=0.0.3.0, Culture=neutral, PublicKeyToken=null">
+        <Reference Include="MelonLoader, Version=0.3.0.0, Culture=neutral, PublicKeyToken=null">
             <SpecificVersion>false</SpecificVersion>
             <Private>false</Private>
-            <HintPath>$(MsBuildThisFileDirectory)Libs\MelonLoader.ModHandler.dll</HintPath>
+            <HintPath>$(MsBuildThisFileDirectory)Libs\MelonLoader.dll</HintPath>
         </Reference>
         <Reference Include="UnhollowerBaseLib, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
             <SpecificVersion>false</SpecificVersion>
