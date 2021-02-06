@@ -261,6 +261,8 @@ namespace UIExpansionKit
                     }
                 }
             }
+
+            UiExpansionKitMod.SetLayerRecursively(settingsContentRoot.gameObject, 12);
         }
     }
 }

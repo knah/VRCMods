@@ -280,6 +280,8 @@ namespace UIExpansionKit
         private void FillBigMenuExpando(GameObject expando, ExpandedMenu categoryEnum)
         {
             var expandoRoot = expando.transform.Find("Content").Cast<RectTransform>();
+
+            myHasContents[categoryEnum] = false;
             
             expandoRoot.DestroyChildren();
 
@@ -327,7 +329,7 @@ namespace UIExpansionKit
             Object.Destroy(myModSettingsExpandoTransform.Find("Content/ApplyButton").gameObject);
             Object.Destroy(myModSettingsExpandoTransform.Find("Content/RefreshButton").gameObject);
             
-            SetLayerRecursively(myModSettingsExpando, fullMenuRoot.layer);
+            SetLayerRecursively(myModSettingsExpando, mySettingsPage.gameObject.layer);
         }
 
         internal static void SetLayerRecursively(GameObject obj, int layer)
