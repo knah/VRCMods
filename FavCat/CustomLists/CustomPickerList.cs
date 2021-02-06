@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using FavCat.Database.Stored;
 using MelonLoader;
+using UnhollowerBaseLib;
 using UnhollowerBaseLib.Attributes;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace FavCat.CustomLists
@@ -346,6 +348,54 @@ namespace FavCat.CustomLists
             
             DoResize();
             RecreatePickers();
+        }
+
+        private void OnDestroy()
+        {
+            if (myParentScrollRect != null && myParentScrollRectListener != null)
+            {
+                myParentScrollRect.onValueChanged.RemoveListener(myParentScrollRectListener);
+                myParentScrollRectListener = null;
+            }
+        }
+
+        private ScrollRect? myParentScrollRect;
+        private UnityAction<Vector2>? myParentScrollRectListener;
+        private static readonly Il2CppStructArray<Vector3> ourParentViewportCorners = new(4);
+        private static readonly Il2CppStructArray<Vector3> ourCorners = new(4);
+
+        [HideFromIl2Cpp]
+        private static bool RectsIntersect(Il2CppStructArray<Vector3> a, Il2CppStructArray<Vector3> b, Vector3 upAxis)
+        {
+            var aMin = a.Min(it => Vector3.Dot(it, upAxis));
+            var aMax = a.Max(it => Vector3.Dot(it, upAxis));
+            var bMin = b.Min(it => Vector3.Dot(it, upAxis));
+            var bMax = b.Max(it => Vector3.Dot(it, upAxis));
+
+            bool InRange(float min, float max, float val) => val > min && val < max;
+
+            return InRange(aMin, aMax, bMin) || InRange(aMin, aMax, bMax) || InRange(bMin, bMax, aMin) ||
+                   InRange(bMin, bMax, aMax);
+        }
+
+        [HideFromIl2Cpp]
+        private void OnParentScrollChanged(Vector2 _)
+        {
+            if (myParentScrollRect == null) return;
+
+            myParentScrollRect.viewport.GetWorldCorners(ourParentViewportCorners);
+            myRectTransform.GetWorldCorners(ourCorners);
+            
+            myContentRoot.gameObject.SetActive(RectsIntersect(ourParentViewportCorners, ourCorners, myRectTransform.up));
+        }
+
+        [HideFromIl2Cpp]
+        public void SetParentScrollRect(ScrollRect parentScrollRect)
+        {
+            myParentScrollRect = parentScrollRect;
+            myParentScrollRectListener = new Action<Vector2>(OnParentScrollChanged);
+
+            myParentScrollRect.onValueChanged.AddListener(myParentScrollRectListener);
         }
     }
 }

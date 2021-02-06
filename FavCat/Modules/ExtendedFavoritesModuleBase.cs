@@ -401,6 +401,10 @@ namespace FavCat.Modules
             UpdateListElements(storedCategory.CategoryName, list);
             list.transform.SetAsFirstSibling();
 
+            var parentScroll = myListsParent.GetComponentsInParent<ScrollRect>(true).FirstOrDefault();
+            if (parentScroll != null)
+                list.SetParentScrollRect(parentScroll);
+
             PickerLists[storedCategory.CategoryName] = list;
         }
 
