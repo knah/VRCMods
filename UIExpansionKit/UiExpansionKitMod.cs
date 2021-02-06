@@ -57,6 +57,8 @@ namespace UIExpansionKit
         private readonly Dictionary<ExpandedMenu, bool> myHasContents = new Dictionary<ExpandedMenu, bool>();
 
         public PreloadedBundleContents StuffBundle => myStuffBundle;
+        
+        internal static bool AreSettingsDirty = false;
 
         public event Action QuickMenuClosed;
         public event Action FullMenuClosed;
@@ -71,12 +73,14 @@ namespace UIExpansionKit
         {
             Instance = this;
             ClassInjector.RegisterTypeInIl2Cpp<EnableDisableListener>();
+            ClassInjector.RegisterTypeInIl2Cpp<DestroyListener>();
             
             ExpansionKitSettings.RegisterSettings();
+            ExpansionKitSettings.PinsEntry.OnValueChangedUntyped += UpdateQuickMenuPins;
             MelonCoroutines.Start(InitThings());
         }
 
-        public override void OnModSettingsApplied()
+        public void UpdateQuickMenuPins()
         {
             if (myMenuRoots.TryGetValue(ExpandedMenu.QuickMenu, out var menuRoot))
             {
@@ -155,7 +159,7 @@ namespace UIExpansionKit
 
         private void DecorateMenuPages()
         {
-            MelonLogger.Log($"Decorating menus");
+            MelonLogger.Msg("Decorating menus");
             
             var quickMenuExpandoPrefab = myStuffBundle.QuickMenuExpando;
             var quickMenuRoot = QuickMenu.prop_QuickMenu_0.gameObject;
@@ -288,7 +292,15 @@ namespace UIExpansionKit
 
         private void UpdateModSettingsVisibility()
         {
-            myModSettingsExpando.SetActive(mySettingsPage.activeInHierarchy && !(myInputPopup.activeSelf || myInputKeypadPopup.activeSelf));
+            var wasActive = myModSettingsExpando.activeSelf;
+            var newActive = mySettingsPage.activeInHierarchy && !(myInputPopup.activeSelf || myInputKeypadPopup.activeSelf);
+            myModSettingsExpando.SetActive(newActive);
+
+            if (wasActive != newActive && newActive == false && AreSettingsDirty)
+            {
+                MelonPreferences.Save();
+                AreSettingsDirty = false;
+            }
         }
 
         private void DecorateFullMenu()
@@ -312,10 +324,8 @@ namespace UIExpansionKit
             settingsMenuListener.OnEnabled += UpdateModSettingsVisibility;
             settingsMenuListener.OnDisabled += UpdateModSettingsVisibility;
 
-            myModSettingsExpandoTransform.Find("Content/ApplyButton").GetComponent<Button>().onClick.AddListener(new Action(MelonPrefs.SaveConfig));
-
-            myModSettingsExpandoTransform.Find("Content/RefreshButton").GetComponent<Button>().onClick
-                .AddListener(new Action(() => MelonCoroutines.Start(ModSettingsHandler.PopulateSettingsPanel(settingsContentRoot))));
+            Object.Destroy(myModSettingsExpandoTransform.Find("Content/ApplyButton").gameObject);
+            Object.Destroy(myModSettingsExpandoTransform.Find("Content/RefreshButton").gameObject);
             
             SetLayerRecursively(myModSettingsExpando, fullMenuRoot.layer);
         }
@@ -346,20 +356,31 @@ namespace UIExpansionKit
 
             if (expandedMenu == ExpandedMenu.QuickMenu)
             {
-                foreach (var (category, name) in ExpansionKitSettings.ListPinnedPrefs(false))
+                foreach (var (category, prefId) in ExpansionKitSettings.ListPinnedPrefs())
                 {
-                    if (!MelonPrefs.GetPreferences().TryGetValue(category, out var categoryMap)) continue;
-                    if (!categoryMap.TryGetValue(name, out var prefDesc)) continue;
+                    var entry = MelonPreferences.GetCategory(category)?.GetEntry(prefId);
+                    if (entry is not MelonPreferences_Entry<bool> boolEntry) continue;
 
                     var toggleButton = Object.Instantiate(toggleButtonPrefab, expandoRoot, false);
-                    toggleButton.GetComponentInChildren<Text>().text = prefDesc.DisplayText ?? name;
+                    toggleButton.GetComponentInChildren<Text>().text = entry.DisplayName ?? prefId;
                     var toggle = toggleButton.GetComponent<Toggle>();
-                    toggle.isOn = MelonPrefs.GetBool(category, name);
+                    toggle.isOn = boolEntry.Value;
                     toggle.onValueChanged.AddListener(new Action<bool>(isOn =>
                     {
-                        prefDesc.ValueEdited = isOn.ToString().ToLowerInvariant();
-                        MelonPrefs.SaveConfig();
+                        if (boolEntry.Value != isOn) 
+                            boolEntry.Value = isOn;
+
+                        MelonPreferences.Save();
                     }));
+                    Action<bool, bool> handler = (_, newValue) =>
+                    {
+                        toggle.isOn = newValue;
+                    };
+                    boolEntry.OnValueChanged += handler;
+                    toggle.gameObject.GetOrAddComponent<DestroyListener>().OnDestroyed += () =>
+                    {
+                        boolEntry.OnValueChanged -= handler;
+                    };
                     
                     myHasContents[expandedMenu] = true;
                 }

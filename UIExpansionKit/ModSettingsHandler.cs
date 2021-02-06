@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using MelonLoader;
 using UIExpansionKit.API;
@@ -33,12 +34,12 @@ namespace UIExpansionKit
 
             settingsContentRoot.DestroyChildren();
 
-            var pinnedSettings = ExpansionKitSettings.ListPinnedPrefs(false).ToList();
+            var pinnedSettings = ExpansionKitSettings.ListPinnedPrefs().ToList();
             
-            foreach (var keyValuePair in MelonPrefs.GetPreferences())
+            foreach (var category in MelonPreferences.Categories)
             {
-                var categoryId = keyValuePair.Key;
-                var prefDict = keyValuePair.Value;
+                var categoryId = category.Identifier;
+                var prefDict = category.Entries;
 
                 if (ExpansionKitApi.CustomCategoryUIs.TryGetValue(categoryId, out var specificPrefab))
                 {
@@ -46,13 +47,13 @@ namespace UIExpansionKit
                     continue;
                 }
 
-                var prefsToPopulate = prefDict.Where(it => !it.Value.Hidden).ToList();
+                var prefsToPopulate = prefDict.Where(it => !it.IsHidden).ToList();
                 
-                if(prefsToPopulate.Count == 0)
+                if (prefsToPopulate.Count == 0)
                     continue;
 
                 var categoryUi = Object.Instantiate(categoryPrefab, settingsContentRoot, false);
-                categoryUi.GetComponentInChildren<Text>().text = MelonPrefs.GetCategoryDisplayName(categoryId);
+                categoryUi.GetComponentInChildren<Text>().text = category.DisplayName ?? categoryId;
                 var categoryUiContent = categoryUi.transform.Find("CategoryEntries");
                 var expandButtonTransform = categoryUi.transform.Find("ExpandButton");
                 var expandButton = expandButtonTransform.GetComponent<Button>();
@@ -74,22 +75,63 @@ namespace UIExpansionKit
                 
                 SetExpanded(ourCategoryExpanded[categoryId]);
                 
-                foreach (var valuePair in prefsToPopulate)
+                
+                
+                void CreateNumericSetting<T>(MelonPreferences_Entry<T> entry, Func<T, string> toString, Func<string, T?> fromString) where T:struct, IEquatable<T>
                 {
-                    var prefId = valuePair.Key;
-                    var prefDesc = valuePair.Value;
-
-                    switch (prefDesc.Type)
+                    var textSetting = Object.Instantiate(textPrefab, categoryUiContent, false);
+                    textSetting.GetComponentInChildren<Text>().text = entry.DisplayName ?? entry.Identifier;
+                    var textField = textSetting.GetComponentInChildren<InputField>();
+                    textField.text = toString(entry.Value);
+                    textField.contentType = typeof(T) == typeof(float) || typeof(T) == typeof(double)
+                        ? InputField.ContentType.DecimalNumber
+                        : InputField.ContentType.IntegerNumber;
+                    textField.onValueChanged.AddListener(new Action<string>(value =>
                     {
-                        case MelonPrefs.MelonPreferenceType.STRING:
+                        var parsed = fromString(value);
+                        if (parsed != null && !entry.Value.Equals(parsed.Value)) 
+                            entry.Value = parsed.Value;
+                    }));
+                    textSetting.GetComponentInChildren<Button>().onClick.AddListener(new Action(() =>
+                    {
+                        BuiltinUiUtils.ShowInputPopup(entry.DisplayName ?? entry.Identifier, textField.text,
+                            InputField.InputType.Standard, false, "Done", 
+                            (result, _, __) =>
+                            {
+                                var parsed = fromString(result);
+                                if (parsed != null)
+                                {
+                                    textField.text = result;
+                                    if (!entry.Value.Equals(parsed.Value)) 
+                                        entry.Value = parsed.Value;
+                                }
+                            });
+                    }));
+                    entry.OnValueChanged += (_, newValue) =>
+                    {
+                        UiExpansionKitMod.AreSettingsDirty = true;
+
+                        textField.text = toString(newValue);
+                    };
+                }
+                
+                
+                
+                foreach (var pref in prefsToPopulate)
+                {
+                    var prefId = pref.Identifier;
+
+                    switch (pref)
+                    {
+                        case MelonPreferences_Entry<string> stringPref:
                         {
                             if (ExpansionKitApi.EnumSettings.TryGetValue((categoryId, prefId), out var enumValues))
                             {
                                 var comboSetting = Object.Instantiate(comboBoxPrefab, categoryUiContent, false);
-                                comboSetting.GetComponentInChildren<Text>().text = prefDesc.DisplayText ?? prefId;
+                                comboSetting.GetComponentInChildren<Text>().text = pref.DisplayName ?? prefId;
                                 var dropdown = comboSetting.GetComponentInChildren<Dropdown>();
                                 var options = new Il2CppSystem.Collections.Generic.List<Dropdown.OptionData>();
-                                var currentValue = MelonPrefs.GetString(categoryId, prefId);
+                                var currentValue = stringPref.Value;
                                 var selectedIndex = enumValues.Count;
                                 for (var i = 0; i < enumValues.Count; i++)
                                 {
@@ -104,40 +146,69 @@ namespace UIExpansionKit
                                 dropdown.value = selectedIndex;
                                 dropdown.onValueChanged.AddListener(new Action<int>(value =>
                                 {
-                                    prefDesc.ValueEdited = value >= enumValues.Count
+                                    stringPref.Value = value >= enumValues.Count
                                         ? currentValue
                                         : enumValues[value].SettingsValue;
                                 }));
+                                stringPref.OnValueChanged += (old, newValue) =>
+                                {
+                                    UiExpansionKitMod.AreSettingsDirty = true;
+                                    
+                                    int newIndex = -1;
+                                    for (var i = 0; i < enumValues.Count; i++)
+                                    {
+                                        if (enumValues[i].SettingsValue == newValue)
+                                        {
+                                            newIndex = i;
+                                            break;
+                                        }
+                                    }
+
+                                    if (newIndex != -1)
+                                        dropdown.value = selectedIndex;
+                                };
                             }
                             else
                             {
                                 var textSetting = Object.Instantiate(textPrefab, categoryUiContent, false);
-                                textSetting.GetComponentInChildren<Text>().text = prefDesc.DisplayText ?? prefId;
+                                textSetting.GetComponentInChildren<Text>().text = pref.DisplayName ?? prefId;
                                 var textField = textSetting.GetComponentInChildren<InputField>();
-                                textField.text = MelonPrefs.GetString(categoryId, prefId);
+                                textField.text = stringPref.Value;
                                 textField.onValueChanged.AddListener(new Action<string>(value =>
                                 {
-                                    prefDesc.ValueEdited = value;
+                                    if (stringPref.Value != value)
+                                        stringPref.Value = value;
                                 }));
                                 textSetting.GetComponentInChildren<Button>().onClick.AddListener(new Action(() =>
                                 {
-                                    BuiltinUiUtils.ShowInputPopup(prefDesc.DisplayText ?? prefId, textField.text,
+                                    BuiltinUiUtils.ShowInputPopup(pref.DisplayName ?? prefId, textField.text,
                                         InputField.InputType.Standard, false, "Done",
-                                        (result, _, __) => prefDesc.ValueEdited = textField.text = result);
+                                        (result, _, __) =>
+                                        {
+                                            textField.text = result;
+                                            if (stringPref.Value != result)
+                                                stringPref.Value = result;
+                                        });
                                 }));
+                                stringPref.OnValueChanged += (_, newValue) =>
+                                {
+                                    UiExpansionKitMod.AreSettingsDirty = true;
+                                    textField.text = newValue;
+                                };
                             }
 
                             break;
                         }
-                        case MelonPrefs.MelonPreferenceType.BOOL:
+                        case MelonPreferences_Entry<bool> boolEntry:
                             var boolSetting = Object.Instantiate(boolPrefab, categoryUiContent, false);
-                            boolSetting.GetComponentInChildren<Text>().text = prefDesc.DisplayText ?? prefId;
+                            boolSetting.GetComponentInChildren<Text>().text = pref.DisplayName ?? prefId;
                             var mainToggle = boolSetting.transform.Find("Toggle").GetComponent<Toggle>();
-                            mainToggle.isOn = MelonPrefs.GetBool(categoryId, prefId);
+                            mainToggle.isOn = boolEntry.Value;
                             mainToggle.onValueChanged.AddListener(new Action<bool>(
                                 isSet =>
                                 {
-                                    prefDesc.ValueEdited = isSet.ToString().ToLowerInvariant();
+                                    if (boolEntry.Value != isSet)
+                                        boolEntry.Value = isSet;
                                 }));
                             var pinToggle = boolSetting.transform.Find("PinToggle").GetComponent<Toggle>();
                             pinToggle.isOn = pinnedSettings.Contains((categoryId, prefId));
@@ -148,31 +219,44 @@ namespace UIExpansionKit
                                 else
                                     ExpansionKitSettings.UnpinPref(categoryId, prefId);
                             }));
-                            break;
-                        case MelonPrefs.MelonPreferenceType.INT:
-                        case MelonPrefs.MelonPreferenceType.FLOAT:
-                        {
-                            var textSetting = Object.Instantiate(textPrefab, categoryUiContent, false);
-                            textSetting.GetComponentInChildren<Text>().text = prefDesc.DisplayText ?? prefId;
-                            var textField = textSetting.GetComponentInChildren<InputField>();
-                            textField.text = MelonPrefs.GetString(categoryId, prefId);
-                            textField.contentType = prefDesc.Type == MelonPrefs.MelonPreferenceType.INT
-                                ? InputField.ContentType.IntegerNumber
-                                : InputField.ContentType.DecimalNumber;
-                            textField.onValueChanged.AddListener(new Action<string>(value =>
+                            ExpansionKitSettings.PinsEntry.OnValueChanged += (_, __) =>
                             {
-                                prefDesc.ValueEdited = value;
-                            }));
-                            textSetting.GetComponentInChildren<Button>().onClick.AddListener(new Action(() =>
-                                {
-                                    BuiltinUiUtils.ShowInputPopup(prefDesc.DisplayText ?? prefId, textField.text,
-                                        InputField.InputType.Standard, prefDesc.Type == MelonPrefs.MelonPreferenceType.INT, "Done", 
-                                        (result, _, __) => prefDesc.ValueEdited = textField.text = result);
-                                }));
+                                pinToggle.isOn = ExpansionKitSettings.IsPinned(categoryId, prefId);
+                            };
+                            boolEntry.OnValueChanged += (old, newValue) =>
+                            {
+                                UiExpansionKitMod.AreSettingsDirty = true;
+                                
+                                mainToggle.isOn = newValue;
+                            };
                             break;
-                        }
+                        case MelonPreferences_Entry<float> floatEntry:
+                            CreateNumericSetting(floatEntry, f => f.ToString(CultureInfo.InvariantCulture),
+                                s => float.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var f) ? f : null);
+                            break;
+                        case MelonPreferences_Entry<double> floatEntry:
+                            CreateNumericSetting(floatEntry, f => f.ToString(CultureInfo.InvariantCulture),
+                                s => double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var f) ? f : null);
+                            break;
+                        case MelonPreferences_Entry<byte> floatEntry:
+                            CreateNumericSetting(floatEntry, f => f.ToString(CultureInfo.InvariantCulture),
+                                s => byte.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var f) ? f : null);
+                            break;
+                        case MelonPreferences_Entry<short> floatEntry:
+                            CreateNumericSetting(floatEntry, f => f.ToString(CultureInfo.InvariantCulture),
+                                s => short.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var f) ? f : null);
+                            break;
+                        case MelonPreferences_Entry<int> floatEntry:
+                            CreateNumericSetting(floatEntry, f => f.ToString(CultureInfo.InvariantCulture),
+                                s => int.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var f) ? f : null);
+                            break;
+                        case MelonPreferences_Entry<long> floatEntry:
+                            CreateNumericSetting(floatEntry, f => f.ToString(CultureInfo.InvariantCulture),
+                                s => long.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var f) ? f : null);
+                            break;
                         default:
-                            MelonLogger.LogError($"Unknown mod pref type {prefDesc.Type}");
+                            if (MelonDebug.IsEnabled())
+                                MelonLogger.Msg($"Unknown mod pref type {pref.GetType()}");
                             break;
                     }
                 }
