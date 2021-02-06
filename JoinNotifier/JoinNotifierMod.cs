@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using JoinNotifier;
 using MelonLoader;
@@ -20,8 +21,10 @@ namespace JoinNotifier
 {
     public class JoinNotifierMod : MelonMod
     {
-        public const string VersionConst = "0.2.7.2";
-        
+        public const string VersionConst = "0.2.8";
+        private const string CustomJoinSoundFileName = "UserData/JN-Join.ogg";
+        private const string CustomLeaveSoundFileName = "UserData/JN-Leave.ogg";
+
         private readonly List<string> myJoinNames = new List<string>();
         private readonly List<string> myLeaveNames = new List<string>();
 
@@ -40,7 +43,7 @@ namespace JoinNotifier
         private AudioClip myJoinClip;
         private AudioClip myLeaveClip;
 
-        private AudioMixerGroup uiGroup;
+        private AudioMixerGroup myUIGroup;
 
         public override void OnApplicationStart()
         {
@@ -57,7 +60,13 @@ namespace JoinNotifier
             while (ReferenceEquals(VRCAudioManager.field_Private_Static_VRCAudioManager_0, null)) yield return null;
             while (ReferenceEquals(VRCUiManager.prop_VRCUiManager_0, null)) yield return null;
 
-            uiGroup = VRCAudioManager.field_Private_Static_VRCAudioManager_0.field_Public_AudioMixerGroup_0;
+            var audioManager = VRCAudioManager.field_Private_Static_VRCAudioManager_0;
+
+            myUIGroup = new[]
+            {
+                audioManager.field_Public_AudioMixerGroup_0, audioManager.field_Public_AudioMixerGroup_1,
+                audioManager.field_Public_AudioMixerGroup_2
+            }.Single(it => it.name == "UI");
 
             MelonLogger.Log("Start init");
             
@@ -75,10 +84,33 @@ namespace JoinNotifier
             myJoinSprite = myAssetBundle.LoadAsset_Internal("Assets/JoinNotifier/JoinIcon.png", Il2CppType.Of<Sprite>()).Cast<Sprite>();
             myJoinSprite.hideFlags |= HideFlags.DontUnloadUnusedAsset;
 
-            myJoinClip = myAssetBundle.LoadAsset_Internal("Assets/JoinNotifier/Chime.ogg", Il2CppType.Of<AudioClip>()).Cast<AudioClip>();
-            myJoinClip.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+            if (File.Exists(CustomJoinSoundFileName))
+            {
+                MelonLogger.Msg("Loading custom join sound");
+                var www = new WWW($"file://{Path.Combine(Environment.CurrentDirectory, CustomJoinSoundFileName)}");
+                
+                while (www.keepWaiting) yield return null;
+                
+                myJoinClip = www.GetAudioClip();
+            }
             
-            myLeaveClip = myAssetBundle.LoadAsset_Internal("Assets/JoinNotifier/DoorClose.ogg", Il2CppType.Of<AudioClip>()).Cast<AudioClip>();
+            if (myJoinClip == null)
+                myJoinClip = myAssetBundle.LoadAsset_Internal("Assets/JoinNotifier/Chime.ogg", Il2CppType.Of<AudioClip>()).Cast<AudioClip>();
+            
+            myJoinClip.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+
+            if (File.Exists(CustomLeaveSoundFileName))
+            {
+                MelonLogger.Msg("Loading custom leave sound");
+                var www = new WWW($"file://{Path.Combine(Environment.CurrentDirectory, CustomLeaveSoundFileName)}");
+                while (www.keepWaiting) yield return null;
+                
+                myLeaveClip = www.GetAudioClip();
+            }
+            
+            if (myLeaveClip == null)
+                myLeaveClip = myAssetBundle.LoadAsset_Internal("Assets/JoinNotifier/DoorClose.ogg", Il2CppType.Of<AudioClip>()).Cast<AudioClip>();
+            
             myLeaveClip.hideFlags |= HideFlags.DontUnloadUnusedAsset;
 
             CreateGameObjects();
@@ -93,13 +125,13 @@ namespace JoinNotifier
             if (myJoinSource != null)
             {
                 myJoinSource.volume = JoinNotifierSettings.GetSoundVolume();
-                myJoinSource.outputAudioMixerGroup = JoinNotifierSettings.GetUseUiMixer() ? uiGroup : null;
+                myJoinSource.outputAudioMixerGroup = JoinNotifierSettings.GetUseUiMixer() ? myUIGroup : null;
             }
 
             if (myLeaveSource != null)
             {
                 myLeaveSource.volume = JoinNotifierSettings.GetSoundVolume();
-                myLeaveSource.outputAudioMixerGroup = JoinNotifierSettings.GetUseUiMixer() ? uiGroup : null;
+                myLeaveSource.outputAudioMixerGroup = JoinNotifierSettings.GetUseUiMixer() ? myUIGroup : null;
             }
 
             if (myJoinImage != null)
@@ -147,7 +179,7 @@ namespace JoinNotifier
             gameObject.transform.localScale = Vector3.one;
             gameObject.transform.localPosition = Vector3.up * offset;
             var text = gameObject.GetComponent<Text>();
-            text.color = Color.white;
+            text.color = UnityEngine.Color.white;
             text.fontStyle = FontStyle.Bold;
             text.horizontalOverflow = HorizontalWrapMode.Overflow;
             text.verticalOverflow = VerticalWrapMode.Overflow;
@@ -169,7 +201,7 @@ namespace JoinNotifier
             source.loop = false;
             source.playOnAwake = false;
             if (JoinNotifierSettings.GetUseUiMixer())
-                source.outputAudioMixerGroup = uiGroup;
+                source.outputAudioMixerGroup = myUIGroup;
             return source;
         }
 
