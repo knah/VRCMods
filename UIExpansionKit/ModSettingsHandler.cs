@@ -146,9 +146,11 @@ namespace UIExpansionKit
                                 dropdown.value = selectedIndex;
                                 dropdown.onValueChanged.AddListener(new Action<int>(value =>
                                 {
-                                    stringPref.Value = value >= enumValues.Count
+                                    var newValue = value >= enumValues.Count
                                         ? currentValue
                                         : enumValues[value].SettingsValue;
+                                    if (stringPref.Value != newValue)
+                                        stringPref.Value = newValue;
                                 }));
                                 stringPref.OnValueChanged += (old, newValue) =>
                                 {
@@ -165,7 +167,7 @@ namespace UIExpansionKit
                                     }
 
                                     if (newIndex != -1)
-                                        dropdown.value = selectedIndex;
+                                        dropdown.value = newIndex;
                                 };
                             }
                             else
