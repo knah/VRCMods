@@ -31,7 +31,7 @@ namespace LagFreeScreenshots
                 }
                 catch (Exception ex)
                 {
-                    MelonLogger.LogWarning($"Exception if task: {ex}");
+                    MelonLogger.Warning($"Exception in task: {ex}");
                 }
             }
         }

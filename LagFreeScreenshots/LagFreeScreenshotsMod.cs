@@ -19,11 +19,10 @@ using UIExpansionKit.API;
 using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
 using UnityEngine.Rendering;
-using VRC.UserCamera;
 using Object = UnityEngine.Object;
 using CameraUtil = ObjectPublicCaSiVeUnique;
 
-[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.0.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.0.2", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -39,16 +38,20 @@ namespace LagFreeScreenshots
         private const string SettingScreenshotFormat = "ScreenshotFormat";
         private const string SettingJpegPercent = "JpegPercent";
 
+        private static MelonPreferences_Entry<bool> ourEnabled;
+        private static MelonPreferences_Entry<string> ourFormat;
+        private static MelonPreferences_Entry<int> ourJpegPercent;
+
         public override void OnApplicationStart()
         {
-            harmonyInstance.Patch(
+            var category = MelonPreferences.CreateCategory(SettingsCategory, "Lag Free Screenshots");
+            ourEnabled = (MelonPreferences_Entry<bool>) category.CreateEntry(SettingEnableMod, true, "Enabled");
+            ourFormat = (MelonPreferences_Entry<string>) category.CreateEntry( SettingScreenshotFormat, "png", "Screenshot format");
+            ourJpegPercent = (MelonPreferences_Entry<int>) category.CreateEntry(SettingJpegPercent, 95, "JPEG quality (0-100)");
+            
+            Harmony.Patch(
                 typeof(CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObBosareInAcre2StUnique).GetMethod("MoveNext"),
                 new HarmonyMethod(AccessTools.Method(typeof(LagFreeScreenshotsMod), nameof(MoveNextPatch))));
-            
-            MelonPrefs.RegisterCategory(SettingsCategory, "Lag Free Screenshots");
-            MelonPrefs.RegisterBool(SettingsCategory, SettingEnableMod, true, "Enabled");
-            MelonPrefs.RegisterString(SettingsCategory, SettingScreenshotFormat, "png", "Screenshot format");
-            MelonPrefs.RegisterInt(SettingsCategory, SettingJpegPercent, 95, "JPEG quality (0-100)");
             
             if (MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit" && !it.Info.Version.StartsWith("0.1."))) 
                 AddEnumSettings();
@@ -72,7 +75,8 @@ namespace LagFreeScreenshots
 
         public static bool MoveNextPatch(ref bool __result, CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObBosareInAcre2StUnique __instance)
         {
-            if (!MelonPrefs.GetBool(SettingsCategory, SettingEnableMod))
+            // ignore all small pictures as default VRC is fast enough on them and this mod breaks VRC+ picture taking features otherwise
+            if (!ourEnabled.Value || __instance.resWidth <= 1920 || __instance.resHeight <= 1080)
                 return true;
             
             __result = false;
@@ -80,7 +84,7 @@ namespace LagFreeScreenshots
                 __instance.resHeight, __instance.alpha).ContinueWith(t =>
             {
                 if (t.IsFaulted)
-                    MelonLogger.LogWarning($"Free-floating task failed with exception: {t.Exception}");
+                    MelonLogger.Warning($"Free-floating task failed with exception: {t.Exception}");
             });
             return false;
         }
@@ -105,37 +109,33 @@ namespace LagFreeScreenshots
             var readbackSupported = SystemInfo.supportsAsyncGPUReadback;
             if (readbackSupported)
             {
-                if (Imports.IsDebugMode())
-                    MelonLogger.Log("Supports readback");
+                MelonDebug.Msg("Supports readback");
                 
                 var request = AsyncGPUReadback.Request(renderTexture, 0, hasAlpha ? TextureFormat.ARGB32 : TextureFormat.RGB24,new Action<AsyncGPUReadbackRequest>(r =>
                 {
                     if (r.hasError)
-                        MelonLogger.LogWarning("Readback request finished with error (w)");
+                        MelonLogger.Warning("Readback request finished with error (w)");
                     
                     var sw = Stopwatch.StartNew();
                     data = ToBytes(r.GetDataRaw(0), r.GetLayerDataSize());
-                    if (Imports.IsDebugMode())
-                        MelonLogger.Log($"Bytes readback took {sw.ElapsedMilliseconds}");
+                    MelonDebug.Msg($"Bytes readback took {sw.ElapsedMilliseconds}");
                 }));
                 
                 while (!request.done && !request.hasError && data == null)
                     await ourToMainThread.Yield();
 
                 if (request.hasError)
-                    MelonLogger.LogWarning("Readback request finished with error");
+                    MelonLogger.Warning("Readback request finished with error");
                 
                 if (data == null)
                 {
-                    if (Imports.IsDebugMode())
-                        MelonLogger.Log("Data was null after request was done, waiting more");
+                    MelonDebug.Msg("Data was null after request was done, waiting more");
                     await ourToMainThread.Yield();
                 }
             }
             else
             {
-                if (Imports.IsDebugMode())
-                    MelonLogger.Log("Does not support readback");
+                MelonDebug.Msg("Does not support readback");
                 
                 RenderTexture.active = renderTexture;
                 var newTexture = new Texture2D(w, h, hasAlpha ? TextureFormat.ARGB32 : TextureFormat.RGB24, false);
@@ -178,9 +178,9 @@ namespace LagFreeScreenshots
 
             IImageEncoder encoder;
             await ourToMainThread.Yield();
-            if (MelonPrefs.GetString(SettingsCategory, SettingScreenshotFormat) == "jpeg")
+            if (ourFormat.Value == "jpeg")
             {
-                encoder = new JpegEncoder() {Quality = MelonPrefs.GetInt(SettingsCategory, SettingJpegPercent)};
+                encoder = new JpegEncoder() {Quality = ourJpegPercent.Value};
                 filePath = Path.ChangeExtension(filePath, ".jpeg");
             }
             else
@@ -192,7 +192,7 @@ namespace LagFreeScreenshots
 
             await ourToMainThread.Yield();
             
-            MelonLogger.Log($"Image saved to {filePath}");
+            MelonLogger.Msg($"Image saved to {filePath}");
             // compatibility with log-reading tools
             UnityEngine.Debug.Log($"Took screenshot to: {filePath}");
         }
