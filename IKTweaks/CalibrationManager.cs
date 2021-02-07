@@ -138,12 +138,18 @@ namespace IKTweaks
 
             var dummyMuscles = new Il2CppStructArray<float>(HumanTrait.MuscleCount);
 
-            // Enforce T-pose for IK setup - otherwise animations can break knee bend angles and the like
+            // Enforce mostly-bike-pose for IK setup - otherwise animations can break knee bend angles and the like
+            // Some avatars apparently have inverted knees in T-pose, so bike pose is preferred here
             var animator = avatarRoot.GetComponent<Animator>();
             var poseHandler = new HumanPoseHandler(animator.avatar, avatarRoot.transform);
             poseHandler.GetHumanPose(out var position, out var rotation, dummyMuscles);
             rotation = Quaternion.identity;
-            for (var i = 0; i < TPoseMuscles.Length; i++) dummyMuscles[i] = TPoseMuscles[i];
+            for (var i = 0; i < FullBodyHandling.ourBoneResetMasks.Length; i++)
+            {
+                if (FullBodyHandling.ourBoneResetMasks[i] != FullBodyHandling.BoneResetMask.Never)
+                    dummyMuscles[i] = 0;
+            }
+
             poseHandler.SetHumanPose(ref position, ref rotation, dummyMuscles);
             
             FullBodyHandling.PreSetupVrIk(avatarRoot);

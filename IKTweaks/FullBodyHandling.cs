@@ -165,7 +165,7 @@ namespace IKTweaks
             return BoneResetMask.Spine;
         }
 
-        private static readonly BoneResetMask[] ourBoneResetMasks = HumanTrait.MuscleName.Select(JudgeBone).ToArray(); 
+        internal static readonly BoneResetMask[] ourBoneResetMasks = HumanTrait.MuscleName.Select(JudgeBone).ToArray(); 
 
         internal static void PreSetupVrIk(GameObject targetGameObject)
         {
