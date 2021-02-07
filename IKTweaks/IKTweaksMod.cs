@@ -11,10 +11,11 @@ using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.UI;
+using Valve.VR;
 using Delegate = Il2CppSystem.Delegate;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.3", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.4", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -113,8 +114,10 @@ namespace IKTweaks
             steamVrControllerManager.field_Public_ArrayOf_GameObject_0 = newPucks;
             steamVrControllerManager.field_Private_ArrayOf_UInt32_0 = newUints;
 
-            steamVrControllerManager.OnDisable();
-            steamVrControllerManager.OnEnable();
+            // only one of them is the correct type, so just try all of them 
+            steamVrControllerManager.field_Private_Action_0.TryCast<SteamVR_Events.Action<VREvent_t>>()?.action?.Invoke(new VREvent_t());
+            steamVrControllerManager.field_Private_Action_1.TryCast<SteamVR_Events.Action<VREvent_t>>()?.action?.Invoke(new VREvent_t());
+            steamVrControllerManager.field_Private_Action_2.TryCast<SteamVR_Events.Action<VREvent_t>>()?.action?.Invoke(new VREvent_t());
         }
 
         private static bool ourHadUpdateThisFrame = false;
