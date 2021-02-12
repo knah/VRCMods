@@ -13,7 +13,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using ViewPointTweaker;
 
-[assembly:MelonInfo(typeof(ViewPointTweakerMod), "View Point Tweaker", "1.0.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(ViewPointTweakerMod), "View Point Tweaker", "1.0.1", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace ViewPointTweaker
@@ -36,11 +36,14 @@ namespace ViewPointTweaker
         {
             ExpansionKitApi.GetExpandedMenu(ExpandedMenu.UiElementsQuickMenu).AddSimpleButton("Tweak view point", ShowViewpointMenu);
 
-            harmonyInstance.Patch(typeof(IKHeadAlignment)
-                    .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                    .Single(it => it.GetCustomAttribute<CallerCountAttribute>().Count > 0),
-                postfix: new HarmonyMethod(AccessTools.Method(typeof(ViewPointTweakerMod),
-                    nameof(HeadAlignmentInitPatch))));
+            foreach (var methodInfo in typeof(IKHeadAlignment)
+                .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                .Where(it => it.GetCustomAttribute<CallerCountAttribute>().Count > 0 && it.GetParameters().Length == 1 && it.GetParameters()[0].ParameterType == typeof(Animator)))
+            {
+                Harmony.Patch(methodInfo,
+                    postfix: new HarmonyMethod(AccessTools.Method(typeof(ViewPointTweakerMod),
+                        nameof(HeadAlignmentInitPatch))));
+            }
             
             LoadViewpoints();
         }
@@ -58,7 +61,7 @@ namespace ViewPointTweaker
                 return;
             }
             
-            MelonLogger.LogError("Steam tracking not found, things will break");
+            MelonLogger.Error("Steam tracking not found, things will break");
         }
 
         private void SaveViewpoints()
@@ -73,7 +76,7 @@ namespace ViewPointTweaker
             var json = File.ReadAllText(ViewPointsFilePath);
             JSON.MakeInto(JSON.Load(json), out ourSavedViewpoints);
             
-            MelonLogger.Log($"Loaded {ourSavedViewpoints.Count} saved viewpoints");
+            MelonLogger.Msg($"Loaded {ourSavedViewpoints.Count} saved viewpoints");
         }
 
         private static void HeadAlignmentInitPatch(IKHeadAlignment __instance)
@@ -96,9 +99,8 @@ namespace ViewPointTweaker
                 SetViewPointOffset(offset);
                 MelonCoroutines.Start(SetOffsetAgainLater(offset));
             }
-
-            if (Imports.IsDebugMode())
-                MelonLogger.Log("Head alignment set hook");
+            
+            MelonDebug.Msg("Head alignment set hook");
         }
 
         private static IEnumerator SetOffsetAgainLater(Vector3 offset)
@@ -135,8 +137,7 @@ namespace ViewPointTweaker
                 (go.GetComponent<EnableDisableListener>() ?? go.AddComponent<EnableDisableListener>()).OnDisabled +=
                     () =>
                     {
-                        if (Imports.IsDebugMode())
-                            MelonLogger.Log("Menu closed, cleaning up");
+                        MelonDebug.Msg("Menu closed, cleaning up");
                         Object.Destroy(ball);
                         
                         var avatarId = VRCPlayer.field_Internal_Static_VRCPlayer_0.prop_ApiAvatar_0.id;
