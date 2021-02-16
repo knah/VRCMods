@@ -13,7 +13,7 @@ using UnityEngine.UI;
 using VRCSDK2;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.2.3", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.2.4", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace UIExpansionKit
@@ -140,7 +140,7 @@ namespace UIExpansionKit
                     }
                     catch (Exception ex)
                     {
-                        MelonLogger.LogError(
+                        MelonLogger.Error(
                             $"Error while waiting for init of coroutine with type {coroutine.GetType().FullName}: {ex.ToString()}");
                     }
                     yield return coroutine.Current;
@@ -176,7 +176,7 @@ namespace UIExpansionKit
                 var gameObject = GameObject.Find(gameObjectPath);
                 if (gameObject == null)
                 {
-                    MelonLogger.LogError($"GameObject at path {gameObjectPath} for category {categoryEnum} was not found, not decorating");
+                    MelonLogger.Error($"GameObject at path {gameObjectPath} for category {categoryEnum} was not found, not decorating");
                     continue;
                 }
                 
@@ -369,17 +369,18 @@ namespace UIExpansionKit
                     toggle.isOn = boolEntry.Value;
                     toggle.onValueChanged.AddListener(new Action<bool>(isOn =>
                     {
-                        if (boolEntry.Value != isOn) 
+                        if (boolEntry.Value != isOn)
+                        {
                             boolEntry.Value = isOn;
-
-                        MelonPreferences.Save();
+                            MelonPreferences.Save();
+                        }
                     }));
                     Action<bool, bool> handler = (_, newValue) =>
                     {
                         toggle.isOn = newValue;
                     };
                     boolEntry.OnValueChanged += handler;
-                    toggle.gameObject.GetOrAddComponent<DestroyListener>().OnDestroyed += () =>
+                    toggleButton.GetOrAddComponent<DestroyListener>().OnDestroyed += () =>
                     {
                         boolEntry.OnValueChanged -= handler;
                     };
