@@ -1,5 +1,7 @@
 using System;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -9,12 +11,6 @@ using System.Threading.Tasks;
 using Harmony;
 using LagFreeScreenshots;
 using MelonLoader;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats;
-using SixLabors.ImageSharp.Formats.Jpeg;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 using UIExpansionKit.API;
 using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
@@ -22,7 +18,7 @@ using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 using CameraUtil = ObjectPublicCaSiVeUnique;
 
-[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.0.2", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.1.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -60,7 +56,7 @@ namespace LagFreeScreenshots
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void AddEnumSettings()
         {
-            ExpansionKitApi.RegisterSettingAsStringEnum(SettingsCategory, SettingScreenshotFormat, new []{("png", "PNG"), ("jpeg", "JPEG (slow!)")});
+            ExpansionKitApi.RegisterSettingAsStringEnum(SettingsCategory, SettingScreenshotFormat, new []{("png", "PNG"), ("jpeg", "JPEG")});
         }
 
         public override void OnUpdate()
@@ -166,29 +162,72 @@ namespace LagFreeScreenshots
 
             return data;
         }
+        
+        private static ImageCodecInfo GetEncoder(ImageFormat format)  
+        {  
+            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageEncoders();  
+            foreach (ImageCodecInfo codec in codecs)  
+            {  
+                if (codec.FormatID == format.Guid)  
+                {  
+                    return codec;  
+                }  
+            }  
+            return null;  
+        }  
 
         private static async Task EncodeAndSavePicture(string filePath, byte[] pixels, int w, int h, bool hasAlpha)
         {
             // yield to background thread
             await Task.Delay(1).ConfigureAwait(false);
 
-            using var image = hasAlpha ? (Image) Image.LoadPixelData<Argb32>(pixels, w, h) : Image.LoadPixelData<Rgb24>(pixels, w, h);
-            
-            image.Mutate(it => it.Flip(FlipMode.Vertical));
+            // swap colors [a]rgb -> bgr[a]
+            var step = hasAlpha ? 4 : 3;
+            for (int i = 0; i < pixels.Length; i += step)
+            {
+                var t = pixels[i];
+                pixels[i] = pixels[i + step - 1];
+                pixels[i + step - 1] = t;
+                if (step != 4) continue;
+                
+                t = pixels[i + 1];
+                pixels[i + 1] = pixels[i + step - 2];
+                pixels[i + step - 2] = t;
+            }
 
-            IImageEncoder encoder;
-            await ourToMainThread.Yield();
+            // flip image upside-down
+            for (var y = 0; y < h / 2; y++)
+            {
+                for (var x = 0; x < w * step; x++)
+                {
+                    var t = pixels[x + y * w * step];
+                    pixels[x + y * w * step] = pixels[x + (h - y - 1) * w * step];
+                    pixels[x + (h - y - 1) * w * step] = t;
+                }
+            }
+            
+
+            var pixelFormat = hasAlpha ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb;
+            var bitmap = new Bitmap(w, h, pixelFormat);
+            var bitmapData = bitmap.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, pixelFormat);
+            Marshal.Copy(pixels, 0, bitmapData.Scan0, pixels.Length);
+            bitmap.UnlockBits(bitmapData);
+
+            ImageCodecInfo encoder;
+            EncoderParameters parameters;
+            
             if (ourFormat.Value == "jpeg")
             {
-                encoder = new JpegEncoder() {Quality = ourJpegPercent.Value};
+                encoder = GetEncoder(ImageFormat.Jpeg);
+                parameters = new EncoderParameters(1)
+                {
+                    Param = {[0] = new EncoderParameter(Encoder.Quality, ourJpegPercent.Value)}
+                };
                 filePath = Path.ChangeExtension(filePath, ".jpeg");
+                bitmap.Save(filePath, encoder, parameters);
             }
             else
-                encoder = new PngEncoder();
-
-            await Task.Delay(1).ConfigureAwait(false);
-
-            await image.SaveAsync(filePath, encoder).ConfigureAwait(false);
+                bitmap.Save(filePath, ImageFormat.Png);
 
             await ourToMainThread.Yield();
             

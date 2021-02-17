@@ -5,36 +5,10 @@
         <VrcReferences>true</VrcReferences>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>8</LangVersion>
-        <Version>1.0.2.0</Version>
+        <Version>1.1.0.0</Version>
     </PropertyGroup>
-
-    <Import Project="$(MsBuildThisFileDirectory)/../ILRepack/ILRepack.Lib.MSBuild.Task.targets" />
-
-    <ItemGroup>
-      <PackageReference Include="SixLabors.ImageSharp" Version="1.0.2" />
-    </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\UIExpansionKit\UIExpansionKit.csproj" />
     </ItemGroup>
-
-    <Target Name="ILRepack" AfterTargets="Build">
-        <PropertyGroup>
-            <WorkingDirectory>$(OutputPath)</WorkingDirectory>
-        </PropertyGroup>
-
-        <ItemGroup>
-            <InputAssemblies Include="$(OutputPath)/$(AssemblyName).dll" />
-            <InputAssemblies Include="$(OutputPath)/SixLabors.ImageSharp.dll" />
-            <InputAssemblies Include="$(OutputPath)/System.Memory.dll" />
-            <InputAssemblies Include="$(OutputPath)/System.Buffers.dll" />
-            <InputAssemblies Include="$(OutputPath)/System.Runtime.CompilerServices.Unsafe.dll" />
-
-            <IlRepackLibs Include="$(OutputPath)" />
-            <IlRepackLibs Include="$(MsBuildThisFileDirectory)/../Libs" />
-        </ItemGroup>
-        <Message Text="MERGING: @(InputAssemblies->'%(Filename)') into $(AssemblyName)-merged.dll" Importance="High" />
-        <ILRepack Internalize="true" LibraryPath="@(IlRepackLibs)" OutputFile="$(OutputPath)/$(AssemblyName)-merged.dll" InputAssemblies="@(InputAssemblies)" />
-    </Target>
-
 </Project>
