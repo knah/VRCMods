@@ -111,9 +111,9 @@ namespace IKTweaks
         };
         private static string? GetTrackerSerial(int trackerId)
         {
-            var sb = new StringBuilder();
+            var sb = new StringBuilder(64);
             ETrackedPropertyError err = ETrackedPropertyError.TrackedProp_Success;
-            OpenVR.System.GetStringTrackedDeviceProperty((uint) trackerId, ETrackedDeviceProperty.Prop_SerialNumber_String, sb, OpenVR.k_unMaxPropertyStringSize, ref err);
+            OpenVR.System.GetStringTrackedDeviceProperty((uint) trackerId, ETrackedDeviceProperty.Prop_SerialNumber_String, sb, (uint) sb.Capacity, ref err);
             if (err == ETrackedPropertyError.TrackedProp_Success)
                 return sb.ToString();
             
