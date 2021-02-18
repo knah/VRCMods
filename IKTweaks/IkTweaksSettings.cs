@@ -15,7 +15,7 @@ namespace IKTweaks
             MelonPrefs.RegisterCategory(IkTweaksCategory, "IK Tweaks");
             
             MelonPrefs.RegisterBool(IkTweaksCategory, FixShoulders, true, "Use Pitch-Yaw Shoulders");
-            MelonPrefs.RegisterBool(IkTweaksCategory, nameof(IgnoreAnimations), true, "Ignore animations (always slide around)");
+            MelonPrefs.RegisterBool(IkTweaksCategory, nameof(IgnoreAnimations), false, "Ignore animations (always slide around)");
             MelonPrefs.RegisterBool(IkTweaksCategory, nameof(PlantFeet), false, "Feet stick to ground");
             
             MelonPrefs.RegisterBool(IkTweaksCategory, nameof(FullBodyVrIk), true, "Use custom VRIK for FBT");
