@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Harmony;
 using LagFreeScreenshots;
@@ -38,6 +39,8 @@ namespace LagFreeScreenshots
         private static MelonPreferences_Entry<string> ourFormat;
         private static MelonPreferences_Entry<int> ourJpegPercent;
 
+        private static Thread ourMainThread;
+
         public override void OnApplicationStart()
         {
             var category = MelonPreferences.CreateCategory(SettingsCategory, "Lag Free Screenshots");
@@ -47,7 +50,7 @@ namespace LagFreeScreenshots
             
             Harmony.Patch(
                 typeof(CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObBosareInAcre2StUnique).GetMethod("MoveNext"),
-                new HarmonyMethod(AccessTools.Method(typeof(LagFreeScreenshotsMod), nameof(MoveNextPatch))));
+                new HarmonyMethod(AccessTools.Method(typeof(LagFreeScreenshotsMod), nameof(MoveNextPatchAsyncReadback))));
             
             if (MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit" && !it.Info.Version.StartsWith("0.1."))) 
                 AddEnumSettings();
@@ -69,12 +72,14 @@ namespace LagFreeScreenshots
             ourToEndOfFrame.Flush();
         }
 
-        public static bool MoveNextPatch(ref bool __result, CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObBosareInAcre2StUnique __instance)
+        public static bool MoveNextPatchAsyncReadback(ref bool __result, CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObBosareInAcre2StUnique __instance)
         {
-            // ignore all small pictures as default VRC is fast enough on them and this mod breaks VRC+ picture taking features otherwise
-            if (!ourEnabled.Value || __instance.resWidth <= 1920 || __instance.resHeight <= 1080)
+            // ignore VRC+ pictures too
+            if (!ourEnabled.Value || !__instance.saveToFile)
                 return true;
             
+            ourMainThread = Thread.CurrentThread;
+
             __result = false;
             TakeScreenshot(__instance.cam, __instance.resWidth,
                 __instance.resHeight, __instance.alpha).ContinueWith(t =>
@@ -89,7 +94,9 @@ namespace LagFreeScreenshots
         {
             await ourToEndOfFrame.Yield();
 
-            var renderTexture = RenderTexture.GetTemporary(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, 8);
+            // var renderTexture = RenderTexture.GetTemporary(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, 8);
+            var renderTexture = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
+            renderTexture.antiAliasing = 8;
 
             var oldCameraTarget = camera.targetTexture;
             var oldCameraFov = camera.fieldOfView;
@@ -101,29 +108,29 @@ namespace LagFreeScreenshots
             camera.targetTexture = oldCameraTarget;
             camera.fieldOfView = oldCameraFov;
 
-            byte[] data = null;
+            (IntPtr, int) data = default;
             var readbackSupported = SystemInfo.supportsAsyncGPUReadback;
             if (readbackSupported)
             {
                 MelonDebug.Msg("Supports readback");
                 
+                var stopwatch = Stopwatch.StartNew();
                 var request = AsyncGPUReadback.Request(renderTexture, 0, hasAlpha ? TextureFormat.ARGB32 : TextureFormat.RGB24,new Action<AsyncGPUReadbackRequest>(r =>
                 {
                     if (r.hasError)
                         MelonLogger.Warning("Readback request finished with error (w)");
                     
-                    var sw = Stopwatch.StartNew();
                     data = ToBytes(r.GetDataRaw(0), r.GetLayerDataSize());
-                    MelonDebug.Msg($"Bytes readback took {sw.ElapsedMilliseconds}");
+                    MelonDebug.Msg($"Bytes readback took total {stopwatch.ElapsedMilliseconds}");
                 }));
                 
-                while (!request.done && !request.hasError && data == null)
+                while (!request.done && !request.hasError && data.Item1 == IntPtr.Zero)
                     await ourToMainThread.Yield();
 
                 if (request.hasError)
                     MelonLogger.Warning("Readback request finished with error");
                 
-                if (data == null)
+                if (data.Item1 == IntPtr.Zero)
                 {
                     MelonDebug.Msg("Data was null after request was done, waiting more");
                     await ourToMainThread.Yield();
@@ -131,7 +138,7 @@ namespace LagFreeScreenshots
             }
             else
             {
-                MelonDebug.Msg("Does not support readback");
+                MelonLogger.Msg("Does not support readback, using fallback texture read method");
                 
                 RenderTexture.active = renderTexture;
                 var newTexture = new Texture2D(w, h, hasAlpha ? TextureFormat.ARGB32 : TextureFormat.RGB24, false);
@@ -139,12 +146,14 @@ namespace LagFreeScreenshots
                 newTexture.Apply();
                 RenderTexture.active = null;
 
-                data = newTexture.GetRawTextureData();
+                var bytes = newTexture.GetRawTextureData();
+                data = (Marshal.AllocHGlobal(bytes.Length), bytes.Length);
+                Il2CppSystem.Runtime.InteropServices.Marshal.Copy(bytes, 0, data.Item1, bytes.Length);
                 
                 Object.Destroy(newTexture);
             }
             
-            RenderTexture.ReleaseTemporary(renderTexture);
+            Object.Destroy(renderTexture);
 
             var targetFile = GetPath(w, h);
             var targetDir = Path.GetDirectoryName(targetFile);
@@ -154,13 +163,13 @@ namespace LagFreeScreenshots
             await EncodeAndSavePicture(targetFile, data, w, h, hasAlpha).ConfigureAwait(false);
         }
         
-        private static byte[] ToBytes(IntPtr pointer, int length)
+        private static unsafe (IntPtr, int) ToBytes(IntPtr pointer, int length)
         {
-            var data = new byte[length];
+            var data = Marshal.AllocHGlobal(length);
+            
+            Buffer.MemoryCopy((void*) pointer, (void*)data, length, length);
 
-            Marshal.Copy(pointer, data, 0, data.Length);
-
-            return data;
+            return (data, length);
         }
         
         private static ImageCodecInfo GetEncoder(ImageFormat format)  
@@ -176,42 +185,57 @@ namespace LagFreeScreenshots
             return null;  
         }  
 
-        private static async Task EncodeAndSavePicture(string filePath, byte[] pixels, int w, int h, bool hasAlpha)
+        private static async Task EncodeAndSavePicture(string filePath, (IntPtr, int Length) pixelsPair, int w, int h, bool hasAlpha)
         {
+            if (pixelsPair.Item1 == IntPtr.Zero) return;
+            
             // yield to background thread
             await Task.Delay(1).ConfigureAwait(false);
+            
+            if (Thread.CurrentThread == ourMainThread)
+                MelonLogger.Error("Image encode is executed on main thread - it's a bug!");
 
-            // swap colors [a]rgb -> bgr[a]
             var step = hasAlpha ? 4 : 3;
-            for (int i = 0; i < pixels.Length; i += step)
+            unsafe
             {
-                var t = pixels[i];
-                pixels[i] = pixels[i + step - 1];
-                pixels[i + step - 1] = t;
-                if (step != 4) continue;
-                
-                t = pixels[i + 1];
-                pixels[i + 1] = pixels[i + step - 2];
-                pixels[i + step - 2] = t;
-            }
-
-            // flip image upside-down
-            for (var y = 0; y < h / 2; y++)
-            {
-                for (var x = 0; x < w * step; x++)
+                // swap colors [a]rgb -> bgr[a]
+                byte* pixels = (byte*) pixelsPair.Item1;
+                for (int i = 0; i < pixelsPair.Length; i += step)
                 {
-                    var t = pixels[x + y * w * step];
-                    pixels[x + y * w * step] = pixels[x + (h - y - 1) * w * step];
-                    pixels[x + (h - y - 1) * w * step] = t;
+                    var t = pixels[i];
+                    pixels[i] = pixels[i + step - 1];
+                    pixels[i + step - 1] = t;
+                    if (step != 4) continue;
+
+                    t = pixels[i + 1];
+                    pixels[i + 1] = pixels[i + step - 2];
+                    pixels[i + step - 2] = t;
+                }
+
+                // flip image upside-down
+                for (var y = 0; y < h / 2; y++)
+                {
+                    for (var x = 0; x < w * step; x++)
+                    {
+                        var t = pixels[x + y * w * step];
+                        pixels[x + y * w * step] = pixels[x + (h - y - 1) * w * step];
+                        pixels[x + (h - y - 1) * w * step] = t;
+                    }
                 }
             }
-            
+
 
             var pixelFormat = hasAlpha ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb;
             var bitmap = new Bitmap(w, h, pixelFormat);
             var bitmapData = bitmap.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, pixelFormat);
-            Marshal.Copy(pixels, 0, bitmapData.Scan0, pixels.Length);
+            unsafe
+            {
+                Buffer.MemoryCopy((void*) pixelsPair.Item1, (void*) bitmapData.Scan0, pixelsPair.Length, pixelsPair.Length);
+            }
+
             bitmap.UnlockBits(bitmapData);
+            
+            Marshal.FreeHGlobal(pixelsPair.Item1);
 
             ImageCodecInfo encoder;
             EncoderParameters parameters;
