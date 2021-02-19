@@ -138,7 +138,7 @@ This mod includes parts of FinalIK, which is a paid Unity Store asset, therefore
 If you want to build the mod yourself, you'll need to do the following:
 * Get a copy of FinalIK from asset store
 * Copy the VRIK solver, VRIK component and TwistRelaxer component into mod sources folder
-* Rename them to match with what the rest of mod source expects
+* Rename them to match with what the rest of mod source expects, make VRIK_New `partial`
 * Add the following line to start of `RootMotionNew.FinalIK.IKSolverVR.Spine.FABRIKPass` : `weight = Mathf.Clamp01(weight - pelvisPositionWeight);`
 * Remove `RootMotionNew.FinalIK.IKSolverVR.Spine.SolvePelvis` from the original VRIK solver
 * Rename `RootMotionNew.FinalIK.IKSolverVR.Leg.ApplyOffsets` to `ApplyOffsetsOld`, remove `override` from it
