@@ -33,7 +33,7 @@ namespace FavCat.Database
 
         public Task TrimCache(long maxSize)
         {
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
                 MelonLogger.Log("Trimming image cache");
                 var allFileInfos = new List<(LiteFileInfo<string>, StoredImageInfo)>();
@@ -64,6 +64,8 @@ namespace FavCat.Database
                     myFileDatabase.FileStorage.Delete(allFileInfos[i].Item1.Id);
                     myImageInfos.Delete(allFileInfos[i].Item2.Id);
                 }
+
+                await FavCatMod.YieldToMainThread();
                 
                 MelonLogger.Log($"Removed {cutoffPoint} images from cache");
             });
