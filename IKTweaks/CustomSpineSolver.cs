@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using IKTweaks;
 using UnityEngine;
@@ -206,5 +207,17 @@ namespace RootMotionNew.FinalIK
 				bendGoalWeight = oldWeight;
 			}
 		}
+	}
+
+	public partial class VRIK_New
+	{
+		public VRIK_New(IntPtr ptr) : base(ptr)
+        {
+        }
+
+        private void OnDestroy()
+        {
+        	FullBodyHandling.LastInitializedVRIK = null;
+        }
 	}
 }
