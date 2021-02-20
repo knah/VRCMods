@@ -10,6 +10,7 @@ namespace UIExpansionKit.API
     {
         internal static readonly Dictionary<ExpandedMenu, CustomLayoutedPageImpl> ExpandedMenus = new Dictionary<ExpandedMenu, CustomLayoutedPageImpl>();
         internal static readonly Dictionary<string, GameObject> CustomCategoryUIs = new Dictionary<string, GameObject>();
+        internal static readonly Dictionary<string, CustomLayoutedPageImpl> SettingPageExtensions = new Dictionary<string, CustomLayoutedPageImpl>();
         internal static readonly List<IEnumerator> ExtraWaitCoroutines = new List<IEnumerator>();
 
         internal static readonly Dictionary<(string, string), IList<(string SettingsValue, string DisplayName)>> EnumSettings = new Dictionary<(string, string), IList<(string SettingsValue, string DisplayName)>>();
@@ -66,6 +67,18 @@ namespace UIExpansionKit.API
             return ExpandedMenus[menu] = new CustomLayoutedPageImpl(null);
         }
 
+        /// <summary>
+        /// Returns the interface that can be used to add buttons to settings categories.
+        /// If they category was registered as custom via <see cref="RegisterCustomSettingsCategory"/>, changes to this menu will have no effect.
+        /// </summary>
+        /// <param name="categoryName">The category to return the menu for</param>
+        public static ICustomLayoutedMenu GetSettingsCategory(string categoryName)
+        {
+            if (SettingPageExtensions.TryGetValue(categoryName, out var result)) return result;
+
+            return SettingPageExtensions[categoryName] = new CustomLayoutedPageImpl(null);
+        }
+
         internal class ButtonRegistration
         {
             public GameObject Prefab;
@@ -91,7 +104,8 @@ namespace UIExpansionKit.API
 
         /// <summary>
         /// Registers a specific string-valued MelonPref as a enum value.
-        /// In mod settings menu, this setting will be represented by a dropdown with specified possible values
+        /// In mod settings menu, this setting will be represented by a dropdown with specified possible values.
+        /// The list of possible values will be read each time the settings UI is shown
         /// </summary>
         /// <param name="categoryName">MelonPrefs settings category</param>
         /// <param name="settingName">MelonPrefs setting name</param>

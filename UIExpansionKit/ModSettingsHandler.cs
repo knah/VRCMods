@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using MelonLoader;
 using UIExpansionKit.API;
+using UIExpansionKit.Components;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -47,9 +48,11 @@ namespace UIExpansionKit
                     continue;
                 }
 
+                ExpansionKitApi.SettingPageExtensions.TryGetValue(categoryId, out var customEntries);
+
                 var prefsToPopulate = prefDict.Where(it => !it.IsHidden).ToList();
                 
-                if (prefsToPopulate.Count == 0)
+                if (prefsToPopulate.Count == 0 && customEntries.RegisteredButtons.Count == 0)
                     continue;
 
                 var categoryUi = Object.Instantiate(categoryPrefab, settingsContentRoot, false);
@@ -130,22 +133,30 @@ namespace UIExpansionKit
                                 var comboSetting = Object.Instantiate(comboBoxPrefab, categoryUiContent, false);
                                 comboSetting.GetComponentInChildren<Text>().text = pref.DisplayName ?? prefId;
                                 var dropdown = comboSetting.GetComponentInChildren<Dropdown>();
-                                var options = new Il2CppSystem.Collections.Generic.List<Dropdown.OptionData>();
-                                var currentValue = stringPref.Value;
-                                var selectedIndex = enumValues.Count;
-                                for (var i = 0; i < enumValues.Count; i++)
+
+                                void RefreshOptions()
                                 {
-                                    var valueTuple = enumValues[i];
-                                    options.Add(new Dropdown.OptionData(valueTuple.DisplayName));
-                                    if (currentValue == valueTuple.SettingsValue)
-                                        selectedIndex = i;
+                                    var options = new Il2CppSystem.Collections.Generic.List<Dropdown.OptionData>();
+                                    var currentValue = stringPref.Value;
+                                    var selectedIndex = enumValues.Count;
+                                    for (var i = 0; i < enumValues.Count; i++)
+                                    {
+                                        var valueTuple = enumValues[i];
+                                        options.Add(new Dropdown.OptionData(valueTuple.DisplayName));
+                                        if (currentValue == valueTuple.SettingsValue)
+                                            selectedIndex = i;
+                                    }
+                                    if (enumValues.All(it => it.SettingsValue != currentValue)) 
+                                        options.Add(new Dropdown.OptionData(currentValue));
+                                    dropdown.options = options;
+                                    dropdown.value = selectedIndex;
                                 }
-                                if (enumValues.All(it => it.SettingsValue != currentValue)) 
-                                    options.Add(new Dropdown.OptionData(currentValue));
-                                dropdown.options = options;
-                                dropdown.value = selectedIndex;
+                                dropdown.gameObject.GetOrAddComponent<EnableDisableListener>().OnEnabled += RefreshOptions;
+                                RefreshOptions();
+                                
                                 dropdown.onValueChanged.AddListener(new Action<int>(value =>
                                 {
+                                    var currentValue = stringPref.Value;
                                     var newValue = value >= enumValues.Count
                                         ? currentValue
                                         : enumValues[value].SettingsValue;
@@ -262,6 +273,8 @@ namespace UIExpansionKit
                             break;
                     }
                 }
+                
+                customEntries?.PopulateButtons(categoryUiContent, false, false);
             }
 
             UiExpansionKitMod.SetLayerRecursively(settingsContentRoot.gameObject, 12);
