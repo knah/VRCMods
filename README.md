@@ -208,6 +208,12 @@ Settings description:
  This mod allows removing start and end sparkles from VR laser pointers, as well as recoloring them.  
  It will do nothing on desktop.   
  Settings are fairly self-explanatory.
+
+## True Shader Anticrash
+This mod prevents practically all known shader crashes. Note that it can affect how stuff looks as it rewrites shader code to be non-crashy. Setting changes require world rejoin to reload shaders.
+### Partial source code
+Main logic of this mod is located in the native DLL that currently is not opensource. The DLL is build upon [HLSLcc](https://github.com/Unity-Technologies/HLSLcc) and uses [Microsoft Detours](https://github.com/microsoft/Detours). An opensource release for it will likely be available at a later point.
+
  
  ## UIExpansionKit
  This mod provides additional UI panels for use by other mods, and a unified mod settings UI.  

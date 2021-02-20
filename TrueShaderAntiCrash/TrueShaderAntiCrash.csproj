@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net472</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <Version>1.0.0.0</Version>
+        <VrcReferences>true</VrcReferences>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="DxbcShaderFilter.dll" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\UIExpansionKit\UIExpansionKit.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -52,7 +52,7 @@ namespace UIExpansionKit
 
                 var prefsToPopulate = prefDict.Where(it => !it.IsHidden).ToList();
                 
-                if (prefsToPopulate.Count == 0 && customEntries.RegisteredButtons.Count == 0)
+                if (prefsToPopulate.Count == 0 && customEntries?.RegisteredButtons.Count == 0)
                     continue;
 
                 var categoryUi = Object.Instantiate(categoryPrefab, settingsContentRoot, false);
