@@ -21,7 +21,7 @@ using Object = UnityEngine.Object;
 using ModerationManager = VRC.Management.ModerationManager;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.2.6", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.3.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
 namespace AdvancedSafety
@@ -173,11 +173,14 @@ namespace AdvancedSafety
             var seenAnimators = 0;
             var seenLights = 0;
             var seenComponents = 0;
+            var seenParticles = 0;
+            var seenMeshParticleVertices = 0;
 
             var animator = go.GetComponent<Animator>();
 
             var componentList = new Il2CppSystem.Collections.Generic.List<Component>();
             var audioSourcesList = new List<AudioSource>();
+            var skinnedRendererListList = new List<SkinnedMeshRenderer>();
             
             void Bfs(GameObjectWithPriorityData objWithPriority)
             {
@@ -206,9 +209,9 @@ namespace AdvancedSafety
                 obj.GetComponents(componentList);
                 foreach (var component in componentList)
                 {
-                    if(component == null) continue;
+                    if (component == null) continue;
 
-                    component.TryCast<AudioSource>()?.VisitAudioSource(ref scannedObjects, ref destroyedObjects, ref seenAudioSources, obj, audioSourcesList);
+                    component.TryCast<AudioSource>()?.VisitAudioSource(ref scannedObjects, ref destroyedObjects, ref seenAudioSources, obj, audioSourcesList, objWithPriority.IsActiveInHierarchy);
                     component.TryCast<IConstraint>()?.VisitConstraint(ref scannedObjects, ref destroyedObjects, ref seenConstraints, obj);
                     component.TryCast<Cloth>()?.VisitCloth(ref scannedObjects, ref destroyedObjects, ref seenClothVertices, obj);
                     component.TryCast<Rigidbody>()?.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenRigidbodies, AdvancedSafetySettings.MaxRigidBodies);
@@ -217,25 +220,28 @@ namespace AdvancedSafety
                     component.TryCast<Animator>()?.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenAnimators, AdvancedSafetySettings.MaxAnimators);
                     component.TryCast<Light>()?.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenLights, AdvancedSafetySettings.MaxLights);
                     
-                    component.TryCast<Renderer>()?.VisitRenderer(ref scannedObjects, ref destroyedObjects, ref seenPolys, ref seenMaterials, obj);
+                    component.TryCast<Renderer>()?.VisitRenderer(ref scannedObjects, ref destroyedObjects, ref seenPolys, ref seenMaterials, obj, skinnedRendererListList);
+                    component.TryCast<ParticleSystem>()?.VisitParticleSystem(component.GetComponent<ParticleSystemRenderer>(), ref scannedObjects, ref destroyedObjects, ref seenParticles, ref seenMeshParticleVertices, obj);
                     
                     if (ReferenceEquals(component.TryCast<Transform>(), null))
                         component.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenComponents, AdvancedSafetySettings.MaxComponents);
                 }
                 
                 foreach (var child in obj.transform) 
-                    ourBfsQueue.Enqueue(new GameObjectWithPriorityData(child.Cast<Transform>().gameObject, objWithPriority.Depth + 1));
+                    ourBfsQueue.Enqueue(new GameObjectWithPriorityData(child.Cast<Transform>().gameObject, objWithPriority.Depth + 1, objWithPriority.IsActiveInHierarchy));
             }
             
-            Bfs(new GameObjectWithPriorityData(go, 0));
+            Bfs(new GameObjectWithPriorityData(go, 0, true, true));
             while (ourBfsQueue.Count > 0) 
                 Bfs(ourBfsQueue.Dequeue());
+            
+            ComponentAdjustment.PostprocessSkinnedRenderers(skinnedRendererListList);
 
             if (!AdvancedSafetySettings.AllowSpawnSounds)
                 MelonCoroutines.Start(CheckSpawnSounds(go, audioSourcesList));
 
-            if (Imports.IsDebugMode() || destroyedObjects > 100)
-                MelonLogger.Log($"Cleaned avatar ({avatarManager.prop_ApiAvatar_0?.name}) in {start.ElapsedMilliseconds}ms, scanned {scannedObjects} things, destroyed {destroyedObjects} things");
+            if (MelonDebug.IsEnabled() || destroyedObjects > 100)
+                MelonLogger.Msg($"Cleaned avatar ({avatarManager.prop_ApiAvatar_0?.name}) used by \"{vrcPlayer.prop_VRCPlayerApi_0?.displayName}\" in {start.ElapsedMilliseconds}ms, scanned {scannedObjects} things, destroyed {destroyedObjects} things");
         }
 
         private static IEnumerator CheckSpawnSounds(GameObject go, List<AudioSource> audioSourcesList)
@@ -384,14 +390,16 @@ namespace AdvancedSafety
         {
             public readonly GameObject GameObject;
             public readonly bool IsActive;
+            public readonly bool IsActiveInHierarchy;
             public readonly int NumChildren;
             public readonly int Depth;
 
-            public GameObjectWithPriorityData(GameObject go, int depth)
+            public GameObjectWithPriorityData(GameObject go, int depth, bool parentActive, bool enforceActive = false)
             {
                 GameObject = go;
                 Depth = depth;
-                IsActive = go.activeSelf;
+                IsActive = go.activeSelf || enforceActive;
+                IsActiveInHierarchy = IsActive && parentActive;
                 NumChildren = go.transform.childCount;
             }
 

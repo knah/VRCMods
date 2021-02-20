@@ -39,6 +39,8 @@ namespace AdvancedSafety
             MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxLights), 2, "Max lights");
             MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxComponents), 4_000, "Max total components");
             
+            MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxParticles), 1_000_000, "Max total particles");
+            MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxMeshParticleVertices), 100_000, "Max total mesh particle vertices");
             MelonPrefs.RegisterBool(SettingsCategory, nameof(AllowUiLayer), false, "Allow UI layer on avatars");
             
             MelonPrefs.RegisterBool(SettingsCategory, nameof(HidePortalsFromBlockedUsers), true, "Hide portals from blocked users");
@@ -74,6 +76,8 @@ namespace AdvancedSafety
         public static int MaxLights;
         public static int MaxComponents;
         public static int MaxDepth;
+        public static int MaxParticles;
+        public static int MaxMeshParticleVertices;
 
         public static bool HeuristicallyRemoveScreenSpaceBullshit;
 

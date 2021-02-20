@@ -7,7 +7,7 @@ namespace AdvancedSafety
 {
     public static class ComponentAdjustment
     {
-        public static void VisitAudioSource(this AudioSource audioSource, ref int totalCount, ref int deletedCount, ref int specificCount, GameObject obj, System.Collections.Generic.List<AudioSource> sourcesOutList)
+        public static void VisitAudioSource(this AudioSource audioSource, ref int totalCount, ref int deletedCount, ref int specificCount, GameObject obj, System.Collections.Generic.List<AudioSource> sourcesOutList, bool activeInHierarchy)
         {
             totalCount++;
             
@@ -22,7 +22,7 @@ namespace AdvancedSafety
             if (!AdvancedSafetySettings.AllowSpawnSounds)
             {
                 sourcesOutList.Add(audioSource);
-                if (audioSource.enabled && obj.activeSelf && audioSource.playOnAwake)
+                if (audioSource.enabled && activeInHierarchy && audioSource.playOnAwake)
                 {
                     audioSource.playOnAwake = false;
                     audioSource.Stop();
@@ -106,12 +106,15 @@ namespace AdvancedSafety
         
         private static readonly List<Material> ourMaterialsList = new List<Material>();
         
-        public static void VisitRenderer(this Renderer renderer, ref int totalCount, ref int deletedCount, ref int polyCount, ref int materialCount, GameObject obj)
+        public static void VisitRenderer(this Renderer renderer, ref int totalCount, ref int deletedCount, ref int polyCount, ref int materialCount, GameObject obj, System.Collections.Generic.List<SkinnedMeshRenderer> skinnedRendererList)
         {
             totalCount++;
             
             var skinnedMeshRenderer = renderer.TryCast<SkinnedMeshRenderer>();
             var meshFilter = obj.GetComponent<MeshFilter>();
+            
+            if (skinnedMeshRenderer != null)
+                skinnedRendererList.Add(skinnedMeshRenderer);
 
             renderer.GetSharedMaterials(ourMaterialsList);
             if (ourMaterialsList.Count == 0) return;
@@ -156,6 +159,81 @@ namespace AdvancedSafety
             }
 
             materialCount += renderer.GetMaterialCount();
+        }
+
+        public static void VisitParticleSystem(this ParticleSystem particleSystem, ParticleSystemRenderer renderer, ref int totalCount, ref int deletedCount, ref int particleCount, ref int meshParticleVertexCount, GameObject obj)
+        {
+            totalCount++;
+
+            if (renderer == null)
+            {
+                deletedCount++;
+                Object.Destroy(particleSystem);
+                return;
+            }
+            
+            var particleLimit = AdvancedSafetySettings.MaxParticles - particleCount;
+
+            if (particleSystem.maxParticles > particleLimit) 
+                particleSystem.maxParticles = particleLimit;
+
+            particleCount += particleSystem.maxParticles;
+
+            if (renderer.renderMode == ParticleSystemRenderMode.Mesh)
+            {
+                var meshes = new Il2CppReferenceArray<Mesh>(renderer.meshCount);
+                renderer.GetMeshes(meshes);
+
+                var vertexCountSum = 1;
+                
+                foreach (var mesh in meshes)
+                    vertexCountSum += mesh.vertexCount;
+
+                var requestedVertexCount = vertexCountSum * particleSystem.particleCount;
+                var vertexLimit = AdvancedSafetySettings.MaxMeshParticleVertices - meshParticleVertexCount;
+                if (requestedVertexCount > vertexLimit) 
+                    particleSystem.maxParticles = vertexLimit / vertexCountSum;
+
+                meshParticleVertexCount += vertexCountSum * particleSystem.particleCount;
+            }
+            
+            if (particleSystem.maxParticles == 0)
+            {
+                Object.DestroyImmediate(renderer, true);
+                Object.DestroyImmediate(particleSystem, true);
+                
+                deletedCount++;
+            }
+        }
+
+        public static void PostprocessSkinnedRenderers(System.Collections.Generic.List<SkinnedMeshRenderer> renderers)
+        {
+            foreach (var skinnedMeshRenderer in renderers)
+            {
+                if (skinnedMeshRenderer == null) continue;
+
+                Transform zeroScaleRoot = null;
+
+                var bones = skinnedMeshRenderer.bones;
+                for (var i = 0; i < bones.Count; i++)
+                {
+                    if (bones[i] != null) continue;
+                    
+                    // this prevents stretch-to-zero uglies
+                    if (ReferenceEquals(zeroScaleRoot, null))
+                    {
+                        var newGo = new GameObject("zero-scale");
+                        zeroScaleRoot = newGo.transform;
+                        zeroScaleRoot.SetParent(skinnedMeshRenderer.rootBone, false);
+                        zeroScaleRoot.localScale = Vector3.zero;
+                    }
+                        
+                    bones[i] = zeroScaleRoot;
+                }
+
+                if (!ReferenceEquals(zeroScaleRoot, null))
+                    skinnedMeshRenderer.bones = bones;
+            }
         }
     }
 }
