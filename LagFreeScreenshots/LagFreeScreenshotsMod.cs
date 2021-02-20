@@ -16,8 +16,9 @@ using UIExpansionKit.API;
 using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
 using UnityEngine.Rendering;
+using VRC.UserCamera;
 using Object = UnityEngine.Object;
-using CameraUtil = ObjectPublicCaSiVeUnique;
+// using CameraUtil = ObjectPublicCaSiVeUnique;
 
 [assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.1.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
