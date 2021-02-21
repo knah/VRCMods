@@ -217,7 +217,7 @@ namespace RootMotionNew.FinalIK
 
         private void OnDestroy()
         {
-        	FullBodyHandling.LastInitializedVRIK = null;
+        	if (FullBodyHandling.LastInitializedVRIK == this) FullBodyHandling.LastInitializedVRIK = null;
         }
 	}
 }
