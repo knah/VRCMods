@@ -22,6 +22,7 @@ namespace JoinNotifier
         private const string SettingLeaveIconColor = "LeaveColor";
         private const string SettingShowFriendsInDifferentColor = "ShowFriendsInDifferentColor";
         private const string SettingShowFriendsOnly = "ShowFriendsOnly";
+        private const string SettingShowFriendsAlways = "ShowFriendsAlways";
         private const string SettingFriendsJoinColor = "FriendJoinColor";
         private const string SettingFriendsLeaveColor = "FriendLeaveColor";
         
@@ -48,6 +49,7 @@ namespace JoinNotifier
             MelonPrefs.RegisterBool(SettingsCategory, SettingNotifyPrivate, true, "Notify in private instances");
 
             MelonPrefs.RegisterBool(SettingsCategory, SettingShowFriendsOnly, false, "Show friend join/leave only");
+            MelonPrefs.RegisterBool(SettingsCategory, SettingShowFriendsAlways, false, "Show friend join/leave regardless of instance type");
             MelonPrefs.RegisterString(SettingsCategory, SettingJoinIconColor, "127 191 255", "Join icon color (r g b)");
             MelonPrefs.RegisterString(SettingsCategory, SettingLeaveIconColor, "153 82 51", "Leave icon color (r g b)");
             
@@ -85,6 +87,7 @@ namespace JoinNotifier
             MelonPrefs.GetBool(SettingsCategory, isJoin ? SettingJoinShowName : SettingLeaveShowName);
 
         public static bool ShowFriendsOnly() => MelonPrefs.GetBool(SettingsCategory, SettingShowFriendsOnly);
+        public static bool ShowFriendsAlways() => MelonPrefs.GetBool(SettingsCategory, SettingShowFriendsAlways);
         public static bool ShowFriendsInDifferentColor() => MelonPrefs.GetBool(SettingsCategory, SettingShowFriendsInDifferentColor);
 
         public static float GetSoundVolume() => MelonPrefs.GetFloat(SettingsCategory, SettingSoundVolume);

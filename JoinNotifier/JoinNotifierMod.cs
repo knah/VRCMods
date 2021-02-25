@@ -246,9 +246,12 @@ namespace JoinNotifier
             }
 
             if (!myObservedLocalPlayerJoin || Environment.TickCount - myLastLevelLoad < 5_000) return;
-            if (!JoinNotifierSettings.ShouldNotifyInCurrentInstance()) return;
             var isFriendsWith = APIUser.IsFriendsWith(apiUser.id);
-            if (JoinNotifierSettings.ShowFriendsOnly() && !isFriendsWith) return;
+            if (!isFriendsWith || !JoinNotifierSettings.ShowFriendsAlways())
+            {
+                if (!JoinNotifierSettings.ShouldNotifyInCurrentInstance()) return;
+                if (JoinNotifierSettings.ShowFriendsOnly() && !isFriendsWith) return;
+            }
             var playerName = apiUser.displayName ?? "!null!";
             if (JoinNotifierSettings.ShouldBlinkIcon(true))
                 MelonCoroutines.Start(BlinkIconCoroutine(myJoinImage));
@@ -262,10 +265,15 @@ namespace JoinNotifier
         {
             var apiUser = player?.field_Private_APIUser_0;
             if (apiUser == null) return;
-            if (!JoinNotifierSettings.ShouldNotifyInCurrentInstance()) return;
             if (Environment.TickCount - myLastLevelLoad < 5_000) return;
+
             var isFriendsWith = APIUser.IsFriendsWith(apiUser.id);
-            if (JoinNotifierSettings.ShowFriendsOnly() && !isFriendsWith) return;
+            if (!isFriendsWith || !JoinNotifierSettings.ShowFriendsAlways())
+            {
+                if (!JoinNotifierSettings.ShouldNotifyInCurrentInstance()) return;
+                if (JoinNotifierSettings.ShowFriendsOnly() && !isFriendsWith) return;
+            }
+
             var playerName = apiUser.displayName ?? "!null!";
             if (JoinNotifierSettings.ShouldBlinkIcon(false))
                 MelonCoroutines.Start(BlinkIconCoroutine(myLeaveImage));
