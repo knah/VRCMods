@@ -13,6 +13,7 @@ namespace FavCat
         private const string ImageCacheMaxSize = "ImageCacheMaxSize";
         private const string HidePopupAfterFav = "HidePopupAfterFav";
         private const string UseSharedMode = "UseSharedMode";
+        private const string MakeClickSounds = "MakeClickSounds";
         private const string EnableAvatarFavs = "EnableAvatarFavs";
         private const string EnableWorldFavs = "EnableWorldFavs";
         private const string EnablePlayerFavs = "EnablePlayerFavs";
@@ -31,6 +32,8 @@ namespace FavCat
             MelonPrefs.RegisterString(FavCatCategory, ImageCachingMode, "full", "Image caching mode");
             MelonPrefs.RegisterInt(FavCatCategory, ImageCacheMaxSize, 4096, "Image cache max size (MB)");
             MelonPrefs.RegisterBool(FavCatCategory, HidePopupAfterFav, true, "Hide favorite popup after (un)favoriting a world or a player");
+
+            MelonPrefs.RegisterBool(FavCatCategory, MakeClickSounds, true, "Click sounds");
             
             // shared mode can't be multi-threaded, so hide this until other parts of code are ready for ST patterns
             MelonPrefs.RegisterBool(FavCatCategory, UseSharedMode, false, "Support multiple VRC instances (slower, restart required)", true);
@@ -55,6 +58,8 @@ namespace FavCat
         public static bool IsEnableAvatarFavs => MelonPrefs.GetBool(FavCatCategory, EnableAvatarFavs);
         public static bool IsEnableWorldFavs => MelonPrefs.GetBool(FavCatCategory, EnableWorldFavs);
         public static bool IsEnablePlayerFavs => MelonPrefs.GetBool(FavCatCategory, EnablePlayerFavs);
+
+        public static bool DoClickSounds => MelonPrefs.GetBool(FavCatCategory, MakeClickSounds);
 
     }
 }

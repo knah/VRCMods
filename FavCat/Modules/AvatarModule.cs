@@ -116,6 +116,8 @@ namespace FavCat.Modules
 
         protected override void OnPickerSelected(IPickerElement model)
         {
+            PlaySound();
+            
             var avatar = new ApiAvatar() {id = model.Id};
             if (Imports.IsDebugMode())
                 MelonLogger.Log($"Performing an API request for {model.Id}");
@@ -138,7 +140,7 @@ namespace FavCat.Modules
             {
                 if (Imports.IsDebugMode())
                     MelonLogger.Log("API request errored with " + c.Code + " - " + c.Error);
-                if (c.Code == 404)
+                if (c.Code == 404 && listsParent.gameObject.activeInHierarchy)
                 {
                     FavCatMod.Database.CompletelyDeleteAvatar(model.Id);
                     var menu = ExpansionKitApi.CreateCustomFullMenuPopup(LayoutDescription.WideSlimList);

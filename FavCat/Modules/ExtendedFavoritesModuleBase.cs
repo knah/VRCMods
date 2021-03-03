@@ -24,7 +24,7 @@ namespace FavCat.Modules
         
         protected readonly Dictionary<string, CustomPickerList> PickerLists = new Dictionary<string, CustomPickerList>();
         protected readonly CustomPickerList SearchList;
-        private readonly Transform myListsParent;
+        protected readonly Transform listsParent;
         private readonly bool myHasUpdateAndCreationDates;
         protected readonly DatabaseFavoriteHandler<T> Favorites;
         private readonly ExpandedMenu myExpandedMenu;
@@ -34,6 +34,17 @@ namespace FavCat.Modules
         private List<T>? mySearchResult;
         private StoredCategory myCurrentlySelectedCategory;
         private CustomPickerList myCurrentlySelectedList;
+
+        private UISoundCollection mySoundCollection;
+
+        protected void PlaySound()
+        {
+            if (!FavCatSettings.DoClickSounds) return;
+            var soundPlayer = VRCUiSoundPlayer.field_Private_Static_VRCUiSoundPlayer_0;
+            if (mySoundCollection == null || mySoundCollection.Click == null || soundPlayer == null) return;
+
+            soundPlayer.field_Private_AudioSource_0.PlayOneShot(mySoundCollection.Click, 1f);
+        }
         
         
         protected abstract void OnPickerSelected(IPickerElement picker);
@@ -54,7 +65,7 @@ namespace FavCat.Modules
             ExpansionKitApi.GetExpandedMenu(myExpandedMenu).AddSimpleButton("New Category", CreateCategory);
             ExpansionKitApi.GetExpandedMenu(myExpandedMenu).AddSimpleButton("More FavCat...", ShowExtraOptionsMenu);
             
-            myListsParent = listsParent;
+            this.listsParent = listsParent;
             myHasUpdateAndCreationDates = hasUpdateAndCreationDates;
 
             var knownCategories = Favorites.GetCategories().ToList();
@@ -85,7 +96,7 @@ namespace FavCat.Modules
             
             ReorderLists();
 
-            SearchList = FavCatMod.Instance.CreateCustomList(myListsParent);
+            SearchList = FavCatMod.Instance.CreateCustomList(this.listsParent);
             SearchList.SetAvatarListSizing(myExpandedMenu == ExpandedMenu.AvatarMenu);
             SearchList.HeaderString = SearchCategoryName;
             SearchList.SetFavButtonText("Clear", true);
@@ -111,7 +122,7 @@ namespace FavCat.Modules
             SearchList.SetList(Enumerable.Empty<IPickerElement>(), true);
             SearchList.SetVisibleRows(searchCategory.VisibleRows);
             SearchList.OnModelClick += OnPickerSelected;
-            SearchList.transform.SetSiblingIndex(myListsParent.transform.childCount);
+            SearchList.transform.SetSiblingIndex(this.listsParent.transform.childCount);
 
             // assign these to something random by default - 
             myCurrentlySelectedCategory = searchCategory;
@@ -130,6 +141,9 @@ namespace FavCat.Modules
                 listener.OnEnabled += OnSearchListShown;
                 listener.OnDisabled += OnSearchListHidden;
             }
+
+            mySoundCollection = GameObject.Find("/UserInterface/QuickMenu/CameraMenu/BackButton")
+                .GetComponent<ButtonReaction>().field_Public_UISoundCollection_0;
         }
 
         private void ShowListSortingMenu()
@@ -378,7 +392,7 @@ namespace FavCat.Modules
 
         internal void CreateList(StoredCategory storedCategory)
         {
-            var list = FavCatMod.Instance.CreateCustomList(myListsParent);
+            var list = FavCatMod.Instance.CreateCustomList(listsParent);
             list.HeaderString = storedCategory.CategoryName;
             list.SetAvatarListSizing(myExpandedMenu == ExpandedMenu.AvatarMenu);
             list.SetVisibleRows(storedCategory.VisibleRows);
@@ -401,7 +415,7 @@ namespace FavCat.Modules
             UpdateListElements(storedCategory.CategoryName, list);
             list.transform.SetAsFirstSibling();
 
-            var parentScroll = myListsParent.GetComponentsInParent<ScrollRect>(true).FirstOrDefault();
+            var parentScroll = listsParent.GetComponentsInParent<ScrollRect>(true).FirstOrDefault();
             if (parentScroll != null)
                 list.SetParentScrollRect(parentScroll);
 
@@ -443,7 +457,7 @@ namespace FavCat.Modules
             
             moveOptionsMenu.AddSimpleButton("The beginning of the list", () => UpdateSelectedListOrder(0));
             
-            foreach (var subListObj in myListsParent)
+            foreach (var subListObj in listsParent)
             {
                 var subList = subListObj.Cast<Transform>();
                 if (!subList.gameObject.activeSelf)
@@ -453,7 +467,7 @@ namespace FavCat.Modules
                     moveOptionsMenu.AddSimpleButton($"After '{listName}'", () => UpdateSelectedListOrder(subList.GetSiblingIndex() + 1));
             }
             
-            moveOptionsMenu.AddSimpleButton("The end of the list", () => UpdateSelectedListOrder(myListsParent.childCount));
+            moveOptionsMenu.AddSimpleButton("The end of the list", () => UpdateSelectedListOrder(listsParent.childCount));
             moveOptionsMenu.AddSpacer();
             moveOptionsMenu.AddSimpleButton("Cancel", moveOptionsMenu.Hide);
             
@@ -476,7 +490,7 @@ namespace FavCat.Modules
         {
             var result = new List<(Transform, string, bool)>();
             
-            foreach (var subListObj in myListsParent)
+            foreach (var subListObj in listsParent)
             {
                 var subList = subListObj.Cast<Transform>();
                 
@@ -556,7 +570,7 @@ namespace FavCat.Modules
         protected IEnumerator ScrollDownAfterDelay()
         {
             yield return new WaitForSeconds(0.5f);
-            myListsParent.GetComponentInParent<ScrollRect>().verticalNormalizedPosition = 0f;
+            listsParent.GetComponentInParent<ScrollRect>().verticalNormalizedPosition = 0f;
         }
         
         private void UpdateSelectedListSort(string sort, IShowableMenu menuToHide)

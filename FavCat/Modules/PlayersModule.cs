@@ -77,19 +77,22 @@ namespace FavCat.Modules
         {
             if (picker.Id == myLastRequestedPlayer) 
                 return;
+            
+            PlaySound();
 
             myLastRequestedPlayer = picker.Id;
             var user = new APIUser {id = picker.Id};
             user.Fetch(new Action<ApiContainer>(_ =>
             {
                 myLastRequestedPlayer = "";
-                ShowUserPage(user);
+                if (listsParent.gameObject.activeInHierarchy)
+                    ShowUserPage(user);
             }), new Action<ApiContainer>(c =>
             {
                 myLastRequestedPlayer = "";
                 if (Imports.IsDebugMode())
                     MelonLogger.Log("API request errored with " + c.Code + " - " + c.Error);
-                if (c.Code == 404)
+                if (c.Code == 404 && listsParent.gameObject.activeInHierarchy)
                 {
                     FavCatMod.Database.CompletelyDeleteWorld(picker.Id);
                     var menu = ExpansionKitApi.CreateCustomFullMenuPopup(LayoutDescription.WideSlimList);

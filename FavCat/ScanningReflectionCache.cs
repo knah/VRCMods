@@ -16,6 +16,25 @@ namespace FavCat
         private static DisplayErrorAvatarDelegate? ourDisplayErrorAvatarDelegate;
         private static PedestalRefreshDelegate? ourPedestalRefreshDelegate;
 
+        private static Action<ApiWorld>? ourShowWorldInfoPageDelegate;
+
+        public static void DisplayWorldInfoPage(ApiWorld world)
+        {
+            if (ourShowWorldInfoPageDelegate == null)
+            {
+                var target = typeof(UiWorldList)
+                    .GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Static).Single(it =>
+                        it.Name.StartsWith("Method_Public_Static_Void_ApiWorld") &&
+                        XrefScanner.XrefScan(it).Any(jt =>
+                            jt.Type == XrefType.Global && jt.ReadAsObject()?.ToString() ==
+                            "UserInterface/MenuContent/Screens/WorldInfo"));
+
+                ourShowWorldInfoPageDelegate = (Action<ApiWorld>) Delegate.CreateDelegate(typeof(Action<ApiWorld>), target);
+            }
+
+            ourShowWorldInfoPageDelegate(world);
+        }
+
         public static void DisplayErrorAvatar(this SimpleAvatarPedestal @this)
         {
             if (ourDisplayErrorAvatarDelegate == null)
