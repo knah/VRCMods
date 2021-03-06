@@ -1,7 +1,9 @@
+using System;
 using Il2CppSystem.Collections.Generic;
 using UnhollowerBaseLib;
 using UnityEngine;
 using UnityEngine.Animations;
+using Object = UnityEngine.Object;
 
 namespace AdvancedSafety
 {
@@ -17,6 +19,11 @@ namespace AdvancedSafety
                 deletedCount++;
 
                 return;
+            }
+
+            if (!AdvancedSafetySettings.AllowCustomMixers)
+            {
+                audioSource.outputAudioMixerGroup = null;
             }
 
             if (!AdvancedSafetySettings.AllowSpawnSounds)
@@ -120,18 +127,20 @@ namespace AdvancedSafety
             if (ourMaterialsList.Count == 0) return;
             
             var mesh = skinnedMeshRenderer?.sharedMesh ?? meshFilter?.sharedMesh;
+            var submeshCount = 0;
             if (mesh != null)
             {
-                if (polyCount + mesh.vertexCount >= AdvancedSafetySettings.MaxPolygons)
-                {
-                    renderer.SetMaterialArray(new Il2CppReferenceArray<Material>(0));
+                submeshCount = mesh.subMeshCount;
+                var (meshPolyCount, firstBadSubmesh) =
+                    CountMeshPolygons(mesh, AdvancedSafetySettings.MaxPolygons - polyCount);
 
-                    deletedCount++;
-                    
-                    return;
+                if (firstBadSubmesh != -1)
+                {
+                    ourMaterialsList.RemoveRange(firstBadSubmesh, ourMaterialsList.Count - firstBadSubmesh);
+                    renderer.SetMaterialArray((Il2CppReferenceArray<Material>) ourMaterialsList.ToArray());
                 }
 
-                polyCount += mesh.vertexCount;
+                polyCount += meshPolyCount;
 
                 if (AdvancedSafetySettings.HeuristicallyRemoveScreenSpaceBullshit && meshFilter != null && (ourMaterialsList[0]?.renderQueue ?? 0) >= 2500)
                 {
@@ -147,7 +156,7 @@ namespace AdvancedSafety
                 }
             }
 
-            var allowedMaterialCount = AdvancedSafetySettings.MaxMaterialSlots - materialCount;
+            var allowedMaterialCount = Math.Min(AdvancedSafetySettings.MaxMaterialSlots - materialCount, submeshCount + AdvancedSafetySettings.MaxMaterialSlotsOverSubmeshCount);
             if (allowedMaterialCount < renderer.GetMaterialCount())
             {
                 renderer.GetSharedMaterials(ourMaterialsList);
@@ -184,17 +193,17 @@ namespace AdvancedSafety
                 var meshes = new Il2CppReferenceArray<Mesh>(renderer.meshCount);
                 renderer.GetMeshes(meshes);
 
-                var vertexCountSum = 1;
-                
-                foreach (var mesh in meshes)
-                    vertexCountSum += mesh.vertexCount;
+                var polySum = 1;
 
-                var requestedVertexCount = vertexCountSum * particleSystem.particleCount;
+                foreach (var mesh in meshes)
+                    polySum += CountMeshPolygons(mesh, Int32.MaxValue).TotalPolys;
+
+                var requestedVertexCount = polySum * particleSystem.maxParticles;
                 var vertexLimit = AdvancedSafetySettings.MaxMeshParticleVertices - meshParticleVertexCount;
                 if (requestedVertexCount > vertexLimit) 
-                    particleSystem.maxParticles = vertexLimit / vertexCountSum;
+                    particleSystem.maxParticles = vertexLimit / polySum;
 
-                meshParticleVertexCount += vertexCountSum * particleSystem.particleCount;
+                meshParticleVertexCount += polySum * particleSystem.maxParticles;
             }
             
             if (particleSystem.maxParticles == 0)
@@ -204,6 +213,40 @@ namespace AdvancedSafety
                 
                 deletedCount++;
             }
+        }
+
+        private static (int TotalPolys, int FirstSubmeshOverLimit) CountMeshPolygons(Mesh mesh, int remainingLimit)
+        {
+            var polyCount = 0;
+            var firstSubmeshOverLimit = -1;
+            var submeshCount = mesh.subMeshCount;
+            for (var i = 0; i < submeshCount; i++)
+            {
+                var polysInSubmesh = mesh.GetIndexCount(i);
+                switch (mesh.GetTopology(i))
+                {
+                    case MeshTopology.Triangles:
+                        polysInSubmesh /= 3;
+                        break;
+                    case MeshTopology.Quads:
+                        polysInSubmesh /= 4;
+                        break;
+                    case MeshTopology.Lines:
+                        polysInSubmesh /= 2;
+                        break;
+                    // keep LinesStrip/Points as-is
+                }
+
+                if (polyCount + polysInSubmesh >= remainingLimit)
+                {
+                    firstSubmeshOverLimit = i;
+                    break;
+                }
+
+                polyCount += (int) polysInSubmesh;
+            }
+
+            return (polyCount, firstSubmeshOverLimit);
         }
 
         public static void PostprocessSkinnedRenderers(System.Collections.Generic.List<SkinnedMeshRenderer> renderers)
