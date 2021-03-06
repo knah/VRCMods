@@ -43,7 +43,7 @@ namespace FavCat
                     .GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance).Single(
                         it =>
                         {
-                            if (it.ReturnType != typeof(void)) return false;
+                            if (it.ReturnType != typeof(void) || it.Name.Contains("_PDM_")) return false;
                             var parameters = it.GetParameters();
                             if (parameters.Length != 0)
                                 return false;
