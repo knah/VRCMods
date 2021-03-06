@@ -21,7 +21,7 @@ namespace JoinNotifier
 {
     public class JoinNotifierMod : MelonMod
     {
-        public const string VersionConst = "0.2.8";
+        public const string VersionConst = "0.2.9";
         private const string CustomJoinSoundFileName = "UserData/JN-Join.ogg";
         private const string CustomLeaveSoundFileName = "UserData/JN-Leave.ogg";
 

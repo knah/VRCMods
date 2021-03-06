@@ -49,13 +49,14 @@ namespace JoinNotifier
             MelonPrefs.RegisterBool(SettingsCategory, SettingNotifyPrivate, true, "Notify in private instances");
 
             MelonPrefs.RegisterBool(SettingsCategory, SettingShowFriendsOnly, false, "Show friend join/leave only");
-            MelonPrefs.RegisterBool(SettingsCategory, SettingShowFriendsAlways, false, "Show friend join/leave regardless of instance type");
             MelonPrefs.RegisterString(SettingsCategory, SettingJoinIconColor, "127 191 255", "Join icon color (r g b)");
             MelonPrefs.RegisterString(SettingsCategory, SettingLeaveIconColor, "153 82 51", "Leave icon color (r g b)");
             
             MelonPrefs.RegisterBool(SettingsCategory, SettingShowFriendsInDifferentColor, true, "Show friend names in different color");
             MelonPrefs.RegisterString(SettingsCategory, SettingFriendsJoinColor, "224 224 0", "Friend join name color (r g b)");
             MelonPrefs.RegisterString(SettingsCategory, SettingFriendsLeaveColor, "201 201 0", "Friend leave name color (r g b)");
+            
+            MelonPrefs.RegisterBool(SettingsCategory, SettingShowFriendsAlways, false, "Show friend join/leave regardless of instance type");
         }
 
         public static bool ShouldNotifyInCurrentInstance()
