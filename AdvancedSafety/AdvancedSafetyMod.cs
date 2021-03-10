@@ -13,15 +13,15 @@ using UnhollowerBaseLib.Runtime;
 using UnityEngine;
 using UnityEngine.Animations;
 using VRC.Core;
-using AMEnumA = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObAcOb1GaondoAconUnique;
-using AMEnumB = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObGaobApObapBoisfrUnique;
-using AMEnumC = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObAcOb1GaonPrAconUnique;
+using AMEnumA = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObAcOb1GaApAcBoStUnique;
+using AMEnumB = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObAcOb1GaApAcObObUnique;
+using AMEnumC = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObGaApObBoBoBoObObUnique;
 using Object = UnityEngine.Object;
 
 using ModerationManager = VRC.Management.ModerationManager;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.4.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.4.1", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
 namespace AdvancedSafety
@@ -268,7 +268,7 @@ namespace AdvancedSafety
         {
             try
             {
-                using (new AvatarManagerCookie(new AMEnumA(thisPtr).__4__this))
+                using (new AvatarManagerCookie(new AMEnumA(thisPtr).field_Public_VRCAvatarManager_0))
                     return SafeInvokeMoveNext(ourMoveNextA, thisPtr);
             }
             catch (Il2CppException ex)
@@ -288,7 +288,7 @@ namespace AdvancedSafety
         {
             try
             {
-                using (new AvatarManagerCookie(new AMEnumB(thisPtr).__4__this))
+                using (new AvatarManagerCookie(new AMEnumB(thisPtr).field_Public_VRCAvatarManager_0))
                     return SafeInvokeMoveNext(ourMoveNextB, thisPtr);
             }
             catch (Il2CppException ex)
@@ -308,7 +308,7 @@ namespace AdvancedSafety
         {
             try
             {
-                using (new AvatarManagerCookie(new AMEnumC(thisPtr).__4__this))
+                using (new AvatarManagerCookie(new AMEnumC(thisPtr).field_Public_VRCAvatarManager_0))
                     return SafeInvokeMoveNext(ourMoveNextC, thisPtr);
             }
             catch (Il2CppException ex)

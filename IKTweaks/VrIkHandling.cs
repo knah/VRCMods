@@ -1,7 +1,10 @@
 using System.Linq;
 using System.Reflection;
 using Harmony;
+using MelonLoader;
 using RootMotion.FinalIK;
+using UnhollowerBaseLib.Attributes;
+using UnhollowerBaseLib.Maps;
 using UnhollowerRuntimeLib.XrefScans;
 using VRC.Core;
 
@@ -24,18 +27,23 @@ namespace IKTweaks
             harmony.Patch(vrikInitMethod,
                 postfix: new HarmonyMethod(AccessTools.Method(typeof(VrIkHandling), nameof(VrikInitPatch))));
 
-            var canSupportHipTracking = XrefScanner.XrefScan(typeof(VRCVrIkController)
-                .GetMethods(BindingFlags.Public | BindingFlags.Instance |
-                            BindingFlags.DeclaredOnly).Single(it =>
+            var methodThatChecksHipTracking = typeof(VRCVrIkController)
+                .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Single(it =>
                     XrefScanner.XrefScan(it).Any(jt =>
                         jt.Type == XrefType.Global && "Hip Tracking: Hip tracker found. tracking enabled." ==
-                        jt.ReadAsObject()?.ToString()))).Single(it =>
+                        jt.ReadAsObject()?.ToString()));
+            
+            var canSupportHipTrackingCandidates = XrefScanner.XrefScan(methodThatChecksHipTracking).Where(it =>
             {
                 if (it.Type != XrefType.Method) return false;
                 var resolved = it.TryResolve();
                 if (resolved == null || !resolved.IsStatic) return false;
-                return resolved.DeclaringType == typeof(VRCTrackingManager) && resolved is MethodInfo mi && mi.ReturnType == typeof(bool) && resolved.GetParameters().Length == 0;
-            }).TryResolve();
+                if(!(resolved.DeclaringType == typeof(VRCTrackingManager) && resolved is MethodInfo mi && mi.ReturnType == typeof(bool) && resolved.GetParameters().Length == 0)) return false;
+                return XrefScanner.UsedBy(resolved).Any(jt =>
+                    jt.Type == XrefType.Method && jt.TryResolve().DeclaringType == typeof(QuickMenu));
+            }).ToList();
+
+            var canSupportHipTracking = canSupportHipTrackingCandidates.Single().TryResolve();
 
             harmony.Patch(canSupportHipTracking, new HarmonyMethod(AccessTools.Method(typeof(VrIkHandling), nameof(SupportsHipTrackingPatch))));
         }

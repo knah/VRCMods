@@ -4,7 +4,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <VrcReferences>true</VrcReferences>
     <UseAltLibs>true</UseAltLibs>
-    <AssemblyVersion>0.2.9</AssemblyVersion>
+    <AssemblyVersion>0.2.10</AssemblyVersion>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="joinnotifier.assetbundle" />

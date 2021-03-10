@@ -18,9 +18,10 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using VRC.UserCamera;
 using Object = UnityEngine.Object;
+using CameraTakePhotoEnumerator = VRC.UserCamera.CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObBoAcIn2StInTeCaUnique;
 // using CameraUtil = ObjectPublicCaSiVeUnique;
 
-[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.1.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.1.1", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -50,7 +51,7 @@ namespace LagFreeScreenshots
             ourJpegPercent = (MelonPreferences_Entry<int>) category.CreateEntry(SettingJpegPercent, 95, "JPEG quality (0-100)");
             
             Harmony.Patch(
-                typeof(CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObBosareInAcre2StUnique).GetMethod("MoveNext"),
+                typeof(CameraTakePhotoEnumerator).GetMethod("MoveNext"),
                 new HarmonyMethod(AccessTools.Method(typeof(LagFreeScreenshotsMod), nameof(MoveNextPatchAsyncReadback))));
             
             if (MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit" && !it.Info.Version.StartsWith("0.1."))) 
@@ -73,17 +74,20 @@ namespace LagFreeScreenshots
             ourToEndOfFrame.Flush();
         }
 
-        public static bool MoveNextPatchAsyncReadback(ref bool __result, CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObBosareInAcre2StUnique __instance)
+        public static bool MoveNextPatchAsyncReadback(ref bool __result, CameraTakePhotoEnumerator __instance)
         {
-            // ignore VRC+ pictures too
-            if (!ourEnabled.Value || !__instance.saveToFile)
+            var resX = __instance.field_Public_Int32_0;
+            var resY = __instance.field_Public_Int32_1;
+            
+            // ignore everything low resolution - it's fast enough and also used by VRC+ picture features
+            if (!ourEnabled.Value || resX <= 1920 && resY <= 1080)
                 return true;
             
             ourMainThread = Thread.CurrentThread;
 
             __result = false;
-            TakeScreenshot(__instance.cam, __instance.resWidth,
-                __instance.resHeight, __instance.alpha).ContinueWith(t =>
+            TakeScreenshot(__instance.field_Public_Camera_0, resX,
+                resY, true).ContinueWith(t =>
             {
                 if (t.IsFaulted)
                     MelonLogger.Warning($"Free-floating task failed with exception: {t.Exception}");

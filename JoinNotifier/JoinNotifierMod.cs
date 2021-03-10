@@ -9,6 +9,7 @@ using MelonLoader;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.Networking;
 using UnityEngine.UI;
 using VRC;
 using VRC.Core;
@@ -21,7 +22,7 @@ namespace JoinNotifier
 {
     public class JoinNotifierMod : MelonMod
     {
-        public const string VersionConst = "0.2.9";
+        public const string VersionConst = "0.2.10";
         private const string CustomJoinSoundFileName = "UserData/JN-Join.ogg";
         private const string CustomLeaveSoundFileName = "UserData/JN-Leave.ogg";
 
@@ -87,11 +88,12 @@ namespace JoinNotifier
             if (File.Exists(CustomJoinSoundFileName))
             {
                 MelonLogger.Msg("Loading custom join sound");
-                var www = new WWW($"file://{Path.Combine(Environment.CurrentDirectory, CustomJoinSoundFileName)}");
+                var uwr = UnityWebRequest.Get($"file://{Path.Combine(Environment.CurrentDirectory, CustomJoinSoundFileName)}");
+                var asyncOp = uwr.SendWebRequest();
+
+                while (uwr.isDone) yield return null;
                 
-                while (www.keepWaiting) yield return null;
-                
-                myJoinClip = www.GetAudioClip();
+                myJoinClip = WebRequestWWW.InternalCreateAudioClipUsingDH(uwr.downloadHandler, uwr.url, false, false, AudioType.UNKNOWN);
             }
             
             if (myJoinClip == null)
@@ -102,10 +104,13 @@ namespace JoinNotifier
             if (File.Exists(CustomLeaveSoundFileName))
             {
                 MelonLogger.Msg("Loading custom leave sound");
-                var www = new WWW($"file://{Path.Combine(Environment.CurrentDirectory, CustomLeaveSoundFileName)}");
-                while (www.keepWaiting) yield return null;
                 
-                myLeaveClip = www.GetAudioClip();
+                var uwr = UnityWebRequest.Get($"file://{Path.Combine(Environment.CurrentDirectory, CustomLeaveSoundFileName)}");
+                var asyncOp = uwr.SendWebRequest();
+
+                while (uwr.isDone) yield return null;
+                
+                myLeaveClip = WebRequestWWW.InternalCreateAudioClipUsingDH(uwr.downloadHandler, uwr.url, false, false, AudioType.UNKNOWN);
             }
             
             if (myLeaveClip == null)
