@@ -111,7 +111,7 @@ namespace LagFreeScreenshots
 
         private static string GetWorldMeta()
         {
-            return RoomManager.field_Internal_Static_ApiWorld_0.id + "," + RoomManager.field_Internal_Static_ApiWorldInstance_0.idOnly;
+            return RoomManager.field_Internal_Static_ApiWorld_0.id + "," + RoomManager.field_Internal_Static_ApiWorldInstance_0.idOnly + "," + RoomManager.field_Internal_Static_ApiWorld_0.name;
         }
 
         public override void OnUpdate()
