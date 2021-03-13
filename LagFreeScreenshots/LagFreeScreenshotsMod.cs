@@ -19,6 +19,7 @@ using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
 using UnityEngine.Rendering;
 using VRC.UserCamera;
+using VRC.Core;
 using VRC;
 using Object = UnityEngine.Object;
 using CameraTakePhotoEnumerator = VRC.UserCamera.CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObBoAcIn2StInTeCaUnique;
@@ -103,12 +104,12 @@ namespace LagFreeScreenshots
             return String.Join(";", result);
         }
 
-        private static string GetWorldName()
+        private static string GetPhotographerMeta()
         {
-            return RoomManager.field_Internal_Static_ApiWorld_0.name;
+            return APIUser.CurrentUser.id + "," + APIUser.CurrentUser.displayName;
         }
 
-        private static string GetWorldInstanceId()
+        private static string GetWorldMeta()
         {
             return RoomManager.field_Internal_Static_ApiWorld_0.id + "," + RoomManager.field_Internal_Static_ApiWorldInstance_0.idOnly;
         }
@@ -219,7 +220,7 @@ namespace LagFreeScreenshots
             string metadataStr = null;
 
             if (ourMetadata.Value) { 
-                metadataStr = "lfs|1|world:" + GetWorldInstanceId() + "," + GetWorldName() + "|players:" + GetPlayerList(camera);
+                metadataStr = "lfs|1|author:" + GetPhotographerMeta() + "|world:" + GetWorldMeta() + "|players:" + GetPlayerList(camera);
             }
 
             await EncodeAndSavePicture(targetFile, data, w, h, hasAlpha, metadataStr).ConfigureAwait(false);
