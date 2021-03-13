@@ -81,23 +81,21 @@ namespace LagFreeScreenshots
 
             var localPlayer = VRCPlayer.field_Internal_Static_VRCPlayer_0;
             var localPosition = localPlayer.gameObject.transform.position;
-            var localAngle = localPlayer.gameObject.transform.rotation;
 
             foreach (var p in playerManager.field_Private_List_1_Player_0)
             {
-                var playerDescriptor = p.prop_APIUser_0.id + "," + p.prop_APIUser_0.displayName;
                 var playerPosition = p.gameObject.transform.position;
-                if (Vector3.Distance(localPosition, playerPosition) < 3) {
+                Vector3 viewPos = camera.WorldToViewportPoint(playerPosition);
+                var playerDescriptor = p.prop_APIUser_0.id + "," + viewPos.x.ToString("0.00") + "," + viewPos.y.ToString("0.00") + "," + viewPos.z.ToString("0.00") + "," + p.prop_APIUser_0.displayName;
+                
+                if (viewPos.z < 2 && Vector3.Distance(localPosition, playerPosition) < 2) {
                     //User standing right next to photographer, might be visible (approx.)
                     result.Add(playerDescriptor);
                 }
-                else
+                else if (viewPos.x > -0.03 && viewPos.x < 1.03 && viewPos.y > -0.03 && viewPos.y < 1.03 && viewPos.z > 2 && viewPos.z < 30)
                 {
-                    Vector3 viewPos = camera.WorldToViewportPoint(playerPosition);
-                    if (viewPos.x >= 0 && viewPos.x <= 1 && viewPos.y >= 0 && viewPos.y <= 1 && viewPos.z > 2 && viewPos.z < 50) {
-                        //User in viewport, might be obstructed but still...
-                        result.Add(playerDescriptor);
-                    }
+                    //User in viewport, might be obstructed but still...
+                    result.Add(playerDescriptor);
                 }
             }
 
@@ -157,7 +155,7 @@ namespace LagFreeScreenshots
 
             var oldCameraTarget = camera.targetTexture;
             var oldCameraFov = camera.fieldOfView;
-            
+
             camera.targetTexture = renderTexture;
             
             camera.Render();
@@ -220,7 +218,7 @@ namespace LagFreeScreenshots
             string metadataStr = null;
 
             if (ourMetadata.Value) { 
-                metadataStr = "lfs|1|author:" + GetPhotographerMeta() + "|world:" + GetWorldMeta() + "|players:" + GetPlayerList(camera);
+                metadataStr = "lfs|2|author:" + GetPhotographerMeta() + "|world:" + GetWorldMeta() + "|players:" + GetPlayerList(camera);
             }
 
             await EncodeAndSavePicture(targetFile, data, w, h, hasAlpha, metadataStr).ConfigureAwait(false);
@@ -305,7 +303,7 @@ namespace LagFreeScreenshots
                 var pi = (PropertyItem)FormatterServices.GetUninitializedObject(typeof(PropertyItem));
                 pi.Type = 2;
                 pi.Id = 0x010E;  //PropertyTagImageDescription
-                pi.Value = Encoding.UTF8.GetBytes(description);
+                pi.Value = Encoding.Convert(Encoding.Unicode, Encoding.UTF8, Encoding.Unicode.GetBytes(description));
                 pi.Len = pi.Value.Length;
                 bitmap.SetPropertyItem(pi);
             }
