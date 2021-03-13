@@ -7,8 +7,10 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text;
 using Harmony;
 using LagFreeScreenshots;
 using MelonLoader;
@@ -17,8 +19,10 @@ using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
 using UnityEngine.Rendering;
 using VRC.UserCamera;
+using VRC;
 using Object = UnityEngine.Object;
 using CameraTakePhotoEnumerator = VRC.UserCamera.CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObBoAcIn2StInTeCaUnique;
+using System.Collections.Generic;
 // using CameraUtil = ObjectPublicCaSiVeUnique;
 
 [assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.1.1", "knah", "https://github.com/knah/VRCMods")]
@@ -36,10 +40,12 @@ namespace LagFreeScreenshots
         private const string SettingEnableMod = "Enabled";
         private const string SettingScreenshotFormat = "ScreenshotFormat";
         private const string SettingJpegPercent = "JpegPercent";
+        private const string SettingMetadata = "Metadata";
 
         private static MelonPreferences_Entry<bool> ourEnabled;
         private static MelonPreferences_Entry<string> ourFormat;
         private static MelonPreferences_Entry<int> ourJpegPercent;
+        private static MelonPreferences_Entry<bool> ourMetadata;
 
         private static Thread ourMainThread;
 
@@ -49,7 +55,8 @@ namespace LagFreeScreenshots
             ourEnabled = (MelonPreferences_Entry<bool>) category.CreateEntry(SettingEnableMod, true, "Enabled");
             ourFormat = (MelonPreferences_Entry<string>) category.CreateEntry( SettingScreenshotFormat, "png", "Screenshot format");
             ourJpegPercent = (MelonPreferences_Entry<int>) category.CreateEntry(SettingJpegPercent, 95, "JPEG quality (0-100)");
-            
+            ourMetadata = (MelonPreferences_Entry<bool>)category.CreateEntry(SettingMetadata, false, "Save metadata in picture");
+
             Harmony.Patch(
                 typeof(CameraTakePhotoEnumerator).GetMethod("MoveNext"),
                 new HarmonyMethod(AccessTools.Method(typeof(LagFreeScreenshotsMod), nameof(MoveNextPatchAsyncReadback))));
@@ -62,6 +69,48 @@ namespace LagFreeScreenshots
         private static void AddEnumSettings()
         {
             ExpansionKitApi.RegisterSettingAsStringEnum(SettingsCategory, SettingScreenshotFormat, new []{("png", "PNG"), ("jpeg", "JPEG")});
+        }
+
+        private static string GetPlayerList(Camera camera)
+        {
+            var playerManager = PlayerManager.field_Private_Static_PlayerManager_0;
+            if (playerManager == null) return "";
+
+            var result = new List<string>();
+
+            var localPlayer = VRCPlayer.field_Internal_Static_VRCPlayer_0;
+            var localPosition = localPlayer.gameObject.transform.position;
+            var localAngle = localPlayer.gameObject.transform.rotation;
+
+            foreach (var p in playerManager.field_Private_List_1_Player_0)
+            {
+                var playerDescriptor = p.prop_APIUser_0.id + "," + p.prop_APIUser_0.displayName;
+                var playerPosition = p.gameObject.transform.position;
+                if (Vector3.Distance(localPosition, playerPosition) < 3) {
+                    //User standing right next to photographer, might be visible (approx.)
+                    result.Add(playerDescriptor);
+                }
+                else
+                {
+                    Vector3 viewPos = camera.WorldToViewportPoint(playerPosition);
+                    if (viewPos.x >= 0 && viewPos.x <= 1 && viewPos.y >= 0 && viewPos.y <= 1 && viewPos.z > 2 && viewPos.z < 50) {
+                        //User in viewport, might be obstructed but still...
+                        result.Add(playerDescriptor);
+                    }
+                }
+            }
+
+            return String.Join(";", result);
+        }
+
+        private static string GetWorldName()
+        {
+            return RoomManager.field_Internal_Static_ApiWorld_0.name;
+        }
+
+        private static string GetWorldInstanceId()
+        {
+            return RoomManager.field_Internal_Static_ApiWorld_0.id + "," + RoomManager.field_Internal_Static_ApiWorldInstance_0.idOnly;
         }
 
         public override void OnUpdate()
@@ -79,8 +128,8 @@ namespace LagFreeScreenshots
             var resX = __instance.field_Public_Int32_0;
             var resY = __instance.field_Public_Int32_1;
             
-            // ignore everything low resolution - it's fast enough and also used by VRC+ picture features
-            if (!ourEnabled.Value || resX <= 1920 && resY <= 1080)
+            // ignore low resultion, unchanged pngs - it's fast enough and also used by VRC+ picture features
+            if (!ourEnabled.Value || resX <= 1920 && resY <= 1080 && ourFormat.Value == "png" && !ourMetadata.Value)
                 return true;
             
             ourMainThread = Thread.CurrentThread;
@@ -98,6 +147,8 @@ namespace LagFreeScreenshots
         public static async Task TakeScreenshot(Camera camera, int w, int h, bool hasAlpha)
         {
             await ourToEndOfFrame.Yield();
+
+            MelonLogger.Msg("Photographing with LFS");
 
             // var renderTexture = RenderTexture.GetTemporary(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, 8);
             var renderTexture = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
@@ -164,8 +215,14 @@ namespace LagFreeScreenshots
             var targetDir = Path.GetDirectoryName(targetFile);
             if (!Directory.Exists(targetDir))
                 Directory.CreateDirectory(targetDir);
-            
-            await EncodeAndSavePicture(targetFile, data, w, h, hasAlpha).ConfigureAwait(false);
+
+            string metadataStr = null;
+
+            if (ourMetadata.Value) { 
+                metadataStr = "lfs|1|world:" + GetWorldInstanceId() + "," + GetWorldName() + "|players:" + GetPlayerList(camera);
+            }
+
+            await EncodeAndSavePicture(targetFile, data, w, h, hasAlpha, metadataStr).ConfigureAwait(false);
         }
         
         private static unsafe (IntPtr, int) ToBytes(IntPtr pointer, int length)
@@ -190,7 +247,7 @@ namespace LagFreeScreenshots
             return null;  
         }  
 
-        private static async Task EncodeAndSavePicture(string filePath, (IntPtr, int Length) pixelsPair, int w, int h, bool hasAlpha)
+        private static async Task EncodeAndSavePicture(string filePath, (IntPtr, int Length) pixelsPair, int w, int h, bool hasAlpha, string description)
         {
             if (pixelsPair.Item1 == IntPtr.Zero) return;
             
@@ -239,8 +296,18 @@ namespace LagFreeScreenshots
             }
 
             bitmap.UnlockBits(bitmapData);
-            
             Marshal.FreeHGlobal(pixelsPair.Item1);
+
+            //https://docs.microsoft.com/en-us/windows/win32/gdiplus/-gdiplus-constant-property-item-descriptions
+
+            if (description != null) { 
+                var pi = (PropertyItem)FormatterServices.GetUninitializedObject(typeof(PropertyItem));
+                pi.Type = 2;
+                pi.Id = 0x010E;  //PropertyTagImageDescription
+                pi.Value = Encoding.UTF8.GetBytes(description);
+                pi.Len = pi.Value.Length;
+                bitmap.SetPropertyItem(pi);
+            }
 
             ImageCodecInfo encoder;
             EncoderParameters parameters;
@@ -250,7 +317,7 @@ namespace LagFreeScreenshots
                 encoder = GetEncoder(ImageFormat.Jpeg);
                 parameters = new EncoderParameters(1)
                 {
-                    Param = {[0] = new EncoderParameter(Encoder.Quality, ourJpegPercent.Value)}
+                    Param = {[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, ourJpegPercent.Value)}
                 };
                 filePath = Path.ChangeExtension(filePath, ".jpeg");
                 bitmap.Save(filePath, encoder, parameters);
@@ -259,8 +326,9 @@ namespace LagFreeScreenshots
                 bitmap.Save(filePath, ImageFormat.Png);
 
             await ourToMainThread.Yield();
-            
+
             MelonLogger.Msg($"Image saved to {filePath}");
+
             // compatibility with log-reading tools
             UnityEngine.Debug.Log($"Took screenshot to: {filePath}");
         }
