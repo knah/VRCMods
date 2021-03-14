@@ -195,8 +195,6 @@ namespace LagFreeScreenshots
         {
             await ourToEndOfFrame.Yield();
 
-            MelonLogger.Msg("Photographing with LFS");
-
             // var renderTexture = RenderTexture.GetTemporary(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, 8);
             var renderTexture = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
             renderTexture.antiAliasing = MaxMsaaCount(w, h);
@@ -421,15 +419,23 @@ namespace LagFreeScreenshots
             bitmap.UnlockBits(bitmapData);
             Marshal.FreeHGlobal(pixelsPair.Item1);
 
-            //https://docs.microsoft.com/en-us/windows/win32/gdiplus/-gdiplus-constant-property-item-descriptions
+            // https://docs.microsoft.com/en-us/windows/win32/gdiplus/-gdiplus-constant-property-item-descriptions
+            if (description != null)
+            {
+                if (ourFormat.Value == "jpeg")
+                { // png description is saved as iTXt chunk manually
+                    var stringBytesCount = Encoding.Unicode.GetByteCount(description);
+                    var allBytes = new byte[8 + stringBytesCount];
+                    Encoding.ASCII.GetBytes("UNICODE\0", 0, 8, allBytes, 0);
+                    Encoding.Unicode.GetBytes(description, 0, description.Length, allBytes, 8);
 
-            if (description != null) { 
-                var pi = (PropertyItem)FormatterServices.GetUninitializedObject(typeof(PropertyItem));
-                pi.Type = 2;
-                pi.Id = 0x010E;  //PropertyTagImageDescription
-                pi.Value = Encoding.Convert(Encoding.Unicode, Encoding.UTF8, Encoding.Unicode.GetBytes(description));
-                pi.Len = pi.Value.Length;
-                bitmap.SetPropertyItem(pi);
+                    var pi = (PropertyItem) FormatterServices.GetUninitializedObject(typeof(PropertyItem));
+                    pi.Type = 7; // PropertyTagTypeUndefined
+                    pi.Id = 0x9286; // PropertyTagExifUserComment
+                    pi.Value = allBytes;
+                    pi.Len = pi.Value.Length;
+                    bitmap.SetPropertyItem(pi);
+                }
             }
 
             ImageCodecInfo encoder;
@@ -446,7 +452,20 @@ namespace LagFreeScreenshots
                 bitmap.Save(filePath, encoder, parameters);
             }
             else
+            {
                 bitmap.Save(filePath, ImageFormat.Png);
+                if (description != null)
+                {
+                    using var pngStream = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite);
+                    var originalEndChunkBytes = new byte[12];
+                    pngStream.Position = pngStream.Length - 12;
+                    pngStream.Read(originalEndChunkBytes, 0, 12);
+                    pngStream.Position = pngStream.Length - 12;
+                    var itxtChunk = PngUtils.ProducePngDescriptionTextChunk(description);
+                    pngStream.Write(itxtChunk, 0, itxtChunk.Length);
+                    pngStream.Write(originalEndChunkBytes, 0, originalEndChunkBytes.Length);
+                }
+            }
 
             await ourToMainThread.Yield();
 
