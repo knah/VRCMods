@@ -142,7 +142,7 @@ namespace AdvancedSafety
 
                 polyCount += meshPolyCount;
 
-                if (AdvancedSafetySettings.HeuristicallyRemoveScreenSpaceBullshit && meshFilter != null && (ourMaterialsList[0]?.renderQueue ?? 0) >= 2500)
+                if (AdvancedSafetySettings.HeuristicallyRemoveScreenSpaceBullshit && meshFilter != null && ourMaterialsList.Count > 0 && (ourMaterialsList[0]?.renderQueue ?? 0) >= 2500)
                 {
                     var meshLowerName = mesh.name.ToLower();
                     if (meshLowerName.Contains("sphere") || meshLowerName.Contains("cube"))
