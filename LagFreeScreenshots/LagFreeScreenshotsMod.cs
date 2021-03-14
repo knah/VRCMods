@@ -133,6 +133,7 @@ namespace LagFreeScreenshots
         private static string GetWorldMeta()
         {
             var apiworld = RoomManager.field_Internal_Static_ApiWorld_0;
+            if (apiworld == null) return "null,0,Not in any world";
             return apiworld.id + "," + RoomManager.field_Internal_Static_ApiWorldInstance_0.idOnly + "," + apiworld.name;
         }
 
