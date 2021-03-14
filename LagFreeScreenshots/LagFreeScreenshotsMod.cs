@@ -409,7 +409,7 @@ namespace LagFreeScreenshots
 
 
             var pixelFormat = hasAlpha ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb;
-            var bitmap = new Bitmap(w, h, pixelFormat);
+            using var bitmap = new Bitmap(w, h, pixelFormat);
             var bitmapData = bitmap.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, pixelFormat);
             unsafe
             {
@@ -438,13 +438,10 @@ namespace LagFreeScreenshots
                 }
             }
 
-            ImageCodecInfo encoder;
-            EncoderParameters parameters;
-            
             if (ourFormat.Value == "jpeg")
             {
-                encoder = GetEncoder(ImageFormat.Jpeg);
-                parameters = new EncoderParameters(1)
+                var encoder = GetEncoder(ImageFormat.Jpeg);
+                using var parameters = new EncoderParameters(1)
                 {
                     Param = {[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, ourJpegPercent.Value)}
                 };
@@ -473,6 +470,9 @@ namespace LagFreeScreenshots
 
             // compatibility with log-reading tools
             UnityEngine.Debug.Log($"Took screenshot to: {filePath}");
+            
+            // yield to background thread for disposes
+            await Task.Delay(1).ConfigureAwait(false);
         }
 
         private static Func<int, int, string> ourOurGetPathMethod;
