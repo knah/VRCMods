@@ -41,11 +41,13 @@ namespace LagFreeScreenshots
         private const string SettingEnableMod = "Enabled";
         private const string SettingScreenshotFormat = "ScreenshotFormat";
         private const string SettingJpegPercent = "JpegPercent";
+        private const string SettingAutorotation = "Auto-rotation";
         private const string SettingMetadata = "Metadata";
 
         private static MelonPreferences_Entry<bool> ourEnabled;
         private static MelonPreferences_Entry<string> ourFormat;
         private static MelonPreferences_Entry<int> ourJpegPercent;
+        private static MelonPreferences_Entry<bool> ourAutorotation;
         private static MelonPreferences_Entry<bool> ourMetadata;
 
         private static Thread ourMainThread;
@@ -56,6 +58,7 @@ namespace LagFreeScreenshots
             ourEnabled = (MelonPreferences_Entry<bool>) category.CreateEntry(SettingEnableMod, true, "Enabled");
             ourFormat = (MelonPreferences_Entry<string>) category.CreateEntry( SettingScreenshotFormat, "png", "Screenshot format");
             ourJpegPercent = (MelonPreferences_Entry<int>) category.CreateEntry(SettingJpegPercent, 95, "JPEG quality (0-100)");
+            ourAutorotation = (MelonPreferences_Entry<bool>)category.CreateEntry(SettingAutorotation, true, "Rotate picture to match camera");
             ourMetadata = (MelonPreferences_Entry<bool>)category.CreateEntry(SettingMetadata, false, "Save metadata in picture");
 
             Harmony.Patch(
@@ -70,6 +73,18 @@ namespace LagFreeScreenshots
         private static void AddEnumSettings()
         {
             ExpansionKitApi.RegisterSettingAsStringEnum(SettingsCategory, SettingScreenshotFormat, new []{("png", "PNG"), ("jpeg", "JPEG")});
+        }
+
+        private static int GetPictureAutorotation(Camera camera)
+        {
+            var pitch = Vector3.Angle(camera.transform.forward, new Vector3(0, 1, 0));
+            if (pitch < 45 || pitch > 135) return 0; //Pointing up/down, rotation doesn't matter
+
+            var rot = camera.transform.localEulerAngles.z;
+            if (rot >= 45 && rot < 135) return 3;
+            if (rot >= 135 && rot < 225) return 2;
+            if (rot >= 225 && rot < 315) return 1;
+            return 0;
         }
 
         private static string GetPlayerList(Camera camera)
@@ -109,7 +124,14 @@ namespace LagFreeScreenshots
 
         private static string GetWorldMeta()
         {
-            return RoomManager.field_Internal_Static_ApiWorld_0.id + "," + RoomManager.field_Internal_Static_ApiWorldInstance_0.idOnly + "," + RoomManager.field_Internal_Static_ApiWorld_0.name;
+            var apiworld = RoomManager.field_Internal_Static_ApiWorld_0;
+            return apiworld.id + "," + RoomManager.field_Internal_Static_ApiWorldInstance_0.idOnly + "," + apiworld.name;
+        }
+
+        private static string GetPosition()
+        {
+            var position = VRCPlayer.field_Internal_Static_VRCPlayer_0.transform.position;
+            return position.x + "," + position.y + "," + position.z;
         }
 
         public override void OnUpdate()
@@ -216,12 +238,22 @@ namespace LagFreeScreenshots
                 Directory.CreateDirectory(targetDir);
 
             string metadataStr = null;
-
-            if (ourMetadata.Value) { 
-                metadataStr = "lfs|2|author:" + GetPhotographerMeta() + "|world:" + GetWorldMeta() + "|players:" + GetPlayerList(camera);
+            int rotationQuarters = 0;
+            
+            if (ourAutorotation.Value) {
+                rotationQuarters = GetPictureAutorotation(camera);
             }
 
-            await EncodeAndSavePicture(targetFile, data, w, h, hasAlpha, metadataStr).ConfigureAwait(false);
+            if (ourMetadata.Value) {
+                metadataStr = "lfs|2|author:" + GetPhotographerMeta() + "|world:" + GetWorldMeta() + "|pos:" + GetPosition();
+                if (ourAutorotation.Value)
+                {
+                    metadataStr += "|rq:" + rotationQuarters;
+                }
+                metadataStr += "|players:" + GetPlayerList(camera);
+            }
+
+            await EncodeAndSavePicture(targetFile, data, w, h, hasAlpha, rotationQuarters, metadataStr).ConfigureAwait(false);
         }
         
         private static unsafe (IntPtr, int) ToBytes(IntPtr pointer, int length)
@@ -246,7 +278,62 @@ namespace LagFreeScreenshots
             return null;  
         }  
 
-        private static async Task EncodeAndSavePicture(string filePath, (IntPtr, int Length) pixelsPair, int w, int h, bool hasAlpha, string description)
+        private static unsafe (IntPtr, int) TransposeAndDestroyOriginal((IntPtr, int Length) data, int w, int h, int step)
+        {
+            (IntPtr, int) newdata = default;
+            newdata = (Marshal.AllocHGlobal(data.Length), data.Length);
+
+            byte* pixels = (byte*)data.Item1;
+            byte* newpixels = (byte*)newdata.Item1;
+            for (var x = 0; x < w; x++)
+            {
+                for (var y = 0; y < h; y++)
+                {
+                    for (var s = 0; s < step; s++)
+                    {
+                        newpixels[s + y * step + x * h * step] = pixels[s + x * step + y * w * step];
+                    }
+                }
+            }
+
+            Marshal.FreeHGlobal(data.Item1);
+            return newdata;
+        }
+
+        private static unsafe void FlipVertInPlace((IntPtr, int Length) data, int w, int h, int step)
+        {
+            byte* pixels = (byte*)data.Item1;
+            for (var y = 0; y < h / 2; y++)
+            {
+                for (var x = 0; x < w * step; x++)
+                {
+                    var t = pixels[x + y * w * step];
+                    pixels[x + y * w * step] = pixels[x + (h - y - 1) * w * step];
+                    pixels[x + (h - y - 1) * w * step] = t;
+                }
+            }
+        }
+
+        private static unsafe void FlipHorInPlace((IntPtr, int Length) data, int w, int h, int step)
+        {
+            byte* pixels = (byte*)data.Item1;
+            for (var x = 0; x < w / 2; x++)
+            {
+                for (var y = 0; y < h; y++)
+                {
+                    for (var s = 0; s < step; s++)
+                    {
+                        var t = pixels[s + x * step + y * w * step];
+                        pixels[s + x * step + y * w * step] = pixels[s + (w - x - 1) * step + y * w * step];
+                        pixels[s + (w - x - 1) * step + y * w * step] = t;
+                    }
+                }
+            }
+        }
+
+
+
+        private static async Task EncodeAndSavePicture(string filePath, (IntPtr, int Length) pixelsPair, int w, int h, bool hasAlpha, int rotationQuarters, string description)
         {
             if (pixelsPair.Item1 == IntPtr.Zero) return;
             
@@ -257,10 +344,11 @@ namespace LagFreeScreenshots
                 MelonLogger.Error("Image encode is executed on main thread - it's a bug!");
 
             var step = hasAlpha ? 4 : 3;
+
             unsafe
             {
                 // swap colors [a]rgb -> bgr[a]
-                byte* pixels = (byte*) pixelsPair.Item1;
+                byte* pixels = (byte*)pixelsPair.Item1;
                 for (int i = 0; i < pixelsPair.Length; i += step)
                 {
                     var t = pixels[i];
@@ -272,17 +360,27 @@ namespace LagFreeScreenshots
                     pixels[i + 1] = pixels[i + step - 2];
                     pixels[i + step - 2] = t;
                 }
+            }
 
-                // flip image upside-down
-                for (var y = 0; y < h / 2; y++)
-                {
-                    for (var x = 0; x < w * step; x++)
-                    {
-                        var t = pixels[x + y * w * step];
-                        pixels[x + y * w * step] = pixels[x + (h - y - 1) * w * step];
-                        pixels[x + (h - y - 1) * w * step] = t;
-                    }
-                }
+            if (rotationQuarters == 1)  //90deg cw
+            {
+                pixelsPair = TransposeAndDestroyOriginal(pixelsPair, w, h, step);
+                var t = w; w = h; h = t;
+            }
+            else if (rotationQuarters == 2)  //180deg cw
+            {
+                FlipHorInPlace(pixelsPair, w, h, step);
+            }
+            else if (rotationQuarters == 3)  //270deg cw
+            {
+                FlipHorInPlace(pixelsPair, w, h, step);
+                FlipVertInPlace(pixelsPair, w, h, step);
+                pixelsPair = TransposeAndDestroyOriginal(pixelsPair, w, h, step);
+                var t = w; w = h; h = t;
+            }
+            else
+            {
+                FlipVertInPlace(pixelsPair, w, h, step);
             }
 
 
