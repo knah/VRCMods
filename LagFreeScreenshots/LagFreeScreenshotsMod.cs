@@ -111,7 +111,8 @@ namespace LagFreeScreenshots
                                        viewPos.z.ToString("0.00", CultureInfo.InvariantCulture) + "," +
                                        p.prop_APIUser_0.displayName;
                 
-                if (viewPos.z < 2 && Vector3.Distance(localPosition, playerPosition) < 2) {
+                if (viewPos.z < 2 && Vector3.Distance(localPosition, playerPosition) < 2)
+                {
                     //User standing right next to photographer, might be visible (approx.)
                     result.Add(playerDescriptor);
                 }
@@ -132,15 +133,17 @@ namespace LagFreeScreenshots
 
         private static string GetWorldMeta()
         {
-            var apiworld = RoomManager.field_Internal_Static_ApiWorld_0;
-            if (apiworld == null) return "null,0,Not in any world";
-            return apiworld.id + "," + RoomManager.field_Internal_Static_ApiWorldInstance_0.idOnly + "," + apiworld.name;
+            var apiWorld = RoomManager.field_Internal_Static_ApiWorld_0;
+            if (apiWorld == null) return "null,0,Not in any world";
+            return apiWorld.id + "," + RoomManager.field_Internal_Static_ApiWorldInstance_0.idOnly + "," + apiWorld.name;
         }
 
         private static string GetPosition()
         {
             var position = VRCPlayer.field_Internal_Static_VRCPlayer_0.transform.position;
-            return position.x.ToString(CultureInfo.InvariantCulture) + "," + position.y.ToString(CultureInfo.InvariantCulture) + "," + position.z.ToString(CultureInfo.InvariantCulture);
+            return position.x.ToString(CultureInfo.InvariantCulture) + "," +
+                   position.y.ToString(CultureInfo.InvariantCulture) + "," +
+                   position.z.ToString(CultureInfo.InvariantCulture);
         }
 
         public override void OnUpdate()
@@ -216,7 +219,7 @@ namespace LagFreeScreenshots
                 MelonDebug.Msg("Supports readback");
                 
                 var stopwatch = Stopwatch.StartNew();
-                var request = AsyncGPUReadback.Request(renderTexture, 0, hasAlpha ? TextureFormat.ARGB32 : TextureFormat.RGB24,new Action<AsyncGPUReadbackRequest>(r =>
+                var request = AsyncGPUReadback.Request(renderTexture, 0, hasAlpha ? TextureFormat.ARGB32 : TextureFormat.RGB24, new Action<AsyncGPUReadbackRequest>(r =>
                 {
                     if (r.hasError)
                         MelonLogger.Warning("Readback request finished with error (w)");
@@ -264,12 +267,13 @@ namespace LagFreeScreenshots
             string metadataStr = null;
             int rotationQuarters = 0;
             
-            if (ourAutorotation.Value) {
+            if (ourAutorotation.Value) 
                 rotationQuarters = GetPictureAutorotation(camera);
-            }
 
-            if (ourMetadata.Value) {
-                metadataStr = "lfs|2|author:" + GetPhotographerMeta() + "|world:" + GetWorldMeta() + "|pos:" + GetPosition();
+            if (ourMetadata.Value)
+            {
+                metadataStr = "lfs|2|author:" + GetPhotographerMeta() + "|world:" + GetWorldMeta() + "|pos:" +
+                              GetPosition();
                 if (ourAutorotation.Value)
                 {
                     metadataStr += "|rq:" + rotationQuarters;
@@ -277,56 +281,51 @@ namespace LagFreeScreenshots
                 metadataStr += "|players:" + GetPlayerList(camera);
             }
 
-            await EncodeAndSavePicture(targetFile, data, w, h, hasAlpha, rotationQuarters, metadataStr).ConfigureAwait(false);
+            await EncodeAndSavePicture(targetFile, data, w, h, hasAlpha, rotationQuarters, metadataStr)
+                .ConfigureAwait(false);
         }
         
         private static unsafe (IntPtr, int) ToBytes(IntPtr pointer, int length)
         {
             var data = Marshal.AllocHGlobal(length);
             
-            Buffer.MemoryCopy((void*) pointer, (void*)data, length, length);
+            Buffer.MemoryCopy((void*) pointer, (void*) data, length, length);
 
             return (data, length);
         }
         
-        private static ImageCodecInfo GetEncoder(ImageFormat format)  
-        {  
-            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageEncoders();  
-            foreach (ImageCodecInfo codec in codecs)  
-            {  
-                if (codec.FormatID == format.Guid)  
-                {  
-                    return codec;  
-                }  
-            }  
-            return null;  
-        }  
-
-        private static unsafe (IntPtr, int) TransposeAndDestroyOriginal((IntPtr, int Length) data, int w, int h, int step)
+        private static ImageCodecInfo GetEncoder(ImageFormat format)
         {
-            (IntPtr, int) newdata = default;
-            newdata = (Marshal.AllocHGlobal(data.Length), data.Length);
-
-            byte* pixels = (byte*)data.Item1;
-            byte* newpixels = (byte*)newdata.Item1;
-            for (var x = 0; x < w; x++)
+            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageEncoders();
+            foreach (ImageCodecInfo codec in codecs)
             {
-                for (var y = 0; y < h; y++)
+                if (codec.FormatID == format.Guid)
                 {
-                    for (var s = 0; s < step; s++)
-                    {
-                        newpixels[s + y * step + x * h * step] = pixels[s + x * step + y * w * step];
-                    }
+                    return codec;
                 }
             }
 
+            return null;
+        }
+
+        private static unsafe (IntPtr, int) TransposeAndDestroyOriginal((IntPtr, int Length) data, int w, int h, int step)
+        {
+            (IntPtr, int) newData = (Marshal.AllocHGlobal(data.Length), data.Length);
+
+            byte* pixels = (byte*) data.Item1;
+            byte* newPixels = (byte*) newData.Item1;
+            for (var x = 0; x < w; x++)
+            for (var y = 0; y < h; y++)
+            for (var s = 0; s < step; s++)
+                newPixels[s + y * step + x * h * step] = pixels[s + x * step + y * w * step];
+
             Marshal.FreeHGlobal(data.Item1);
-            return newdata;
+            return newData;
         }
 
         private static unsafe void FlipVertInPlace((IntPtr, int Length) data, int w, int h, int step)
         {
-            byte* pixels = (byte*)data.Item1;
+            byte* pixels = (byte*) data.Item1;
             for (var y = 0; y < h / 2; y++)
             {
                 for (var x = 0; x < w * step; x++)
@@ -340,7 +339,7 @@ namespace LagFreeScreenshots
 
         private static unsafe void FlipHorInPlace((IntPtr, int Length) data, int w, int h, int step)
         {
-            byte* pixels = (byte*)data.Item1;
+            byte* pixels = (byte*) data.Item1;
             for (var x = 0; x < w / 2; x++)
             {
                 for (var y = 0; y < h; y++)
@@ -356,8 +355,8 @@ namespace LagFreeScreenshots
         }
 
 
-
-        private static async Task EncodeAndSavePicture(string filePath, (IntPtr, int Length) pixelsPair, int w, int h, bool hasAlpha, int rotationQuarters, string description)
+        private static async Task EncodeAndSavePicture(string filePath, (IntPtr, int Length) pixelsPair, int w, int h,
+            bool hasAlpha, int rotationQuarters, string description)
         {
             if (pixelsPair.Item1 == IntPtr.Zero) return;
             
@@ -372,7 +371,7 @@ namespace LagFreeScreenshots
             unsafe
             {
                 // swap colors [a]rgb -> bgr[a]
-                byte* pixels = (byte*)pixelsPair.Item1;
+                byte* pixels = (byte*) pixelsPair.Item1;
                 for (int i = 0; i < pixelsPair.Length; i += step)
                 {
                     var t = pixels[i];
@@ -386,16 +385,18 @@ namespace LagFreeScreenshots
                 }
             }
 
-            if (rotationQuarters == 1)  //90deg cw
+            if (rotationQuarters == 1) //90deg cw
             {
                 pixelsPair = TransposeAndDestroyOriginal(pixelsPair, w, h, step);
-                var t = w; w = h; h = t;
+                var t = w;
+                w = h;
+                h = t;
             }
-            else if (rotationQuarters == 2)  //180deg cw
+            else if (rotationQuarters == 2) //180deg cw
             {
                 FlipHorInPlace(pixelsPair, w, h, step);
             }
-            else if (rotationQuarters == 3)  //270deg cw
+            else if (rotationQuarters == 3) //270deg cw
             {
                 FlipHorInPlace(pixelsPair, w, h, step);
                 FlipVertInPlace(pixelsPair, w, h, step);
@@ -422,8 +423,9 @@ namespace LagFreeScreenshots
             // https://docs.microsoft.com/en-us/windows/win32/gdiplus/-gdiplus-constant-property-item-descriptions
             if (description != null)
             {
+                // png description is saved as iTXt chunk manually
                 if (ourFormat.Value == "jpeg")
-                { // png description is saved as iTXt chunk manually
+                {
                     var stringBytesCount = Encoding.Unicode.GetByteCount(description);
                     var allBytes = new byte[8 + stringBytesCount];
                     Encoding.ASCII.GetBytes("UNICODE\0", 0, 8, allBytes, 0);
