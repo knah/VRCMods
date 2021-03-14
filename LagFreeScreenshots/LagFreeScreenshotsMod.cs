@@ -157,16 +157,19 @@ namespace LagFreeScreenshots
         {
             var resX = __instance.field_Public_Int32_0;
             var resY = __instance.field_Public_Int32_1;
+            var saveToFile = __instance.field_Public_Boolean_0;
+            var hasAlpha = __instance.field_Public_Boolean_1;
             
-            // ignore low resultion, unchanged pngs - it's fast enough and also used by VRC+ picture features
-            if (!ourEnabled.Value || resX <= 1920 && resY <= 1080 && ourFormat.Value == "png" && !ourMetadata.Value)
+            MelonDebug.Msg($"LFS bools: 0={__instance.field_Public_Boolean_0} 1={__instance.field_Public_Boolean_1}");
+            
+            if (!ourEnabled.Value || !saveToFile)
                 return true;
             
             ourMainThread = Thread.CurrentThread;
 
             __result = false;
             TakeScreenshot(__instance.field_Public_Camera_0, resX,
-                resY, true).ContinueWith(t =>
+                resY, hasAlpha).ContinueWith(t =>
             {
                 if (t.IsFaulted)
                     MelonLogger.Warning($"Free-floating task failed with exception: {t.Exception}");
