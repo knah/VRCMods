@@ -24,6 +24,8 @@ using VRC;
 using Object = UnityEngine.Object;
 using CameraTakePhotoEnumerator = VRC.UserCamera.CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObBoAcIn2StInTeCaUnique;
 using System.Collections.Generic;
+using System.Globalization;
+
 // using CameraUtil = ObjectPublicCaSiVeUnique;
 
 [assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.2.0", "knah, Protected", "https://github.com/knah/VRCMods")]
@@ -101,7 +103,11 @@ namespace LagFreeScreenshots
             {
                 var playerPosition = p.gameObject.transform.position;
                 Vector3 viewPos = camera.WorldToViewportPoint(playerPosition);
-                var playerDescriptor = p.prop_APIUser_0.id + "," + viewPos.x.ToString("0.00") + "," + viewPos.y.ToString("0.00") + "," + viewPos.z.ToString("0.00") + "," + p.prop_APIUser_0.displayName;
+                var playerDescriptor = p.prop_APIUser_0.id + "," +
+                                       viewPos.x.ToString("0.00", CultureInfo.InvariantCulture) + "," +
+                                       viewPos.y.ToString("0.00", CultureInfo.InvariantCulture) + "," +
+                                       viewPos.z.ToString("0.00", CultureInfo.InvariantCulture) + "," +
+                                       p.prop_APIUser_0.displayName;
                 
                 if (viewPos.z < 2 && Vector3.Distance(localPosition, playerPosition) < 2) {
                     //User standing right next to photographer, might be visible (approx.)
@@ -131,7 +137,7 @@ namespace LagFreeScreenshots
         private static string GetPosition()
         {
             var position = VRCPlayer.field_Internal_Static_VRCPlayer_0.transform.position;
-            return position.x + "," + position.y + "," + position.z;
+            return position.x.ToString(CultureInfo.InvariantCulture) + "," + position.y.ToString(CultureInfo.InvariantCulture) + "," + position.z.ToString(CultureInfo.InvariantCulture);
         }
 
         public override void OnUpdate()
