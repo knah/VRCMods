@@ -55,10 +55,10 @@ Steps to change database location:
 1. Run VRChat with the mod at least once
 2. Make sure that VRChat is closed
 3. Navigate to VRChat install directory (i.e. by clicking "Browse Local Files" in Steam)
-4. Navigate to `UserData` folder and open `modprefs.ini` with Notepad or other text editor
+4. Navigate to `UserData` folder and open `MelonPreferenes.cfg` with Notepad or other text editor
 5. Find the line with `[FavCat]`
 6. Find the line with `DatabasePath` under it
-7. Change the value to absolute path to new storage folder. The new line should look like this: `DatabasePath=C:\Users\username\OneDrive` (with your own path, naturally)
+7. Change the value to absolute path to new storage folder. The new line should look like this: `DatabasePath = "C:/Users/username/OneDrive"` (with your own path, naturally; make sure to use forward clashes `/` instead of backslashes `\\`)
 8. Save and close the text file
 9. Copy the two (or four) database files (`favcat-favs.db` and `favacat-store.db`, and `favcat-favs-log.db` and `favcat-store-log.db` if they exist) from the old location (they are in `UserData` by default) to the new one.
 
