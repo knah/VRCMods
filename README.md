@@ -156,8 +156,11 @@ Current features:
  - Custom join/leave sounds - put files named `JN-Join.ogg` and/or `JN-Leave.ogg` into `UserData` folder to override default sounds (they must be in Ogg Vorbis format, naturally)
 
 ## Lag Free Screenshots
-This mod significantly improves screenshot taking performance for handheld camera in VR and F12 key in desktop mode. Benefits are especially noticeable with higher resolution screenshots (4K/8K).  
-Additionally you can set your screenshots to be saved as JPEG files instead of PNG to save on file size. JPEG encoding takes a bit of time though, but it doesn't freeze your game anyway so why even care?
+This mod significantly improves screenshot taking performance for handheld camera in VR and F12 key in desktop mode. Benefits are especially noticeable with higher resolution screenshots (4K/8K).
+Additional features:
+ * You can set your screenshots to be saved as JPEG files instead of PNG to save on file size.  
+ * Automatically rotate screenshots so that proper side faces up (like on your real phone!)
+ * Add metadata about world and players to screenshot files (disabled by default; both JPEG and PNG are supported, though PNG metadata is not displayed by Windows - you'll have to use a use different photo viewer software) 
  
 ## LocalPlayerPrefs
 This mod moves game settings storage from Windows registry to UserData folder.  
