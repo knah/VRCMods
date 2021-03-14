@@ -176,6 +176,20 @@ namespace LagFreeScreenshots
             });
             return false;
         }
+
+        private static int MaxMsaaCount(int w, int h)
+        {
+            // A rendertarget has a single depth attachment (24 bits depth + 8 bits stencil), an output color attachment, and
+            // additional "color attachments" for each MSAA level
+            // Unity doesn't like rendertextures over 4 gigs in size, so reduce MSAA if necessary
+            var depthSize = w * (long) h * 4;
+            var colorSizePerPixel = w * (long) h * 4; // ignore no-alpha to be conservative about packing
+            var maxMsaa = (uint.MaxValue - depthSize - colorSizePerPixel) / colorSizePerPixel;
+            if (maxMsaa >= 8) return 8;
+            if (maxMsaa >= 4) return 4;
+            if (maxMsaa >= 2) return 2;
+            return 1;
+        }
         
         public static async Task TakeScreenshot(Camera camera, int w, int h, bool hasAlpha)
         {
@@ -185,7 +199,7 @@ namespace LagFreeScreenshots
 
             // var renderTexture = RenderTexture.GetTemporary(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, 8);
             var renderTexture = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
-            renderTexture.antiAliasing = 8;
+            renderTexture.antiAliasing = MaxMsaaCount(w, h);
 
             var oldCameraTarget = camera.targetTexture;
             var oldCameraFov = camera.fieldOfView;
