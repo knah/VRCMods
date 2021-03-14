@@ -101,7 +101,9 @@ namespace LagFreeScreenshots
 
             foreach (var p in playerManager.field_Private_List_1_Player_0)
             {
-                var playerPosition = p.gameObject.transform.position;
+                var avatarRoot = p.prop_VRCPlayer_0.prop_VRCAvatarManager_0.transform.Find("Avatar");
+                var playerPositionTransform = avatarRoot?.GetComponent<Animator>()?.GetBoneTransform(HumanBodyBones.Head) ?? p.transform;
+                var playerPosition = playerPositionTransform.position;
                 Vector3 viewPos = camera.WorldToViewportPoint(playerPosition);
                 var playerDescriptor = p.prop_APIUser_0.id + "," +
                                        viewPos.x.ToString("0.00", CultureInfo.InvariantCulture) + "," +
