@@ -480,7 +480,7 @@ namespace FavCat.Modules
             if (customList) return customList.Category.CategoryName;
 
             var avatarList = listRoot.GetComponent<UiAvatarList>();
-            if (avatarList && avatarList.field_Public_EnumNPublicSealedvaInPuMiFaSpClPuLi9vUnique_0 == UiAvatarList.EnumNPublicSealedvaInPuMiFaSpClPuLi9vUnique.PublicQuest) 
+            if (avatarList && avatarList.field_Public_EnumNPublicSealedvaInPuMiFaSpClPuLiCrUnique_0 == UiAvatarList.EnumNPublicSealedvaInPuMiFaSpClPuLiCrUnique.PublicQuest) 
                 return null; // nobody likes this one
 
             return listRoot.transform.Find("Button/TitleText")?.GetComponent<Text>()?.text?.StripParenthesis() ?? listRoot.name;

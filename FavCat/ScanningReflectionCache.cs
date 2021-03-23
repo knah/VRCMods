@@ -72,8 +72,10 @@ namespace FavCat
                             if (parameters.Length != 1 || parameters[0].ParameterType != typeof(ApiAvatar))
                                 return false;
 
-                            return XrefScanner.XrefScan(it).Any(jt =>
-                                jt.Type == XrefType.Global && jt.ReadAsObject()?.ToString() == "local");
+                            var strings = XrefScanner.XrefScan(it)
+                                .Select(jt => jt.Type == XrefType.Global ? jt.ReadAsObject()?.ToString() : null)
+                                .Where(jt => jt != null).ToHashSet(); 
+                            return strings.Contains("Refreshing with : ") && strings.Contains("local");
                         });
 
                 ourPedestalRefreshDelegate =
