@@ -443,14 +443,18 @@ namespace IKTweaks
                 .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Single(it =>
                     XrefScanner.XrefScan(it).Any(jt => jt.Type == XrefType.Global && jt.ReadAsObject()?.ToString() ==
                         "Hip+Feet Tracking: 3 trackers found, tracking enabled."));
-            var hipAndFeetTrackingSupported = (MethodInfo) XrefScanner.XrefScan(userOfHfts).Single(it =>
+            var hipAndFeetTrackingSupportedCandidates = XrefScanner.XrefScan(userOfHfts).Where(it =>
             {
                 if (it.Type != XrefType.Method) return false;
                 var resolved = it.TryResolve() as MethodInfo;
                 return resolved != null && resolved.DeclaringType == typeof(VRCTrackingManager) && resolved.IsStatic &&
                        resolved.GetParameters().Length == 0 && resolved.ReturnType == typeof(bool);
-            }).TryResolve();
+            }).ToList();
+            
+            foreach (var hipAndFeetTrackingSupportedCandidate in hipAndFeetTrackingSupportedCandidates)
+                MelonDebug.Msg("hafts candidate: " + hipAndFeetTrackingSupportedCandidate.TryResolve()?.FullDescription());
 
+            var hipAndFeetTrackingSupported = (MethodInfo) hipAndFeetTrackingSupportedCandidates.First().TryResolve();
             harmony.Patch(hipAndFeetTrackingSupported, new HarmonyMethod(typeof(FullBodyHandling), nameof(PatchHipAndFeetTracking)));
             ourIsFbtSupported = (Func<bool>) Delegate.CreateDelegate(typeof(Func<bool>), hipAndFeetTrackingSupported);
         }
