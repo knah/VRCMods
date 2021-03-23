@@ -39,7 +39,13 @@ namespace FavCat.Database
                 var allFileInfos = new List<(LiteFileInfo<string>, StoredImageInfo)>();
                 var runningSums = new List<long>();
                 foreach (var liteFileInfo in myFileDatabase.FileStorage.FindAll())
-                    allFileInfos.Add((liteFileInfo, myImageInfos.FindById(liteFileInfo.Id) ?? new StoredImageInfo { LastAccessed = DateTime.MinValue, Id = liteFileInfo.Id}));
+                {
+                    if (string.IsNullOrEmpty(liteFileInfo.Id)) continue;
+                    
+                    allFileInfos.Add((liteFileInfo,
+                        myImageInfos.FindById(liteFileInfo.Id) ?? new StoredImageInfo
+                            {LastAccessed = DateTime.MinValue, Id = liteFileInfo.Id}));
+                }
 
                 allFileInfos.Sort((a, b) => a.Item2.LastAccessed.CompareTo(b.Item2.LastAccessed));
                 long totalSize = 0;
@@ -126,6 +132,8 @@ namespace FavCat.Database
 
         public Task StoreImageAsync(string url, Il2CppStructArray<byte> data)
         {
+            if (string.IsNullOrEmpty(url)) return Task.CompletedTask;
+            
             return Task.Run(() =>
             {
                 try
