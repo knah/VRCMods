@@ -13,7 +13,7 @@ using UnityEngine.UI;
 using VRCSDK2;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.2.4", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.2.5", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace UIExpansionKit
@@ -199,7 +199,7 @@ namespace UIExpansionKit
                             : TextAnchor.LowerLeft;
 
                         if (categoryEnum == ExpandedMenu.AvatarMenu)
-                            gameObject.transform.Find("AvatarModel").gameObject.SetActive(!willBeRight);
+                            gameObject.transform.Find("AvatarPreviewBase").gameObject.SetActive(!willBeRight);
                     }));
                     
                     var listener = gameObject.GetOrAddComponent<EnableDisableListener>();
