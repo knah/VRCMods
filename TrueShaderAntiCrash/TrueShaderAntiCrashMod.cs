@@ -12,7 +12,7 @@ using UIExpansionKit.API;
 using UnityEngine.SceneManagement;
 using VRC.Core;
 
-[assembly:MelonInfo(typeof(TrueShaderAntiCrashMod), "True Shader Anticrash", "1.0.0", "knah", "")]
+[assembly:MelonInfo(typeof(TrueShaderAntiCrashMod), "True Shader Anticrash", "1.0.1", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace TrueShaderAntiCrash
@@ -24,11 +24,18 @@ namespace TrueShaderAntiCrash
             var pluginsPath = MelonUtils.GetGameDataDirectory() + "/Plugins";
             var dllName = ShaderFilterApi.DLLName + ".dll";
 
+            try
             {
-                using var resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(typeof(TrueShaderAntiCrashMod), dllName);
-                using var fileStream = File.OpenWrite(pluginsPath + "/" + dllName);
-                
+                using var resourceStream = Assembly.GetExecutingAssembly()
+                    .GetManifestResourceStream(typeof(TrueShaderAntiCrashMod), dllName);
+                using var fileStream = File.Open(pluginsPath + "/" + dllName, FileMode.Create, FileAccess.Write);
+
                 resourceStream.CopyTo(fileStream);
+            }
+            catch (IOException ex)
+            {
+                MelonLogger.Warning("Failed to write native unity plugin; will attempt loading it anyway. This is normal if you're running multiple instances of VRChat");
+                MelonDebug.Msg(ex.ToString());
             }
 
             var process = Process.GetCurrentProcess();
