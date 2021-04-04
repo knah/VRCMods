@@ -1,0 +1,58 @@
+name: .NET
+
+on:
+  push:
+    branches: [ master ]
+  create:
+    tags:
+     - '*'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Checkout libs
+      uses: actions/checkout@v2
+      with:
+        repository: ${{ secrets.LibsRepository }}
+        token: ${{ secrets.LibsRepositoryToken }}
+        path: Libs
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+      
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --no-restore
+      
+    - name: Publish a release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        body_path: ReleaseChangelog.md
+        files: |
+          Output/Debug/net472/AdvancedSafety.dll
+          Output/Debug/net472/CameraMinus.dll
+          Output/Debug/net472/EmojiPageButtons.dll
+          Output/Debug/net472/FavCat-merged.dll
+          Output/Debug/net472/Finitizer.dll
+          Output/Debug/net472/FriendsPlusHome.dll
+          Output/Debug/net472/IKTweaks.dll
+          Output/Debug/net472/JoinNotifier.dll
+          Output/Debug/net472/LagFreeScreenshots.dll
+          Output/Debug/net472/MirrorResolutionUnlimiter.dll
+          Output/Debug/net472/ParticleAndBoneLimiterSettings.dll
+          Output/Debug/net472/SparkleBeGone.dll
+          Output/Debug/net472/TrueShaderAntiCrash.dll
+          Output/Debug/net472/UIExpansionKit.dll
+          Output/Debug/net472/ViewPointTweaker.dll
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

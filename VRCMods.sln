@@ -7,6 +7,7 @@ ProjectSection(SolutionItems) = preProject
 	.gitignore = .gitignore
 	Directory.Build.props = Directory.Build.props
 	README.md = README.md
+	ReleaseChangelog.md = ReleaseChangelog.md
 EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UIExpansionKit", "UIExpansionKit\UIExpansionKit.csproj", "{85B11D98-E013-4E5D-95F3-5437DE63ACF4}"
