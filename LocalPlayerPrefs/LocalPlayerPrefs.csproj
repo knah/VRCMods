@@ -1,9 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>net472</TargetFramework>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <Version>1.0.0.0</Version>
-    </PropertyGroup>
-
-</Project>

@@ -1,4 +1,5 @@
-This repository contains my mods for VRChat. Join the [VRChat Modding Group discord](https://discord.gg/rCqKSvR) for support and more mods!
+This repository contains my mods for VRChat. Join the [VRChat Modding Group discord](https://discord.gg/rCqKSvR) for support and more mods!  
+Looking for more (universal) mods? [Check out my universal mods repository!](https://github.com/knah/ML-UniversalMods)
 
 ## AdvancedSafety
 Features:
@@ -161,13 +162,7 @@ Additional features:
  * You can set your screenshots to be saved as JPEG files instead of PNG to save on file size.  
  * Automatically rotate screenshots so that proper side faces up (like on your real phone!)
  * Add metadata about world and players to screenshot files (disabled by default; both JPEG and PNG are supported, though PNG metadata is not displayed by Windows - you'll have to use a use different photo viewer software) 
- 
-## LocalPlayerPrefs
-This mod moves game settings storage from Windows registry to UserData folder.  
-This can make using multiple accounts easier by having separate installs for them.  
-Do note that some settings will stay in registry (the ones that Unity itself uses as opposed to game code).  
-There's also no import from registry, so expect to have to log in again after installing this mod. 
- 
+
 ## MirrorResolutionUnlimiter
 Headset and display resolutions increase each year, and yet VRChat limits mirror resolution to 2048 pixels per eye. With this mod, that's not the case anymore!  
 Set whatever limit you want, with an option to un-potatoify mirrors that world makers set to potato resolution for their insane reasons. Or you can make all mirrors blurry as a sacrifice to performance gods. It's up to you, really.
@@ -181,36 +176,16 @@ Settings:
  * Force auto resolution - removes mirror resolution limits set by world maker. Off by default.
  * Mirror MSAA - changes MSAA specifically for mirrors. Valid values are 0 (same as main camera), 1, 2, 4 and 8. Lower MSAA may lead to "shimmering" and jaggies, especially in VR. 
 
-## NoSteamAtAll
-Makes the game unable to access Steam. At all.    
-This prevents it from getting your SteamID, which means that it won't get sent to everyone in the instance. No more assholes taking a peek at your Steam profile!    
-**This will also make you unable to log in via Steam.** Additionally, you may experience different voice quality. Nothing too bad though, it would be the same as what Oculus Store users get.
-
 ## ParticleAndBoneLimiterSettings
 This mod provides an UI for changing VRChat's built-in dynamic bone and particle limiter settings.  
 Refer to VRChat docs [for particle limiter](https://docs.vrchat.com/docs/avatar-particle-system-limits#particle-limiter-configuration-description) and [for dynamic bone limiter](https://docs.vrchat.com/docs/avatar-dynamic-bone-limits) for a detailed description of what these settings do.  
 Changing these settings should not require game restart.  
 Requires UIExpansionKit. Settings are placed into the Mod Settings menu.
 
-## RuntimeGraphicsSettings
-A mod to allow tweaking some graphics settings at runtime to get those extra few frames.
-If only VRCTools supported editing integer values at runtime...
-
-Settings description:
- * -1 on integer settings means "don't change the default value"
- * MSAALevel - multi-sampled anti-aliasing level. Valid values are 2, 4 and 8
- * AllowMSAA - toggle MSAA at runtime
- * AnisotropicFiltering - texture anisotropic filtering
- * RealtimeShadows - allow realtime shadows
- * SoftShadows - use soft shadows if shadows are enabled. Soft shadows are more expensive.
- * PixelLights - maximum amount of pixel lights that can affect an object
- * Texture decimation - Reduces texture resolution by 2^(this setting). A value of 0 means full-resolution textures, a value of 1 means half-res, 2 would be quarter res, and so on.
- * GraphicsTier - Unity Graphics Hardware Tier. Valid values are 1, 2 and 3. Only affects shaders loaded after it was changed. Probably of questionable value in VRChat, as custom shaders rarely support this setting.
- 
- ## SparkleBeGone
- This mod allows removing start and end sparkles from VR laser pointers, as well as recoloring them.  
- It will do nothing on desktop.   
- Settings are fairly self-explanatory.
+## SparkleBeGone
+This mod allows removing start and end sparkles from VR laser pointers, as well as recoloring them.  
+It will do nothing on desktop.   
+Settings are fairly self-explanatory.
 
 ## True Shader Anticrash
 This mod prevents practically all known shader crashes. Note that it can affect how stuff looks as it rewrites shader code to be non-crashy. Setting changes require world rejoin to reload shaders.
@@ -218,37 +193,20 @@ This mod prevents practically all known shader crashes. Note that it can affect 
 Main logic of this mod is located in the native DLL that currently is not opensource. The DLL is build upon [HLSLcc](https://github.com/Unity-Technologies/HLSLcc) and uses [Microsoft Detours](https://github.com/microsoft/Detours). An opensource release for it will likely be available at a later point.
 
  
- ## UIExpansionKit
- This mod provides additional UI panels for use by other mods, and a unified mod settings UI.  
- Some settings (currently boolean ones) can be pinned to quick menu for faster access.  
- Refer to [API](UIExpansionKit/API) for mod integration.  
- MirrorResolutionUnlimiter has an [example](MirrorResolutionUnlimiter/MirrorResolutionUnlimiterMod.cs) of soft dependency on this mod  
- EmojiPageButtons has an [example](EmojiPageButtons/EmojiPageButtonsMod.cs) for delaying button creation until your mod is done
+## UIExpansionKit
+This mod provides additional UI panels for use by other mods, and a unified mod settings UI.  
+Some settings (currently boolean ones) can be pinned to quick menu for faster access.  
+Refer to [API](UIExpansionKit/API) for mod integration.  
+MirrorResolutionUnlimiter has an [example](MirrorResolutionUnlimiter/MirrorResolutionUnlimiterMod.cs) of soft dependency on this mod  
+EmojiPageButtons has an [example](EmojiPageButtons/EmojiPageButtonsMod.cs) for delaying button creation until your mod is done
  
- This mod uses [Google Noto](https://www.google.com/get/noto/) font, licensed under [SIL Open Font License 1.1](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL).  
+This mod uses [Google Noto](https://www.google.com/get/noto/) font, licensed under [SIL Open Font License 1.1](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL).  
 
 ## View Point Tweaker
 This mod allows you to move view point ("view ball") on avatars. The tweak will affect only you, but other players will see your adjusted head position correctly.  
 Adjusted view points are saved per avatar.  
 **Requires UI Expansion Kit 0.2.0+**. The menu to tweak view point can be found in UI Elements Quick Menu submenu.  
 Do note that the coordinates displayed in that menu are local offset of the view point, not the coordinates you set in avatar descriptor.
- 
- ## HWIDPatch
-This mod allows you to fake your Hardware ID. This mod creates a new ID on launch and saves it for future launches. The ID can be changed in `modprefs.ini` afterwards. Set it to empty string to generate a new one.  
-Privacy first!
-
- 
- ## CoreLimiter
-A mod to automatically limit your game to a certain amount of CPU cores. This can be used to boost performance on some Ryzen CPUs by limiting the game to a single CCX.
-Naturally, limiting the game may reduce maximum possible performance under heavy load, and results are highly dependent on how well the game is multithreaded.
-  
-You should experiment with settings in a CPU-heavy world or scene to measure performance on your specific system. For CPUs with less than 8 cores it might be worth it to reduce used core count or allow hyperthreads.  
-  
-This mod is Windows-only. It likely won't do anything on Intel CPUs, but you're free to experiment with it.    
-
-Settings:
- * Max Cores (default 4) - the maximum amount of cores that the game may use. 4 is the sweet spot on a 2700X/3700X.
- * Skip Hyperthreads (default true) - don't assign game to both threads of one core. Works best when enabled on 2700X/3700X.
 
 ## ILRepack
 There's a copy of [ILRepack.Lib.MSBuild.Task](https://github.com/ravibpatel/ILRepack.Lib.MSBuild.Task) and [ILRepack](https://github.com/gluck/il-repack) built for netcore/MSBuild 16 shipped with the repo.
