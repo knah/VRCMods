@@ -28,7 +28,7 @@ using System.Globalization;
 
 // using CameraUtil = ObjectPublicCaSiVeUnique;
 
-[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.2.0", "knah, Protected", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.2.1", "knah, Protected", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -182,12 +182,10 @@ namespace LagFreeScreenshots
 
         private static int MaxMsaaCount(int w, int h)
         {
-            // A rendertarget has a single depth attachment (24 bits depth + 8 bits stencil), an output color attachment, and
-            // additional "color attachments" for each MSAA level
+            // MSAA rendertargets store depth (24+8 bits?) and color per sample, plus one extra color sample (output color?) for levels >1
             // Unity doesn't like rendertextures over 4 gigs in size, so reduce MSAA if necessary
-            var depthSize = w * (long) h * 4;
-            var colorSizePerPixel = w * (long) h * 4; // ignore no-alpha to be conservative about packing
-            var maxMsaa = (uint.MaxValue - depthSize - colorSizePerPixel) / colorSizePerPixel;
+            var colorSizePerLevel = w * (long) h * 4 * 2; // ignore no-alpha to be conservative about packing
+            var maxMsaa = (uint.MaxValue - colorSizePerLevel / 2) / colorSizePerLevel;
             if (maxMsaa >= 8) return 8;
             if (maxMsaa >= 4) return 4;
             if (maxMsaa >= 2) return 2;
