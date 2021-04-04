@@ -135,6 +135,8 @@ namespace FavCat.Modules
                 else
                     myPageAvatar.field_Public_SimpleAvatarPedestal_0.Refresh(avatar);
 
+                // VRC has a tendency to change visibility of its lists after pedestal refresh 
+                ReorderLists();
                 RefreshFavButtons();
             }), new Action<ApiContainer>(c =>
             {
