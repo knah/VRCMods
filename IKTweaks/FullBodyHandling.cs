@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Harmony;
@@ -13,8 +14,30 @@ using IKSolverVR = RootMotionNew.FinalIK.IKSolverVR;
 
 namespace IKTweaks
 {
-    public class FullBodyHandling
+    public static class FullBodyHandling
     {
+        private static T MinBy<T>(this IEnumerable<T> src, Func<T, int> selector)
+        {
+            var seenElement = false;
+            var minValue = int.MaxValue;
+            T best = default;
+            foreach (var x in src)
+            {
+                seenElement = true;
+                var current = selector(x);
+                if (current < minValue)
+                {
+                    minValue = current;
+                    best = x;
+                }
+            }
+
+            if (!seenElement)
+                throw new ArgumentException("Sequence is empty");
+
+            return best;
+        }
+        
         internal static VRCFbbIkController LastInitializedController;
         internal static VRIK_New LastInitializedVRIK;
 
@@ -440,9 +463,9 @@ namespace IKTweaks
                 new HarmonyMethod(typeof(FullBodyHandling), nameof(IsCalibratedForAvatarPrefix)));
             
             var userOfHfts = typeof(VRCFbbIkController)
-                .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Single(it =>
+                .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(it =>
                     XrefScanner.XrefScan(it).Any(jt => jt.Type == XrefType.Global && jt.ReadAsObject()?.ToString() ==
-                        "Hip+Feet Tracking: 3 trackers found, tracking enabled."));
+                        "Hip+Feet Tracking: 3 trackers found, tracking enabled.")).MinBy(it => XrefScanner.XrefScan(it).Count());
             var hipAndFeetTrackingSupportedCandidates = XrefScanner.XrefScan(userOfHfts).Where(it =>
             {
                 if (it.Type != XrefType.Method) return false;
