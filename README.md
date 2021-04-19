@@ -9,10 +9,10 @@ Features:
    * Remove annoying spawn sounds or global sounds
    * Remove some fullscreen effects (this one is unreliable)
    * Avatars over the limit are not replaced by a gray robot. Instead, elements over limits are removed, with the rest of the avatar kept intact.
- * Hide all avatars of a specific author (requires UIExpansionKit, button is in user details menu)
- * Hide a specific avatar, no matter who uses it (requires UIExpansionKit, button in in user quick menu)
+ * Hide all avatars of a specific author (requires UI Expansion Kit, button is in user details menu)
+ * Hide a specific avatar, no matter who uses it (requires UI Expansion Kit, button in in user quick menu)
  * Hide portals from blocked users or non-friends
-   * That blocked asshole will no longer be able to portal drop you
+   * That blocked user will no longer be able to portal drop you
 
 This mod will introduce small lag spikes when avatars are loaded. These should be tolerable compared to VRChat's own lag spikes.  
 All numeric limits are configurable.  
@@ -23,16 +23,16 @@ Configurable for friends and vanilla "show avatar" button.
 ## CameraMinus
 Allows resizing the camera, zooming it in/out and hiding camera lens.  
 This is a lazy rewrite of original [VRCCameraPlus](https://github.com/Slaynash/VRCCameraPlus) by Slaynash.  
-Requires UIExpansionKit - new buttons are added to Camera QuickMenu expansion.  
+Requires UI Expansion Kit - new buttons are added to Camera QuickMenu expansion.  
 
 ## EmojiPageButtons
-This mod adds page buttons to emoji menu that allow faster switching.  
-Requires UIExpansionKit.  
+This mod adds page buttons to old emoji menu that allow faster switching.  
+Requires UI Expansion Kit.  
 ![emoji page buttons screenshot](https://imgur.com/gIq2vKw.png)
 
 ## FavCat
 An all-in-one local favorites mod. Unlimited favorite lists with unlimited favorites in them and a searchable local database of content and players.  
-**Requires UIExpansionKit 0.2.0 or newer**  
+**Requires UI Expansion Kit 0.2.0 or newer**  
 #### Features:
 * Unlimited lists (categories) for favorites, each of unlimited size
 * Lag-free even with large lists
@@ -106,7 +106,7 @@ This mod fixes a set of issues arising from invalid floating point values being 
 ## Friends+ Home
 Allows changing instance type of your home world to whatever you want.  
 Setting it to public will choose a random populated public instance if one is available.  
-UIExpansionKit 0.2.0 or newer recommended for in-game settings.  
+UI Expansion Kit 0.2.0 or newer recommended for in-game settings.  
 Known instance types are `Public`, `FriendOfGuests`, `FriendsOnly`, `InvitePlus` and `InviteOnly` (if you wish to edit modprefs.ini by hand)
 
 ## IKTweaks
@@ -169,7 +169,7 @@ Set whatever limit you want, with an option to un-potatoify mirrors that world m
 
 Note that increasing mirror texture resolution will increase VRAM usage and lower performance, as your GPU will have to do more work.
 
-If UIExpansionKit is installed, Settings page in the main menu will get two buttons to optimize and beautify all visible mirrors in the world.
+If UI Expansion Kit is installed, Settings page in the main menu will get two buttons to optimize and beautify all visible mirrors in the world.
 
 Settings:
  * Max mirror resolution - the maximum size of eye texture for mirror reflections. 2048 is VRChat default, 4096 is mod default.
@@ -180,7 +180,7 @@ Settings:
 This mod provides an UI for changing VRChat's built-in dynamic bone and particle limiter settings.  
 Refer to VRChat docs [for particle limiter](https://docs.vrchat.com/docs/avatar-particle-system-limits#particle-limiter-configuration-description) and [for dynamic bone limiter](https://docs.vrchat.com/docs/avatar-dynamic-bone-limits) for a detailed description of what these settings do.  
 Changing these settings should not require game restart.  
-Requires UIExpansionKit. Settings are placed into the Mod Settings menu.
+Requires UI Expansion Kit. Settings are placed into the Mod Settings menu.
 
 ## SparkleBeGone
 This mod allows removing start and end sparkles from VR laser pointers, as well as recoloring them.  
@@ -193,7 +193,7 @@ This mod prevents practically all known shader crashes. Note that it can affect 
 Main logic of this mod is located in the native DLL that currently is not opensource. The DLL is build upon [HLSLcc](https://github.com/Unity-Technologies/HLSLcc) and uses [Microsoft Detours](https://github.com/microsoft/Detours). An opensource release for it will likely be available at a later point.
 
  
-## UIExpansionKit
+## UI Expansion Kit
 This mod provides additional UI panels for use by other mods, and a unified mod settings UI.  
 Some settings (currently boolean ones) can be pinned to quick menu for faster access.  
 Refer to [API](UIExpansionKit/API) for mod integration.  
