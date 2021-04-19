@@ -10,6 +10,7 @@ using FavCat;
 using FavCat.CustomLists;
 using FavCat.Database;
 using FavCat.Modules;
+using Harmony;
 using MelonLoader;
 using UIExpansionKit.API;
 using UnhollowerBaseLib;
@@ -20,7 +21,7 @@ using VRC.Core;
 using Object = UnityEngine.Object;
 using ImageDownloaderClosure = ImageDownloader.__c__DisplayClass11_1;
 
-[assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.0.12", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.0.13", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace FavCat
@@ -57,6 +58,20 @@ namespace FavCat
             Database.ImageHandler.TrimCache(FavCatSettings.MaxCacheSizeBytes).NoAwait();
 
             ExpansionKitApi.RegisterWaitConditionBeforeDecorating(WaitForInitDone());
+            
+            foreach (var methodInfo in typeof(AvatarPedestal).GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public).Where(it => it.Name.StartsWith("Method_Private_Void_ApiContainer_") && it.GetParameters().Length == 1))
+            {
+                Harmony.Patch(methodInfo, new HarmonyMethod(typeof(FavCatMod), nameof(AvatarPedestalPatch)));
+            }
+        }
+
+        private static void AvatarPedestalPatch(ApiContainer __0)
+        {
+            if (__0.Error != null || __0.Code != 200) return;
+            var model = __0.Model?.TryCast<ApiAvatar>();
+            if (model == null) return;
+            
+            Database?.UpdateStoredAvatar(model);
         }
 
         internal CustomPickerList CreateCustomList(Transform parent)
@@ -238,8 +253,6 @@ namespace FavCat
 
                 var maybeUser = apiModel.TryCast<APIUser>();
                 if (maybeUser != null) FavCatMod.Database?.UpdateStoredPlayer(maybeUser);
-                var maybeAvatar = apiModel.TryCast<ApiAvatar>();
-                if (maybeAvatar != null) FavCatMod.Database?.UpdateStoredAvatar(maybeAvatar);
                 var maybeWorld = apiModel.TryCast<ApiWorld>();
                 if (maybeWorld != null) FavCatMod.Database?.UpdateStoredWorld(maybeWorld);
             }

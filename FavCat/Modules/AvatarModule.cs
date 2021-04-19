@@ -78,8 +78,9 @@ namespace FavCat.Modules
                     return;
                 
                 // something showed an unknown avatar, request it before favoriting
-                new ApiAvatar { id = avatarId }.Fetch(new Action<ApiContainer>(_ =>
+                new ApiAvatar { id = avatarId }.Fetch(new Action<ApiContainer>(model =>
                 {
+                    FavCatMod.Database?.UpdateStoredAvatar(model.Model.Cast<ApiAvatar>());
                     MelonCoroutines.Start(ReFavAfterDelay(storedCategory, avatarId));
                 }));
                 return;
@@ -125,6 +126,8 @@ namespace FavCat.Modules
             {
                 if (Imports.IsDebugMode())
                     MelonLogger.Log($"Done an API request for {model.Id}");
+
+                FavCatMod.Database?.UpdateStoredAvatar(avatar);
 
                 var canUse = avatar.releaseStatus == "public" || avatar.authorId == APIUser.CurrentUser.id;
                 if (!canUse)

@@ -75,7 +75,7 @@ namespace FavCat
                             var strings = XrefScanner.XrefScan(it)
                                 .Select(jt => jt.Type == XrefType.Global ? jt.ReadAsObject()?.ToString() : null)
                                 .Where(jt => jt != null).ToHashSet(); 
-                            return strings.Contains("Refreshing with : ") && strings.Contains("local");
+                            return strings.Contains("Refreshing with : ");
                         });
 
                 ourPedestalRefreshDelegate =
