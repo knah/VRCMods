@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using FavCat.Adapters;
 using FavCat.CustomLists;
@@ -11,13 +12,14 @@ using FavCat.Database.Stored;
 using MelonLoader;
 using UIExpansionKit.API;
 using UIExpansionKit.Components;
+using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace FavCat.Modules
 {
-    public abstract class ExtendedFavoritesModuleBase<T> where T: class
+    public abstract class ExtendedFavoritesModuleBase<T> where T: class, INamedStoredObject
     {
         protected const string SearchCategoryName = "Local search results";
         protected const string ExpandEnforcerGameObjectName = "ExpandEnforcer";
@@ -55,30 +57,42 @@ namespace FavCat.Modules
         protected internal abstract void RefreshFavButtons();
         protected abstract void SearchButtonClicked();
 
+        protected bool CanPerformAdditiveActions { get; }
+        protected bool CanShowExistingLists { get; }
 
-        protected ExtendedFavoritesModuleBase(ExpandedMenu expandedMenu, DatabaseFavoriteHandler<T> favoriteHandler, Transform listsParent, bool hasUpdateAndCreationDates = true)
+        public virtual void ShowAnnoyingMessage()
+        {
+        }
+
+
+        protected ExtendedFavoritesModuleBase(ExpandedMenu expandedMenu, DatabaseFavoriteHandler<T> favoriteHandler, Transform listsParent, bool canPerformAdditiveActions, bool canShowExistingLists, bool hasUpdateAndCreationDates = true)
         {
             myExpandedMenu = expandedMenu;
             Favorites = favoriteHandler;
+            CanPerformAdditiveActions = canPerformAdditiveActions;
+            CanShowExistingLists = canShowExistingLists;
 
             ExpansionKitApi.GetExpandedMenu(myExpandedMenu).AddSimpleButton("Local Search", SearchButtonClicked);
-            ExpansionKitApi.GetExpandedMenu(myExpandedMenu).AddSimpleButton("New Category", CreateCategory);
+            if (CanPerformAdditiveActions) ExpansionKitApi.GetExpandedMenu(myExpandedMenu).AddSimpleButton("New Category", CreateCategory);
             ExpansionKitApi.GetExpandedMenu(myExpandedMenu).AddSimpleButton("More FavCat...", ShowExtraOptionsMenu);
             
             this.listsParent = listsParent;
             myHasUpdateAndCreationDates = hasUpdateAndCreationDates;
 
-            var knownCategories = Favorites.GetCategories().ToList();
-            if (knownCategories.Count == 0)
+            if (CanShowExistingLists)
             {
-                var newCategory = new StoredCategory { CategoryName = "Local Favorites", SortType = "!added" };
-                Favorites.UpdateCategory(newCategory);
-                CreateList(newCategory);
+                var knownCategories = Favorites.GetCategories().ToList();
+                if (knownCategories.Count == 0)
+                {
+                    var newCategory = new StoredCategory {CategoryName = "Local Favorites", SortType = "!added"};
+                    Favorites.UpdateCategory(newCategory);
+                    CreateList(newCategory);
+                }
+                else
+                    foreach (var categoryName in knownCategories)
+                        if (categoryName.CategoryName != SearchCategoryName)
+                            CreateList(categoryName);
             }
-            else
-                foreach (var categoryName in knownCategories)
-                    if (categoryName.CategoryName != SearchCategoryName)
-                        CreateList(categoryName);
             
             var searchCategory = Favorites.GetCategory(SearchCategoryName) ??
                                  new StoredCategory {CategoryName = SearchCategoryName, SortType = hasUpdateAndCreationDates ? "!updated" : "name"};
@@ -194,6 +208,12 @@ namespace FavCat.Modules
         
         private void CreateCategory()
         {
+            if (!CanPerformAdditiveActions)
+            {
+                ShowAnnoyingMessage();
+                return;
+            }
+            
             BuiltinUiUtils.ShowInputPopup("Enter category name", "", InputField.InputType.Standard, false, "Create",
                 (s, _, __) =>
                 {
@@ -281,7 +301,10 @@ namespace FavCat.Modules
             listSettingsMenu.AddSpacer();
 
             if (category.CategoryName == SearchCategoryName)
-                listSettingsMenu.AddSimpleButton("Save as new category", () => SaveSearchAsCategory());
+                if (CanPerformAdditiveActions)
+                    listSettingsMenu.AddSimpleButton("Save as new category", () => SaveSearchAsCategory());
+                else
+                    listSettingsMenu.AddSpacer();
             else
                 listSettingsMenu.AddSimpleButton("Delete", DeleteSelectedList);
             
@@ -597,13 +620,16 @@ namespace FavCat.Modules
             if (ImportFolderProcessor.ImportRunning)
                 customMenu.AddLabel(ImportFolderProcessor.ImportStatusOuter + "\n" + ImportFolderProcessor.ImportStatusInner);
             else
-                customMenu.AddSimpleButton("Import databases and text files", () =>
+                customMenu.AddSimpleButton(CanPerformAdditiveActions ? "Import databases and text files" : "Import databases", () =>
                 {
                     customMenu.Hide();
                     ImportFolderProcessor.ProcessImportsFolder().NoAwait();
                 });
             
-            customMenu.AddSpacer();
+            if (Favorites.EntityType == DatabaseEntity.Avatar)
+                customMenu.AddSimpleButton("Show avatar favorites deprecation message", ShowAnnoyingMessage);
+            else
+                customMenu.AddSpacer();
             
             customMenu.AddSimpleButton("Open documentation in browser", () =>
             {
@@ -620,7 +646,15 @@ namespace FavCat.Modules
                     ReFetchFavoritesProcessor.ReFetchFavorites().NoAwait();
                 });
             
-            customMenu.AddSpacer();
+            if (ExportProcessor.IsExportingFavorites)
+                customMenu.AddLabel($"Exporting: {ExportProcessor.ProcessedCategories} / {ExportProcessor.TotalCategories}");
+            else
+                customMenu.AddSimpleButton("Export favorites",
+                    () =>
+                    {
+                        customMenu.Hide();
+                        ExportProcessor.DoExportFavorites(Favorites).NoAwait();
+                    });
             
             customMenu.AddSimpleButton("Close", customMenu.Hide);
             

@@ -4,7 +4,7 @@ using VRC.Core;
 
 namespace FavCat.Database.Stored
 {
-    public class StoredAvatar
+    public class StoredAvatar: INamedStoredObject
     {
         [BsonId] public string AvatarId { get; set; }
         public string Name { get; set; }

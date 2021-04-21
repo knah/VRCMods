@@ -21,23 +21,25 @@ using VRC.Core;
 using Object = UnityEngine.Object;
 using ImageDownloaderClosure = ImageDownloader.__c__DisplayClass11_1;
 
-[assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.0.13", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.1.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace FavCat
 {
     public class FavCatMod : MelonMod
     {
+        public static readonly DateTime NoMoreVisibleAvatarFavoritesAfter = new(2021, 05, 31);
+        
         public static LocalStoreDatabase? Database;
         internal static FavCatMod Instance;
 
         internal AvatarModule? AvatarModule;
         private WorldsModule? myWorldsModule;
-        private PlayersModule? myPlayerModule;
+        internal PlayersModule? PlayerModule;
         
         private static bool ourInitDone;
         
-        private static readonly ConcurrentQueue<Action> ToMainThreadQueue = new ConcurrentQueue<Action>();
+        private static readonly ConcurrentQueue<Action> ToMainThreadQueue = new();
 
         public override void OnApplicationStart()
         {
@@ -120,7 +122,7 @@ namespace FavCat
             try
             {
                 if (FavCatSettings.IsEnablePlayerFavs)
-                    myPlayerModule = new PlayersModule();
+                    PlayerModule = new PlayersModule();
             }
             catch (Exception ex)
             {
@@ -135,7 +137,7 @@ namespace FavCat
         {
             AvatarModule?.Update();
             myWorldsModule?.Update();
-            myPlayerModule?.Update();
+            PlayerModule?.Update();
             GlobalImageCache.OnUpdate();
 
             if (ToMainThreadQueue.TryDequeue(out var action))

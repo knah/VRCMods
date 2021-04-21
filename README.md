@@ -1,6 +1,17 @@
 This repository contains my mods for VRChat. Join the [VRChat Modding Group discord](https://discord.gg/rCqKSvR) for support and more mods!  
 Looking for more (universal) mods? [Check out my universal mods repository!](https://github.com/knah/ML-UniversalMods)
 
+## Preface
+Modifying the VRChat client is not allowed by VRChat Terms of Service and can lead to your account being banned.  
+Based on evidence until this point, VRChat Team will happily hand out bans to people using mods with evil features, such as ripping, crashing, and others things you don't want to be on the receiving end of. 
+Mods published here aim to avoid negative attention from VRChat Team and hopefully keep their users in a non-banned state as long as possible.  
+However, with that said, **these mods are provided without any warranty and as-is**. 
+If you use them and do get banned, don't complain to me that you were not warned. 
+Also, report your ban to VRChat Modding Group discord (see above) - every data point matters in determining how safe mods are for general public use.
+
+As an extra point, if you encounter an issue with the game (especially after an update), **make sure that issue is not caused by mods before reporting it to VRChat Team**.  
+You can add `--no-mods` launch option (in Steam) to temporarily disable MelonLoader without uninstalling it completely. 
+
 ## AdvancedSafety
 Features:
  * Set hard limits on avatar features, such as polygon count, audio sources, and some other things
@@ -37,14 +48,15 @@ An all-in-one local favorites mod. Unlimited favorite lists with unlimited favor
 * Unlimited lists (categories) for favorites, each of unlimited size
 * Lag-free even with large lists
 * Freely changeable list height
-* Avatar, world, and player favorites supported
+* ~~Avatar,~~ world, and player favorites supported
 * Modifiable list order and multiple list sorting options
 * Fully searchable database of everything you have ever seen
 * Changeable database location (**it's recommended to store the database in a directory backed up to cloud storage, such as Dropbox or OneDrive**, see below for setup)
 * Local image cache for even better performance
-* Categorize your own private avatars
-* Import avatar favorites from other local favorite mods (read below)
+* ~~Categorize your own private avatars~~
+* ~~Import avatar favorites from other local favorite mods (read below)~~
 * Exchange search database with friends (read below)
+* Hide default lists that you never use  
 * Many more small things
 
 #### Known limitations
@@ -65,15 +77,6 @@ Steps to change database location:
 
 If you want to move the image cache, use the same steps as above, but modify the line with `ImageCachePath` and copy `favcat-images.db` instead. It's not recommended to store the image cache in cloud storage due to its big size.
 
-#### Importing avatar favorites from other local favorite mods
-You can import favorites from other local favorite mods that use text files for storage.
-1. Run VRChat with the mod at least once
-2. Navigate to VRChat install directory (i.e. by clicking "Browse Local Files" in Steam)
-3. Find the avatar list of the mod you want to import from. Places to look like are `UserData` folder, game folder, or a mod-specific folder, such as `404Mods`. The avatar list would usually be a plain text file or a JSON file - both are supported.
-4. **Copy** the file to `UserData/FavCatImport` folder
-5. In-game, click "More FavCat" on any big menu page, then click "Import databases and text files"
-6. Import process can take some time. Once it is done, a new list will appear in the menu. It's safe to close the game and reopen it - import will continue from where it left off (you'll need to click the button again though). Once it is done, the corresponding list will be deleted from `UserData/FavCatImport` folder.
-
 #### Sharing search database with friends
 You can exchange the search database with friends to be able to find things they have seen. **Only accept databases from friends you trust - an intentionally malformed database can overwrite parts of yours with garbage**  
 How to send database to a friend:
@@ -91,6 +94,64 @@ How to receive database from a friend:
 5. Import process can take some time. Once it is done, the corresponding database will be deleted from `UserData/FavCatImport` folder.
 
 Note that your favorites are stored in `favcat-favs.db` - don't send it to your friends, favorite import is not supported. Most certainly don't send `favcat-images.db` to your friends - it's just a boring image cache.
+
+#### Avatar favorites deprecation
+Due to recent events surrounding modding (modder ban-unban wave, VRC Team/modders discussion, API changes), I've decided to remove extra avatar favorites from FavCat.  
+One of the biggest concerns raised during the still-ongoing discussion between modders and VRChat Team is mods stepping on VRC+ features. VRChat relies on VRC+ supporters to pay for servers and ensure that VRChat continues existing.  
+As such, I wanted to proactively address that concern. One of my main goals with modding VRChat is making the game better for everyone, and negatively affecting the platform itself goes against that.    
+I believe this step to be necessary to ensure that VRChat team sees (wholesome) modding not as a threat, but as an opportunity.  
+On top of that, recent API changes indicate that VRChat Team is taking action to restrict access to avatars. It might be an attempt at ripping prevention, or it might be aimed at privacy enhancement, or it might be aimed at extended avatar favorites. There's no way to tell for sure, and there's no knowing how far those changes would go in the future. 
+Local favorite mods have to rely on the API to some degree, and with things changing quickly, there's no reliable way to ensure that things will stay working and stay safe ban-wise in the long run.  
+
+In more practical terms, this means the following:
+ * Starting with this update, you will not be able to add new avatar favorites, create new avatar favorite lists, or import avatar favorite lists  
+ * Starting on 2021-05-31, you will not be able to access your existing avatar favorite lists in-game
+ * Starting on 2021-05-31, avatar search will only provide avatar names and icons in the menu. Clicking an avatar in search results will bring up user page for its author.
+ * World and user favorites will stay accessible for the time being.  
+   VRChat Team did mention during the recent dev stream that they are going to provide additional player and world favorites for everyone at some later point.
+ * You can export all your favorites into plain text files from "More FavCat..." menu in the respective menu page. Exported lists are put in `UserData/FavCatExport` folder.
+   Export will be always available and is not subject to time limits mentioned above.  
+   This has limited usability, but you probably can put them on pedestals in your own world or find an udon world that has change-pedestal-to-id function (unless that gets restricted eventually).   
+   This is still somewhat iffy, but it's unwieldy/uncomfortable enough compared to in-menu favorite lists that I wouldn't consider that as a viable replacement for VRC+ extra favorites.
+
+##### FAQ:
+**Q1**: But what about *another mod X* that still offers unlimited avatar favorites for everyone?  
+**A1**: Good question! If that is a VRCMG mod, it'll likely follow suit.   
+If it's not a VRCMG mod, if I were you, I'd be *extremely* wary of that. Those mods are unverified in VRCMG, and usually for a good reason.  
+There have been numerous cases of unverified mods being harmful towards their own users. After all, if one makes a mod to harm other users and/or VRChat itself, who says that they wouldn't want to harm its own users eventually for some petty reason?  
+Additionally, consider this: recently there was a relatively big ban wave against users of a certain malicious/unverified mod. It's not too hard to imagine that another malicious/unverified mod will be next.
+
+**Q2**: Does that mean that mods are now okay if they don't touch VRC+?  
+**A2**: Nope! According to VRChat Team all mods are still against Terms of Service and therefore bannable, nothing has changed there.
+
+**Q3**: Why only remove avatar favorites, but not world and/or player favorites?  
+**A3**: Simply because extra world/player favorites are not a VRC+ feature.  
+If, for whatever reason, VRChat decides to remove extra avatar favorites from VRC+ (for example by giving 100 slots to everyone), modded extra favorites will likely come back.
+
+**Q4**: Why remove avatar favorites completely instead of restricting them to VRC+ users?  
+**A4**: A fully local mod can't be reliably restricted.
+Significant codebase drift, however, is at least mildly annoying to deal with, which reduces probability of questionable forks continuing to provide the same functionality. 
+
+**Q5**: Someone is/will be distributing a modified version of this mod with this dumb restriction removed.  
+**A5**: See question one. Also, that's not my problem anymore. Also, if it's **you** who happens to provide that version, make sure your version is easily distinguishable from the mainline one, for example by adding a suffix to the name or version number.
+
+**Q6**: People who don't want to pay for VRC+ won't pay for it anyway, why even bother? / **Answer 2,** therefore why even bother?  
+**A6**: It's not only about VRC+, but also about sending a message. There's much to be gained from cooperating with VRChat Team. Monetization/cash flow is an important concern for any company. Being pointlessly contrarian here doesn't help anyone. 
+
+**Q7**: This is a blatant VRC+ cash grab!  
+**A7**: If you choose to look at it that way. VRChat needs to get money from somewhere to pay (likely huge) server costs, and eventually repay investors on top of that. Blatantly and purposefully denying them that is simply an asshole thing to do. Also see question 9.    
+
+**Q8**: Today they come for our extra favorites, tomorrow they'll come for *modded feature Y*!  
+**A8**: Perhaps. I can't affect VRChat Team's decisions to paywall certain features.  
+However, based on the dev stream, it seems unlikely that we'll see much paywalling - there was no mention of "VRC+ only" in respect to any of the new features, except for the few features *specifically for* other VRC+ features.  
+
+**Q9**: You're a sellout/shill! / MelonLoader devs are sellouts! / *Other personal attack or insult*! / *Other rumor without any proof*!  
+**A9**: I get it, you're 14 and angry. And I have better things to do than needlessly fighting VRChat Team about the direction they want to take their game in and getting a bunch of people banned along the way.
+ 
+**Closing word**:  
+With the introduction of VRC+, users and their feedback became much more important, simply because VRChat depends more than ever on user support to continue existing and developing.  
+You now have the option of voting with your wallet (purchasing/cancelling VRC+ depending on your opinion of the direction VRChat is going in), in addition to talking to your friends about it, providing feedback to VRChat via discord or Canny, and exploring competing social VR platforms.  
+Capitalism at its best and all that.
 
 #### Used libraries:
 * [LiteDB](https://github.com/mbdavid/LiteDB) for all data storage
@@ -212,15 +273,12 @@ Do note that the coordinates displayed in that menu are local offset of the view
 There's a copy of [ILRepack.Lib.MSBuild.Task](https://github.com/ravibpatel/ILRepack.Lib.MSBuild.Task) and [ILRepack](https://github.com/gluck/il-repack) built for netcore/MSBuild 16 shipped with the repo.
 
 ## Installation
-Before install:  
-**Tupper (from VRChat Team) said that any modification of the game can lead to a ban, as with these mods**
-
 To install these mods, you will need to install [MelonLoader](https://discord.gg/2Wn3N2P) (discord link, see \#how-to-install).  
 Then, you will have to put mod .dll files in the `Mods` folder of your game directory
 
 ## Building
 To build these, drop required libraries (found in `<vrchat instanll dir>/MelonLoader/Managed` after melonloader installation, list found in `Directory.Build.props`) into Libs folder, then use your IDE of choice to build.
- * Libs folder is intended for newest libraries (MelonLoader 0.2.2)
+ * Libs folder is intended for newest libraries (MelonLoader 0.3.0)
 
 ## License
 With the following exceptions, all mods here are provided under the terms of [GNU GPLv3 license](LICENSE)

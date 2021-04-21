@@ -18,7 +18,7 @@ namespace FavCat.Modules
     {
         private readonly PageWorldInfo myPageWorldInfo;
         
-        public WorldsModule() : base(ExpandedMenu.WorldMenu, FavCatMod.Database.WorldFavorites, GetListsParent())
+        public WorldsModule() : base(ExpandedMenu.WorldMenu, FavCatMod.Database.WorldFavorites, GetListsParent(), true, true)
         {
             ExpansionKitApi.GetExpandedMenu(ExpandedMenu.WorldDetailsMenu).AddSimpleButton("Local Favorite", ShowFavMenu);
 

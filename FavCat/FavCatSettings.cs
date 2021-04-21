@@ -13,6 +13,7 @@ namespace FavCat
         private const string ImageCacheMaxSize = "ImageCacheMaxSize";
         private const string HidePopupAfterFav = "HidePopupAfterFav";
         private const string UseSharedMode = "UseSharedMode";
+        private const string LastAnnoyingMessageSeen = "AnnoyingMessageSeen";
         private const string MakeClickSounds = "MakeClickSounds";
         private const string EnableAvatarFavs = "EnableAvatarFavs";
         private const string EnableWorldFavs = "EnableWorldFavs";
@@ -38,6 +39,8 @@ namespace FavCat
             // shared mode can't be multi-threaded, so hide this until other parts of code are ready for ST patterns
             MelonPrefs.RegisterBool(FavCatCategory, UseSharedMode, false, "Support multiple VRC instances (slower, restart required)", true);
             
+            MelonPrefs.RegisterString(FavCatCategory, LastAnnoyingMessageSeen, "", hideFromList: true);
+            
             ExpansionKitApi.RegisterSettingAsStringEnum(FavCatCategory, ImageCachingMode, new []{("full", "Full local image cache (fastest, safest)"), ("fast", "Fast, use more RAM"), ("builtin", "Preserve RAM, more API requests")});
         }
 
@@ -61,5 +64,14 @@ namespace FavCat
 
         public static bool DoClickSounds => MelonPrefs.GetBool(FavCatCategory, MakeClickSounds);
 
+        public static string DontShowAnnoyingMessage
+        {
+            get => MelonPrefs.GetString(FavCatCategory, LastAnnoyingMessageSeen);
+            set
+            {
+                MelonPrefs.SetString(FavCatCategory, LastAnnoyingMessageSeen, value);
+                MelonPrefs.SaveConfig();
+            }
+        }
     }
 }

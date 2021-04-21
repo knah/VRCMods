@@ -48,25 +48,12 @@ namespace FavCat
                 }
             }
 
-            for (var i = 0; i < textFiles.Count; i++)
-            {
-                var textFile = textFiles[i];
-                try
-                {
-                    ImportStatusOuter = $"Importing file {i + 1}/{textFiles.Count}";
-                    await ProcessTextFile(textFile);
-                }
-                catch (Exception ex)
-                {
-                    MelonLogger.Log($"Import of {textFile} failed: {ex}");
-                }
-            }
-
             ImportRunning = false;
         }
         
         private static readonly Regex AvatarIdRegex = new Regex("avtr_[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}");
 
+        // might be re-used for worlds/players
         internal static async Task ProcessTextFile(string filePath)
         {
             var fileName = Path.GetFileName(filePath);

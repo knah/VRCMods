@@ -73,6 +73,8 @@ namespace FavCat.Database
             
                 if (preExisting != null)
                 {
+                    if (preExisting.UpdatedAt > storedAvatar.UpdatedAt) return;
+                    
                     if (avatar.assetUrl == null) storedAvatar.SupportedPlatforms = preExisting.SupportedPlatforms;
                 
                     storedAvatar.Description ??= preExisting.Description;

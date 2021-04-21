@@ -8,7 +8,7 @@ namespace FavCat.Database
 {
     public class DatabaseFavoriteHandler<T> where T: class
     {
-        private readonly DatabaseEntity myEntityType;
+        public readonly DatabaseEntity EntityType;
         internal readonly ILiteCollection<StoredFavorite> myStoredFavorites;
         private readonly ILiteCollection<StoredCategory> myStoredCategories;
         private readonly ILiteCollection<T> myObjectStore;
@@ -19,7 +19,7 @@ namespace FavCat.Database
         public DatabaseFavoriteHandler(LiteDatabase database, DatabaseEntity entityType, ILiteCollection<T> objectStore,
             ILiteCollection<StoredCategoryOrder> storedOrders)
         {
-            myEntityType = entityType;
+            this.EntityType = entityType;
             myObjectStore = objectStore;
             myStoredOrders = storedOrders;
 
@@ -35,12 +35,12 @@ namespace FavCat.Database
 
         public StoredCategoryOrder GetStoredOrder()
         {
-            return myStoredOrders.FindById(myEntityType.ToString()) ?? new StoredCategoryOrder {EntityType = myEntityType};
+            return myStoredOrders.FindById(EntityType.ToString()) ?? new StoredCategoryOrder {EntityType = EntityType};
         }
 
         public void SetStoredOrder(List<CategoryInfo> order, List<string> defaultListsToHide)
         {
-            myStoredOrders.Upsert(new StoredCategoryOrder {EntityType = myEntityType, Order = order, DefaultListsToHide = defaultListsToHide});
+            myStoredOrders.Upsert(new StoredCategoryOrder {EntityType = EntityType, Order = order, DefaultListsToHide = defaultListsToHide});
         }
 
         public void AddFavorite(string objectId, string category)
