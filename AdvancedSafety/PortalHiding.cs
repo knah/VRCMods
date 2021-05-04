@@ -98,9 +98,12 @@ namespace AdvancedSafety
             if (APIUser.CurrentUser?.id == userId)
                 return false;
             
-            foreach (var playerModeration in moderationManager.field_Private_List_1_ApiPlayerModeration_0)
+            var moderationsDict = ModerationManager.prop_ModerationManager_0.field_Private_Dictionary_2_String_List_1_ApiPlayerModeration_0;
+            if (!moderationsDict.ContainsKey(userId)) return false;
+            
+            foreach (var playerModeration in moderationsDict[userId])
             {
-                if (playerModeration != null && playerModeration.moderationType == ApiPlayerModeration.ModerationType.Block && playerModeration.targetUserId == userId)
+                if (playerModeration != null && playerModeration.moderationType == ApiPlayerModeration.ModerationType.Block)
                     return true;
             }
             

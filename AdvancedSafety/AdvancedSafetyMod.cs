@@ -21,7 +21,7 @@ using Object = UnityEngine.Object;
 using ModerationManager = VRC.Management.ModerationManager;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.4.2", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.4.3", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
 namespace AdvancedSafety
@@ -361,9 +361,12 @@ namespace AdvancedSafety
 
         internal static bool IsAvatarExplicitlyShown(string userId)
         {
-            foreach (var playerModeration in ModerationManager.prop_ModerationManager_0.field_Private_List_1_ApiPlayerModeration_0)
+            var moderationsDict = ModerationManager.prop_ModerationManager_0.field_Private_Dictionary_2_String_List_1_ApiPlayerModeration_0;
+            if (!moderationsDict.ContainsKey(userId)) return false;
+            
+            foreach (var playerModeration in moderationsDict[userId])
             {
-                if (playerModeration.moderationType == ApiPlayerModeration.ModerationType.ShowAvatar && playerModeration.targetUserId == userId)
+                if (playerModeration.moderationType == ApiPlayerModeration.ModerationType.ShowAvatar)
                     return true;
             }
             
