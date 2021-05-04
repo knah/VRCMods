@@ -387,6 +387,8 @@ namespace IKTweaks
 
         private static bool LateUpdatePrefix(FullBodyBipedIK __instance)
         {
+            IKTweaksMod.ProcessIKLateUpdateQueue();
+
             if (IkTweaksSettings.FullBodyVrIk && LastCalibrationWasInCustomIk &&
                 LastInitializedController.field_Private_FullBodyBipedIK_0 == __instance)
             {

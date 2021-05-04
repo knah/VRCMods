@@ -332,31 +332,40 @@ namespace IKTweaks
             var head = animator.GetBoneTransform(HumanBodyBones.Head);
             var avatarId = avatarRoot.GetComponent<PipelineManager>().blueprintId;
             var avatarRootTransform = avatarRoot.transform;
+            var nativeMuscles = (Il2CppStructArray<float>) TPoseMuscles;
+            var dummyMuscles = new Il2CppStructArray<float>(nativeMuscles.Count);
+            var poseHandler = new HumanPoseHandler(animator.avatar, animator.transform);
 
-            for (var i = 0; i < 30; i++)
-                await IKTweaksMod.AwaitVeryLateUpdate();
+            var forwardDirection = avatarRootTransform.parent;
+            var hipsRelativeToForwardDirection = Quaternion.Inverse(forwardDirection.rotation) * hips.rotation;
+            
+            MelonDebug.Msg($"Calibrating for avatar ID {avatarId}");
+            
+            var oldHipPos = hips.position;
+            var oldHipRot = hips.rotation;
+            
+            await IKTweaksMod.AwaitVeryLateUpdate();
 
-            if (!avatarRoot) 
+            if (!avatarRoot)
+            {
+                MelonDebug.Msg("Avatar root was destroyed, cancelling calibration");
                 return;
-
-            var playerApi = FullBodyHandling.LastInitializedController.field_Private_VRCPlayer_0.prop_VRCPlayerApi_0;
-            playerApi.PushAnimations(BundleHolder.TPoseController);
+            }
 
             var headTarget = FullBodyHandling.LastInitializedController.field_Private_FBBIKHeadEffector_0.transform;
             var headsetTracker = headTarget.parent;
             
             SetTrackerVisibility(true);
 
-            var oldHipPos = hips.position;
-            var oldHipRot = hips.rotation;
-
             var preClickHeadPos = Vector3.zero;
             var preClickHeadRot = Quaternion.identity;
 
-            var mirrorCloneRoot = avatarRootTransform.parent.Find("_AvatarMirrorClone");
+            var mirrorCloneRoot = forwardDirection.Find("_AvatarMirrorClone");
+            HumanPoseHandler mirrorClonePoseHandler = null;
             Transform mirrorHips = null;
             if (mirrorCloneRoot != null)
             {
+                mirrorClonePoseHandler = new HumanPoseHandler(animator.avatar, mirrorCloneRoot);
                 var mirrorCloneAnimator = mirrorCloneRoot.GetComponent<Animator>();
                 if (mirrorCloneAnimator != null) mirrorHips = mirrorCloneAnimator.GetBoneTransform(HumanBodyBones.Hips);
             }
@@ -365,8 +374,12 @@ namespace IKTweaks
 
             while (true)
             {
-                await IKTweaksMod.AwaitVeryLateUpdate();
+                await IKTweaksMod.AwaitIKLateUpdate();
                 if (avatarRoot == null) break;
+                
+                poseHandler.GetHumanPose(out var humanBodyPose, out var humanBodyRot, dummyMuscles);
+                poseHandler.SetHumanPose(ref humanBodyPose, ref humanBodyRot, nativeMuscles);
+                mirrorClonePoseHandler?.SetHumanPose(ref humanBodyPose, ref humanBodyRot, nativeMuscles);
 
                 var trigger1 = Input.GetAxisRaw("Oculus_CrossPlatform_PrimaryIndexTrigger");
                 var trigger2 = Input.GetAxisRaw("Oculus_CrossPlatform_SecondaryIndexTrigger");
@@ -390,6 +403,8 @@ namespace IKTweaks
                 }
                 else if(IkTweaksSettings.CalibrateFollowHead || willUniversallyCalibrate)
                 {
+                    hips.rotation = forwardDirection.rotation * hipsRelativeToForwardDirection;
+                    
                     var delta = headTarget.position - head.position;
                     hips.position += delta;
                     if (mirrorHips != null) mirrorHips.position = hips.position;
@@ -574,8 +589,6 @@ namespace IKTweaks
                     GetLocalPosition(trackerParent, preClickHeadPos),
                     GetLocalRotation(trackerParent, preClickHeadRot), "HEAD");
             }
-
-            playerApi.PopAnimations();
         }
     }
 }

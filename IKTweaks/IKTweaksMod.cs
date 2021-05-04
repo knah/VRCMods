@@ -15,7 +15,7 @@ using Valve.VR;
 using Delegate = Il2CppSystem.Delegate;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.9", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.10", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -24,6 +24,7 @@ namespace IKTweaks
     public class IKTweaksMod : MelonMod
     {
         private static readonly Queue<Action> ourToMainThreadQueue = new Queue<Action>();
+        private static readonly Queue<Action> ourToIKLateUpdateQueue = new Queue<Action>();
         
         internal static GameObject ourRandomPuck;
 
@@ -133,9 +134,19 @@ namespace IKTweaks
             
             ourHadUpdateThisFrame = true;
 
-            var toRun = ourToMainThreadQueue.ToList();
-            ourToMainThreadQueue.Clear();
-            
+            ProcessQueue(ourToMainThreadQueue);
+        }
+
+        internal static void ProcessIKLateUpdateQueue()
+        {
+            ProcessQueue(ourToIKLateUpdateQueue);
+        }
+
+        private static void ProcessQueue(Queue<Action> queue)
+        {
+            var toRun = queue.ToList();
+            queue.Clear();
+
             foreach (var action in toRun)
             {
                 try
@@ -149,13 +160,18 @@ namespace IKTweaks
             }
         }
 
-        public static YieldVeryLateUpdateAwaitable AwaitVeryLateUpdate()
-        {
-            return new YieldVeryLateUpdateAwaitable();
-        }
+        public static YieldVeryLateUpdateAwaitable AwaitVeryLateUpdate() => new(ourToMainThreadQueue);
+        public static YieldVeryLateUpdateAwaitable AwaitIKLateUpdate() => new(ourToIKLateUpdateQueue);
 
         public struct YieldVeryLateUpdateAwaitable : INotifyCompletion
         {
+            private readonly Queue<Action> myQueue;
+
+            public YieldVeryLateUpdateAwaitable(Queue<Action> queue)
+            {
+                myQueue = queue;
+            }
+
             public bool IsCompleted => false;
 
             public YieldVeryLateUpdateAwaitable GetAwaiter() => this;
@@ -164,7 +180,7 @@ namespace IKTweaks
 
             public void OnCompleted(Action continuation)
             {
-                ourToMainThreadQueue.Enqueue(continuation);
+                myQueue.Enqueue(continuation);
             }
         }
 
