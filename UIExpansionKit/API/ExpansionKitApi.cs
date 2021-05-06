@@ -14,6 +14,18 @@ namespace UIExpansionKit.API
         internal static readonly List<IEnumerator> ExtraWaitCoroutines = new List<IEnumerator>();
 
         internal static readonly Dictionary<(string, string), IList<(string SettingsValue, string DisplayName)>> EnumSettings = new Dictionary<(string, string), IList<(string SettingsValue, string DisplayName)>>();
+
+        public static void SortButtonsByText(this ICustomLayoutedMenu customLayoutedMenu)
+        {
+            try
+            {
+                (customLayoutedMenu as CustomLayoutedPageImpl)?.SortButtonsByText();
+            }
+            catch (Exception e)
+            {
+                MelonLogger.Error("Failed to Sort Buttons By Text:\n", e);
+            }
+        }
         
         /// <summary>
         /// Register a simple button for given menu
