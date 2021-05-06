@@ -15,7 +15,7 @@ namespace UIExpansionKit.API
 
         internal static readonly Dictionary<(string, string), IList<(string SettingsValue, string DisplayName)>> EnumSettings = new Dictionary<(string, string), IList<(string SettingsValue, string DisplayName)>>();
 
-        public static void SortButtonsByText(this ICustomLayoutedMenu customLayoutedMenu)
+        public static void SortButtonsByText(this ICustomShowableLayoutedMenu customLayoutedMenu)
         {
             try
             {
