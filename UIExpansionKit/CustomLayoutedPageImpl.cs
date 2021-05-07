@@ -21,6 +21,47 @@ namespace UIExpansionKit
             LayoutDescription = layoutDescription;
         }
 
+        internal void SortButtonByTextRespectingLabels()
+        {
+            if (RegisteredButtons.Count <= 1) return;
+            List<(int start, int count)> labels = new();
+
+            (int start, int count) currentLabel = new(0, 0);
+            for (int i = 0; i < RegisteredButtons.Count; i++)
+            {
+                var currentButton = RegisteredButtons[i];
+                // this way both labels and spacers should be included
+                if (currentButton.Action is null && currentButton.ToggleAction is null)
+                {
+                    labels.Add(currentLabel);
+                    currentLabel.start = i;
+                    currentLabel.count = 0;
+                    continue;
+                }
+
+                currentLabel.count++;
+            }
+            labels.Add(currentLabel);
+
+            ButtonComparer bc = new();
+            foreach ((int start, int count) in labels)
+            {
+                RegisteredButtons.Sort(Mathf.Min(start + 1, RegisteredButtons.Count-1), count, bc);
+            }
+        }
+
+        private class ButtonComparer : IComparer<ExpansionKitApi.ButtonRegistration>
+        {
+            public int Compare(ExpansionKitApi.ButtonRegistration x, ExpansionKitApi.ButtonRegistration y)
+            {
+                if (ReferenceEquals(x, y)) return 0;
+                if (ReferenceEquals(null, y)) return 1;
+                if (ReferenceEquals(null, x)) return -1;
+                return string.Compare(x.Text, y.Text, StringComparison.OrdinalIgnoreCase);
+            }
+
+        }
+
         internal void SortButtonsByText()
         {
             RegisteredButtons.Sort((button1, button2) => string.CompareOrdinal(button1.Text, button2.Text));

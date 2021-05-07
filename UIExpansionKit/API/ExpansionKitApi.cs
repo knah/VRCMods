@@ -15,15 +15,17 @@ namespace UIExpansionKit.API
 
         internal static readonly Dictionary<(string, string), IList<(string SettingsValue, string DisplayName)>> EnumSettings = new Dictionary<(string, string), IList<(string SettingsValue, string DisplayName)>>();
 
-        public static void SortButtonsByText(this ICustomShowableLayoutedMenu customLayoutedMenu)
+        public static void SortButtonsByText(this ICustomShowableLayoutedMenu layoutedMenu, bool hasLabelsSpacers)
         {
             try
             {
-                (customLayoutedMenu as CustomLayoutedPageImpl)?.SortButtonsByText();
+                if(hasLabelsSpacers) (layoutedMenu as CustomLayoutedPageImpl)?.SortButtonByTextRespectingLabels();
+                else (layoutedMenu as CustomLayoutedPageImpl)?.SortButtonsByText();
+                    
             }
             catch (Exception e)
             {
-                MelonLogger.Error("Failed to Sort Buttons By Text:\n", e);
+                MelonLogger.Error("Failed to Sort Buttons:\n", e);
             }
         }
         
@@ -103,6 +105,7 @@ namespace UIExpansionKit.API
             
             public Action<bool> ToggleAction;
             public Func<bool> InitialState;
+
         }
 
         /// <summary>
