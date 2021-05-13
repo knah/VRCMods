@@ -6,8 +6,9 @@ using Finitizer;
 using MelonLoader;
 using UnhollowerBaseLib;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(FinitizerMod), "Finitizer", "1.1.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(FinitizerMod), "Finitizer", "1.2.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace Finitizer
@@ -22,23 +23,27 @@ namespace Finitizer
         
         public override void OnApplicationStart()
         {
-            MelonPrefs.RegisterCategory(SettingsCategory, SettingsCategory);
-            MelonPrefs.RegisterBool(SettingsCategory, EnabledSetting, true, "FP fix enabled");
-            
-            OnModSettingsApplied();
+            var category = MelonPreferences.CreateCategory(SettingsCategory, SettingsCategory);
+            var entry = (MelonPreferences_Entry<bool>) category.CreateEntry(EnabledSetting, true, "FP fix enabled");
+            entry.OnValueChanged += (old, value) =>
+            {
+                OnModSettingsApplied(value);
+            };
+
+            OnModSettingsApplied(entry.Value);
         }
         
 
-        public override void OnModSettingsApplied()
+        private void OnModSettingsApplied(bool isEnabled)
         {
-            var isEnabled = MelonPrefs.GetBool(SettingsCategory, EnabledSetting);
-
             if (isEnabled == myWasEnabled) return;
             
             if (isEnabled)
                 ApplyPatches();
             else
                 UnpatchAll();
+            
+            MelonLogger.Msg($"Finitizer is now {(isEnabled ? "enabled" : "disabled")}");
 
             myWasEnabled = isEnabled;
         }
@@ -57,9 +62,12 @@ namespace Finitizer
             PatchICall("UnityEngine.Rigidbody::" + nameof(Rigidbody.MoveRotation_Injected), out ourOriginalRigidbodyRotMove, nameof(SetRigidbodyRotMovePatch));
             PatchICall("UnityEngine.Rigidbody::" + nameof(Rigidbody.set_velocity_Injected), out ourOriginalRigidbodyVelSetter, nameof(SetRigidbodyVelPatch));
             PatchICall("UnityEngine.Rigidbody::" + nameof(Rigidbody.set_angularVelocity_Injected), out ourOriginalRigidbodyAvSetter, nameof(SetRigidbodyAvPatch));
+            
+            PatchICall("UnityEngine.Object::" + nameof(Object.Internal_InstantiateSingle_Injected), out ourOriginalInstantiateSimple, nameof(InstantiateSimplePatch));
+            PatchICall("UnityEngine.Object::" + nameof(Object.Internal_InstantiateSingleWithParent_Injected), out ourOriginalInstantiateWithParent, nameof(InstantiateWithParentPatch));
 
             myArePatchesApplied = true;
-            MelonLogger.Log("Things patching complete");
+            MelonLogger.Msg("Things patching complete");
         }
         
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -70,6 +78,12 @@ namespace Finitizer
         
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private unsafe delegate void VectorQuaternionSetter(IntPtr instance, Vector3* vector, Quaternion* quat);
+        
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private unsafe delegate IntPtr InstantiatorSimple(IntPtr target, Vector3* vector, Quaternion* quat);
+        
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private unsafe delegate IntPtr InstantiatorWithParent(IntPtr target, IntPtr parent, Vector3* vector, Quaternion* quat);
 
         private static VectorSetter ourOriginalTransformSetter;
         private static QuaternionSetter ourOriginalTransformRotSetter;
@@ -80,6 +94,8 @@ namespace Finitizer
         private static QuaternionSetter ourOriginalRigidbodyRotMove;
         private static VectorSetter ourOriginalRigidbodyAvSetter;
         private static VectorSetter ourOriginalRigidbodyVelSetter;
+        private static InstantiatorSimple ourOriginalInstantiateSimple;
+        private static InstantiatorWithParent ourOriginalInstantiateWithParent;
 
         private static readonly Dictionary<string, (IntPtr, IntPtr)> ourOriginalPointers = new Dictionary<string, (IntPtr, IntPtr)>();
 
@@ -132,10 +148,16 @@ namespace Finitizer
         
         private static unsafe void SetTransformQuaternionPatch(IntPtr instance, Quaternion* quat)
         {
-            if ((*(int*) &quat->x & int.MaxValue) >= 2139095040) quat->x = 0f;
-            if ((*(int*) &quat->y & int.MaxValue) >= 2139095040) quat->y = 0f;
-            if ((*(int*) &quat->z & int.MaxValue) >= 2139095040) quat->z = 0f;
-            if ((*(int*) &quat->w & int.MaxValue) >= 2139095040) quat->w = 1f;
+            if ((*(int*) &quat->x & int.MaxValue) >= 2139095040 ||
+                (*(int*) &quat->y & int.MaxValue) >= 2139095040 ||
+                (*(int*) &quat->z & int.MaxValue) >= 2139095040 ||
+                (*(int*) &quat->w & int.MaxValue) >= 2139095040)
+            {
+                quat->x = 0f;
+                quat->y = 0f;
+                quat->z = 0f;
+                quat->w = 1f;
+            }
 
             ourOriginalTransformRotSetter(instance, quat);
         }
@@ -146,10 +168,16 @@ namespace Finitizer
             if ((*(int*) &vector->y & int.MaxValue) >= 2139095040) vector->y = 0f;
             if ((*(int*) &vector->z & int.MaxValue) >= 2139095040) vector->z = 0f;
             
-            if ((*(int*) &quat->x & int.MaxValue) >= 2139095040) quat->x = 0f;
-            if ((*(int*) &quat->y & int.MaxValue) >= 2139095040) quat->y = 0f;
-            if ((*(int*) &quat->z & int.MaxValue) >= 2139095040) quat->z = 0f;
-            if ((*(int*) &quat->w & int.MaxValue) >= 2139095040) quat->w = 1f;
+            if ((*(int*) &quat->x & int.MaxValue) >= 2139095040 ||
+                (*(int*) &quat->y & int.MaxValue) >= 2139095040 ||
+                (*(int*) &quat->z & int.MaxValue) >= 2139095040 ||
+                (*(int*) &quat->w & int.MaxValue) >= 2139095040)
+            {
+                quat->x = 0f;
+                quat->y = 0f;
+                quat->z = 0f;
+                quat->w = 1f;
+            }
 
             ourOriginalTransformTwinSetter(instance, vector, quat);
         }
@@ -165,10 +193,16 @@ namespace Finitizer
         
         private static unsafe void SetRigidbodyRotPatch(IntPtr instance, Quaternion* quat)
         {
-            if ((*(int*) &quat->x & int.MaxValue) >= 2139095040) quat->x = 0f;
-            if ((*(int*) &quat->y & int.MaxValue) >= 2139095040) quat->y = 0f;
-            if ((*(int*) &quat->z & int.MaxValue) >= 2139095040) quat->z = 0f;
-            if ((*(int*) &quat->w & int.MaxValue) >= 2139095040) quat->w = 1f;
+            if ((*(int*) &quat->x & int.MaxValue) >= 2139095040 ||
+                (*(int*) &quat->y & int.MaxValue) >= 2139095040 ||
+                (*(int*) &quat->z & int.MaxValue) >= 2139095040 ||
+                (*(int*) &quat->w & int.MaxValue) >= 2139095040)
+            {
+                quat->x = 0f;
+                quat->y = 0f;
+                quat->z = 0f;
+                quat->w = 1f;
+            }
 
             ourOriginalRigidbodyRotSetter(instance, quat);
         }
@@ -184,10 +218,16 @@ namespace Finitizer
         
         private static unsafe void SetRigidbodyRotMovePatch(IntPtr instance, Quaternion* quat)
         {
-            if ((*(int*) &quat->x & int.MaxValue) >= 2139095040) quat->x = 0f;
-            if ((*(int*) &quat->y & int.MaxValue) >= 2139095040) quat->y = 0f;
-            if ((*(int*) &quat->z & int.MaxValue) >= 2139095040) quat->z = 0f;
-            if ((*(int*) &quat->w & int.MaxValue) >= 2139095040) quat->w = 1f;
+            if ((*(int*) &quat->x & int.MaxValue) >= 2139095040 ||
+                (*(int*) &quat->y & int.MaxValue) >= 2139095040 ||
+                (*(int*) &quat->z & int.MaxValue) >= 2139095040 ||
+                (*(int*) &quat->w & int.MaxValue) >= 2139095040)
+            {
+                quat->x = 0f;
+                quat->y = 0f;
+                quat->z = 0f;
+                quat->w = 1f;
+            }
 
             ourOriginalRigidbodyRotMove(instance, quat);
         }
@@ -208,6 +248,46 @@ namespace Finitizer
             if ((*(int*) &vector->z & int.MaxValue) >= 2139095040) vector->z = 0f;
 
             ourOriginalRigidbodyVelSetter(instance, vector);
+        }
+        
+        private static unsafe IntPtr InstantiateSimplePatch(IntPtr target, Vector3* vector, Quaternion* quat)
+        {
+            if ((*(int*) &vector->x & int.MaxValue) >= 2139095040) vector->x = 0f;
+            if ((*(int*) &vector->y & int.MaxValue) >= 2139095040) vector->y = 0f;
+            if ((*(int*) &vector->z & int.MaxValue) >= 2139095040) vector->z = 0f;
+            
+            if ((*(int*) &quat->x & int.MaxValue) >= 2139095040 ||
+                (*(int*) &quat->y & int.MaxValue) >= 2139095040 ||
+                (*(int*) &quat->z & int.MaxValue) >= 2139095040 ||
+                (*(int*) &quat->w & int.MaxValue) >= 2139095040)
+            {
+                quat->x = 0f;
+                quat->y = 0f;
+                quat->z = 0f;
+                quat->w = 1f;
+            }
+
+            return ourOriginalInstantiateSimple(target, vector, quat);
+        }
+        
+        private static unsafe IntPtr InstantiateWithParentPatch(IntPtr target, IntPtr parent, Vector3* vector, Quaternion* quat)
+        {
+            if ((*(int*) &vector->x & int.MaxValue) >= 2139095040) vector->x = 0f;
+            if ((*(int*) &vector->y & int.MaxValue) >= 2139095040) vector->y = 0f;
+            if ((*(int*) &vector->z & int.MaxValue) >= 2139095040) vector->z = 0f;
+            
+            if ((*(int*) &quat->x & int.MaxValue) >= 2139095040 ||
+                (*(int*) &quat->y & int.MaxValue) >= 2139095040 ||
+                (*(int*) &quat->z & int.MaxValue) >= 2139095040 ||
+                (*(int*) &quat->w & int.MaxValue) >= 2139095040)
+            {
+                quat->x = 0f;
+                quat->y = 0f;
+                quat->z = 0f;
+                quat->w = 1f;
+            }
+
+            return ourOriginalInstantiateWithParent(target, parent, vector, quat);
         }
     }
 }
