@@ -43,7 +43,8 @@ namespace AdvancedSafety
             MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxMeshParticleVertices), 1_000_000, "Max total mesh particle polygons");
             MelonPrefs.RegisterBool(SettingsCategory, nameof(AllowUiLayer), false, "Allow UI layer on avatars");
             
-            MelonPrefs.RegisterBool(SettingsCategory, nameof(AllowCustomMixers), false, "Allow custom audio mixers");
+            MelonPrefs.RegisterBool(SettingsCategory, nameof(AllowCustomMixers), false, "Allow custom audio mixers on avatars");
+            MelonPrefs.RegisterBool(SettingsCategory, nameof(AllowReadingMixers), false, "Allow audio mixers in assetbundles");
             MelonPrefs.RegisterInt(SettingsCategory, nameof(MaxMaterialSlotsOverSubmeshCount), 2, "Maximum material slots over submesh count");
             
             MelonPrefs.RegisterBool(SettingsCategory, nameof(HidePortalsFromBlockedUsers), true, "Hide portals from blocked users");
@@ -67,6 +68,7 @@ namespace AdvancedSafety
         
         public static bool AllowUiLayer;
         public static bool AllowCustomMixers;
+        public static bool AllowReadingMixers;
 
         public static int MaxPolygons;
         public static int MaxTransforms;

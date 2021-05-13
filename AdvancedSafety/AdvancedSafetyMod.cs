@@ -6,12 +6,14 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using AdvancedSafety;
+using Harmony;
 using MelonLoader;
 using UIExpansionKit;
 using UnhollowerBaseLib;
 using UnhollowerBaseLib.Runtime;
 using UnityEngine;
 using UnityEngine.Animations;
+using UnityEngine.SceneManagement;
 using VRC.Core;
 using AMEnumA = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObAcOb1GaApAcBoStUnique;
 using AMEnumB = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObAcOb1GaApAcObObUnique;
@@ -21,7 +23,7 @@ using Object = UnityEngine.Object;
 using ModerationManager = VRC.Management.ModerationManager;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.4.3", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.5.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
 namespace AdvancedSafety
@@ -29,7 +31,8 @@ namespace AdvancedSafety
     public class AdvancedSafetyMod : MelonMod
     {
         private static List<object> ourPinnedDelegates = new List<object>();
-        
+        private static bool ourCanReadAudioMixers = true;
+
         public override void OnApplicationStart()
         {
             AdvancedSafetySettings.RegisterSettings();
@@ -51,7 +54,7 @@ namespace AdvancedSafety
 
                     ourPinnedDelegates.Add(replacement);
 
-                    Imports.Hook((IntPtr) (&originalMethodPointer), Marshal.GetFunctionPointerForDelegate(replacement));
+                    MelonUtils.NativeHookAttach((IntPtr) (&originalMethodPointer), Marshal.GetFunctionPointerForDelegate(replacement));
 
                     originalInstantiateDelegate = Marshal.GetDelegateForFunctionPointer<ObjectInstantiateDelegate>(originalMethodPointer);
                 }
@@ -64,7 +67,7 @@ namespace AdvancedSafety
                         nameof(AMEnumA.MoveNext)))
                     .GetValue(null);
                 
-                Imports.Hook((IntPtr)(&originalMethodPointer), typeof(AdvancedSafetyMod).GetMethod(nameof(MoveNextPatchA), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
+                MelonUtils.NativeHookAttach((IntPtr)(&originalMethodPointer), typeof(AdvancedSafetyMod).GetMethod(nameof(MoveNextPatchA), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
 
                 ourMoveNextA = originalMethodPointer;
             }
@@ -76,7 +79,7 @@ namespace AdvancedSafety
                         nameof(AMEnumB.MoveNext)))
                     .GetValue(null);
                 
-                Imports.Hook((IntPtr)(&originalMethodPointer), typeof(AdvancedSafetyMod).GetMethod(nameof(MoveNextPatchB), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
+                MelonUtils.NativeHookAttach((IntPtr)(&originalMethodPointer), typeof(AdvancedSafetyMod).GetMethod(nameof(MoveNextPatchB), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
 
                 ourMoveNextB = originalMethodPointer;
             }
@@ -88,7 +91,7 @@ namespace AdvancedSafety
                         nameof(AMEnumC.MoveNext)))
                     .GetValue(null);
                 
-                Imports.Hook((IntPtr)(&originalMethodPointer), typeof(AdvancedSafetyMod).GetMethod(nameof(MoveNextPatchC), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
+                MelonUtils.NativeHookAttach((IntPtr)(&originalMethodPointer), typeof(AdvancedSafetyMod).GetMethod(nameof(MoveNextPatchC), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
 
                 ourMoveNextC = originalMethodPointer;
             }
@@ -106,8 +109,43 @@ namespace AdvancedSafety
                 ourInvokeMethodInfo = (IntPtr) methodInfoCopy;
             }
             
+            foreach (ProcessModule module in Process.GetCurrentProcess().Modules)
+            {
+                if (!module.FileName.Contains("UnityPlayer")) continue;
+
+                // AudioMixer::Transfer<SafeBinaryRead>, thanks to Ben for finding this
+                ourAudioMixerReadPointer = module.BaseAddress + 0x487610;
+                unsafe
+                {
+                    fixed (IntPtr* mixerReadAddress = &ourAudioMixerReadPointer)
+                        MelonUtils.NativeHookAttach((IntPtr) mixerReadAddress, AccessTools.Method(typeof(AdvancedSafetyMod), nameof(AudioMixerReadPatch)).MethodHandle.GetFunctionPointer());
+                    ourAudioMixerReadDelegate = Marshal.GetDelegateForFunctionPointer<AudioMixerReadDelegate>(ourAudioMixerReadPointer);
+                }
+                    
+                break;
+            }
+            
+            SceneManager.add_sceneLoaded(new Action<Scene, LoadSceneMode>((s, _) =>
+            {
+                if (s.buildIndex == -1)
+                {
+                    ourCanReadAudioMixers = false;
+                    MelonDebug.Msg("No reading audio mixers anymore");
+                }
+            }));
+            
+            SceneManager.add_sceneUnloaded(new Action<Scene>(s =>
+            {
+                if (s.buildIndex == -1)
+                {
+                    // allow loading mixers from world assetbundles 
+                    ourCanReadAudioMixers = true;
+                    MelonDebug.Msg("Can read audio mixers now");
+                }
+            }));
+            
             PortalHiding.OnApplicationStart();
-            AvatarHiding.OnApplicationStart(harmonyInstance);
+            AvatarHiding.OnApplicationStart(Harmony);
             
             if(MelonHandler.Mods.Any(it => it.Info.SystemType.Name == nameof(UiExpansionKitMod)))
             {
@@ -122,6 +160,12 @@ namespace AdvancedSafety
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr ObjectInstantiateDelegate(IntPtr assetPtr, Vector3 pos, Quaternion rot, byte allowCustomShaders, byte isUI, byte validate, IntPtr nativeMethodPointer);
+        
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate void AudioMixerReadDelegate(IntPtr thisPtr, IntPtr readerPtr);
+
+        private static AudioMixerReadDelegate ourAudioMixerReadDelegate;
+        private static IntPtr ourAudioMixerReadPointer;
 
         private static IntPtr ourMoveNextA;
         private static IntPtr ourMoveNextB;
@@ -273,13 +317,12 @@ namespace AdvancedSafety
             }
             catch (Il2CppException ex)
             {
-                if (Imports.IsDebugMode())
-                    MelonLogger.Log($"Caught top-level native exception: {ex}");
+                MelonDebug.Msg($"Caught top-level native exception: {ex}");
                 return false;
             }
             catch (Exception ex)
             {
-                MelonLogger.LogError($"Error when wrapping avatar creation: {ex}");
+                MelonLogger.Error($"Error when wrapping avatar creation: {ex}");
                 return false;
             }
         }
@@ -293,13 +336,12 @@ namespace AdvancedSafety
             }
             catch (Il2CppException ex)
             {
-                if (Imports.IsDebugMode())
-                    MelonLogger.Log($"Caught top-level native exception: {ex}");
+                MelonDebug.Msg($"Caught top-level native exception: {ex}");
                 return false;
             }
             catch (Exception ex)
             {
-                MelonLogger.LogError($"Error when wrapping avatar creation: {ex}");
+                MelonLogger.Error($"Error when wrapping avatar creation: {ex}");
                 return false;
             }
         }
@@ -313,13 +355,12 @@ namespace AdvancedSafety
             }
             catch (Il2CppException ex)
             {
-                if (Imports.IsDebugMode())
-                    MelonLogger.Log($"Caught top-level native exception: {ex}");
+                MelonDebug.Msg($"Caught top-level native exception: {ex}");
                 return false;
             }
             catch (Exception ex)
             {
-                MelonLogger.LogError($"Error when wrapping avatar creation: {ex}");
+                MelonLogger.Error($"Error when wrapping avatar creation: {ex}");
                 return false;
             }
         }
@@ -371,6 +412,19 @@ namespace AdvancedSafety
             }
             
             return false;
+        }
+
+        private static void AudioMixerReadPatch(IntPtr thisPtr, IntPtr readerPtr)
+        {
+            if (!ourCanReadAudioMixers && !AdvancedSafetySettings.AllowReadingMixers)
+            {
+                MelonDebug.Msg("Not reading audio mixer");
+                return;
+            }
+            
+            // just in case something ever races
+            ourAudioMixerReadDelegate ??= Marshal.GetDelegateForFunctionPointer<AudioMixerReadDelegate>(ourAudioMixerReadPointer);
+            ourAudioMixerReadDelegate(thisPtr, readerPtr);
         }
         
         private readonly struct AvatarManagerCookie : IDisposable
