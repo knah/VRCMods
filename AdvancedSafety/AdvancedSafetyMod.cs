@@ -113,12 +113,14 @@ namespace AdvancedSafety
             {
                 if (!module.FileName.Contains("UnityPlayer")) continue;
 
-                // AudioMixer::Transfer<SafeBinaryRead>, thanks to Ben for finding this
-                ourAudioMixerReadPointer = module.BaseAddress + 0x487610;
+                // ProduceHelper<AudioMixer,0>::Produce, thanks to Ben for finding an adjacent method
+                ourAudioMixerReadPointer = module.BaseAddress + 0x4997C0;
+                var patchDelegate = new AudioMixerReadDelegate(AudioMixerReadPatch);
+                ourPinnedDelegates.Add(patchDelegate);
                 unsafe
                 {
                     fixed (IntPtr* mixerReadAddress = &ourAudioMixerReadPointer)
-                        MelonUtils.NativeHookAttach((IntPtr) mixerReadAddress, AccessTools.Method(typeof(AdvancedSafetyMod), nameof(AudioMixerReadPatch)).MethodHandle.GetFunctionPointer());
+                        MelonUtils.NativeHookAttach((IntPtr) mixerReadAddress, Marshal.GetFunctionPointerForDelegate(patchDelegate));
                     ourAudioMixerReadDelegate = Marshal.GetDelegateForFunctionPointer<AudioMixerReadDelegate>(ourAudioMixerReadPointer);
                 }
                     
@@ -162,7 +164,7 @@ namespace AdvancedSafety
         private delegate IntPtr ObjectInstantiateDelegate(IntPtr assetPtr, Vector3 pos, Quaternion rot, byte allowCustomShaders, byte isUI, byte validate, IntPtr nativeMethodPointer);
         
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void AudioMixerReadDelegate(IntPtr thisPtr, IntPtr readerPtr);
+        private delegate IntPtr AudioMixerReadDelegate(int thisPtr, int readerPtr);
 
         private static AudioMixerReadDelegate ourAudioMixerReadDelegate;
         private static IntPtr ourAudioMixerReadPointer;
@@ -414,17 +416,17 @@ namespace AdvancedSafety
             return false;
         }
 
-        private static void AudioMixerReadPatch(IntPtr thisPtr, IntPtr readerPtr)
+        private static IntPtr AudioMixerReadPatch(int thisPtr, int readerPtr)
         {
             if (!ourCanReadAudioMixers && !AdvancedSafetySettings.AllowReadingMixers)
             {
                 MelonDebug.Msg("Not reading audio mixer");
-                return;
+                return IntPtr.Zero;
             }
             
             // just in case something ever races
             ourAudioMixerReadDelegate ??= Marshal.GetDelegateForFunctionPointer<AudioMixerReadDelegate>(ourAudioMixerReadPointer);
-            ourAudioMixerReadDelegate(thisPtr, readerPtr);
+            return ourAudioMixerReadDelegate(thisPtr, readerPtr);
         }
         
         private readonly struct AvatarManagerCookie : IDisposable
