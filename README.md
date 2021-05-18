@@ -10,7 +10,10 @@ If you use them and do get banned, don't complain to me that you were not warned
 Also, report your ban to VRChat Modding Group discord (see above) - every data point matters in determining how safe mods are for general public use.
 
 As an extra point, if you encounter an issue with the game (especially after an update), **make sure that issue is not caused by mods before reporting it to VRChat Team**.  
-You can add `--no-mods` launch option (in Steam) to temporarily disable MelonLoader without uninstalling it completely. 
+You can add `--no-mods` launch option (in Steam) to temporarily disable MelonLoader without uninstalling it completely.
+
+Some mods will have Canny tickets linked. It's your duty to go and upvote them to show to VRChat Team what you want from their game. If you decide to comment on Canny, **be respectful** and **avoid mentioning modding** - the team still doesn't like it, obviously.  
+And yes, it will probably be ignored/forever hanging in "under review" like the majority of Canny posts. At least we'll have a nice big upvote number on our ignored posts.
 
 ## AdvancedSafety
 Features:
@@ -31,10 +34,19 @@ All numeric limits are configurable.
 
 Configurable for friends and vanilla "show avatar" button.  
 
+**Canny tickets**:
+* [Allow changing safety settings based on trust rank of avatar uploader, not wearer](https://feedback.vrchat.com/feature-requests/p/allow-changing-safety-settings-based-on-trust-rank-of-avatar-uploader-not-wearer) (I wanted to implement this, but it would be too API request heavy to be safe)
+* [Allow hiding all avatars made by a specific user](https://feedback.vrchat.com/feature-requests/p/allow-hiding-all-avatars-made-by-a-specific-user)
+* [Hiding specific avatars](https://vrchat.canny.io/feature-requests/p/blocking-specific-avatars)
+
 ## CameraMinus
 Allows resizing the camera, zooming it in/out and hiding camera lens.  
 This is a lazy rewrite of original [VRCCameraPlus](https://github.com/Slaynash/VRCCameraPlus) by Slaynash.  
 Requires UI Expansion Kit - new buttons are added to Camera QuickMenu expansion.  
+
+**Canny tickets**:
+* [A few camera suggestions](https://feedback.vrchat.com/feature-requests/p/a-few-camera-suggestions)
+* [Move the camera lens to not be instrusively in the middle of the camera screen](https://feedback.vrchat.com/feature-requests/p/move-the-camera-lens-to-not-be-instrusively-in-the-middle-of-the-camera-screen)
 
 ## EmojiPageButtons
 This mod adds page buttons to old emoji menu that allow faster switching.  
@@ -62,6 +74,12 @@ An all-in-one local favorites mod. Unlimited favorite lists with unlimited favor
 #### Known limitations
 * Player favorites don't show online status
 * Lists with over a thousand elements can take a bit of time on game startup/list creation
+
+#### Canny tickets
+* [**Reconsider the approach to paywalling extra avatar favorite slots/groups**](https://feedback.vrchat.com/vrchat-plus-feedback/p/reconsider-the-approach-to-paywalling-extra-avatar-favorite-slotsgroups)
+* [The ability to categorize avatars](https://feedback.vrchat.com/feature-requests/p/the-ability-to-categorize-avatars)
+* [Search avatars](https://feedback.vrchat.com/feature-requests/p/search-avatars)
+* [Personal avatar sorting](https://feedback.vrchat.com/feature-requests/p/personal-avatar-sorting)
 
 #### Changing database location
 Steps to change database location:
@@ -101,7 +119,9 @@ One of the biggest concerns raised during the still-ongoing discussion between m
 As such, I wanted to proactively address that concern. One of my main goals with modding VRChat is making the game better for everyone, and negatively affecting the platform itself goes against that.    
 I believe this step to be necessary to ensure that VRChat team sees (wholesome) modding not as a threat, but as an opportunity.  
 On top of that, recent API changes indicate that VRChat Team is taking action to restrict access to avatars. It might be an attempt at ripping prevention, or it might be aimed at privacy enhancement, or it might be aimed at extended avatar favorites. There's no way to tell for sure, and there's no knowing how far those changes would go in the future. 
-Local favorite mods have to rely on the API to some degree, and with things changing quickly, there's no reliable way to ensure that things will stay working and stay safe ban-wise in the long run.  
+Local favorite mods have to rely on the API to some degree, and with things changing quickly, there's no reliable way to ensure that things will stay working and stay safe ban-wise in the long run.
+
+Before you read on, please scroll up a bit and **upvote all linked Canny tickets related to avatar favorites**. If you decide to comment on them, remember to **stay civil** and **avoid mentioning mods**.
 
 In more practical terms, this means the following:
  * Starting with this update, you will not be able to add new avatar favorites, create new avatar favorite lists, or import avatar favorite lists  
@@ -170,6 +190,9 @@ Setting it to public will choose a random populated public instance if one is av
 UI Expansion Kit 0.2.0 or newer recommended for in-game settings.  
 Known instance types are `Public`, `FriendOfGuests`, `FriendsOnly`, `InvitePlus` and `InviteOnly` (if you wish to edit modprefs.ini by hand)
 
+**Canny tickets**:
+* [Allow setting your home world to a friends/friends+ instance](https://feedback.vrchat.com/feature-requests/p/allow-setting-your-home-world-to-a-friendsfriends-instance)
+
 ## IKTweaks
 This mod offers a customized VRIK solver for full body tracking, and a few other IK-related tweaks.  
 Features:
@@ -186,6 +209,14 @@ Features:
 
 It's recommended to use a normal humanoid rig without any rig hacks (so no neck fix, no FBT fix, no inverted hip, no zero-length spine bones).  
 It requires at least three trackers (legs and hip). 3-point (no trackers) and 4-point (hip tracker) modes are not affected by the mod.
+
+**Canny tickets**:
+* [More trackers for fullbody tracking](https://feedback.vrchat.com/feature-requests/p/more-trackers-for-fullbody-tracking)
+* [Add control to temporarily disable FBT](https://feedback.vrchat.com/feature-requests/p/add-control-to-temporarily-disable-fbt)
+* [Retain FBT Calibration settings during play session](https://feedback.vrchat.com/feature-requests/p/retain-fbt-calibration-settings-during-play-session)
+* [Full Body Tracking problems](https://feedback.vrchat.com/feature-requests/p/full-body-tracking-problems)
+* [Avatar local neck stretching on some setups](https://feedback.vrchat.com/bug-reports/p/avatar-local-neck-stretching-on-some-setups)
+* Check comments on some of those - they have links to other related posts
 
 ### Using additional trackers
 You need to enable additional trackers in mod settings before you're able to use them.  
@@ -217,12 +248,20 @@ Current features:
  - Can be set to highlight friends or show only friends
  - Custom join/leave sounds - put files named `JN-Join.ogg` and/or `JN-Leave.ogg` into `UserData` folder to override default sounds (they must be in Ogg Vorbis format, naturally)
 
+**Canny tickets**:
+* [Join / Leave notifications](https://feedback.vrchat.com/feature-requests/p/join-leave-notifications)
+
 ## Lag Free Screenshots
 This mod significantly improves screenshot taking performance for handheld camera in VR and F12 key in desktop mode. Benefits are especially noticeable with higher resolution screenshots (4K/8K).
 Additional features:
  * You can set your screenshots to be saved as JPEG files instead of PNG to save on file size.  
  * Automatically rotate screenshots so that proper side faces up (like on your real phone!)
- * Add metadata about world and players to screenshot files (disabled by default; both JPEG and PNG are supported, though PNG metadata is not displayed by Windows - you'll have to use a use different photo viewer software) 
+ * Add metadata about world and players to screenshot files (disabled by default; both JPEG and PNG are supported, though PNG metadata is not displayed by Windows - you'll have to use a use different photo viewer software)
+
+**Canny tickets**:
+* [Record or correct camera orientation](https://feedback.vrchat.com/feature-requests/p/record-or-correct-camera-orientation)
+* [A few camera suggestions](https://feedback.vrchat.com/feature-requests/p/a-few-camera-suggestions)
+* [8K camera](https://feedback.vrchat.com/feature-requests/p/8k-camera)
 
 ## MirrorResolutionUnlimiter
 Headset and display resolutions increase each year, and yet VRChat limits mirror resolution to 2048 pixels per eye. With this mod, that's not the case anymore!  
@@ -235,13 +274,19 @@ If UI Expansion Kit is installed, Settings page in the main menu will get two bu
 Settings:
  * Max mirror resolution - the maximum size of eye texture for mirror reflections. 2048 is VRChat default, 4096 is mod default.
  * Force auto resolution - removes mirror resolution limits set by world maker. Off by default.
- * Mirror MSAA - changes MSAA specifically for mirrors. Valid values are 0 (same as main camera), 1, 2, 4 and 8. Lower MSAA may lead to "shimmering" and jaggies, especially in VR. 
+ * Mirror MSAA - changes MSAA specifically for mirrors. Valid values are 0 (same as main camera), 1, 2, 4 and 8. Lower MSAA may lead to "shimmering" and jaggies, especially in VR.
+
+**Canny tickets**:
+* [problem of maximum resolution of mirror](https://feedback.vrchat.com/feature-requests/p/problem-of-maximum-resolution-of-mirror)
 
 ## ParticleAndBoneLimiterSettings
 This mod provides an UI for changing VRChat's built-in dynamic bone and particle limiter settings.  
 Refer to VRChat docs [for particle limiter](https://docs.vrchat.com/docs/avatar-particle-system-limits#particle-limiter-configuration-description) and [for dynamic bone limiter](https://docs.vrchat.com/docs/avatar-dynamic-bone-limits) for a detailed description of what these settings do.  
 Changing these settings should not require game restart.  
 Requires UI Expansion Kit. Settings are placed into the Mod Settings menu.
+
+**Canny tickets**:
+* [Particle Limiter](https://feedback.vrchat.com/feature-requests/p/particle-limitier)
 
 ## SparkleBeGone
 This mod allows removing start and end sparkles from VR laser pointers, as well as recoloring them.  
