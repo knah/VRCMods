@@ -121,7 +121,7 @@ I believe this step to be necessary to ensure that VRChat team sees (wholesome) 
 On top of that, recent API changes indicate that VRChat Team is taking action to restrict access to avatars. It might be an attempt at ripping prevention, or it might be aimed at privacy enhancement, or it might be aimed at extended avatar favorites. There's no way to tell for sure, and there's no knowing how far those changes would go in the future. 
 Local favorite mods have to rely on the API to some degree, and with things changing quickly, there's no reliable way to ensure that things will stay working and stay safe ban-wise in the long run.
 
-Before you read on, please scroll up a bit and **upvote all linked Canny tickets related to avatar favorites**. If you decide to comment on them, remember to **stay civil** and **avoid mentioning mods**.
+Before you read on, please [scroll up a bit](https://github.com/knah/VRCMods#canny-tickets) and **upvote all linked Canny tickets related to avatar favorites**. If you decide to comment on them, remember to **stay civil** and **avoid mentioning mods**.
 
 In more practical terms, this means the following:
  * Starting with this update, you will not be able to add new avatar favorites, create new avatar favorite lists, or import avatar favorite lists  

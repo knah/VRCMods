@@ -29,7 +29,7 @@ namespace FavCat.Modules
 
         public AvatarModule() : base(ExpandedMenu.AvatarMenu, FavCatMod.Database.AvatarFavorites, GetListsParent(), false, DateTime.Now < FavCatMod.NoMoreVisibleAvatarFavoritesAfter)
         {
-            myCurrentAnnoyingMessage = CanPerformAdditiveActions ? "WillBeObsolete" : (CanShowExistingLists ? "CantAdd" : "NoFavorites");
+            myCurrentAnnoyingMessage = CanPerformAdditiveActions ? "WillBeObsolete" : (CanShowExistingLists ? "CantAddWithCanny" : "NoFavorites");
             
             MelonLogger.Log("Adding button to UI - Looking up for Change Button");
             var foundAvatarPage = Resources.FindObjectsOfTypeAll<PageAvatar>()?.FirstOrDefault(p => p.transform.Find("Change Button") != null);
@@ -221,8 +221,8 @@ namespace FavCat.Modules
             var popup = ExpansionKitApi.CreateCustomFullMenuPopup(LayoutDescription.WideSlimList);
             
             popup.AddLabel("Due to recent events, avatar favorites in FavCat are being phased out.");
-            popup.AddLabel($"To read more about this, click this button:");
             popup.AddSimpleButton($"More info (opens in browser)", () => Process.Start("https://github.com/knah/VRCMods#avatar-favorites-deprecation"));
+            popup.AddSimpleButton($"Vote on Canny! (opens in browser)", () => Process.Start("https://feedback.vrchat.com/vrchat-plus-feedback/p/reconsider-the-approach-to-paywalling-extra-avatar-favorite-slotsgroups"));
             popup.AddLabel("You can't add new avatar favorites or create new lists");
 
             popup.AddLabel(CanShowExistingLists
