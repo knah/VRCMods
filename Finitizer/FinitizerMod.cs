@@ -8,7 +8,7 @@ using UnhollowerBaseLib;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(FinitizerMod), "Finitizer", "1.2.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(FinitizerMod), "Finitizer", "1.3.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace Finitizer
@@ -17,6 +17,10 @@ namespace Finitizer
     {
         private const string SettingsCategory = "Finitizer";
         private const string EnabledSetting = "Enabled";
+        
+        // Why these numbers? Check wrld_b9f80349-74af-4840-8ce9-a1b783436590 for how *horribly* things break even on 10^6. Nothing belongs outside these bounds. The significand is that of MaxValue.
+        private const float MaxAllowedValueTop = 3.402823E+7f;
+        private const float MaxAllowedValueBottom = -3.402823E+7f;
 
         private bool myArePatchesApplied;
         private bool myWasEnabled;
@@ -139,19 +143,20 @@ namespace Finitizer
 
         private static unsafe void SetTransformVectorPatch(IntPtr instance, Vector3* vector)
         {
-            if ((*(int*) &vector->x & int.MaxValue) >= 2139095040) vector->x = 0f;
-            if ((*(int*) &vector->y & int.MaxValue) >= 2139095040) vector->y = 0f;
-            if ((*(int*) &vector->z & int.MaxValue) >= 2139095040) vector->z = 0f;
+            // All NaN comparisons are false, and infinities compare well
+            if (!(vector->x > MaxAllowedValueBottom && vector->x < MaxAllowedValueTop)) vector->x = 0f;
+            if (!(vector->y > MaxAllowedValueBottom && vector->y < MaxAllowedValueTop)) vector->y = 0f;
+            if (!(vector->z > MaxAllowedValueBottom && vector->z < MaxAllowedValueTop)) vector->z = 0f;
 
             ourOriginalTransformSetter(instance, vector);
         }
         
         private static unsafe void SetTransformQuaternionPatch(IntPtr instance, Quaternion* quat)
         {
-            if ((*(int*) &quat->x & int.MaxValue) >= 2139095040 ||
-                (*(int*) &quat->y & int.MaxValue) >= 2139095040 ||
-                (*(int*) &quat->z & int.MaxValue) >= 2139095040 ||
-                (*(int*) &quat->w & int.MaxValue) >= 2139095040)
+            if(!(quat->x > MaxAllowedValueBottom && quat->x < MaxAllowedValueTop) || 
+               !(quat->y > MaxAllowedValueBottom && quat->y < MaxAllowedValueTop) || 
+               !(quat->z > MaxAllowedValueBottom && quat->z < MaxAllowedValueTop) || 
+               !(quat->w > MaxAllowedValueBottom && quat->w < MaxAllowedValueTop))
             {
                 quat->x = 0f;
                 quat->y = 0f;
@@ -164,14 +169,15 @@ namespace Finitizer
         
         private static unsafe void SetTransformVectorQuaternionPatch(IntPtr instance, Vector3* vector, Quaternion* quat)
         {
-            if ((*(int*) &vector->x & int.MaxValue) >= 2139095040) vector->x = 0f;
-            if ((*(int*) &vector->y & int.MaxValue) >= 2139095040) vector->y = 0f;
-            if ((*(int*) &vector->z & int.MaxValue) >= 2139095040) vector->z = 0f;
+            // All NaN comparisons are false, and infinities compare well
+            if (!(vector->x > MaxAllowedValueBottom && vector->x < MaxAllowedValueTop)) vector->x = 0f;
+            if (!(vector->y > MaxAllowedValueBottom && vector->y < MaxAllowedValueTop)) vector->y = 0f;
+            if (!(vector->z > MaxAllowedValueBottom && vector->z < MaxAllowedValueTop)) vector->z = 0f;
             
-            if ((*(int*) &quat->x & int.MaxValue) >= 2139095040 ||
-                (*(int*) &quat->y & int.MaxValue) >= 2139095040 ||
-                (*(int*) &quat->z & int.MaxValue) >= 2139095040 ||
-                (*(int*) &quat->w & int.MaxValue) >= 2139095040)
+            if(!(quat->x > MaxAllowedValueBottom && quat->x < MaxAllowedValueTop) || 
+               !(quat->y > MaxAllowedValueBottom && quat->y < MaxAllowedValueTop) || 
+               !(quat->z > MaxAllowedValueBottom && quat->z < MaxAllowedValueTop) || 
+               !(quat->w > MaxAllowedValueBottom && quat->w < MaxAllowedValueTop))
             {
                 quat->x = 0f;
                 quat->y = 0f;
@@ -184,19 +190,20 @@ namespace Finitizer
         
         private static unsafe void SetRigidbodyPosPatch(IntPtr instance, Vector3* vector)
         {
-            if ((*(int*) &vector->x & int.MaxValue) >= 2139095040) vector->x = 0f;
-            if ((*(int*) &vector->y & int.MaxValue) >= 2139095040) vector->y = 0f;
-            if ((*(int*) &vector->z & int.MaxValue) >= 2139095040) vector->z = 0f;
+            // All NaN comparisons are false, and infinities compare well
+            if (!(vector->x > MaxAllowedValueBottom && vector->x < MaxAllowedValueTop)) vector->x = 0f;
+            if (!(vector->y > MaxAllowedValueBottom && vector->y < MaxAllowedValueTop)) vector->y = 0f;
+            if (!(vector->z > MaxAllowedValueBottom && vector->z < MaxAllowedValueTop)) vector->z = 0f;
 
             ourOriginalRigidbodyPosSetter(instance, vector);
         }
         
         private static unsafe void SetRigidbodyRotPatch(IntPtr instance, Quaternion* quat)
         {
-            if ((*(int*) &quat->x & int.MaxValue) >= 2139095040 ||
-                (*(int*) &quat->y & int.MaxValue) >= 2139095040 ||
-                (*(int*) &quat->z & int.MaxValue) >= 2139095040 ||
-                (*(int*) &quat->w & int.MaxValue) >= 2139095040)
+            if(!(quat->x > MaxAllowedValueBottom && quat->x < MaxAllowedValueTop) || 
+               !(quat->y > MaxAllowedValueBottom && quat->y < MaxAllowedValueTop) || 
+               !(quat->z > MaxAllowedValueBottom && quat->z < MaxAllowedValueTop) || 
+               !(quat->w > MaxAllowedValueBottom && quat->w < MaxAllowedValueTop))
             {
                 quat->x = 0f;
                 quat->y = 0f;
@@ -209,19 +216,20 @@ namespace Finitizer
         
         private static unsafe void SetRigidbodyPosMovePatch(IntPtr instance, Vector3* vector)
         {
-            if ((*(int*) &vector->x & int.MaxValue) >= 2139095040) vector->x = 0f;
-            if ((*(int*) &vector->y & int.MaxValue) >= 2139095040) vector->y = 0f;
-            if ((*(int*) &vector->z & int.MaxValue) >= 2139095040) vector->z = 0f;
+            // All NaN comparisons are false, and infinities compare well
+            if (!(vector->x > MaxAllowedValueBottom && vector->x < MaxAllowedValueTop)) vector->x = 0f;
+            if (!(vector->y > MaxAllowedValueBottom && vector->y < MaxAllowedValueTop)) vector->y = 0f;
+            if (!(vector->z > MaxAllowedValueBottom && vector->z < MaxAllowedValueTop)) vector->z = 0f;
 
             ourOriginalRigidbodyPosMove(instance, vector);
         }
         
         private static unsafe void SetRigidbodyRotMovePatch(IntPtr instance, Quaternion* quat)
         {
-            if ((*(int*) &quat->x & int.MaxValue) >= 2139095040 ||
-                (*(int*) &quat->y & int.MaxValue) >= 2139095040 ||
-                (*(int*) &quat->z & int.MaxValue) >= 2139095040 ||
-                (*(int*) &quat->w & int.MaxValue) >= 2139095040)
+            if(!(quat->x > MaxAllowedValueBottom && quat->x < MaxAllowedValueTop) || 
+               !(quat->y > MaxAllowedValueBottom && quat->y < MaxAllowedValueTop) || 
+               !(quat->z > MaxAllowedValueBottom && quat->z < MaxAllowedValueTop) || 
+               !(quat->w > MaxAllowedValueBottom && quat->w < MaxAllowedValueTop))
             {
                 quat->x = 0f;
                 quat->y = 0f;
@@ -234,32 +242,35 @@ namespace Finitizer
         
         private static unsafe void SetRigidbodyAvPatch(IntPtr instance, Vector3* vector)
         {
-            if ((*(int*) &vector->x & int.MaxValue) >= 2139095040) vector->x = 0f;
-            if ((*(int*) &vector->y & int.MaxValue) >= 2139095040) vector->y = 0f;
-            if ((*(int*) &vector->z & int.MaxValue) >= 2139095040) vector->z = 0f;
+            // All NaN comparisons are false, and infinities compare well
+            if (!(vector->x > MaxAllowedValueBottom && vector->x < MaxAllowedValueTop)) vector->x = 0f;
+            if (!(vector->y > MaxAllowedValueBottom && vector->y < MaxAllowedValueTop)) vector->y = 0f;
+            if (!(vector->z > MaxAllowedValueBottom && vector->z < MaxAllowedValueTop)) vector->z = 0f;
 
             ourOriginalRigidbodyAvSetter(instance, vector);
         }
         
         private static unsafe void SetRigidbodyVelPatch(IntPtr instance, Vector3* vector)
         {
-            if ((*(int*) &vector->x & int.MaxValue) >= 2139095040) vector->x = 0f;
-            if ((*(int*) &vector->y & int.MaxValue) >= 2139095040) vector->y = 0f;
-            if ((*(int*) &vector->z & int.MaxValue) >= 2139095040) vector->z = 0f;
+            // All NaN comparisons are false, and infinities compare well
+            if (!(vector->x > MaxAllowedValueBottom && vector->x < MaxAllowedValueTop)) vector->x = 0f;
+            if (!(vector->y > MaxAllowedValueBottom && vector->y < MaxAllowedValueTop)) vector->y = 0f;
+            if (!(vector->z > MaxAllowedValueBottom && vector->z < MaxAllowedValueTop)) vector->z = 0f;
 
             ourOriginalRigidbodyVelSetter(instance, vector);
         }
         
         private static unsafe IntPtr InstantiateSimplePatch(IntPtr target, Vector3* vector, Quaternion* quat)
         {
-            if ((*(int*) &vector->x & int.MaxValue) >= 2139095040) vector->x = 0f;
-            if ((*(int*) &vector->y & int.MaxValue) >= 2139095040) vector->y = 0f;
-            if ((*(int*) &vector->z & int.MaxValue) >= 2139095040) vector->z = 0f;
+            // All NaN comparisons are false, and infinities compare well
+            if (!(vector->x > MaxAllowedValueBottom && vector->x < MaxAllowedValueTop)) vector->x = 0f;
+            if (!(vector->y > MaxAllowedValueBottom && vector->y < MaxAllowedValueTop)) vector->y = 0f;
+            if (!(vector->z > MaxAllowedValueBottom && vector->z < MaxAllowedValueTop)) vector->z = 0f;
             
-            if ((*(int*) &quat->x & int.MaxValue) >= 2139095040 ||
-                (*(int*) &quat->y & int.MaxValue) >= 2139095040 ||
-                (*(int*) &quat->z & int.MaxValue) >= 2139095040 ||
-                (*(int*) &quat->w & int.MaxValue) >= 2139095040)
+            if(!(quat->x > MaxAllowedValueBottom && quat->x < MaxAllowedValueTop) || 
+               !(quat->y > MaxAllowedValueBottom && quat->y < MaxAllowedValueTop) || 
+               !(quat->z > MaxAllowedValueBottom && quat->z < MaxAllowedValueTop) || 
+               !(quat->w > MaxAllowedValueBottom && quat->w < MaxAllowedValueTop))
             {
                 quat->x = 0f;
                 quat->y = 0f;
@@ -272,14 +283,15 @@ namespace Finitizer
         
         private static unsafe IntPtr InstantiateWithParentPatch(IntPtr target, IntPtr parent, Vector3* vector, Quaternion* quat)
         {
-            if ((*(int*) &vector->x & int.MaxValue) >= 2139095040) vector->x = 0f;
-            if ((*(int*) &vector->y & int.MaxValue) >= 2139095040) vector->y = 0f;
-            if ((*(int*) &vector->z & int.MaxValue) >= 2139095040) vector->z = 0f;
+            // All NaN comparisons are false, and infinities compare well
+            if (!(vector->x > MaxAllowedValueBottom && vector->x < MaxAllowedValueTop)) vector->x = 0f;
+            if (!(vector->y > MaxAllowedValueBottom && vector->y < MaxAllowedValueTop)) vector->y = 0f;
+            if (!(vector->z > MaxAllowedValueBottom && vector->z < MaxAllowedValueTop)) vector->z = 0f;
             
-            if ((*(int*) &quat->x & int.MaxValue) >= 2139095040 ||
-                (*(int*) &quat->y & int.MaxValue) >= 2139095040 ||
-                (*(int*) &quat->z & int.MaxValue) >= 2139095040 ||
-                (*(int*) &quat->w & int.MaxValue) >= 2139095040)
+            if(!(quat->x > MaxAllowedValueBottom && quat->x < MaxAllowedValueTop) || 
+               !(quat->y > MaxAllowedValueBottom && quat->y < MaxAllowedValueTop) || 
+               !(quat->z > MaxAllowedValueBottom && quat->z < MaxAllowedValueTop) || 
+               !(quat->w > MaxAllowedValueBottom && quat->w < MaxAllowedValueTop))
             {
                 quat->x = 0f;
                 quat->y = 0f;
