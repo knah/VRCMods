@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using FavCat.Database.Stored;
 using LiteDB;
 using MelonLoader;
+using UIExpansionKit.API;
 using VRC.Core;
 using Random = UnityEngine.Random;
 
@@ -35,7 +36,7 @@ namespace FavCat
                 var storedFavorite = worldFavs[i];
                 if (database.myStoredWorlds.FindById(storedFavorite.ObjectId) != null) continue;
 
-                await FavCatMod.YieldToMainThread();
+                await TaskUtilities.YieldToMainThread();
 
                 new ApiWorld {id = storedFavorite.ObjectId}.Fetch(null, new Action<ApiContainer>(c =>
                 {
@@ -58,7 +59,7 @@ namespace FavCat
                     var storedFavorite = avatarFavs[i];
                     if (database.myStoredAvatars.FindById(storedFavorite.ObjectId) != null) continue;
 
-                    await FavCatMod.YieldToMainThread();
+                    await TaskUtilities.YieldToMainThread();
 
                     new ApiAvatar {id = storedFavorite.ObjectId}.Fetch(null, new Action<ApiContainer>(c =>
                     {
@@ -78,7 +79,7 @@ namespace FavCat
                 var storedFavorite = playerFavs[i];
                 if (database.myStoredPlayers.FindById(storedFavorite.ObjectId) != null) continue;
 
-                await FavCatMod.YieldToMainThread();
+                await TaskUtilities.YieldToMainThread();
 
                 new APIUser {id = storedFavorite.ObjectId}.Fetch(new Action<ApiContainer>(c =>
                 {

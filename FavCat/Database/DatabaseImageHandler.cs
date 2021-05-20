@@ -1,15 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Utilities.Collections;
 using FavCat.Database.Stored;
 using LiteDB;
 using MelonLoader;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using UIExpansionKit.API;
 using UnhollowerBaseLib;
 using UnityEngine;
 
@@ -71,7 +70,7 @@ namespace FavCat.Database
                     myImageInfos.Delete(allFileInfos[i].Item2.Id);
                 }
 
-                await FavCatMod.YieldToMainThread();
+                await TaskUtilities.YieldToMainThread();
                 
                 MelonLogger.Log($"Removed {cutoffPoint} images from cache");
             });
@@ -95,7 +94,7 @@ namespace FavCat.Database
                 var newImageInfo = new StoredImageInfo {Id = url, LastAccessed = DateTime.UtcNow};
                 myImageInfos.Upsert(newImageInfo);
 
-                await FavCatMod.YieldToMainThread();
+                await TaskUtilities.YieldToMainThread();
 
                 try
                 {

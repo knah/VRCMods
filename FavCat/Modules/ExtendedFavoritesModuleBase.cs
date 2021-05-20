@@ -407,7 +407,7 @@ namespace FavCat.Modules
             await Task.Run(() => { }).ConfigureAwait(false);
             foreach (var adapter in SearchList.Models)
                 Favorites.AddFavorite(adapter.Id, newCategory.CategoryName);
-            await FavCatMod.YieldToMainThread();
+            await TaskUtilities.YieldToMainThread();
             CreateList(newCategory);
             ReorderLists();
             RefreshFavButtons();

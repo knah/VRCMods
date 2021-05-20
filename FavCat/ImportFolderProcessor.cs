@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using FavCat.Database.Stored;
 using LiteDB;
 using MelonLoader;
+using UIExpansionKit.API;
 using VRC.Core;
 using Random = UnityEngine.Random;
 
@@ -82,14 +83,14 @@ namespace FavCat
                 var avatarId = toAdd[i];
                 if (FavCatMod.Database.myStoredAvatars.FindById(avatarId) == null)
                 {
-                    await FavCatMod.YieldToMainThread();
+                    await TaskUtilities.YieldToMainThread();
                     new ApiAvatar {id = avatarId}.Fetch(); // it will get intercepted and stored
                     await Task.Delay(TimeSpan.FromSeconds(5f + Random.Range(0f, 5f))).ConfigureAwait(false);
                 }
             }
 
             ImportStatusInner = "Creating favorites list";
-            await FavCatMod.YieldToMainThread();
+            await TaskUtilities.YieldToMainThread();
             var userId = APIUser.CurrentUser.id;
             var categoryName = $"Imported from {fileName}";
             var existingCategory = FavCatMod.Database.AvatarFavorites.GetCategory(categoryName);
