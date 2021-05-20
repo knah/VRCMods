@@ -15,7 +15,7 @@ using UnityEngine;
 
 namespace SparkleBeGone
 {
-    public class SparkleBeGoneMod : MelonMod
+    public class SparkleBeGoneMod : CustomizedMelonMod
     {
         private const string SettingsCategory = "SparkleBeGone";
         

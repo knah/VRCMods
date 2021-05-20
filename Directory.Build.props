@@ -96,7 +96,13 @@
             <HintPath>$(MsBuildThisFileDirectory)Libs\Il2CppSystem.Core.dll</HintPath>
         </Reference>
     </ItemGroup>
-    <ItemGroup Condition="'$(VrcReferences)' == 'true'">
+    <ItemGroup>
+        <EmbeddedResource Include="$(MsBuildThisFileDirectory)/Common/_dummy_.dll" Link="Common/_dummy_.dll" />
+        <EmbeddedResource Include="$(MsBuildThisFileDirectory)/Common/_dummy2_.dll" Link="Common/_dummy2_.dll" />
+        <Compile Include="$(MsBuildThisFileDirectory)/Common/LoaderIntegrityCheck.cs" Link="Common/LoaderIntegrityCheck.cs"/>
+        <Compile Include="$(MsBuildThisFileDirectory)/Common/CustomizedMelonMod.cs" Link="Common/CustomizedMelonMod.cs" />
+    </ItemGroup>
+    <ItemGroup>
         <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
             <SpecificVersion>false</SpecificVersion>
             <Private>false</Private>
@@ -136,5 +142,6 @@
 
     <PropertyGroup>
         <OutputPath>$(MsBuildThisFileDirectory)\Output\$(Configuration)\</OutputPath>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 </Project>

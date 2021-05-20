@@ -17,7 +17,7 @@ using Object = UnityEngine.Object;
 
 namespace ParticleAndBoneLimiterSettings
 {
-    public class ParticleAndBoneLimiterSettingsMod : MelonMod
+    public class ParticleAndBoneLimiterSettingsMod : CustomizedMelonMod
     {
         private const string SettingsCategory = "VrcParticleLimiter";
         private static bool ourIsExpanded;

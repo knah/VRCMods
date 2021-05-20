@@ -13,7 +13,7 @@ using Object = UnityEngine.Object;
 
 namespace Finitizer
 {
-    public class FinitizerMod : MelonMod
+    public class FinitizerMod : CustomizedMelonMod
     {
         private const string SettingsCategory = "Finitizer";
         private const string EnabledSetting = "Enabled";

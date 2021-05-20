@@ -21,7 +21,7 @@ using Object = UnityEngine.Object;
 
 namespace IKTweaks
 {
-    public class IKTweaksMod : MelonMod
+    public class IKTweaksMod : CustomizedMelonMod
     {
         private static readonly Queue<Action> ourToMainThreadQueue = new Queue<Action>();
         private static readonly Queue<Action> ourToIKLateUpdateQueue = new Queue<Action>();
@@ -41,6 +41,8 @@ namespace IKTweaks
             FullBodyHandling.HookFullBodyController(harmonyInstance);
             
             Camera.onPreRender = Delegate.Combine(Camera.onPreRender, (Camera.CameraCallback) OnVeryLateUpdate).Cast<Camera.CameraCallback>();
+            
+            DoAfterUiManagerInit(OnUiManagerInit);
             
             if (MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit" && !it.Info.Version.StartsWith("0.1."))) 
                 AddUixActions();
@@ -69,7 +71,7 @@ namespace IKTweaks
             menu.Show();
         }
 
-        public override void VRChat_OnUiManagerInit()
+        public void OnUiManagerInit()
         {
             var calibrateButton = GameObject.Find("UserInterface/QuickMenu/ShortcutMenu/CalibrateButton")
                 .GetComponent<Button>();

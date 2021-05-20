@@ -34,7 +34,7 @@ using System.Globalization;
 
 namespace LagFreeScreenshots
 {
-    public class LagFreeScreenshotsMod : MelonMod
+    public class LagFreeScreenshotsMod : CustomizedMelonMod
     {
         private static readonly AwaitProvider ourToMainThread = new AwaitProvider();
         private static readonly AwaitProvider ourToEndOfFrame = new AwaitProvider();

@@ -18,7 +18,7 @@ using Object = UnityEngine.Object;
 
 namespace UIExpansionKit
 {
-    public class UiExpansionKitMod : MelonMod
+    public class UiExpansionKitMod : CustomizedMelonMod
     {
         internal static UiExpansionKitMod Instance;
         
@@ -64,11 +64,6 @@ namespace UIExpansionKit
         public event Action FullMenuClosed;
         public event Action<ExpandedMenu> OnMenuOpened;
 
-        public UiExpansionKitMod()
-        {
-            LoaderIntegrityCheck.CheckIntegrity();
-        }
-        
         public override void OnApplicationStart()
         {
             Instance = this;

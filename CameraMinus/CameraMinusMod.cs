@@ -9,7 +9,7 @@ using VRC.UserCamera;
 
 namespace CameraMinus
 {
-    public class CameraMinusMod : MelonMod
+    public class CameraMinusMod : CustomizedMelonMod
     {
         public override void OnApplicationStart()
         {

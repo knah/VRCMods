@@ -17,7 +17,7 @@ using VRC.Core;
 
 namespace TrueShaderAntiCrash
 {
-    public class TrueShaderAntiCrashMod : MelonMod
+    public class TrueShaderAntiCrashMod : CustomizedMelonMod
     {
         public override void OnApplicationStart()
         {

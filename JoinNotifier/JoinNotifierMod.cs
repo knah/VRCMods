@@ -20,7 +20,7 @@ using Object = UnityEngine.Object;
 
 namespace JoinNotifier
 {
-    public class JoinNotifierMod : MelonMod
+    public class JoinNotifierMod : CustomizedMelonMod
     {
         public const string VersionConst = "0.2.10";
         private const string CustomJoinSoundFileName = "UserData/JN-Join.ogg";

@@ -16,7 +16,7 @@ using VRC.Core;
 
 namespace FriendsPlusHome
 {
-    public class FriendsPlusHomeMod : MelonMod
+    public class FriendsPlusHomeMod : CustomizedMelonMod
     {
         private const string SettingsCategory = "FriendsPlusHome";
         private const string SettingStartupName = "StartupWorldType";
@@ -42,9 +42,11 @@ namespace FriendsPlusHome
                 MelonLogger.Log($"Patched {methodInfo.Name}");
                 harmonyInstance.Patch(methodInfo, postfix: new HarmonyMethod(AccessTools.Method(typeof(FriendsPlusHomeMod), nameof(GoHomePatch))));
             }
+            
+            DoAfterUiManagerInit(OnUiManagerInit);
         }
 
-        public override void VRChat_OnUiManagerInit()
+        public void OnUiManagerInit()
         {
             StartEnforcingInstanceType(VRCFlowManager.prop_VRCFlowManager_0.Cast<VRCFlowManagerVRC>(), false); // just in case startup is slow
         }

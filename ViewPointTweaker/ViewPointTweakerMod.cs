@@ -18,7 +18,7 @@ using ViewPointTweaker;
 
 namespace ViewPointTweaker
 {
-    public class ViewPointTweakerMod : MelonMod
+    public class ViewPointTweakerMod : CustomizedMelonMod
     {
         private const string ViewPointsFilePath = "UserData/ViewPoints.json";
         
@@ -46,9 +46,11 @@ namespace ViewPointTweaker
             }
             
             LoadViewpoints();
+            
+            DoAfterUiManagerInit(OnUiManagerInit);
         }
 
-        public override void VRChat_OnUiManagerInit()
+        private void OnUiManagerInit()
         {
             foreach (var vrcTracking in VRCTrackingManager.field_Private_Static_VRCTrackingManager_0.field_Private_List_1_VRCTracking_0)
             {

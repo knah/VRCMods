@@ -8,7 +8,5 @@
     </PropertyGroup>
     <ItemGroup>
         <EmbeddedResource Include="modui.assetbundle" />
-        <EmbeddedResource Include="_dummy_.dll" />
-        <EmbeddedResource Include="_dummy2_.dll" />
     </ItemGroup>
 </Project>

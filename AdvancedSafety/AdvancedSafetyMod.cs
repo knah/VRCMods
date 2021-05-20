@@ -28,7 +28,7 @@ using ModerationManager = VRC.Management.ModerationManager;
 
 namespace AdvancedSafety
 {
-    public class AdvancedSafetyMod : MelonMod
+    public class AdvancedSafetyMod : CustomizedMelonMod
     {
         private static List<object> ourPinnedDelegates = new List<object>();
         private static bool ourCanReadAudioMixers = true;
