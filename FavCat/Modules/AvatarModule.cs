@@ -49,7 +49,6 @@ namespace FavCat.Modules
             myPageAvatar.gameObject.AddComponent<EnableDisableListener>().OnEnabled += () =>
             {
                 if (FavCatSettings.DontShowAnnoyingMessage == myCurrentAnnoyingMessage || myHasShownAnnoyingMessageThisRun) return;
-                myHasShownAnnoyingMessageThisRun = true;
                 ShowAnnoyingMessage();
             };
 
@@ -232,7 +231,11 @@ namespace FavCat.Modules
             popup.AddLabel("World and user favorites will remain for the time being");
             popup.AddLabel("Favorite export is available from \"More FavCat...\" menu");
             popup.AddLabel("Scroll down for close buttons");
-            popup.AddSimpleButton("Don't show this until game restart", popup.Hide);
+            popup.AddSimpleButton("Don't show this until game restart", () =>
+            {
+                popup.Hide();
+                myHasShownAnnoyingMessageThisRun = true;
+            });
             popup.AddSimpleButton("Don't show this until something changes", () =>
             {
                 popup.Hide();
