@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(EmojiPageButtonsMod), "Emoji Page Buttons", "1.0.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(EmojiPageButtonsMod), "Emoji Page Buttons", "1.0.2", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace EmojiPageButtons
@@ -27,7 +27,7 @@ namespace EmojiPageButtons
             var emojiMenuRoot = QuickMenu.prop_QuickMenu_0.transform.Find("EmojiMenu");
             if (emojiMenuRoot == null)
             {
-                MelonLogger.LogError("Emoji menu root not found");
+                MelonLogger.Error("Emoji menu root not found");
                 yield break;
             }
 
