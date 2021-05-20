@@ -14,6 +14,27 @@ namespace UIExpansionKit.API
         internal static readonly List<IEnumerator> ExtraWaitCoroutines = new List<IEnumerator>();
 
         internal static readonly Dictionary<(string, string), IList<(string SettingsValue, string DisplayName)>> EnumSettings = new Dictionary<(string, string), IList<(string SettingsValue, string DisplayName)>>();
+
+        internal static List<Action> onUiManagerInitDelegateList = new();
+        
+        /// <summary>
+        /// Actions added to this even will be called during UI Expansion Kit init, after VrcUiManager has been created
+        /// <exception cref="InvalidOperationException">Thrown if an action is attempted to be added after UI Expansion Kit is initialized (and VrcUiManager is already created)</exception>
+        /// </summary>
+        public static event Action OnUiManagerInit
+        {
+            add
+            {
+                if (value == null) throw new ArgumentNullException(nameof(value));
+                if (onUiManagerInitDelegateList == null)
+                    throw new InvalidOperationException("UI manager init has already happened, your delegate will not be called");
+                onUiManagerInitDelegateList.Add(value);
+            }
+            remove
+            {
+                if (onUiManagerInitDelegateList != null) onUiManagerInitDelegateList.Remove(value);
+            }
+        }
         
         /// <summary>
         /// Register a simple button for given menu

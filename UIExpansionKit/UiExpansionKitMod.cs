@@ -13,7 +13,7 @@ using UnityEngine.UI;
 using VRCSDK2;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.2.5", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.2.6", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace UIExpansionKit
@@ -125,6 +125,20 @@ namespace UIExpansionKit
             listener.OnEnabled += UpdateModSettingsVisibility;
             listener.OnDisabled += UpdateModSettingsVisibility;
 
+            var delegatesToInvoke = ExpansionKitApi.onUiManagerInitDelegateList;
+            ExpansionKitApi.onUiManagerInitDelegateList = null;
+            foreach (var action in delegatesToInvoke)
+            {
+                try
+                {
+                    action();
+                }
+                catch (Exception ex)
+                {
+                    MelonLogger.Error($"Error while invoking UI-manager-init delegate {action.GetType().FullName}: {ex}");
+                }
+            }
+
             foreach (var coroutine in ExpansionKitApi.ExtraWaitCoroutines)
             {
                 while (true)
@@ -135,8 +149,8 @@ namespace UIExpansionKit
                     }
                     catch (Exception ex)
                     {
-                        MelonLogger.Error(
-                            $"Error while waiting for init of coroutine with type {coroutine.GetType().FullName}: {ex.ToString()}");
+                        MelonLogger.Error($"Error while waiting for init of coroutine with type {coroutine.GetType().FullName}: {ex}");
+                        break;
                     }
                     yield return coroutine.Current;
                 }
