@@ -8,7 +8,7 @@ using UnhollowerBaseLib;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(FinitizerMod), "Finitizer", "1.3.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(FinitizerMod), "Finitizer", "1.3.1", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace Finitizer
@@ -29,7 +29,7 @@ namespace Finitizer
         {
             var category = MelonPreferences.CreateCategory(SettingsCategory, SettingsCategory);
             var entry = (MelonPreferences_Entry<bool>) category.CreateEntry(EnabledSetting, true, "FP fix enabled");
-            entry.OnValueChanged += (old, value) =>
+            entry.OnValueChanged += (_, value) =>
             {
                 OnModSettingsApplied(value);
             };
@@ -108,7 +108,7 @@ namespace Finitizer
             var originalPointer = IL2CPP.il2cpp_resolve_icall(name);
             if (originalPointer == IntPtr.Zero)
             {
-                MelonLogger.LogWarning($"ICall {name} was not found, not patching");
+                MelonLogger.Warning($"ICall {name} was not found, not patching");
                 original = null;
                 return;
             }
@@ -116,7 +116,7 @@ namespace Finitizer
             var target = typeof(FinitizerMod).GetMethod(patchName, BindingFlags.Static | BindingFlags.NonPublic);
             var functionPointer = target!.MethodHandle.GetFunctionPointer();
 
-            Imports.Hook((IntPtr) (&originalPointer), functionPointer);
+            MelonUtils.NativeHookAttach((IntPtr) (&originalPointer), functionPointer);
             
             ourOriginalPointers[name] = (originalPointer, functionPointer);
 
@@ -130,13 +130,13 @@ namespace Finitizer
             foreach (var keyValuePair in ourOriginalPointers)
             {
                 var pointer = keyValuePair.Value.Item1;
-                Imports.Unhook((IntPtr) (&pointer), keyValuePair.Value.Item2);
+                MelonUtils.NativeHookDetach((IntPtr) (&pointer), keyValuePair.Value.Item2);
             }
 
             ourOriginalPointers.Clear();
 
             myArePatchesApplied = false;
-            MelonLogger.Log("Things unpatching complete");
+            MelonLogger.Msg("Things unpatching complete");
         }
         
         public static unsafe bool IsInvalid(float f) => (*(int*) &f & int.MaxValue) >= 2139095040;
