@@ -2,7 +2,12 @@ using System;
 using System.Collections;
 using MelonLoader;
 
-public abstract class CustomizedMelonMod : MelonMod
+#if CUSTOMIZED_MOD_INTERNAL
+internal
+#else
+public
+#endif
+abstract class CustomizedMelonMod : MelonMod
 {
     static CustomizedMelonMod()
     {

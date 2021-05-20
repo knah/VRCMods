@@ -29,13 +29,13 @@ internal static class LoaderIntegrityCheck
             using var memStream = new MemoryStream((int) stream.Length);
             stream.CopyTo(memStream);
 
-            var assembly = Assembly.Load(memStream.ToArray());
+            Assembly.Load(memStream.ToArray());
 
             PrintWarningMessage();
 
             while (Console.In.Peek() != '\n') Console.In.Read();
         }
-        catch (BadImageFormatException ex)
+        catch (BadImageFormatException)
         {
         }
 
@@ -46,7 +46,7 @@ internal static class LoaderIntegrityCheck
             using var memStream = new MemoryStream((int) stream.Length);
             stream.CopyTo(memStream);
 
-            var assembly = Assembly.Load(memStream.ToArray());
+            Assembly.Load(memStream.ToArray());
         }
         catch (BadImageFormatException ex)
         {
@@ -69,7 +69,7 @@ internal static class LoaderIntegrityCheck
 
             while (Console.In.Peek() != '\n') Console.In.Read();
         }
-        catch (BadImageFormatException ex)
+        catch (BadImageFormatException)
         {
         }
     }

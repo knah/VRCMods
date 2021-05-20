@@ -163,5 +163,14 @@ namespace UIExpansionKit.API
         {
             CustomLayoutedPageWithOwnedMenuImpl.HideAll();
         }
+
+        /// <summary>
+        /// Returns the object containing other objects loaded from UI Expansion Kit resources assetbundle
+        /// Return type of this method and layout of that class are subject to change - only use if strictly necessary
+        /// </summary>
+        public static PreloadedBundleContents GetUiExpansionKitBundleContents()
+        {
+            return UiExpansionKitMod.Instance.StuffBundle;
+        }
     }
 }
