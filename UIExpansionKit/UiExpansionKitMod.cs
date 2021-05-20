@@ -263,6 +263,16 @@ namespace UIExpansionKit
             }
         }
 
+        public override void OnUpdate()
+        {
+            TaskUtilities.ourMainThreadQueue.Flush();
+        }
+
+        public override void OnGUI()
+        {
+            TaskUtilities.ourFrameEndQueue.Flush();
+        }
+
         private static IEnumerator ResizeExpandoAfterDelay(GameObject expando)
         {
             yield return null;
