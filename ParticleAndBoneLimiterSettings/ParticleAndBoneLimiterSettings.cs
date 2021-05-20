@@ -13,7 +13,7 @@ using VRC.Core;
 using Object = UnityEngine.Object;
 
 [assembly: MelonGame("VRChat", "VRChat")]
-[assembly: MelonInfo(typeof(ParticleAndBoneLimiterSettingsMod), "Particle and DynBone limiter settings UI", "1.1.3", "knah", "https://github.com/knah/VRCMods")]
+[assembly: MelonInfo(typeof(ParticleAndBoneLimiterSettingsMod), "Particle and DynBone limiter settings UI", "1.1.4", "knah", "https://github.com/knah/VRCMods")]
 
 namespace ParticleAndBoneLimiterSettings
 {
@@ -26,27 +26,22 @@ namespace ParticleAndBoneLimiterSettings
         {
             ClassInjector.RegisterTypeInIl2Cpp<CustomParticleSettingsUiHandler>();
 
-            MelonPrefs.RegisterCategory(SettingsCategory, "Particle and DynBone limits");
-            MelonPrefs.RegisterBool(SettingsCategory, "dummy", false, "ignore this", true);
+            MelonPreferences.CreateCategory(SettingsCategory, "Particle and DynBone limits").CreateEntry("dummy", false, "ignore this", true);
 
             ExpansionKitApi.RegisterWaitConditionBeforeDecorating(WaitForUixPrefabsAndRegister());
         }
 
         private IEnumerator WaitForUixPrefabsAndRegister()
         {
-            var field = typeof(UiExpansionKitMod).GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
-                .Single(it => it.FieldType == typeof(PreloadedBundleContents));
-            var mod = MelonHandler.Mods.Single(it => it is UiExpansionKitMod);
-
-            while (field.GetValue(mod) == null)
+            while (ExpansionKitApi.GetUiExpansionKitBundleContents() == null)
                 yield return null;
 
             ourIsExpanded = !ExpansionKitSettings.IsCategoriesStartCollapsed();
 
-            var prefabs = CustomParticleSettingsUiHandler.UixBundle = (PreloadedBundleContents) field.GetValue(mod);
+            var prefabs = CustomParticleSettingsUiHandler.UixBundle = ExpansionKitApi.GetUiExpansionKitBundleContents();
 
             var rootPrefab = Object.Instantiate(prefabs.SettingsCategory, prefabs.StoredThingsParent.transform, false);
-            rootPrefab.GetComponentInChildren<Text>().text = MelonPrefs.GetCategoryDisplayName(SettingsCategory);
+            rootPrefab.GetComponentInChildren<Text>().text = MelonPreferences.GetCategory(SettingsCategory).DisplayName;
             rootPrefab.SetActive(true);
             rootPrefab.AddComponent<CustomParticleSettingsUiHandler>();
 

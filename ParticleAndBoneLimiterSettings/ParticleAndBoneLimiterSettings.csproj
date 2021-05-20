@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net472</TargetFramework>
         <VrcReferences>true</VrcReferences>
-        <Version>1.1.3.0</Version>
+        <Version>1.1.4.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
