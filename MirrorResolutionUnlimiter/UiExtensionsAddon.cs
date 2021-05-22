@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using UIExpansionKit.API;
 using UnityEngine;
 using VRC.SDKBase;
@@ -12,10 +13,15 @@ namespace MirrorResolutionUnlimiter
         private static int UiMenuLayer = 1 << 12;
         private static int MirrorReflectionLayer = 1 << 18;
         
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static void Init()
         {
             ExpansionKitApi.GetExpandedMenu(ExpandedMenu.SettingsMenu).AddSimpleButton("Optimize mirrors", OptimizeMirrors);
             ExpansionKitApi.GetExpandedMenu(ExpandedMenu.SettingsMenu).AddSimpleButton("Beautify mirrors", BeautifyMirrors);
+
+            ExpansionKitApi.RegisterSettingAsStringEnum(MirrorResolutionUnlimiterMod.ModCategory,
+                MirrorResolutionUnlimiterMod.PixelLightsSetting,
+                new[] {("default", "World default"), ("allow", "Force allow"), ("disable", "Force disable")});
         }
 
         private static void BeautifyMirrors()

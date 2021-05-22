@@ -1,15 +1,14 @@
 using System;
 using System.Linq;
+using Harmony;
 using Il2CppSystem.Collections.Generic;
-using Il2CppSystem.Reflection;
 using MelonLoader;
 using MirrorResolutionUnlimiter;
-using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using VRC.SDKBase;
 
-[assembly:MelonInfo(typeof(MirrorResolutionUnlimiterMod), "MirrorResolutionUnlimiter", "1.0.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(MirrorResolutionUnlimiterMod), "MirrorResolutionUnlimiter", "1.1.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -17,65 +16,89 @@ namespace MirrorResolutionUnlimiter
 {
     public class MirrorResolutionUnlimiterMod : CustomizedMelonMod
     {
-        private const string ModCategory = "MirrorResolutionUnlimiter";
+        internal const string ModCategory = "MirrorResolutionUnlimiter";
         
         private const string MaxResPref = "MaxEyeTextureResolution";
         private const string MirrorMsaaPref = "MirrorMsaa";
         private const string AllMirrorsAutoPref = "AllMirrorsUseAutoRes";
+        internal const string PixelLightsSetting = "PixelLightsSettings";
 
         private static int ourMaxEyeResolution = 2048;
         private static bool ourAllMirrorsAuto = false;
         private static int ourMirrorMsaa = 0;
 
+        private MelonPreferences_Entry<string> myPixelLightsSetting;
+
         public override void OnApplicationStart()
         {
-            MelonPrefs.RegisterCategory(ModCategory, "Mirror Resolution");
-            MelonPrefs.RegisterInt(ModCategory, MaxResPref, 4096, "Max eye texture size");
-            MelonPrefs.RegisterInt(ModCategory, MirrorMsaaPref, 0, "Mirror MSAA (0=default)");
-            MelonPrefs.RegisterBool(ModCategory, AllMirrorsAutoPref, false, "Force auto resolution");
+            ClassInjector.RegisterTypeInIl2Cpp<OriginalPixelLightsSettingKeeper>();
+
+            var category = MelonPreferences.CreateCategory(ModCategory, "Mirror Resolution");
+            ((MelonPreferences_Entry<int>) category.CreateEntry(MaxResPref, 4096, "Max eye texture size")).OnValueChanged += (_, v) => ourMaxEyeResolution = v;
+            ((MelonPreferences_Entry<int>) category.CreateEntry(MirrorMsaaPref, 0, "Mirror MSAA (0=default)")).OnValueChanged += (_, v) =>
+            {
+                ourMirrorMsaa = v;
+                if (ourMirrorMsaa != 1 && ourMirrorMsaa != 2 && ourMirrorMsaa != 4 && ourMirrorMsaa != 8)
+                    ourMirrorMsaa = 0;
+            };
+            ((MelonPreferences_Entry<bool>) category.CreateEntry(AllMirrorsAutoPref, false, "Force auto resolution")).OnValueChanged += (_, v) => ourAllMirrorsAuto = v;
+            myPixelLightsSetting = (MelonPreferences_Entry<string>) category.CreateEntry(PixelLightsSetting, "default", "Pixel lights in mirrors");
+            myPixelLightsSetting.OnValueChangedUntyped += UpdateMirrorPixelLights;
+
+            Harmony.Patch(
+                AccessTools.Method(typeof(VRC_MirrorReflection), nameof(VRC_MirrorReflection.GetReflectionData)),
+                prefix: new HarmonyMethod(typeof(MirrorResolutionUnlimiterMod), nameof(GetReflectionData)));
+
+            if (MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit"))
+            {
+                MelonLogger.Msg("Adding UIExpansionKit buttons");
+                UiExtensionsAddon.Init();
+            }
+        }
+
+        public override void OnSceneWasInitialized(int buildIndex, string sceneName)
+        {
+            if (buildIndex != -1) return;
             
-            unsafe
+            foreach (var mirror in Resources.FindObjectsOfTypeAll<VRC_MirrorReflection>())
             {
-                var methodInfo = Il2CppType.Of<VRC_MirrorReflection>().GetMethod(nameof(VRC_MirrorReflection.GetReflectionData), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                var originalMethodPointer = *(IntPtr*) IL2CPP.il2cpp_method_get_from_reflection(methodInfo.Pointer);
-                CompatHook((IntPtr) (&originalMethodPointer), typeof(MirrorResolutionUnlimiterMod).GetMethod(nameof(GetReflectionData), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
+                var store = mirror.gameObject.GetComponent<OriginalPixelLightsSettingKeeper>() ??
+                            mirror.gameObject.AddComponent<OriginalPixelLightsSettingKeeper>();
+                store.OriginalValue = mirror.m_DisablePixelLights;
             }
 
-            OnModSettingsApplied();
+            UpdateMirrorPixelLights();
+        }
 
-            if (AppDomain.CurrentDomain.GetAssemblies().Any(it => it.GetName().Name.StartsWith("UIExpansionKit")))
+        private void UpdateMirrorPixelLights()
+        {
+            var allMirrors = Resources.FindObjectsOfTypeAll<VRC_MirrorReflection>();
+            var currentMode = myPixelLightsSetting.Value;
+            foreach (var mirror in allMirrors)
             {
-                MelonLogger.Log("Adding UIExpansionKit buttons");
-                typeof(UiExtensionsAddon)
-                    .GetMethod(nameof(UiExtensionsAddon.Init),
-                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)!
-                    .Invoke(null, new object[0]);
+                switch (currentMode)
+                {
+                    case "default":
+                        mirror.m_DisablePixelLights = mirror.gameObject.GetComponent<OriginalPixelLightsSettingKeeper>()?.OriginalValue ?? mirror.m_DisablePixelLights;
+                        break;
+                    case "disable":
+                        mirror.m_DisablePixelLights = true;
+                        break;
+                    case "allow":
+                        mirror.m_DisablePixelLights = false;
+                        break;
+                }
             }
-        }
-
-        private static void CompatHook(IntPtr first, IntPtr second)
-        {
-            typeof(Imports).GetMethod("Hook", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic)!
-                .Invoke(null, new object[] {first, second});
-        }
-
-        public override void OnModSettingsApplied()
-        {
-            ourMaxEyeResolution = MelonPrefs.GetInt(ModCategory, MaxResPref);
-            ourAllMirrorsAuto = MelonPrefs.GetBool(ModCategory, AllMirrorsAutoPref);
-            ourMirrorMsaa = MelonPrefs.GetInt(ModCategory, MirrorMsaaPref);
-            if (ourMirrorMsaa != 1 && ourMirrorMsaa != 2 && ourMirrorMsaa != 4 && ourMirrorMsaa != 8)
-                ourMirrorMsaa = 0;
         }
 
         // this is slightly rewritten code from VRCSDK
         // if only the game was still in IL so that transpiler harmony patches worked
-        private static IntPtr GetReflectionData(IntPtr thisPtr, IntPtr currentCameraPtr)
+        private static bool GetReflectionData(VRC_MirrorReflection __instance, Camera __0, ref VRC_MirrorReflection.ReflectionData __result)
         {
             try
             {
-                var @this = new VRC_MirrorReflection(thisPtr);
-                var currentCamera = new Camera(currentCameraPtr);
+                var @this = __instance;
+                var currentCamera = __0;
 
                 var reflections = @this._mReflections ??
                                   (@this._mReflections = new Dictionary<Camera, VRC_MirrorReflection.ReflectionData>());
@@ -116,13 +139,14 @@ namespace MirrorResolutionUnlimiter
                     reflectionData.propertyBlock.SetTexture(VRC_MirrorReflection._texturePropertyId[1], reflectionData.texture[1]);
                 }
 
-                return reflectionData.Pointer;
+                __result = reflectionData;
+                return false;
             }
             catch (Exception ex)
             {
-                MelonLogger.LogError("Exception happened in GetReflectionData override; crash will likely follow: " + ex);
-                return IntPtr.Zero;
+                MelonLogger.Error("Exception happened in GetReflectionData override" + ex);
             }
+            return true;
         }
     }
 }
