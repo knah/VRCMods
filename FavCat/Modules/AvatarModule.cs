@@ -84,24 +84,6 @@ namespace FavCat.Modules
             // do nothing
         }
 
-        protected internal override void RefreshFavButtons()
-        {
-            var apiAvatar = myPageAvatar != null ? myPageAvatar.field_Public_SimpleAvatarPedestal_0 != null ? myPageAvatar.field_Public_SimpleAvatarPedestal_0.field_Internal_ApiAvatar_0 : null : null;
-
-            foreach (var customPickerList in PickerLists)
-            {
-                bool favorited = FavCatMod.Database.AvatarFavorites.IsFavorite(myCurrentUiAvatarId, customPickerList.Key);
-                    
-                var isNonPublic = apiAvatar?.releaseStatus != "public";
-                var enabled = !isNonPublic || favorited || apiAvatar?.authorId == APIUser.CurrentUser.id;
-                enabled &= CanPerformAdditiveActions;
-                if (favorited)
-                    customPickerList.Value.SetFavButtonText(isNonPublic ? "Unfav (p)" : "Unfav", false);
-                else
-                    customPickerList.Value.SetFavButtonText(isNonPublic ? (enabled ? "Fav (p)" : "Private") : "Fav", false);
-            }
-        }
-
         protected override void OnPickerSelected(IPickerElement model)
         {
             PlaySound();
