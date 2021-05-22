@@ -2,6 +2,8 @@ using System;
 using UnhollowerBaseLib.Attributes;
 using UnityEngine;
 
+#nullable enable
+
 namespace UIExpansionKit.Components
 {
     public class DestroyListener : MonoBehaviour

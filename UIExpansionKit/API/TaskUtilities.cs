@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+using MelonLoader;
 using UIExpansionKit.API.Classes;
 
 namespace UIExpansionKit.API
@@ -27,6 +29,19 @@ namespace UIExpansionKit.API
         public static AwaitProvider.YieldAwaitable YieldToFrameEnd()
         {
             return ourFrameEndQueue.Yield();
-        } 
+        }
+        
+        /// <summary>
+        /// Adds a handler to a Task that prints a message to console if an exception is thrown within that task
+        /// </summary>
+        /// <param name="taskInfo">A string that will be included in the error message to identify the task</param>
+        public static void NoAwait(this Task task, string taskInfo = "Task")
+        {
+            task.ContinueWith(tsk =>
+            {
+                if (tsk.IsFaulted)
+                    MelonLogger.Error($"Free-floating {taskInfo} failed with exception: {tsk.Exception}");
+            });
+        }
     }
 }
