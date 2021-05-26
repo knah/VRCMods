@@ -42,7 +42,7 @@ Configurable for friends and vanilla "show avatar" button.
 ## CameraMinus
 Allows resizing the camera, zooming it in/out and hiding camera lens.  
 This is a lazy rewrite of original [VRCCameraPlus](https://github.com/Slaynash/VRCCameraPlus) by Slaynash.  
-Requires UI Expansion Kit - new buttons are added to Camera QuickMenu expansion.  
+Requires UI Expansion Kit - new buttons are added to Camera expando (collapsed by default, click the small blue square near camera to expand) or to Camera QuickMenu expansion (can be chosen in mod settings).  
 
 **Canny tickets**:
 * [A few camera suggestions](https://feedback.vrchat.com/feature-requests/p/a-few-camera-suggestions)
@@ -126,7 +126,7 @@ Before you read on, please [scroll up a bit](https://github.com/knah/VRCMods#can
 In more practical terms, this means the following:
  * Starting with this update, you will not be able to add new avatar favorites, create new avatar favorite lists, or import avatar favorite lists  
  * Starting on 2021-05-31, you will not be able to access your existing avatar favorite lists in-game
- * Starting on 2021-05-31, avatar search will only provide avatar names and icons in the menu. Clicking an avatar in search results will bring up user page for its author.
+ * Avatar search will stay accessible for the time being.
  * World and user favorites will stay accessible for the time being.  
    VRChat Team did mention during the recent dev stream that they are going to provide additional player and world favorites for everyone at some later point.
  * You can export all your favorites into plain text files from "More FavCat..." menu in the respective menu page. Exported lists are put in `UserData/FavCatExport` folder.
@@ -216,6 +216,9 @@ It requires at least three trackers (legs and hip). 3-point (no trackers) and 4-
 * [Retain FBT Calibration settings during play session](https://feedback.vrchat.com/feature-requests/p/retain-fbt-calibration-settings-during-play-session)
 * [Full Body Tracking problems](https://feedback.vrchat.com/feature-requests/p/full-body-tracking-problems)
 * [Avatar local neck stretching on some setups](https://feedback.vrchat.com/bug-reports/p/avatar-local-neck-stretching-on-some-setups)
+* [Shoulder move is different when using only VR and fullbody tracking](https://feedback.vrchat.com/bug-reports/p/shoulder-move-is-different-when-using-only-vr-and-fullbody-tracking)
+* [Spine always straight with full body tracking](https://feedback.vrchat.com/bug-reports/p/spine-always-straight-with-full-body-tracking)
+* [Full body spine/chest/neck stretching occurs locally with specific controllers](https://feedback.vrchat.com/bug-reports/p/full-body-spinechestneck-stretching-occurs-locally-with-specific-controllers)
 * Check comments on some of those - they have links to other related posts
 
 ### Using additional trackers
