@@ -21,9 +21,10 @@ namespace JoinNotifier
                 AFiredFirst = true;
                 SeenFire = true;
                 
-                MelonLogger.Log("[JoinNotifier] A fired first");
+                MelonDebug.Msg("A fired first");
             }
-            
+
+            if (player == null) return;
             (AFiredFirst ? OnJoin : OnLeave)?.Invoke(player);
         }
         
@@ -34,9 +35,10 @@ namespace JoinNotifier
                 AFiredFirst = false;
                 SeenFire = true;
                 
-                MelonLogger.Log("[JoinNotifier] B fired first");
+                MelonDebug.Msg("B fired first");
             }
             
+            if (player == null) return;
             (AFiredFirst ? OnLeave : OnJoin)?.Invoke(player);
         }
 

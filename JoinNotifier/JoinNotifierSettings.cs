@@ -6,57 +6,62 @@ namespace JoinNotifier
 {
     public static class JoinNotifierSettings
     {
-        private const string SettingsCategory = "JoinNotifier";
-        private const string SettingShouldPlaySound = "PlaySound";
-        private const string SettingSoundVolume = "SoundVolume";
-        private const string SettingTextSize = "TextSize";
-        private const string SettingShouldBlink = "BlinkIcon";
-        private const string SettingJoinShowName = "ShowJoinedName";
-        private const string SettingNotifyPublic = "NotifyInPublic";
-        private const string SettingNotifyFriends = "NotifyInFriends";
-        private const string SettingNotifyPrivate = "NotifyInPrivate";
-        private const string SettingLeaveSound= "LeaveSound";
-        private const string SettingLeaveBlink = "LeaveBlink";
-        private const string SettingLeaveShowName = "ShowLeaveName";
-        private const string SettingJoinIconColor = "JoinColor";
-        private const string SettingLeaveIconColor = "LeaveColor";
-        private const string SettingShowFriendsInDifferentColor = "ShowFriendsInDifferentColor";
-        private const string SettingShowFriendsOnly = "ShowFriendsOnly";
-        private const string SettingShowFriendsAlways = "ShowFriendsAlways";
-        private const string SettingFriendsJoinColor = "FriendJoinColor";
-        private const string SettingFriendsLeaveColor = "FriendLeaveColor";
+        internal static MelonPreferences_Entry<bool> ShouldJoinBlink;
+        internal static MelonPreferences_Entry<bool> ShouldPlayJoinSound;
+        internal static MelonPreferences_Entry<bool> JoinShowName;
         
-        private const string SettingUseUiMixer = "UseUiMixer";
+        internal static MelonPreferences_Entry<bool> ShouldLeaveBlink;
+        internal static MelonPreferences_Entry<bool> ShouldPlayLeaveSound;
+        internal static MelonPreferences_Entry<bool> LeaveShowName;
         
+        
+        internal static MelonPreferences_Entry<float> SoundVolume;
+        internal static MelonPreferences_Entry<bool> UseUiMixer;
+        internal static MelonPreferences_Entry<int> TextSize;
+        
+        internal static MelonPreferences_Entry<bool> NotifyInPublic;
+        internal static MelonPreferences_Entry<bool> NotifyInFriends;
+        internal static MelonPreferences_Entry<bool> NotifyInPrivate;
+        
+        internal static MelonPreferences_Entry<bool> ShowFriendsOnly;
+        internal static MelonPreferences_Entry<string> JoinIconColor;
+        internal static MelonPreferences_Entry<string> LeaveIconColor;
+        
+        internal static MelonPreferences_Entry<bool> ShowFriendsInDifferentColor;
+        internal static MelonPreferences_Entry<string> FriendsJoinIconColor;
+        internal static MelonPreferences_Entry<string> FriendsLeaveIconColor;
+        
+        internal static MelonPreferences_Entry<bool> ShowFriendsAlways;
+
         public static void RegisterSettings()
         {
-            MelonPrefs.RegisterCategory(SettingsCategory, "Join Notifier");
+            var category = MelonPreferences.CreateCategory("JoinNotifier", "Join Notifier");
             
-            MelonPrefs.RegisterBool(SettingsCategory, SettingShouldBlink, true, "Blink HUD icon on join");
-            MelonPrefs.RegisterBool(SettingsCategory, SettingShouldPlaySound, true, "Play sound on join");
-            MelonPrefs.RegisterBool(SettingsCategory, SettingJoinShowName, true, "Show joined names");
+            ShouldJoinBlink = (MelonPreferences_Entry<bool>) category.CreateEntry("BlinkIcon", true, "Blink HUD icon on join");
+            ShouldPlayJoinSound = (MelonPreferences_Entry<bool>) category.CreateEntry("PlaySound", true, "Play sound on join");
+            JoinShowName = (MelonPreferences_Entry<bool>) category.CreateEntry("ShowJoinedName", true, "Show joined names");
             
-            MelonPrefs.RegisterBool(SettingsCategory, SettingLeaveBlink, false, "Blink HUD icon on leave");
-            MelonPrefs.RegisterBool(SettingsCategory, SettingLeaveSound, false, "Play sound on leave");
-            MelonPrefs.RegisterBool(SettingsCategory, SettingLeaveShowName, false, "Show left names");
+            ShouldLeaveBlink = (MelonPreferences_Entry<bool>) category.CreateEntry("LeaveBlink", false, "Blink HUD icon on leave");
+            ShouldPlayLeaveSound = (MelonPreferences_Entry<bool>) category.CreateEntry("LeaveSound", false, "Play sound on leave");
+            LeaveShowName = (MelonPreferences_Entry<bool>) category.CreateEntry("ShowLeaveName", false, "Show left names");
             
-            MelonPrefs.RegisterFloat(SettingsCategory, SettingSoundVolume, .3f, "Sound volume (0-1)");
-            MelonPrefs.RegisterBool(SettingsCategory, SettingUseUiMixer, true, "Notifications are affected by UI volume slider");
-            MelonPrefs.RegisterInt(SettingsCategory, SettingTextSize, 36, "Text size (pt)");
-
-            MelonPrefs.RegisterBool(SettingsCategory, SettingNotifyPublic, false, "Notify in public instances");
-            MelonPrefs.RegisterBool(SettingsCategory, SettingNotifyFriends, true, "Notify in friends[+] instances");
-            MelonPrefs.RegisterBool(SettingsCategory, SettingNotifyPrivate, true, "Notify in private instances");
-
-            MelonPrefs.RegisterBool(SettingsCategory, SettingShowFriendsOnly, false, "Show friend join/leave only");
-            MelonPrefs.RegisterString(SettingsCategory, SettingJoinIconColor, "127 191 255", "Join icon color (r g b)");
-            MelonPrefs.RegisterString(SettingsCategory, SettingLeaveIconColor, "153 82 51", "Leave icon color (r g b)");
+            SoundVolume = (MelonPreferences_Entry<float>) category.CreateEntry("SoundVolume", .3f, "Sound volume (0-1)");
+            UseUiMixer = (MelonPreferences_Entry<bool>) category.CreateEntry("UseUiMixer", true, "Notifications are affected by UI volume slider");
+            TextSize = (MelonPreferences_Entry<int>) category.CreateEntry("TextSize", 36, "Text size (pt)");
             
-            MelonPrefs.RegisterBool(SettingsCategory, SettingShowFriendsInDifferentColor, true, "Show friend names in different color");
-            MelonPrefs.RegisterString(SettingsCategory, SettingFriendsJoinColor, "224 224 0", "Friend join name color (r g b)");
-            MelonPrefs.RegisterString(SettingsCategory, SettingFriendsLeaveColor, "201 201 0", "Friend leave name color (r g b)");
+            NotifyInPublic = (MelonPreferences_Entry<bool>) category.CreateEntry("NotifyInPublic", false, "Notify in public instances");
+            NotifyInFriends = (MelonPreferences_Entry<bool>) category.CreateEntry("NotifyInFriends", true, "Notify in friends[+] instances");
+            NotifyInPrivate = (MelonPreferences_Entry<bool>) category.CreateEntry("NotifyInPrivate", true, "Notify in private instances");
             
-            MelonPrefs.RegisterBool(SettingsCategory, SettingShowFriendsAlways, false, "Show friend join/leave regardless of instance type");
+            ShowFriendsOnly = (MelonPreferences_Entry<bool>) category.CreateEntry("ShowFriendsOnly", false, "Show friend join/leave only");
+            JoinIconColor = (MelonPreferences_Entry<string>) category.CreateEntry("JoinColor", "127 191 255", "Join icon color (r g b)");
+            LeaveIconColor = (MelonPreferences_Entry<string>) category.CreateEntry("LeaveColor", "153 82 51", "Leave icon color (r g b)");
+            
+            ShowFriendsInDifferentColor = (MelonPreferences_Entry<bool>) category.CreateEntry("ShowFriendsInDifferentColor", true, "Show friend names in different color");
+            FriendsJoinIconColor = (MelonPreferences_Entry<string>) category.CreateEntry("FriendJoinColor", "224 224 0", "Friend join name color (r g b)");
+            FriendsLeaveIconColor = (MelonPreferences_Entry<string>) category.CreateEntry("FriendLeaveColor", "201 201 0", "Friend leave name color (r g b)");
+            
+            ShowFriendsAlways = (MelonPreferences_Entry<bool>) category.CreateEntry("ShowFriendsAlways", false, "Show friend join/leave regardless of instance type");
         }
 
         public static bool ShouldNotifyInCurrentInstance()
@@ -66,42 +71,30 @@ namespace JoinNotifier
             switch (instanceType)
             {
                 case ApiWorldInstance.AccessType.Public:
-                    return MelonPrefs.GetBool(SettingsCategory, SettingNotifyPublic);
+                    return NotifyInPublic.Value;
                 case ApiWorldInstance.AccessType.FriendsOfGuests:
                 case ApiWorldInstance.AccessType.FriendsOnly:
-                    return MelonPrefs.GetBool(SettingsCategory, SettingNotifyFriends);
+                    return NotifyInFriends.Value;
                 case ApiWorldInstance.AccessType.InviteOnly:
                 case ApiWorldInstance.AccessType.InvitePlus:
-                    return MelonPrefs.GetBool(SettingsCategory, SettingNotifyPrivate);
+                    return NotifyInPrivate.Value;
                 default:
                     return false;
             }
         }
 
-        public static bool ShouldBlinkIcon(bool isJoin) =>
-            MelonPrefs.GetBool(SettingsCategory, isJoin ? SettingShouldBlink : SettingLeaveBlink);
-
-        public static bool ShouldPlaySound(bool isJoin) =>
-            MelonPrefs.GetBool(SettingsCategory, isJoin ? SettingShouldPlaySound : SettingLeaveSound);
+        public static bool ShouldBlinkIcon(bool isJoin) => isJoin ? ShouldJoinBlink.Value : ShouldLeaveBlink.Value;
         
-        public static bool ShouldShowNames(bool isJoin) =>
-            MelonPrefs.GetBool(SettingsCategory, isJoin ? SettingJoinShowName : SettingLeaveShowName);
+        public static bool ShouldPlaySound(bool isJoin) =>isJoin ? ShouldPlayJoinSound.Value : ShouldPlayLeaveSound.Value;
 
-        public static bool ShowFriendsOnly() => MelonPrefs.GetBool(SettingsCategory, SettingShowFriendsOnly);
-        public static bool ShowFriendsAlways() => MelonPrefs.GetBool(SettingsCategory, SettingShowFriendsAlways);
-        public static bool ShowFriendsInDifferentColor() => MelonPrefs.GetBool(SettingsCategory, SettingShowFriendsInDifferentColor);
+        public static bool ShouldShowNames(bool isJoin) => isJoin ? JoinShowName.Value : LeaveShowName.Value;
 
-        public static float GetSoundVolume() => MelonPrefs.GetFloat(SettingsCategory, SettingSoundVolume);
 
-        public static Color GetJoinIconColor() => DecodeColor(MelonPrefs.GetString(SettingsCategory, SettingJoinIconColor));
-        public static Color GetLeaveIconColor() => DecodeColor(MelonPrefs.GetString(SettingsCategory, SettingLeaveIconColor));
+        public static Color GetJoinIconColor() => DecodeColor(JoinIconColor.Value);
+        public static Color GetLeaveIconColor() => DecodeColor(LeaveIconColor.Value);
         
-        public static Color GetFriendJoinIconColor() => DecodeColor(MelonPrefs.GetString(SettingsCategory, SettingFriendsJoinColor));
-        public static Color GetFriendLeaveIconColor() => DecodeColor(MelonPrefs.GetString(SettingsCategory, SettingFriendsLeaveColor));
-
-        public static bool GetUseUiMixer() => MelonPrefs.GetBool(SettingsCategory, SettingUseUiMixer);
-
-        public static int GetTextSize() => MelonPrefs.GetInt(SettingsCategory, SettingTextSize);
+        public static Color GetFriendJoinIconColor() => DecodeColor(FriendsJoinIconColor.Value);
+        public static Color GetFriendLeaveIconColor() => DecodeColor(FriendsLeaveIconColor.Value);
 
         private static Color DecodeColor(string color)
         {
