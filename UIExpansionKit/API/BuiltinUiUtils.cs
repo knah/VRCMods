@@ -26,5 +26,13 @@ namespace UIExpansionKit.API
         {
             ScanningReflectionCache.ShowUiInputPopup(title, initialText, inputType, isNumeric, confirmButtonText, onComplete, onCancel, placeholderText, closeAfterInput, onPopupShown);
         }
+        
+        public static event Action QuickMenuClosed;
+        public static event Action FullMenuClosed;
+        public static event Action<ExpandedMenu> OnMenuOpened;
+
+        internal static void InvokeQuickMenuClosed() => QuickMenuClosed?.Invoke();
+        internal static void InvokeFullMenuClosed() => FullMenuClosed?.Invoke();
+        internal static void InvokeMenuOpened(ExpandedMenu menu) => OnMenuOpened?.Invoke(menu);
     }
 }

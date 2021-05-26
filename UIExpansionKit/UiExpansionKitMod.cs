@@ -60,10 +60,6 @@ namespace UIExpansionKit
         
         internal static bool AreSettingsDirty = false;
 
-        public event Action QuickMenuClosed;
-        public event Action FullMenuClosed;
-        public event Action<ExpandedMenu> OnMenuOpened;
-
         public override void OnApplicationStart()
         {
             Instance = this;
@@ -157,10 +153,10 @@ namespace UIExpansionKit
             }
 
             GameObject.Find("UserInterface/QuickMenu/QuickMenu_NewElements/_Background")
-                .AddComponent<EnableDisableListener>().OnDisabled += () => QuickMenuClosed?.Invoke();
+                .AddComponent<EnableDisableListener>().OnDisabled += BuiltinUiUtils.InvokeQuickMenuClosed;
             
             GameObject.Find("UserInterface/MenuContent/Backdrop/Backdrop")
-                .AddComponent<EnableDisableListener>().OnDisabled += () => FullMenuClosed?.Invoke();
+                .AddComponent<EnableDisableListener>().OnDisabled += BuiltinUiUtils.InvokeFullMenuClosed;
 
             DecorateFullMenu();
             DecorateMenuPages();
@@ -215,7 +211,7 @@ namespace UIExpansionKit
                     listener.OnEnabled += () =>
                     {
                         expando.SetActive(myHasContents[categoryEnum]);
-                        OnMenuOpened?.Invoke(categoryEnum);
+                        BuiltinUiUtils.InvokeMenuOpened(categoryEnum);
                     };
                     listener.OnDisabled += () => expando.SetActive(false);
 
@@ -245,7 +241,7 @@ namespace UIExpansionKit
                     listener.OnEnabled += () =>
                     {
                         expando.SetActive(myHasContents[categoryEnum]);
-                        OnMenuOpened?.Invoke(categoryEnum);
+                        BuiltinUiUtils.InvokeMenuOpened(categoryEnum);
                     };
                     listener.OnDisabled += () => expando.SetActive(false);
                     

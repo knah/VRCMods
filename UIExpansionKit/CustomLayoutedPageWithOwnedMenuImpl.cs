@@ -18,6 +18,7 @@ namespace UIExpansionKit
         protected abstract Transform GetContentRoot(Transform instantiatedMenu);
         protected abstract RectTransform GetTopLevelUiObject(Transform instantiatedMenu);
         protected abstract void AdjustMenuTransform(Transform instantiatedMenu, int layer);
+        protected virtual bool CloseOnMenuClose { get; }
 
         private GameObject myMenuInstance;
 
@@ -44,8 +45,12 @@ namespace UIExpansionKit
             }
 
             newInstance.GetComponentInChildren<Canvas>().gameObject.AddComponent<VRC_UiShape>();
-            UiExpansionKitMod.Instance.QuickMenuClosed += Hide;
-            UiExpansionKitMod.Instance.FullMenuClosed += Hide;
+            if (CloseOnMenuClose)
+            {
+                BuiltinUiUtils.QuickMenuClosed += Hide;
+                BuiltinUiUtils.FullMenuClosed += Hide;
+            }
+
             var contentRoot = GetContentRoot(newInstance.transform);
             PopulateButtons(contentRoot.transform, IsQuickMenu, true);
 
@@ -66,10 +71,13 @@ namespace UIExpansionKit
                     
                 topObject.Hide();
             }
-            
-            UiExpansionKitMod.Instance.QuickMenuClosed -= Hide;
-            UiExpansionKitMod.Instance.FullMenuClosed -= Hide;
-                
+
+            if (CloseOnMenuClose)
+            {
+                BuiltinUiUtils.QuickMenuClosed -= Hide;
+                BuiltinUiUtils.FullMenuClosed -= Hide;
+            }
+
             Object.Destroy(myMenuInstance);
             myMenuInstance = null;
         }
