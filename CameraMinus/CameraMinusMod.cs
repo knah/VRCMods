@@ -2,19 +2,71 @@ using CameraMinus;
 using MelonLoader;
 using UIExpansionKit.API;
 using UnityEngine;
+using VRC.SDKBase;
 using VRC.UserCamera;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(CameraMinusMod), "CameraMinus", "1.1.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(CameraMinusMod), "CameraMinus", "2.0.0", "knah", "https://github.com/knah/VRCMods")]
 
 namespace CameraMinus
 {
     public class CameraMinusMod : CustomizedMelonMod
     {
+        private MelonPreferences_Entry<bool> myUseCameraExpando;
+        private MelonPreferences_Entry<bool> myUnlimitCameraPickupDistance;
+
         public override void OnApplicationStart()
         {
-            var customMenu = ExpansionKitApi.CreateCustomQuickMenuPage(LayoutDescription.QuickMenu3Columns);
-            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.CameraQuickMenu).AddSimpleButton("CameraMinus", () => customMenu.Show());
+            var category = MelonPreferences.CreateCategory("CameraMinus", "CameraMinus");
+            myUseCameraExpando = (MelonPreferences_Entry<bool>) category.CreateEntry("UseCameraExpando", true, "Use Camera expando (instead of QM expando)");
+            myUnlimitCameraPickupDistance = (MelonPreferences_Entry<bool>) category.CreateEntry("UnlimitCameraPickupDistance", true, "Longer camera pickup distance");
+
+            ExpansionKitApi.GetSettingsCategory("CameraMinus")
+                .AddLabel("Disable and enable camera to update camera expando visibility");
+            
+            GameObject cameraButton = null;
+            GameObject qmButton = null;
+            
+            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.Camera).AddSimpleButton("CameraMinus", ShowCustomMenu, go =>
+            {
+                cameraButton = go;
+                cameraButton.SetActive(myUseCameraExpando.Value);
+            });
+            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.CameraQuickMenu).AddSimpleButton("CameraMinus", ShowCustomMenu, go =>
+            {
+                qmButton = go;
+                qmButton.SetActive(!myUseCameraExpando.Value);
+            });
+
+            myUseCameraExpando.OnValueChanged += (_, value) =>
+            {
+                if (cameraButton != null) cameraButton.SetActive(value);
+                if (qmButton != null) qmButton.SetActive(!value);
+            };
+
+            myUnlimitCameraPickupDistance.OnValueChanged += (_, value) =>
+            {
+                UpdateCameraPickupDistance(value);
+            };
+
+            ExpansionKitApi.OnUiManagerInit += () =>
+            {
+                UpdateCameraPickupDistance(myUnlimitCameraPickupDistance.Value);
+            };
+        }
+
+        private static void UpdateCameraPickupDistance(bool value)
+        {
+            var controller = UserCameraController.field_Internal_Static_UserCameraController_0;
+            if (controller != null)
+                controller.transform.Find("ViewFinder").GetComponent<VRC_Pickup>().proximity = value ? 20 : 1;
+        }
+
+        private void ShowCustomMenu()
+        {
+            var customMenu = myUseCameraExpando.Value
+                ? ExpansionKitApi.CreateCustomCameraExpandoPage(LayoutDescription.QuickMenu3Columns)
+                : ExpansionKitApi.CreateCustomQuickMenuPage(LayoutDescription.QuickMenu3Columns);
             
             customMenu.AddToggleButton("Camera lens visible", ToggleLens, GetLensState);
             customMenu.AddSimpleButton("Enlarge camera", Enlarge);
@@ -27,6 +79,8 @@ namespace CameraMinus
             customMenu.AddSpacer();
             customMenu.AddSpacer();
             customMenu.AddSimpleButton("Back", () => customMenu.Hide());
+            
+            customMenu.Show();
         }
 
         private void Enlarge()
