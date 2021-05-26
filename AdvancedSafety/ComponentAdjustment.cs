@@ -13,7 +13,7 @@ namespace AdvancedSafety
         {
             totalCount++;
             
-            if (specificCount++ >= AdvancedSafetySettings.MaxAudioSources)
+            if (specificCount++ >= AdvancedSafetySettings.MaxAudioSources.Value)
             {
                 Object.DestroyImmediate(audioSource, true);
                 deletedCount++;
@@ -21,12 +21,12 @@ namespace AdvancedSafety
                 return;
             }
 
-            if (!AdvancedSafetySettings.AllowCustomMixers)
+            if (!AdvancedSafetySettings.AllowCustomMixers.Value)
             {
                 audioSource.outputAudioMixerGroup = null;
             }
 
-            if (!AdvancedSafetySettings.AllowSpawnSounds)
+            if (!AdvancedSafetySettings.AllowSpawnSounds.Value)
             {
                 sourcesOutList.Add(audioSource);
                 if (audioSource.enabled && activeInHierarchy && audioSource.playOnAwake)
@@ -36,7 +36,7 @@ namespace AdvancedSafety
                 }
             }
 
-            if (!AdvancedSafetySettings.AllowGlobalSounds)
+            if (!AdvancedSafetySettings.AllowGlobalSounds.Value)
             {
                 var spatializer = obj.GetComponent<ONSPAudioSource>();
                 if (spatializer != null)
@@ -59,7 +59,7 @@ namespace AdvancedSafety
         {
             totalCount++;
 
-            if (specificCount++ > AdvancedSafetySettings.MaxConstraints)
+            if (specificCount++ > AdvancedSafetySettings.MaxConstraints.Value)
             {
                 Object.DestroyImmediate(constraint.Cast<Behaviour>(), true);
                 deletedCount++;
@@ -70,7 +70,7 @@ namespace AdvancedSafety
         {
             totalCount++;
 
-            if (specificCount++ >= AdvancedSafetySettings.MaxColliders)
+            if (specificCount++ >= AdvancedSafetySettings.MaxColliders.Value)
             {
                 deletedCount++;
                 var rigidbody = obj.GetComponent<Rigidbody>();
@@ -103,7 +103,7 @@ namespace AdvancedSafety
 
             var numVertices = 0;
             var skinnedMesh = obj.GetComponent<SkinnedMeshRenderer>()?.sharedMesh;
-            if (skinnedMesh == null || (specificCount += (numVertices = skinnedMesh.vertexCount)) >= AdvancedSafetySettings.MaxClothVertices)
+            if (skinnedMesh == null || (specificCount += (numVertices = skinnedMesh.vertexCount)) >= AdvancedSafetySettings.MaxClothVertices.Value)
             {
                 specificCount -= numVertices;
                 deletedCount++;
@@ -132,7 +132,7 @@ namespace AdvancedSafety
             {
                 submeshCount = mesh.subMeshCount;
                 var (meshPolyCount, firstBadSubmesh) =
-                    CountMeshPolygons(mesh, AdvancedSafetySettings.MaxPolygons - polyCount);
+                    CountMeshPolygons(mesh, AdvancedSafetySettings.MaxPolygons.Value - polyCount);
 
                 if (firstBadSubmesh != -1)
                 {
@@ -142,7 +142,7 @@ namespace AdvancedSafety
 
                 polyCount += meshPolyCount;
 
-                if (AdvancedSafetySettings.HeuristicallyRemoveScreenSpaceBullshit && meshFilter != null && ourMaterialsList.Count > 0 && (ourMaterialsList[0]?.renderQueue ?? 0) >= 2500)
+                if (AdvancedSafetySettings.HeuristicallyRemoveScreenSpaceBullshit.Value && meshFilter != null && ourMaterialsList.Count > 0 && (ourMaterialsList[0]?.renderQueue ?? 0) >= 2500)
                 {
                     var meshLowerName = mesh.name.ToLower();
                     if (meshLowerName.Contains("sphere") || meshLowerName.Contains("cube"))
@@ -156,7 +156,7 @@ namespace AdvancedSafety
                 }
             }
 
-            var allowedMaterialCount = Math.Min(AdvancedSafetySettings.MaxMaterialSlots - materialCount, submeshCount + AdvancedSafetySettings.MaxMaterialSlotsOverSubmeshCount);
+            var allowedMaterialCount = Math.Min(AdvancedSafetySettings.MaxMaterialSlots.Value - materialCount, submeshCount + AdvancedSafetySettings.MaxMaterialSlotsOverSubmeshCount.Value);
             if (allowedMaterialCount < renderer.GetMaterialCount())
             {
                 renderer.GetSharedMaterials(ourMaterialsList);
@@ -181,7 +181,7 @@ namespace AdvancedSafety
                 return;
             }
             
-            var particleLimit = AdvancedSafetySettings.MaxParticles - particleCount;
+            var particleLimit = AdvancedSafetySettings.MaxParticles.Value - particleCount;
 
             if (particleSystem.maxParticles > particleLimit) 
                 particleSystem.maxParticles = particleLimit;
@@ -199,7 +199,7 @@ namespace AdvancedSafety
                     polySum += CountMeshPolygons(mesh, Int32.MaxValue).TotalPolys;
 
                 var requestedVertexCount = polySum * particleSystem.maxParticles;
-                var vertexLimit = AdvancedSafetySettings.MaxMeshParticleVertices - meshParticleVertexCount;
+                var vertexLimit = AdvancedSafetySettings.MaxMeshParticleVertices.Value - meshParticleVertexCount;
                 if (requestedVertexCount > vertexLimit) 
                     particleSystem.maxParticles = vertexLimit / polySum;
 

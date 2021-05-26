@@ -53,7 +53,7 @@ namespace AdvancedSafety
                         nameof(VRCAvatarManager.Method_Public_Boolean_ApiAvatar_String_Single_MulticastDelegateNPublicSealedVoGaVRBoUnique_0)))
                     .GetValue(null);
                 
-                Imports.Hook((IntPtr)(&originalMethodPointer), typeof(AvatarHiding).GetMethod(nameof(SwitchAvatarPatch), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
+                MelonUtils.NativeHookAttach((IntPtr)(&originalMethodPointer), typeof(AvatarHiding).GetMethod(nameof(SwitchAvatarPatch), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
 
                 ourSwitchAvatar = Marshal.GetDelegateForFunctionPointer<SwitchAvatarDelegate>(originalMethodPointer);
             }
@@ -100,17 +100,17 @@ namespace AdvancedSafety
                     return;
 
                 var userId = apiUser.id;
-                if (!AdvancedSafetySettings.IncludeFriendsInHides && APIUser.IsFriendsWith(userId))
+                if (!AdvancedSafetySettings.IncludeFriendsInHides.Value && APIUser.IsFriendsWith(userId))
                     return;
 
-                if (AdvancedSafetySettings.HidesAbideByShowAvatar &&
+                if (AdvancedSafetySettings.HidesAbideByShowAvatar.Value &&
                     AdvancedSafetyMod.IsAvatarExplicitlyShown(userId))
                     return;
 
                 if (ourBlockedAvatarAuthors.ContainsKey(apiAvatar.authorId) ||
                     ourBlockedAvatars.ContainsKey(apiAvatar.id))
                 {
-                    MelonLogger.Log(
+                    MelonLogger.Msg(
                         $"Hiding avatar on {apiUser.displayName} because it or its author is hidden");
                     // denyReason = 3;
                     __result = false;
@@ -118,7 +118,7 @@ namespace AdvancedSafety
             }
             catch (Exception ex)
             {
-                MelonLogger.LogError($"Exception in CanUseCustomAvatarPatch: {ex}");
+                MelonLogger.Error($"Exception in CanUseCustomAvatarPatch: {ex}");
             }
         }
 

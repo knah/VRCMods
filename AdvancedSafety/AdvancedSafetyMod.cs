@@ -6,9 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using AdvancedSafety;
-using Harmony;
 using MelonLoader;
-using UIExpansionKit;
 using UnhollowerBaseLib;
 using UnhollowerBaseLib.Runtime;
 using UnityEngine;
@@ -23,7 +21,7 @@ using Object = UnityEngine.Object;
 using ModerationManager = VRC.Management.ModerationManager;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.5.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.5.1", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
 namespace AdvancedSafety
@@ -149,15 +147,10 @@ namespace AdvancedSafety
             PortalHiding.OnApplicationStart();
             AvatarHiding.OnApplicationStart(Harmony);
             
-            if(MelonHandler.Mods.Any(it => it.Info.SystemType.Name == nameof(UiExpansionKitMod)))
+            if(MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit"))
             {
                 typeof(UiExpansionKitSupport).GetMethod(nameof(UiExpansionKitSupport.OnApplicationStart), BindingFlags.Static | BindingFlags.Public)!.Invoke(null, new object[0]);
             }
-        }
-
-        public override void OnModSettingsApplied()
-        {
-            AdvancedSafetySettings.OnModSettingsApplied();
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -187,10 +180,10 @@ namespace AdvancedSafety
         private static readonly PriorityQueue<GameObjectWithPriorityData> ourBfsQueue = new PriorityQueue<GameObjectWithPriorityData>(GameObjectWithPriorityData.IsActiveDepthNumChildrenComparer);
         private static void CleanAvatar(VRCAvatarManager avatarManager, GameObject go)
         {
-            if (!AdvancedSafetySettings.AvatarFilteringEnabled) 
+            if (!AdvancedSafetySettings.AvatarFilteringEnabled.Value) 
                 return;
             
-            if (AdvancedSafetySettings.AvatarFilteringOnlyInPublic &&
+            if (AdvancedSafetySettings.AvatarFilteringOnlyInPublic.Value &&
                 RoomManager.field_Internal_Static_ApiWorldInstance_0?.InstanceType != ApiWorldInstance.AccessType.Public)
                 return;
             
@@ -198,10 +191,10 @@ namespace AdvancedSafety
             if (vrcPlayer == null) return;
             
             var userId = vrcPlayer.prop_Player_0?.prop_APIUser_0?.id ?? "";
-            if (!AdvancedSafetySettings.IncludeFriends && APIUser.IsFriendsWith(userId))
+            if (!AdvancedSafetySettings.IncludeFriends.Value && APIUser.IsFriendsWith(userId))
                 return;
 
-            if (AdvancedSafetySettings.AbideByShowAvatar && IsAvatarExplicitlyShown(userId))
+            if (AdvancedSafetySettings.AbideByShowAvatar.Value && IsAvatarExplicitlyShown(userId))
                 return;
 
             var start = Stopwatch.StartNew();
@@ -235,21 +228,21 @@ namespace AdvancedSafety
                 if (obj == null) return;
                 scannedObjects++;
 
-                if (animator?.IsBoneTransform(obj.transform) != true && seenTransforms++ >= AdvancedSafetySettings.MaxTransforms)
+                if (animator?.IsBoneTransform(obj.transform) != true && seenTransforms++ >= AdvancedSafetySettings.MaxTransforms.Value)
                 {
                     Object.DestroyImmediate(obj, true);
                     destroyedObjects++;
                     return;
                 }
 
-                if (objWithPriority.Depth >= AdvancedSafetySettings.MaxDepth)
+                if (objWithPriority.Depth >= AdvancedSafetySettings.MaxDepth.Value)
                 {
                     Object.DestroyImmediate(obj, true);
                     destroyedObjects++;
                     return;
                 }
 
-                if (!AdvancedSafetySettings.AllowUiLayer && (obj.layer == 12 || obj.layer == 5))
+                if (!AdvancedSafetySettings.AllowUiLayer.Value && (obj.layer == 12 || obj.layer == 5))
                     obj.layer = 9;
 
                 obj.GetComponents(componentList);
@@ -260,17 +253,17 @@ namespace AdvancedSafety
                     component.TryCast<AudioSource>()?.VisitAudioSource(ref scannedObjects, ref destroyedObjects, ref seenAudioSources, obj, audioSourcesList, objWithPriority.IsActiveInHierarchy);
                     component.TryCast<IConstraint>()?.VisitConstraint(ref scannedObjects, ref destroyedObjects, ref seenConstraints, obj);
                     component.TryCast<Cloth>()?.VisitCloth(ref scannedObjects, ref destroyedObjects, ref seenClothVertices, obj);
-                    component.TryCast<Rigidbody>()?.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenRigidbodies, AdvancedSafetySettings.MaxRigidBodies);
+                    component.TryCast<Rigidbody>()?.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenRigidbodies, AdvancedSafetySettings.MaxRigidBodies.Value);
                     
                     component.TryCast<Collider>()?.VisitCollider(ref scannedObjects, ref destroyedObjects, ref seenColliders, obj);
-                    component.TryCast<Animator>()?.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenAnimators, AdvancedSafetySettings.MaxAnimators);
-                    component.TryCast<Light>()?.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenLights, AdvancedSafetySettings.MaxLights);
+                    component.TryCast<Animator>()?.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenAnimators, AdvancedSafetySettings.MaxAnimators.Value);
+                    component.TryCast<Light>()?.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenLights, AdvancedSafetySettings.MaxLights.Value);
                     
                     component.TryCast<Renderer>()?.VisitRenderer(ref scannedObjects, ref destroyedObjects, ref seenPolys, ref seenMaterials, obj, skinnedRendererListList);
                     component.TryCast<ParticleSystem>()?.VisitParticleSystem(component.GetComponent<ParticleSystemRenderer>(), ref scannedObjects, ref destroyedObjects, ref seenParticles, ref seenMeshParticleVertices, obj);
                     
                     if (ReferenceEquals(component.TryCast<Transform>(), null))
-                        component.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenComponents, AdvancedSafetySettings.MaxComponents);
+                        component.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenComponents, AdvancedSafetySettings.MaxComponents.Value);
                 }
                 
                 foreach (var child in obj.transform) 
@@ -283,7 +276,7 @@ namespace AdvancedSafety
             
             ComponentAdjustment.PostprocessSkinnedRenderers(skinnedRendererListList);
 
-            if (!AdvancedSafetySettings.AllowSpawnSounds)
+            if (!AdvancedSafetySettings.AllowSpawnSounds.Value)
                 MelonCoroutines.Start(CheckSpawnSounds(go, audioSourcesList));
 
             if (MelonDebug.IsEnabled() || destroyedObjects > 100)
@@ -396,7 +389,7 @@ namespace AdvancedSafety
             }
             catch (Exception ex)
             {
-                MelonLogger.LogError($"Exception when cleaning avatar: {ex}");
+                MelonLogger.Error($"Exception when cleaning avatar: {ex}");
             }
             
             return result;
@@ -418,7 +411,7 @@ namespace AdvancedSafety
 
         private static IntPtr AudioMixerReadPatch(int thisPtr, int readerPtr)
         {
-            if (!ourCanReadAudioMixers && !AdvancedSafetySettings.AllowReadingMixers)
+            if (!ourCanReadAudioMixers && !AdvancedSafetySettings.AllowReadingMixers.Value)
             {
                 MelonDebug.Msg("Not reading audio mixer");
                 return IntPtr.Zero;
