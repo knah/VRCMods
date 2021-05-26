@@ -69,13 +69,13 @@ namespace RootMotionNew.FinalIK
 				var middleLegPosition = (mySolver.legs[0].thigh.readPosition + mySolver.legs[1].thigh.readPosition) / 2;
 				var hipLocalOffset = Quaternion.Inverse(pelvis.readRotation) * (middleLegPosition - pelvis.readPosition);
 
-				if (IkTweaksSettings.DoHipShifting)
+				if (IkTweaksSettings.DoHipShifting.Value)
 				{
 					pelvis.solverPosition += pelvis.solverRotation * hipLocalOffset;
 					IKPositionPelvis += IKRotationPelvis * hipLocalOffset;
 				}
 
-				if (IkTweaksSettings.PreStraightenSpine)
+				if (IkTweaksSettings.PreStraightenSpine.Value)
 				{
 					for (var i = 1; i < bones.Length - 1; i++)
 					{
@@ -85,7 +85,7 @@ namespace RootMotionNew.FinalIK
 					}
 				}
 
-				if (IkTweaksSettings.StraightenNeck)
+				if (IkTweaksSettings.StraightenNeck.Value)
 				{
 					if (neckIndex >= 0)
 					{
@@ -132,7 +132,7 @@ namespace RootMotionNew.FinalIK
 					var bendDirection = Vector3.ProjectOnPlane(targetToHead, currentToHead).normalized;
 					var bendForwardness = (Vector3.Dot(rotationForward, bendDirection) + 1) / 2;
 
-					var maxBendTotal = Mathf.Pow(Mathf.Clamp01(Mathf.Acos(Vector3.Dot(currentToHead, targetToHead)) * Mathf2.Rad2Deg / IkTweaksSettings.StraightSpineAngle), IkTweaksSettings.StraightSpinePower);
+					var maxBendTotal = Mathf.Pow(Mathf.Clamp01(Mathf.Acos(Vector3.Dot(currentToHead, targetToHead)) * Mathf2.Rad2Deg / IkTweaksSettings.StraightSpineAngle.Value), IkTweaksSettings.StraightSpinePower.Value);
 
 					var maxSpineAngle = Mathf.Lerp(maxSpineAngleBack, maxSpineAngleFwd, bendForwardness) * maxBendTotal;
 					var maxNeckAngle = Mathf.Lerp(maxNeckAngleBack, maxNeckAngleFwd, bendForwardness) * maxBendTotal;
@@ -176,7 +176,7 @@ namespace RootMotionNew.FinalIK
 					currentAngle = (minAngle + maxAngle) / 2;
 				}
 
-				if (IkTweaksSettings.DoHipShifting)
+				if (IkTweaksSettings.DoHipShifting.Value)
 				{
 					pelvis.solverPosition -= pelvis.solverRotation * hipLocalOffset;
 					IKPositionPelvis -= IKRotationPelvis * hipLocalOffset;

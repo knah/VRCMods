@@ -50,7 +50,7 @@ namespace IKTweaks
 
         private static bool SupportsHipTrackingPatch(ref bool __result)
         {
-            if (IkTweaksSettings.DisableFbt)
+            if (IkTweaksSettings.DisableFbt.Value)
             {
                 __result = false;
                 return false;
@@ -74,7 +74,7 @@ namespace IKTweaks
             var shoulderMode = IkTweaksSettings.ShoulderMode;
             ikSolverVr.leftArm.shoulderRotationMode = shoulderMode;
             ikSolverVr.rightArm.shoulderRotationMode = shoulderMode;
-            ikSolverVr.plantFeet = IkTweaksSettings.PlantFeet;
+            ikSolverVr.plantFeet = IkTweaksSettings.PlantFeet.Value;
         }
     }
 }

@@ -94,7 +94,7 @@ namespace IKTweaks
             CalibrateCore(avatarRoot).ContinueWith(t =>
             {
                 if (t.Exception != null) 
-                    MelonLogger.LogError($"Task failed with exception: {t.Exception}");
+                    MelonLogger.Error($"Task failed with exception: {t.Exception}");
             });
         }
 
@@ -117,7 +117,7 @@ namespace IKTweaks
             if (err == ETrackedPropertyError.TrackedProp_Success)
                 return sb.ToString();
             
-            MelonLogger.LogWarning($"Can't get serial for tracker ID {trackerId}");
+            MelonLogger.Warning($"Can't get serial for tracker ID {trackerId}");
             return null;
         }
         
@@ -173,11 +173,11 @@ namespace IKTweaks
 
                 if (bestTracker == null)
                 {
-                    MelonLogger.Log($"Null target for tracker {data.TrackerSerial}");
+                    MelonLogger.Msg($"Null target for tracker {data.TrackerSerial}");
                     return null;
                 }
 
-                MelonLogger.Log($"Found tracker with serial {data.TrackerSerial} for point {point}");
+                MelonLogger.Msg($"Found tracker with serial {data.TrackerSerial} for point {point}");
 
                 var result = bestTracker;
 
@@ -225,7 +225,7 @@ namespace IKTweaks
             vrik.solver.leftLeg.target = leftFoot;
             vrik.solver.rightLeg.target = rightFoot;
 
-            MelonLogger.Log("Applied stored calibration");
+            MelonLogger.Msg("Applied stored calibration");
         }
 
         private static Action<VRCTrackingSteam, bool>? ourSetVisibilityDelegate;
@@ -304,7 +304,7 @@ namespace IKTweaks
         private static async Task CalibrateCore(GameObject avatarRoot)
         {
             var avatarId = avatarRoot.GetComponent<PipelineManager>().blueprintId;
-            if (IkTweaksSettings.CalibrateStorePerAvatar && HasSavedCalibration(avatarId))
+            if (IkTweaksSettings.CalibrateStorePerAvatar.Value && HasSavedCalibration(avatarId))
             {
                 await ApplyStoredCalibration(avatarRoot, avatarId);
                 return;
@@ -324,7 +324,6 @@ namespace IKTweaks
         private static Quaternion GetLocalRotation(Transform parent, Transform child) => Quaternion.Inverse(parent.rotation) * child.rotation;
         private static Quaternion GetLocalRotation(Transform parent, Quaternion childRotation) => Quaternion.Inverse(parent.rotation) * childRotation;
 
-        private static int spammy = 0;
         private static async Task ManualCalibrateCoro(GameObject avatarRoot)
         {
             var animator = avatarRoot.GetComponent<Animator>();
@@ -384,13 +383,13 @@ namespace IKTweaks
                 var trigger1 = Input.GetAxisRaw("Oculus_CrossPlatform_PrimaryIndexTrigger");
                 var trigger2 = Input.GetAxisRaw("Oculus_CrossPlatform_SecondaryIndexTrigger");
                 
-                if (IkTweaksSettings.CalibrateUseUniversal && UniversalData.Count >= 4)
+                if (IkTweaksSettings.CalibrateUseUniversal.Value && UniversalData.Count >= 4)
                 {
                     MoveTrackersToStoredPositions();
                     willUniversallyCalibrate = true;
                 }
 
-                if (IkTweaksSettings.CalibrateHalfFreeze && trigger1 + trigger2 > 0.75f)
+                if (IkTweaksSettings.CalibrateHalfFreeze.Value && trigger1 + trigger2 > 0.75f)
                 {
                     hips.position = oldHipPos;
                     hips.rotation = oldHipRot;
@@ -401,7 +400,7 @@ namespace IKTweaks
                         mirrorHips.rotation = oldHipRot;
                     }
                 }
-                else if(IkTweaksSettings.CalibrateFollowHead || willUniversallyCalibrate)
+                else if(IkTweaksSettings.CalibrateFollowHead.Value || willUniversallyCalibrate)
                 {
                     hips.rotation = forwardDirection.rotation * hipsRelativeToForwardDirection;
                     
@@ -470,7 +469,7 @@ namespace IKTweaks
 
                 if (bestTracker == -1)
                 {
-                    MelonLogger.Log($"Null target for bone {bone}");
+                    MelonLogger.Msg($"Null target for bone {bone}");
                     return null;
                 }
 
@@ -539,10 +538,10 @@ namespace IKTweaks
 
             var hipsTracker = GetTracker(HumanBodyBones.Hips);
             var leftFootTracker =
-                GetTracker(IkTweaksSettings.MapToes ? HumanBodyBones.LeftToes : HumanBodyBones.LeftFoot,
+                GetTracker(IkTweaksSettings.MapToes.Value ? HumanBodyBones.LeftToes : HumanBodyBones.LeftFoot,
                     HumanBodyBones.LeftFoot);
             var rightFootTracker =
-                GetTracker(IkTweaksSettings.MapToes ? HumanBodyBones.RightToes : HumanBodyBones.RightFoot,
+                GetTracker(IkTweaksSettings.MapToes.Value ? HumanBodyBones.RightToes : HumanBodyBones.RightFoot,
                     HumanBodyBones.RightFoot);
 
             StoreData(CalibrationPoint.Hip, hipsTracker);
@@ -553,7 +552,7 @@ namespace IKTweaks
             var rightLowerLegPosition = animator.GetBoneTransform(HumanBodyBones.RightLowerLeg).position;
             var avatarForward = Vector3.Cross(rightLowerLegPosition - leftLowerLegPosition, Vector3.up).normalized;
 
-            if (IkTweaksSettings.UseElbowTrackers)
+            if (IkTweaksSettings.UseElbowTrackers.Value)
             {
                 var leftElbowTracker = GetTracker(HumanBodyBones.LeftLowerArm);
                 var rightElbowTracker = GetTracker(HumanBodyBones.RightLowerArm);
@@ -562,7 +561,7 @@ namespace IKTweaks
                 StoreBendGoal(CalibrationPoint.RightElbow, rightElbowTracker, avatarForward * -0.1f, ref FullBodyHandling.RightElbowWeight);
             }
 
-            if (IkTweaksSettings.UseKneeTrackers)
+            if (IkTweaksSettings.UseKneeTrackers.Value)
             {
                 var leftKneeTracker = GetTracker(HumanBodyBones.LeftLowerLeg);
                 var rightKneeTracker = GetTracker(HumanBodyBones.RightLowerLeg);
@@ -571,7 +570,7 @@ namespace IKTweaks
                 StoreBendGoal(CalibrationPoint.RightKnee, rightKneeTracker, avatarForward * 0.1f, ref FullBodyHandling.RightKneeWeight);
             }
 
-            if (IkTweaksSettings.UseChestTracker)
+            if (IkTweaksSettings.UseChestTracker.Value)
             {
                 var chestTracker = GetTracker(HumanBodyBones.UpperChest, HumanBodyBones.Chest);
 

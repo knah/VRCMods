@@ -15,7 +15,7 @@ using Valve.VR;
 using Delegate = Il2CppSystem.Delegate;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.10", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.11", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -37,8 +37,8 @@ namespace IKTweaks
             ClassInjector.RegisterTypeInIl2Cpp<VRIK_New>();
             ClassInjector.RegisterTypeInIl2Cpp<TwistRelaxer_New>();
 
-            VrIkHandling.HookVrIkInit(harmonyInstance);
-            FullBodyHandling.HookFullBodyController(harmonyInstance);
+            VrIkHandling.HookVrIkInit(Harmony);
+            FullBodyHandling.HookFullBodyController(Harmony);
             
             Camera.onPreRender = Delegate.Combine(Camera.onPreRender, (Camera.CameraCallback) OnVeryLateUpdate).Cast<Camera.CameraCallback>();
             
@@ -79,9 +79,9 @@ namespace IKTweaks
             calibrateButton.onClick = new Button.ButtonClickedEvent();
             calibrateButton.onClick.AddListener(new Action(() =>
             {
-                if (IkTweaksSettings.FullBodyVrIk)
+                if (IkTweaksSettings.FullBodyVrIk.Value)
                 {
-                    if (IkTweaksSettings.CalibrateUseUniversal)
+                    if (IkTweaksSettings.CalibrateUseUniversal.Value)
                         CalibrationManager.Clear();
                     else
                         CalibrationManager.Clear(VRCPlayer.field_Internal_Static_VRCPlayer_0.prop_ApiAvatar_0.id);
@@ -157,7 +157,7 @@ namespace IKTweaks
                 }
                 catch (Exception ex)
                 {
-                    MelonLogger.LogError(ex.ToString());
+                    MelonLogger.Error(ex.ToString());
                 }
             }
         }
@@ -184,11 +184,6 @@ namespace IKTweaks
             {
                 myQueue.Enqueue(continuation);
             }
-        }
-
-        public override void OnModSettingsApplied()
-        {
-            IkTweaksSettings.OnSettingsApplied();
         }
     }
 }

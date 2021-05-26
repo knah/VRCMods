@@ -52,7 +52,7 @@ namespace IKTweaks
         
         public static void Update()
         {
-            if (!IkTweaksSettings.FullBodyVrIk || !LastCalibrationWasInCustomIk) return;
+            if (!IkTweaksSettings.FullBodyVrIk.Value || !LastCalibrationWasInCustomIk) return;
 
             if (LastInitializedController == null || LastInitializedController.field_Private_FullBodyBipedIK_0 == null) return;
             
@@ -75,7 +75,7 @@ namespace IKTweaks
                 // lastInitedController.field_Private_FBBIKHeadEffector_0.rotationWeight = 0f;
 
                 if (vrik == null) return;
-                if (!IkTweaksSettings.IgnoreAnimations || firstPuckDisabled)
+                if (!IkTweaksSettings.IgnoreAnimations.Value || firstPuckDisabled)
                 {
                     vrik.solver.spine.positionWeight = LastInitializedController.field_Private_FBBIKHeadEffector_0.positionWeight;
                     vrik.solver.spine.rotationWeight = LastInitializedController.field_Private_FBBIKHeadEffector_0.rotationWeight;
@@ -89,7 +89,7 @@ namespace IKTweaks
             
             if (vrik == null) return;
 
-            if (!IkTweaksSettings.IgnoreAnimations || firstPuckDisabled)
+            if (!IkTweaksSettings.IgnoreAnimations.Value || firstPuckDisabled)
             {
                 var leftLegMappingWeight = fbbik.solver.leftLegMapping.weight;
                 vrik.solver.leftLeg.positionWeight = fbbik.solver.leftFootEffector.positionWeight * leftLegMappingWeight;
@@ -131,15 +131,17 @@ namespace IKTweaks
             vrik.enabled = fbbik.enabled;
             vrik.solver.IKPositionWeight = fbbik.solver.IKPositionWeight;
             
-            vrik.solver.spine.maxNeckAngleFwd = IkTweaksSettings.MaxNeckAngleFwd;
-            vrik.solver.spine.maxNeckAngleBack = IkTweaksSettings.MaxNeckAngleBack;
-            vrik.solver.spine.maxSpineAngleFwd = IkTweaksSettings.MaxSpineAngleFwd;
-            vrik.solver.spine.maxSpineAngleBack = IkTweaksSettings.MaxSpineAngleBack;
-            vrik.solver.spine.relaxationIterations = IkTweaksSettings.SpineRelaxIterations;
+            vrik.solver.spine.maxNeckAngleFwd = IkTweaksSettings.MaxNeckAngleFwd.Value;
+            vrik.solver.spine.maxNeckAngleBack = IkTweaksSettings.MaxNeckAngleBack.Value;
+            vrik.solver.spine.maxSpineAngleFwd = IkTweaksSettings.MaxSpineAngleFwd.Value;
+            vrik.solver.spine.maxSpineAngleBack = IkTweaksSettings.MaxSpineAngleBack.Value;
+            vrik.solver.spine.relaxationIterations = IkTweaksSettings.SpineRelaxIterations.Value;
+            if (vrik.solver.spine.relaxationIterations > 25) vrik.solver.spine.relaxationIterations = 25;
+            if (vrik.solver.spine.relaxationIterations < 5) vrik.solver.spine.relaxationIterations = 5;
             // vrik.solver.spine.trigPelvisStrength = IkTweaksSettings.SpineBendHipsStrength;
-            vrik.solver.spine.neckBendPriority = IkTweaksSettings.NeckPriority;
+            vrik.solver.spine.neckBendPriority = IkTweaksSettings.NeckPriority.Value;
 
-            if (IkTweaksSettings.UseKneeTrackers)
+            if (IkTweaksSettings.UseKneeTrackers.Value)
             {
                 vrik.solver.leftLeg.bendGoalWeight = LeftKneeWeight;
                 vrik.solver.rightLeg.bendGoalWeight = RightKneeWeight;
@@ -151,11 +153,11 @@ namespace IKTweaks
                 vrik.solver.leftLeg.bendToTargetWeight = vrik.solver.rightLeg.bendToTargetWeight = 1;
             }
             
-            vrik.solver.leftArm.bendGoalWeight = IkTweaksSettings.UseElbowTrackers ? LeftElbowWeight : 0;
-            vrik.solver.rightArm.bendGoalWeight = IkTweaksSettings.UseElbowTrackers ? RightElbowWeight : 0;
-            vrik.solver.spine.chestGoalWeight = IkTweaksSettings.UseChestTracker ? ChestWeight : 0;
+            vrik.solver.leftArm.bendGoalWeight = IkTweaksSettings.UseElbowTrackers.Value ? LeftElbowWeight : 0;
+            vrik.solver.rightArm.bendGoalWeight = IkTweaksSettings.UseElbowTrackers.Value ? RightElbowWeight : 0;
+            vrik.solver.spine.chestGoalWeight = IkTweaksSettings.UseChestTracker.Value ? ChestWeight : 0;
 
-            vrik.solver.spine.hipRotationPinning = IkTweaksSettings.PinHipRotation;
+            vrik.solver.spine.hipRotationPinning = IkTweaksSettings.PinHipRotation.Value;
         }
 
         public enum BoneResetMask
@@ -211,7 +213,7 @@ namespace IKTweaks
                     
                     for (var i = 0; i < muscles.Count; i++)
                     {
-                        if (IkTweaksSettings.IgnoreAnimations && IKTweaksMod.ourRandomPuck.activeInHierarchy)
+                        if (IkTweaksSettings.IgnoreAnimations.Value && IKTweaksMod.ourRandomPuck.activeInHierarchy)
                         {
                             muscles[i] *= ourBoneResetMasks[i] == BoneResetMask.Never ? 1 : 0;
                             continue;
@@ -250,7 +252,7 @@ namespace IKTweaks
 
                 vrik.solver.OnPostUpdate += () =>
                 {
-                    if (!IkTweaksSettings.AddHumanoidPass) return;
+                    if (!IkTweaksSettings.AddHumanoidPass.Value) return;
                     
                     var hipPos = hips.position;
                     var hipRot = hips.rotation;
@@ -275,7 +277,7 @@ namespace IKTweaks
             
             vrik.AutoDetectReferences();
             
-            if (!IkTweaksSettings.MapToes)
+            if (!IkTweaksSettings.MapToes.Value)
             {
                 vrik.references.leftToes = null;
                 vrik.references.rightToes = null;
@@ -359,7 +361,7 @@ namespace IKTweaks
             var vrcPlayer = __2;
             if (vrcPlayer == null) return;
             var isLocalPlayer = vrcPlayer.prop_Player_0?.prop_APIUser_0?.id == APIUser.CurrentUser?.id;
-            if(isLocalPlayer != __3) MelonLogger.LogWarning("Computed IsLocal is different from provided");
+            if(isLocalPlayer != __3) MelonLogger.Warning("Computed IsLocal is different from provided");
             if (!isLocalPlayer) return;
             
             LastCalibrationWasInCustomIk = false;
@@ -368,7 +370,7 @@ namespace IKTweaks
 
         private static void FbbIkInitPostfix(Animator __1, bool __3)
         {
-            if (!__3 || !IkTweaksSettings.FullBodyVrIk || !ourIsFbtSupported()) return;
+            if (!__3 || !IkTweaksSettings.FullBodyVrIk.Value || !ourIsFbtSupported()) return;
             
             LastCalibrationWasInCustomIk = true;
             CalibrationManager.Calibrate(__1.gameObject);
@@ -376,7 +378,7 @@ namespace IKTweaks
 
         private static bool PatchHipAndFeetTracking(ref bool __result)
         {
-            if (IkTweaksSettings.DisableFbt)
+            if (IkTweaksSettings.DisableFbt.Value)
             {
                 __result = false;
                 return false;
@@ -389,7 +391,7 @@ namespace IKTweaks
         {
             IKTweaksMod.ProcessIKLateUpdateQueue();
 
-            if (IkTweaksSettings.FullBodyVrIk && LastCalibrationWasInCustomIk &&
+            if (IkTweaksSettings.FullBodyVrIk.Value && LastCalibrationWasInCustomIk &&
                 LastInitializedController.field_Private_FullBodyBipedIK_0 == __instance)
             {
                 Update();
@@ -403,7 +405,7 @@ namespace IKTweaks
         
         private static bool FixedUpdatePrefix(FullBodyBipedIK __instance)
         {
-            if (IkTweaksSettings.FullBodyVrIk && LastCalibrationWasInCustomIk &&
+            if (IkTweaksSettings.FullBodyVrIk.Value && LastCalibrationWasInCustomIk &&
                 LastInitializedController.field_Private_FullBodyBipedIK_0 == __instance)
             {
                 if(LastInitializedVRIK != null)
@@ -416,7 +418,7 @@ namespace IKTweaks
         
         private static bool UpdatePrefix(FullBodyBipedIK __instance)
         {
-            if (IkTweaksSettings.FullBodyVrIk && LastCalibrationWasInCustomIk &&
+            if (IkTweaksSettings.FullBodyVrIk.Value && LastCalibrationWasInCustomIk &&
                 LastInitializedController.field_Private_FullBodyBipedIK_0 == __instance)
             {
                 if(LastInitializedVRIK != null)
@@ -439,7 +441,7 @@ namespace IKTweaks
 
         private static bool IsCalibratedForAvatarPrefix(ref bool __result)
         {
-            if (IkTweaksSettings.FullBodyVrIk && ourIsFbtSupported())
+            if (IkTweaksSettings.FullBodyVrIk.Value && ourIsFbtSupported())
             {
                 __result = true;
                 return false;
