@@ -9,6 +9,8 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
+#nullable disable
+
 namespace FavCat.CustomLists
 {
     public class CustomPickerList : MonoBehaviour
@@ -145,7 +147,7 @@ namespace FavCat.CustomLists
             }
             catch (Exception ex)
             {
-                MelonLogger.LogError(ex.ToString());
+                MelonLogger.Error(ex.ToString());
             }
         }
 

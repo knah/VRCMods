@@ -1,9 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Harmony;
 using MelonLoader;
+using UIExpansionKit.API;
 using UnityEngine;
 
 namespace FavCat
@@ -83,7 +82,7 @@ namespace FavCat
             
             ourNextAllowedUpdate = Time.time + RequestDelay;
             
-            MelonLogger.Log($"Performing image request to {url}");
+            MelonLogger.Msg($"Performing image request to {url}");
             ImageDownloader.DownloadImage(url, 256, new Action<Texture2D>(tex =>
             {
                 if (!Textures.TryGetValue(url, out var oldTex) || !oldTex)

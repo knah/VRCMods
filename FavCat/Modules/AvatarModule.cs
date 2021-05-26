@@ -31,7 +31,7 @@ namespace FavCat.Modules
         {
             myCurrentAnnoyingMessage = CanPerformAdditiveActions ? "WillBeObsolete" : (CanShowExistingLists ? "CantAddWithCanny" : "NoFavorites");
             
-            MelonLogger.Log("Adding button to UI - Looking up for Change Button");
+            MelonLogger.Msg("Adding button to UI - Looking up for Change Button");
             var foundAvatarPage = Resources.FindObjectsOfTypeAll<PageAvatar>()?.FirstOrDefault(p => p.transform.Find("Change Button") != null);
             if (foundAvatarPage == null)
                 throw new ApplicationException("No avatar page, can't initialize extended favorites");
@@ -78,29 +78,24 @@ namespace FavCat.Modules
             var randomList = foundAvatarPage.GetComponentInChildren<UiAvatarList>();
             return randomList.transform.parent;
         }
-        
-        protected override void OnFavButtonClicked(StoredCategory storedCategory)
-        {
-            // do nothing
-        }
 
         protected override void OnPickerSelected(IPickerElement model)
         {
             PlaySound();
 
-            if (!CanShowExistingLists)
+            if (FavCatSettings.AvatarSearchMode.Value == "author")
             {
                 FavCatMod.Instance.PlayerModule?.OnPickerSelected(((IStoredModelAdapter<StoredAvatar>) model).Model.AuthorId, listsParent.gameObject);
                 return;
             }
 
             var avatar = new ApiAvatar() {id = model.Id};
-            if (Imports.IsDebugMode())
-                MelonLogger.Log($"Performing an API request for {model.Id}");
+            if (MelonDebug.IsEnabled())
+                MelonDebug.Msg($"Performing an API request for {model.Id}");
             avatar.Fetch(new Action<ApiContainer>((_) =>
             {
-                if (Imports.IsDebugMode())
-                    MelonLogger.Log($"Done an API request for {model.Id}");
+                if (MelonDebug.IsEnabled())
+                    MelonDebug.Msg($"Done an API request for {model.Id}");
 
                 FavCatMod.Database?.UpdateStoredAvatar(avatar);
 
@@ -115,11 +110,10 @@ namespace FavCat.Modules
 
                 // VRC has a tendency to change visibility of its lists after pedestal refresh 
                 ReorderLists();
-                RefreshFavButtons();
             }), new Action<ApiContainer>(c =>
             {
-                if (Imports.IsDebugMode())
-                    MelonLogger.Log("API request errored with " + c.Code + " - " + c.Error);
+                if (MelonDebug.IsEnabled())
+                    MelonDebug.Msg("API request errored with " + c.Code + " - " + c.Error);
                 if (c.Code == 404 && listsParent.gameObject.activeInHierarchy)
                 {
                     FavCatMod.Database.CompletelyDeleteAvatar(model.Id);
@@ -151,7 +145,6 @@ namespace FavCat.Modules
             
             myCurrentUiAvatarId = apiAvatar.id ?? "";
 
-            RefreshFavButtons();
             if (apiAvatar.Populated) 
                 FavCatMod.Database?.UpdateStoredAvatar(apiAvatar);
         }
@@ -167,7 +160,6 @@ namespace FavCat.Modules
                 });
         }
 
-        protected override bool FavButtonsOnLists => true;
         protected override IPickerElement WrapModel(StoredFavorite? favorite, StoredAvatar model) => new DbAvatarAdapter(model, favorite);
 
         protected override void SortModelList(string sortCriteria, string category, List<(StoredFavorite?, StoredAvatar)> avatars)

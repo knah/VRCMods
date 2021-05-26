@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FavCat.Database.Stored;
 using MelonLoader;
+using UIExpansionKit.API;
 using VRC.Core;
 
 namespace FavCat.Database
@@ -12,7 +13,7 @@ namespace FavCat.Database
     {
         internal void RunBackgroundAvatarSearch(string text, Action<IEnumerable<StoredAvatar>> callback)
         {
-            MelonLogger.Log($"Running local avatar search for text {text}");
+            MelonLogger.Msg($"Running local avatar search for text {text}");
             var ownerId = APIUser.CurrentUser.id;
             Task.Run(() => {
                 var searchText = text.ToLowerInvariant();
@@ -30,7 +31,7 @@ namespace FavCat.Database
         
         internal void RunBackgroundAvatarSearchByUser(string userId, Action<IEnumerable<StoredAvatar>> callback)
         {
-            MelonLogger.Log($"Running local avatar search for user {userId}");
+            MelonLogger.Msg($"Running local avatar search for user {userId}");
             var ownerId = APIUser.CurrentUser.id;
             Task.Run(() => {
                 var list = myStoredAvatars.Find(stored =>

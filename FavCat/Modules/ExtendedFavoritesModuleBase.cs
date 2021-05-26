@@ -41,7 +41,7 @@ namespace FavCat.Modules
 
         protected void PlaySound()
         {
-            if (!FavCatSettings.DoClickSounds) return;
+            if (!FavCatSettings.MakeClickSounds.Value) return;
             var soundPlayer = VRCUiSoundPlayer.field_Private_Static_VRCUiSoundPlayer_0;
             if (mySoundCollection == null || mySoundCollection.Click == null || soundPlayer == null) return;
 
@@ -50,11 +50,8 @@ namespace FavCat.Modules
         
         
         protected abstract void OnPickerSelected(IPickerElement picker);
-        protected abstract void OnFavButtonClicked(StoredCategory storedCategory);
-        protected abstract bool FavButtonsOnLists { get; }
         protected abstract void SortModelList(string sortCriteria, string category, List<(StoredFavorite?, T)> list);
         protected abstract IPickerElement WrapModel(StoredFavorite? favorite, T model);
-        protected internal abstract void RefreshFavButtons();
         protected abstract void SearchButtonClicked();
 
         protected bool CanPerformAdditiveActions { get; }
@@ -103,8 +100,6 @@ namespace FavCat.Modules
                 if (PickerLists.TryGetValue(categoryName, out var list))
                 {
                     UpdateListElements(categoryName, list);
-                    
-                    RefreshFavButtons();
                 }
             };
             
@@ -227,7 +222,6 @@ namespace FavCat.Modules
                         Favorites.UpdateCategory(newCategory);
                         CreateList(newCategory);
                         ReorderLists();
-                        RefreshFavButtons();
                     }
                     else
                     {
@@ -257,8 +251,8 @@ namespace FavCat.Modules
             var knownLists = new Dictionary<String, (Transform ListTransform, string ListName, bool IsCustom)>();
             foreach (var list in GatherLists())
             {
-                if (Imports.IsDebugMode() && knownLists.ContainsKey(list.ListName))
-                    MelonLogger.Log($"List {list.ListName} is duplicated");
+                if (MelonDebug.IsEnabled() && knownLists.ContainsKey(list.ListName))
+                    MelonLogger.Msg($"List {list.ListName} is duplicated");
                 
                 knownLists[list.ListName] = list;
             }
@@ -410,7 +404,6 @@ namespace FavCat.Modules
             await TaskUtilities.YieldToMainThread();
             CreateList(newCategory);
             ReorderLists();
-            RefreshFavButtons();
         }
 
         internal void CreateList(StoredCategory storedCategory)
@@ -421,8 +414,7 @@ namespace FavCat.Modules
             list.SetVisibleRows(storedCategory.VisibleRows);
             list.OnModelClick += OnPickerSelected;
             list.Category = storedCategory;
-            list.OnFavClick += () => OnFavButtonClicked(storedCategory);
-            list.SetFavButtonVisible(FavButtonsOnLists);
+            list.SetFavButtonVisible(false);
             list.OnSettingsClick += () =>
             {
                 myCurrentlySelectedList = list;
@@ -574,7 +566,7 @@ namespace FavCat.Modules
             mySearchResult = null;
             if (results == null) return;
             
-            MelonLogger.Log("Local search done, {0} results", results.Count);
+            MelonLogger.Msg("Local search done, {0} results", results.Count);
 
             SortModelList(SearchList.Category.SortType, SearchCategoryName, results);
             SearchList.SetList(results.Select(it => WrapModel(null, it.it)), true);

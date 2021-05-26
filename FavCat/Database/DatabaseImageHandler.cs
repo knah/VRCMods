@@ -34,7 +34,7 @@ namespace FavCat.Database
         {
             return Task.Run(async () =>
             {
-                MelonLogger.Log("Trimming image cache");
+                MelonDebug.Msg("Trimming image cache");
                 var allFileInfos = new List<(LiteFileInfo<string>, StoredImageInfo)>();
                 var runningSums = new List<long>();
                 foreach (var liteFileInfo in myFileDatabase.FileStorage.FindAll())
@@ -56,7 +56,7 @@ namespace FavCat.Database
 
                 if (totalSize < maxSize)
                 {
-                    MelonLogger.Log("Cache already under limit");
+                    MelonDebug.Msg("Cache already under limit");
                     return;
                 }
 
@@ -72,7 +72,7 @@ namespace FavCat.Database
 
                 await TaskUtilities.YieldToMainThread();
                 
-                MelonLogger.Log($"Removed {cutoffPoint} images from cache");
+                MelonLogger.Msg($"Removed {cutoffPoint} images from cache");
             });
         }
 
@@ -102,13 +102,13 @@ namespace FavCat.Database
                 }
                 catch (Exception ex)
                 {
-                    MelonLogger.LogError($"Exception in onDone callback: {ex}");
+                    MelonLogger.Error($"Exception in onDone callback: {ex}");
                 }
             }
             catch (Exception ex)
             {
-                if (Imports.IsDebugMode())
-                    MelonLogger.LogWarning($"Exception in image load, will delete offending image: {ex}");
+                if (MelonDebug.IsEnabled())
+                    MelonLogger.Warning($"Exception in image load, will delete offending image: {ex}");
                 myFileDatabase.FileStorage.Delete(url);
                 myImageInfos.Delete(url);
                 onDone(AssetsHandler.PreviewLoading.texture);
@@ -147,8 +147,8 @@ namespace FavCat.Database
                 }
                 catch (LiteException ex)
                 {
-                    if (Imports.IsDebugMode())
-                        MelonLogger.LogWarning($"Database exception in image store handler: {ex}");
+                    if (MelonDebug.IsEnabled())
+                        MelonLogger.Warning($"Database exception in image store handler: {ex}");
                 }
             });
         }

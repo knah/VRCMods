@@ -2,6 +2,8 @@ using System;
 using LiteDB;
 using VRC.Core;
 
+#nullable disable
+
 namespace FavCat.Database.Stored
 {
     public class StoredAvatar: INamedStoredObject

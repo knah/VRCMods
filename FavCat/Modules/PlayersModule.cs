@@ -54,7 +54,7 @@ namespace FavCat.Modules
 
                         buttonText!.text = $"{(!Favorites.IsFavorite(currentUser.id, storedCategory.CategoryName) ? "Favorite to" : "Unfavorite from")} {storedCategory.CategoryName}";
                         
-                        if (FavCatSettings.IsHidePopupAfterFav) availableListsMenu.Hide();
+                        if (FavCatSettings.HidePopupAfterFav.Value) availableListsMenu.Hide();
                     }, 
                     o => buttonText = o.GetComponentInChildren<Text>());
             }
@@ -92,8 +92,8 @@ namespace FavCat.Modules
             }), new Action<ApiContainer>(c =>
             {
                 myLastRequestedPlayer = "";
-                if (Imports.IsDebugMode())
-                    MelonLogger.Log("API request errored with " + c.Code + " - " + c.Error);
+                if (MelonDebug.IsEnabled())
+                    MelonDebug.Msg("API request errored with " + c.Code + " - " + c.Error);
                 if (c.Code == 404 && whichObjectToCheck.activeInHierarchy)
                 {
                     FavCatMod.Database.CompletelyDeletePlayer(playerId);
@@ -111,12 +111,6 @@ namespace FavCat.Modules
             }));
         }
 
-        protected override void OnFavButtonClicked(StoredCategory storedCategory)
-        {
-            throw new NotSupportedException(); // not happening
-        }
-
-        protected override bool FavButtonsOnLists => false;
         protected override void SortModelList(string sortCriteria, string category, List<(StoredFavorite?, StoredPlayer)> avatars)
         {
             var inverted = sortCriteria.Length > 0 && sortCriteria[0] == '!';
@@ -137,11 +131,6 @@ namespace FavCat.Modules
         }
 
         protected override IPickerElement WrapModel(StoredFavorite? favorite, StoredPlayer model) => new DbPlayerAdapter(model, favorite);
-
-        protected internal override void RefreshFavButtons()
-        {
-            // do nothing
-        }
 
         protected override void SearchButtonClicked()
         {

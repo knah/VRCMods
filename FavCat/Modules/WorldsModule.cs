@@ -68,7 +68,7 @@ namespace FavCat.Modules
 
                         buttonText!.text = $"{(!Favorites.IsFavorite(currentWorld.id, storedCategory.CategoryName) ? "Favorite to" : "Unfavorite from")} {storedCategory.CategoryName}";
                         
-                        if (FavCatSettings.IsHidePopupAfterFav) availableListsMenu.Hide();
+                        if (FavCatSettings.HidePopupAfterFav.Value) availableListsMenu.Hide();
                     }, 
                     o => buttonText = o.GetComponentInChildren<Text>());
             }
@@ -104,8 +104,8 @@ namespace FavCat.Modules
             }), new Action<ApiContainer>(c =>
             {
                 myLastRequestedWorld = "";
-                if (Imports.IsDebugMode())
-                    MelonLogger.Log("API request errored with " + c.Code + " - " + c.Error);
+                if (MelonDebug.IsEnabled())
+                    MelonDebug.Msg("API request errored with " + c.Code + " - " + c.Error);
                 if (c.Code == 404 && listsParent.gameObject.activeInHierarchy)
                 {
                     FavCatMod.Database.CompletelyDeleteWorld(picker.Id);
@@ -123,12 +123,6 @@ namespace FavCat.Modules
             }));
         }
 
-        protected override void OnFavButtonClicked(StoredCategory storedCategory)
-        {
-            throw new NotSupportedException(); // they aren't clicked for worlds
-        }
-
-        protected override bool FavButtonsOnLists => false;
         protected override void SortModelList(string sortCriteria, string category, List<(StoredFavorite?, StoredWorld)> avatars)
         {
             var inverted = sortCriteria.Length > 0 && sortCriteria[0] == '!';
@@ -157,11 +151,6 @@ namespace FavCat.Modules
         }
 
         protected override IPickerElement WrapModel(StoredFavorite? favorite, StoredWorld model) => new DbWorldAdapter(model, favorite);
-
-        protected internal override void RefreshFavButtons()
-        { 
-            // no fav buttons, do nothing
-        }
 
         protected override void SearchButtonClicked()
         {

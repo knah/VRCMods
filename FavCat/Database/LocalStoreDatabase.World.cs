@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FavCat.Database.Stored;
 using MelonLoader;
+using UIExpansionKit.API;
 using VRC.Core;
 
 namespace FavCat.Database
@@ -12,7 +13,7 @@ namespace FavCat.Database
     {
         internal void RunBackgroundWorldSearch(string text, Action<IEnumerable<StoredWorld>> callback)
         {
-            MelonLogger.Log($"Running local world search for text {text}");
+            MelonLogger.Msg($"Running local world search for text {text}");
             Task.Run(() => {
                 var searchText = text.ToLowerInvariant();
                 var list = myStoredWorlds.Find(stored =>

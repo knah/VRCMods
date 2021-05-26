@@ -3,6 +3,8 @@ using UnhollowerBaseLib.Attributes;
 using UnityEngine;
 using UnityEngine.UI;
 
+#nullable disable
+
 namespace FavCat.CustomLists
 {
     public class CustomPicker : MonoBehaviour

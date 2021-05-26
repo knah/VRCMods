@@ -1,5 +1,7 @@
 using LiteDB;
 
+#nullable disable
+
 namespace FavCat.Database.Stored
 {
     public class StoredCategory

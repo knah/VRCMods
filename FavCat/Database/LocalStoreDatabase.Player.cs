@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FavCat.Database.Stored;
 using MelonLoader;
+using UIExpansionKit.API;
 using VRC.Core;
 
 namespace FavCat.Database
@@ -30,7 +31,7 @@ namespace FavCat.Database
         
         internal void RunBackgroundPlayerSearch(string text, Action<IEnumerable<StoredPlayer>> callback)
         {
-            MelonLogger.Log($"Running local player search for text {text}");
+            MelonLogger.Msg($"Running local player search for text {text}");
             Task.Run(() => {
                 var searchText = text.ToLowerInvariant();
                 var list = myStoredPlayers.Find(stored => stored.Name.Contains(searchText)).ToList();

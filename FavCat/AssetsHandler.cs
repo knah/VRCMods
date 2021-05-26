@@ -4,6 +4,8 @@ using FavCat.CustomLists;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 
+#nullable disable
+
 namespace FavCat
 {
     public static class AssetsHandler

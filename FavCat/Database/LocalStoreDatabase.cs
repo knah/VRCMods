@@ -30,7 +30,7 @@ namespace FavCat.Database
 
         public LocalStoreDatabase(string databasePath, string imageCachePath)
         {
-            var connectionType = FavCatSettings.ConnectionType;
+            var connectionType = ConnectionType.Direct;
             
             myStoreDatabase = new LiteDatabase(new ConnectionString {Filename = $"{databasePath}/favcat-store.db", Connection = connectionType});
             myFavDatabase = new LiteDatabase(new ConnectionString {Filename = $"{databasePath}/favcat-favs.db", Connection = connectionType});
@@ -68,7 +68,7 @@ namespace FavCat.Database
                     }
                     catch (Exception ex)
                     {
-                        MelonLogger.LogError($"Exception in DB update thread: {ex}");
+                        MelonLogger.Error($"Exception in DB update thread: {ex}");
                     }
                 } else
                     Thread.Sleep(100);
