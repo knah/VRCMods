@@ -137,13 +137,22 @@ namespace UIExpansionKit.API
         }
 
         /// <summary>
-        /// Registers a custom quick menu page.
+        /// Creates a custom quick menu page.
         /// When shown, the page will be positioned above quick menu, overlapping the main 4x4 grid.
         /// </summary>
         /// <param name="requestedLayout">The layout of the page. If null, a custom layout is assumed - your mod code will need to assign sizes and positions to buttons manually</param>
         public static ICustomShowableLayoutedMenu CreateCustomQuickMenuPage(LayoutDescription? requestedLayout)
         {
             return new CustomQuickMenuPageImpl(requestedLayout);
+        }
+        /// <summary>
+        /// Creates a custom quick menu page.
+        /// When shown, the page will be positioned over the camera expando.
+        /// </summary>
+        /// <param name="requestedLayout">The layout of the page. If null, a custom layout is assumed - your mod code will need to assign sizes and positions to buttons manually</param>
+        public static ICustomShowableLayoutedMenu CreateCustomCameraExpandoPage(LayoutDescription? requestedLayout)
+        {
+            return new CustomCameraPageImpl(requestedLayout);
         }
 
         /// <summary>

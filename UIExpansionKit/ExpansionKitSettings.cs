@@ -9,6 +9,7 @@ namespace UIExpansionKit
         private const string KitCategory = "UIExpansionKit";
         private const string PinnedPrefs = "PinnedPrefs";
         private const string QmExpandoStartsCollapsed = "QmExpandoStartsCollapsed";
+        private const string CameraExpandoStartsCollapsed = "CameraExpandoStartsCollapsed";
         private const string CategoriesStartCollapsed = "CategoriesStartCollapsed";
         private const string QmExpandoMinRows = "QmExpandoMinRows";
         private const string QmExpandoMaxRows = "QmExpandoMaxRows";
@@ -23,12 +24,14 @@ namespace UIExpansionKit
             
             category.CreateEntry(QmExpandoStartsCollapsed, false, "Quick Menu extra panel starts hidden");
             category.CreateEntry(CategoriesStartCollapsed, false, "Settings categories start collapsed");
+            category.CreateEntry(CameraExpandoStartsCollapsed, true, "Camera expanded menu starts collapsed");
             
             category.CreateEntry(QmExpandoMinRows, 1, "Minimum rows in Quick Menu extra panel");
             category.CreateEntry(QmExpandoMaxRows, 3, "Maximum rows in Quick Menu extra panel");
         }
 
         public static bool IsQmExpandoStartsCollapsed() => MelonPreferences.GetEntryValue<bool>(KitCategory, QmExpandoStartsCollapsed);
+        public static bool IsCameraExpandoStartsCollapsed() => MelonPreferences.GetEntryValue<bool>(KitCategory, CameraExpandoStartsCollapsed);
         public static bool IsCategoriesStartCollapsed() => MelonPreferences.GetEntryValue<bool>(KitCategory, CategoriesStartCollapsed);
 
         public static int ClampQuickMenuExpandoRowCount(int targetCount)

@@ -10,10 +10,11 @@ using UIExpansionKit.Components;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.UI;
+using VRC.UserCamera;
 using VRCSDK2;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.2.6", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.3.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace UIExpansionKit
@@ -30,6 +31,7 @@ namespace UIExpansionKit
 
         private GameObject myInputPopup;
         private GameObject myInputKeypadPopup;
+        internal Transform myCameraExpandoRoot;
         
         private static readonly List<(ExpandedMenu, string, bool isFullMenu)> GameObjectToCategoryList = new List<(ExpandedMenu, string, bool)>
         {
@@ -65,6 +67,7 @@ namespace UIExpansionKit
             Instance = this;
             ClassInjector.RegisterTypeInIl2Cpp<EnableDisableListener>();
             ClassInjector.RegisterTypeInIl2Cpp<DestroyListener>();
+            ClassInjector.RegisterTypeInIl2Cpp<CameraExpandoHandler>();
             
             ExpansionKitSettings.RegisterSettings();
             ExpansionKitSettings.PinsEntry.OnValueChangedUntyped += UpdateQuickMenuPins;
@@ -110,16 +113,6 @@ namespace UIExpansionKit
             
             // attach it to QuickMenu. VRChat changes render queue on QM contents on world load that makes it render properly
             myStuffBundle.StoredThingsParent.transform.SetParent(QuickMenu.prop_QuickMenu_0.transform);
-            
-            myInputPopup = GameObject.Find("UserInterface/MenuContent/Popups/InputPopup");
-            myInputKeypadPopup = GameObject.Find("UserInterface/MenuContent/Popups/InputKeypadPopup");
-
-            var listener = myInputPopup.GetOrAddComponent<EnableDisableListener>();
-            listener.OnEnabled += UpdateModSettingsVisibility;
-            listener.OnDisabled += UpdateModSettingsVisibility;
-            listener = myInputKeypadPopup.GetOrAddComponent<EnableDisableListener>();
-            listener.OnEnabled += UpdateModSettingsVisibility;
-            listener.OnDisabled += UpdateModSettingsVisibility;
 
             var delegatesToInvoke = ExpansionKitApi.onUiManagerInitDelegateList;
             ExpansionKitApi.onUiManagerInitDelegateList = null;
@@ -152,6 +145,19 @@ namespace UIExpansionKit
                 }
             }
 
+            myInputPopup = GameObject.Find("UserInterface/MenuContent/Popups/InputPopup");
+            myInputKeypadPopup = GameObject.Find("UserInterface/MenuContent/Popups/InputKeypadPopup");
+            
+            // Wait an extra frame to ve very sure that all other mods had the chance to register buttons in their wait-for-ui-manager coroutine
+            yield return null;
+
+            var listener = myInputPopup.GetOrAddComponent<EnableDisableListener>();
+            listener.OnEnabled += UpdateModSettingsVisibility;
+            listener.OnDisabled += UpdateModSettingsVisibility;
+            listener = myInputKeypadPopup.GetOrAddComponent<EnableDisableListener>();
+            listener.OnEnabled += UpdateModSettingsVisibility;
+            listener.OnDisabled += UpdateModSettingsVisibility;
+
             GameObject.Find("UserInterface/QuickMenu/QuickMenu_NewElements/_Background")
                 .AddComponent<EnableDisableListener>().OnDisabled += BuiltinUiUtils.InvokeQuickMenuClosed;
             
@@ -160,6 +166,7 @@ namespace UIExpansionKit
 
             DecorateFullMenu();
             DecorateMenuPages();
+            DecorateCamera();
         }
 
         private void DecorateMenuPages()
@@ -259,6 +266,49 @@ namespace UIExpansionKit
             }
         }
 
+        private void DecorateCamera()
+        {
+            var cameraController = UserCameraController.field_Internal_Static_UserCameraController_0;
+            if (cameraController == null) return;
+            
+            var cameraTransform = cameraController.transform.Find("ViewFinder");
+            
+            var expando = Object.Instantiate(myStuffBundle.QuickMenuExpando, cameraTransform, false);
+            myMenuRoots[ExpandedMenu.Camera] = expando;
+
+            var transform = expando.transform;
+            myCameraExpandoRoot = transform;
+            transform.localScale = Vector3.one * 0.00077f;
+            var handler = expando.AddComponent<CameraExpandoHandler>();
+            handler.CameraTransform = cameraTransform;
+            handler.PlayerCamera = Camera.main.transform; // todo: the actual camera?
+
+            var toggleButton = transform.Find("QuickMenuExpandoToggle");
+            var content = transform.Find("Content");
+            toggleButton.gameObject.AddComponent<VRC_UiShape>();
+            content.gameObject.AddComponent<VRC_UiShape>();
+
+            if (ExpansionKitSettings.IsCameraExpandoStartsCollapsed())
+                toggleButton.GetComponent<Toggle>().isOn = false;
+                    
+            var listener = cameraTransform.gameObject.GetOrAddComponent<EnableDisableListener>();
+            listener.OnEnabled += () =>
+            {
+                expando.SetActive(myHasContents[ExpandedMenu.Camera]);
+                BuiltinUiUtils.InvokeMenuOpened(ExpandedMenu.Camera);
+            };
+            listener.OnDisabled += () => expando.SetActive(false);
+                    
+            FillQuickMenuExpando(expando, ExpandedMenu.Camera);
+
+            expando.GetOrAddComponent<EnableDisableListener>().OnEnabled += () =>
+            {
+                MelonCoroutines.Start(ResizeExpandoAfterDelay(expando));
+            };
+
+            SetLayerRecursively(expando, 14);
+        }
+
         public override void OnUpdate()
         {
             TaskUtilities.ourMainThreadQueue.Flush();
@@ -290,6 +340,9 @@ namespace UIExpansionKit
             expandoRectTransform.sizeDelta = new Vector2(expandoRectTransform.sizeDelta.x, 100 * targetRows + 5);
             expandoRectTransform.anchoredPosition = oldPosition;
             expando.transform.Find("Content").GetComponent<VRC_UiShape>().Awake(); // adjust the box collider for raycasts
+            
+            expando.transform.Find("Content").gameObject.SetActive(totalButtons != 0);
+            expando.transform.Find("QuickMenuExpandoToggle").gameObject.SetActive(totalButtons != 0);
         }
 
         private void FillBigMenuExpando(GameObject expando, ExpandedMenu categoryEnum)

@@ -84,5 +84,10 @@ namespace UIExpansionKit.API
         /// The invites tab in quick menu
         /// </summary>
         InvitesTab,
+        
+        /// <summary>
+        /// The handheld camera object
+        /// </summary>
+        Camera,
     }
 }
