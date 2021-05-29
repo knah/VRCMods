@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using UIExpansionKit.API;
 using UnityEngine;
-using VRCSDK2;
 
 namespace UIExpansionKit
 {
     internal abstract class CustomLayoutedPageWithOwnedMenuImpl : CustomLayoutedPageImpl, ICustomShowableLayoutedMenu
     {
-        private static readonly Stack<CustomLayoutedPageWithOwnedMenuImpl> ourCurrentlyVisibleMenus = new Stack<CustomLayoutedPageWithOwnedMenuImpl>();
+        private static readonly Stack<CustomLayoutedPageWithOwnedMenuImpl> ourCurrentlyVisibleMenus = new();
         
         public CustomLayoutedPageWithOwnedMenuImpl(LayoutDescription? layoutDescription) : base(layoutDescription)
         {
@@ -18,7 +17,8 @@ namespace UIExpansionKit
         protected abstract Transform GetContentRoot(Transform instantiatedMenu);
         protected abstract RectTransform GetTopLevelUiObject(Transform instantiatedMenu);
         protected abstract void AdjustMenuTransform(Transform instantiatedMenu, int layer);
-        protected virtual bool CloseOnMenuClose { get; }
+        protected virtual bool CloseOnMenuClose => true;
+        protected virtual Stack<CustomLayoutedPageWithOwnedMenuImpl> PanelStack => ourCurrentlyVisibleMenus;
 
         private GameObject myMenuInstance;
 
@@ -29,13 +29,13 @@ namespace UIExpansionKit
 
             if (!onTop)
             {
-                while (ourCurrentlyVisibleMenus.Count > 0) 
-                    ourCurrentlyVisibleMenus.Pop().Hide();
+                while (PanelStack.Count > 0) 
+                    PanelStack.Pop().Hide();
             }
 
             var newInstance = Object.Instantiate(MenuPrefab, ParentTransform);
             UiExpansionKitMod.SetLayerRecursively(newInstance, QuickMenu.prop_QuickMenu_0.gameObject.layer);
-            AdjustMenuTransform(newInstance.transform, ourCurrentlyVisibleMenus.Count + 1);
+            AdjustMenuTransform(newInstance.transform, PanelStack.Count + 1);
             var topLevelTransform = GetTopLevelUiObject(newInstance.transform);
             if (LayoutDescription != null)
             {
@@ -44,7 +44,7 @@ namespace UIExpansionKit
                 topLevelTransform.anchoredPosition = oldPosition;
             }
 
-            newInstance.GetComponentInChildren<Canvas>().gameObject.AddComponent<VRC_UiShape>();
+            newInstance.GetComponentInChildren<Canvas>().gameObject.AddUiShapeWithTriggerCollider();
             if (CloseOnMenuClose)
             {
                 BuiltinUiUtils.QuickMenuClosed += Hide;
@@ -55,7 +55,7 @@ namespace UIExpansionKit
             PopulateButtons(contentRoot.transform, IsQuickMenu, true);
 
             myMenuInstance = newInstance;
-            ourCurrentlyVisibleMenus.Push(this);
+            PanelStack.Push(this);
         }
 
         public void Hide()
@@ -63,9 +63,9 @@ namespace UIExpansionKit
             if (myMenuInstance == null) 
                 return;
             
-            while (ourCurrentlyVisibleMenus.Count > 0)
+            while (PanelStack.Count > 0)
             {
-                var topObject = ourCurrentlyVisibleMenus.Pop();
+                var topObject = PanelStack.Pop();
                 if (ReferenceEquals(topObject, this))
                     break;
                     

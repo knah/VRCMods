@@ -1,4 +1,5 @@
 using UnityEngine;
+using VRC.SDKBase;
 
 namespace UIExpansionKit
 {
@@ -22,6 +23,12 @@ namespace UIExpansionKit
             if (result == null) 
                 result  = obj.AddComponent<T>();
             return result;
+        }
+
+        internal static void AddUiShapeWithTriggerCollider(this GameObject obj)
+        {
+            obj.AddComponent<VRC_UiShape>();
+            obj.GetComponent<BoxCollider>().isTrigger = true;
         }
     }
 }

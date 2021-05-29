@@ -285,8 +285,8 @@ namespace UIExpansionKit
 
             var toggleButton = transform.Find("QuickMenuExpandoToggle");
             var content = transform.Find("Content");
-            toggleButton.gameObject.AddComponent<VRC_UiShape>();
-            content.gameObject.AddComponent<VRC_UiShape>();
+            toggleButton.gameObject.AddUiShapeWithTriggerCollider();
+            content.gameObject.AddUiShapeWithTriggerCollider();
 
             if (ExpansionKitSettings.IsCameraExpandoStartsCollapsed())
                 toggleButton.GetComponent<Toggle>().isOn = false;
@@ -306,7 +306,7 @@ namespace UIExpansionKit
                 MelonCoroutines.Start(ResizeExpandoAfterDelay(expando));
             };
 
-            SetLayerRecursively(expando, 14);
+            SetLayerRecursively(expando, 4);
         }
 
         public override void OnUpdate()
