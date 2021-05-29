@@ -269,7 +269,11 @@ namespace UIExpansionKit
         private void DecorateCamera()
         {
             var cameraController = UserCameraController.field_Internal_Static_UserCameraController_0;
-            if (cameraController == null) return;
+            if (cameraController == null)
+            {
+                MelonLogger.Warning("Camera controller not found, not decorating the camera");
+                return;
+            }
             
             var cameraTransform = cameraController.transform.Find("ViewFinder");
             
@@ -287,18 +291,21 @@ namespace UIExpansionKit
             var content = transform.Find("Content");
             toggleButton.gameObject.AddUiShapeWithTriggerCollider();
             content.gameObject.AddUiShapeWithTriggerCollider();
+            var toggleComponent = toggleButton.GetComponent<Toggle>();
 
-            if (ExpansionKitSettings.IsCameraExpandoStartsCollapsed())
-                toggleButton.GetComponent<Toggle>().isOn = false;
-                    
+            if (ExpansionKitSettings.IsCameraExpandoStartsCollapsed()) 
+                toggleComponent.isOn = false;
+
             var listener = cameraTransform.gameObject.GetOrAddComponent<EnableDisableListener>();
             listener.OnEnabled += () =>
             {
                 expando.SetActive(myHasContents[ExpandedMenu.Camera]);
                 BuiltinUiUtils.InvokeMenuOpened(ExpandedMenu.Camera);
+                // seems like VRC code enables all camera children?
+                SetActiveAfterDelay(content.gameObject, toggleComponent.isOn);
             };
             listener.OnDisabled += () => expando.SetActive(false);
-                    
+
             FillQuickMenuExpando(expando, ExpandedMenu.Camera);
 
             expando.GetOrAddComponent<EnableDisableListener>().OnEnabled += () =>
@@ -458,6 +465,18 @@ namespace UIExpansionKit
             }
             
             DoResizeExpando(expando);
+        }
+
+        private static void SetActiveAfterDelay(GameObject obj, bool active)
+        {
+            MelonCoroutines.Start(SetActiveAfterDelayImpl(obj, active));
+        }
+
+        private static IEnumerator SetActiveAfterDelayImpl(GameObject gameObject, bool active)
+        {
+            yield return null;
+            yield return null;
+            gameObject.SetActive(active);
         }
     }
 }
