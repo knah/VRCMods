@@ -7,7 +7,9 @@ Changes:
  * SparkleBeGone: optimize code a bit, make settings apply immediately
  * Mirror Resolution Unlimiter: added an option to override pixel lights in mirrors
  * UI Expansion Kit: add a few more requested APIs
- * UI Expansion Kit: add support for camera expando - attach extra buttons to the camera itself!
- * CameraMinus: add an option to use the new camera expando
+ * UI Expansion Kit: mod settings categories are sorted alphabetically now
+ * UI Expansion Kit: add support for camera expando - attach extra buttons and menus to the camera itself!
+ * CameraMinus: add an option to use the new camera expando (enabled by default)
+ * JoinNotifier: added an option to hide notifications for users you have blocked
 
 **USE IT AT YOUR OWN RISK.** Modding the client is against VRChat ToS. I am not responsible for any bans or other punishments you may get by using these mods!
