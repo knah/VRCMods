@@ -32,6 +32,7 @@ namespace JoinNotifier
         internal static MelonPreferences_Entry<string> FriendsLeaveIconColor;
         
         internal static MelonPreferences_Entry<bool> ShowFriendsAlways;
+        internal static MelonPreferences_Entry<bool> HideBlockedUsers;
 
         public static void RegisterSettings()
         {
@@ -62,6 +63,7 @@ namespace JoinNotifier
             FriendsLeaveIconColor = (MelonPreferences_Entry<string>) category.CreateEntry("FriendLeaveColor", "201 201 0", "Friend leave name color (r g b)");
             
             ShowFriendsAlways = (MelonPreferences_Entry<bool>) category.CreateEntry("ShowFriendsAlways", false, "Show friend join/leave regardless of instance type");
+            HideBlockedUsers = (MelonPreferences_Entry<bool>) category.CreateEntry("HideBlockedUsers", false, "Hide join/leave of blocked users");
         }
 
         public static bool ShouldNotifyInCurrentInstance()

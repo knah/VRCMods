@@ -13,6 +13,7 @@ using UnityEngine.Networking;
 using UnityEngine.UI;
 using VRC;
 using VRC.Core;
+using VRC.Management;
 using Object = UnityEngine.Object;
 
 [assembly:MelonInfo(typeof(JoinNotifierMod), "JoinNotifier", "1.0.0", "knah", "https://github.com/knah/VRCMods")]
@@ -247,6 +248,9 @@ namespace JoinNotifier
             }
 
             if (!myObservedLocalPlayerJoin || Environment.TickCount - myLastLevelLoad < 5_000) return;
+            
+            if (JoinNotifierSettings.HideBlockedUsers.Value && IsBlocked(apiUser.id)) return;
+            
             var isFriendsWith = APIUser.IsFriendsWith(apiUser.id);
             if (!isFriendsWith || !JoinNotifierSettings.ShowFriendsAlways.Value)
             {
@@ -267,6 +271,8 @@ namespace JoinNotifier
             var apiUser = player.field_Private_APIUser_0;
             if (apiUser == null) return;
             if (Environment.TickCount - myLastLevelLoad < 5_000) return;
+
+            if (JoinNotifierSettings.HideBlockedUsers.Value && IsBlocked(apiUser.id)) return;
 
             var isFriendsWith = APIUser.IsFriendsWith(apiUser.id);
             if (!isFriendsWith || !JoinNotifierSettings.ShowFriendsAlways.Value)
@@ -315,6 +321,28 @@ namespace JoinNotifier
                 imageToBlink.enabled = false;
                 yield return new WaitForSeconds(.5f);
             }
+        }
+        
+        private static bool IsBlocked(string userId)
+        {
+            if (userId == null) return false;
+            
+            var moderationManager = ModerationManager.prop_ModerationManager_0;
+            if (moderationManager == null) return false;
+            if (APIUser.CurrentUser?.id == userId)
+                return false;
+            
+            var moderationsDict = ModerationManager.prop_ModerationManager_0.field_Private_Dictionary_2_String_List_1_ApiPlayerModeration_0;
+            if (!moderationsDict.ContainsKey(userId)) return false;
+            
+            foreach (var playerModeration in moderationsDict[userId])
+            {
+                if (playerModeration != null && playerModeration.moderationType == ApiPlayerModeration.ModerationType.Block)
+                    return true;
+            }
+            
+            return false;
+            
         }
     }
 }
