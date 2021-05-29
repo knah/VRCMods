@@ -37,7 +37,7 @@ namespace UIExpansionKit
 
             var pinnedSettings = ExpansionKitSettings.ListPinnedPrefs().ToList();
             
-            foreach (var category in MelonPreferences.Categories)
+            foreach (var category in MelonPreferences.Categories.OrderBy(it => it.DisplayName ?? it.Identifier, StringComparer.InvariantCultureIgnoreCase))
             {
                 var categoryId = category.Identifier;
                 var prefDict = category.Entries;
@@ -77,9 +77,7 @@ namespace UIExpansionKit
                     ourCategoryExpanded[categoryId] = !ExpansionKitSettings.IsCategoriesStartCollapsed();
                 
                 SetExpanded(ourCategoryExpanded[categoryId]);
-                
-                
-                
+
                 void CreateNumericSetting<T>(MelonPreferences_Entry<T> entry, Func<T, string> toString, Func<string, T?> fromString) where T:struct, IEquatable<T>
                 {
                     var textSetting = Object.Instantiate(textPrefab, categoryUiContent, false);
