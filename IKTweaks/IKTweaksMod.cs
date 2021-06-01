@@ -2,20 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using Harmony;
 using IKTweaks;
 using MelonLoader;
 using RootMotionNew.FinalIK;
 using UIExpansionKit.API;
 using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
+using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
 using UnityEngine.UI;
 using Valve.VR;
 using Delegate = Il2CppSystem.Delegate;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.11", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.12", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -25,6 +28,7 @@ namespace IKTweaks
     {
         private static readonly Queue<Action> ourToMainThreadQueue = new Queue<Action>();
         private static readonly Queue<Action> ourToIKLateUpdateQueue = new Queue<Action>();
+        private static Func<VRCAvatarManager, float> ourGetEyeHeightDelegate;
         
         internal static GameObject ourRandomPuck;
 
@@ -43,9 +47,32 @@ namespace IKTweaks
             Camera.onPreRender = Delegate.Combine(Camera.onPreRender, (Camera.CameraCallback) OnVeryLateUpdate).Cast<Camera.CameraCallback>();
             
             DoAfterUiManagerInit(OnUiManagerInit);
+
+            ourGetEyeHeightDelegate = (Func<VRCAvatarManager, float>) System.Delegate.CreateDelegate(typeof(Func<VRCAvatarManager, float>), typeof(VRCAvatarManager)
+                .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Single(it =>
+                    it.GetParameters().Length == 0 && it.ReturnType == typeof(float) && !it.Name.Contains("_PDM") &&
+                    XrefScanner.XrefScan(it).Any(jt =>
+                        jt.Type == XrefType.Global &&
+                        jt.ReadAsObject()?.ToString() == "Asked for eye height before measured.")));
+
+            Harmony.Patch(typeof(VRCAvatarManager)
+                .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Single(it =>
+                    it.GetParameters().Length == 0 && it.ReturnType == typeof(float) && !it.Name.Contains("_PDM") &&
+                    XrefScanner.XrefScan(it).Any(jt =>
+                        jt.Type == XrefType.Global &&
+                        jt.ReadAsObject()?.ToString() == "Asked for arm length before measured.")),
+                new HarmonyMethod(typeof(IKTweaksMod), nameof(WingspanPatch)));
             
             if (MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit" && !it.Info.Version.StartsWith("0.1."))) 
                 AddUixActions();
+        }
+
+        private static bool WingspanPatch(VRCAvatarManager __instance, ref float __result)
+        {
+            if (!IkTweaksSettings.CalibrateToAvatarHeight.Value) return true;
+
+            __result = ourGetEyeHeightDelegate(__instance) * 0.4537f;
+            return false;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

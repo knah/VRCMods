@@ -45,6 +45,7 @@ namespace IKTweaks
             
             StraightSpineAngle = (MelonPreferences_Entry<float>) category.CreateEntry(nameof(StraightSpineAngle), 15f, "Straight spine angle (degrees)");
             StraightSpinePower = (MelonPreferences_Entry<float>) category.CreateEntry(nameof(StraightSpinePower), 2f, "Straight spine power");
+            CalibrateToAvatarHeight = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(CalibrateToAvatarHeight), false, "Scale avatar to height (instead of wingspan)");
         }
 
         public static IKSolverVR.Arm.ShoulderRotationMode ShoulderMode => FixShoulders.Value ? IKSolverVR.Arm.ShoulderRotationMode.YawPitch : IKSolverVR.Arm.ShoulderRotationMode.FromTo;
@@ -75,5 +76,6 @@ namespace IKTweaks
         public static MelonPreferences_Entry<bool> PinHipRotation;
         public static MelonPreferences_Entry<bool> DoHipShifting;
         public static MelonPreferences_Entry<bool> PreStraightenSpine;
+        public static MelonPreferences_Entry<bool> CalibrateToAvatarHeight;
     }
 }
