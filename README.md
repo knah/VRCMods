@@ -15,6 +15,10 @@ You can add `--no-mods` launch option (in Steam) to temporarily disable MelonLoa
 Some mods will have Canny tickets linked. It's your duty to go and upvote them to show to VRChat Team what you want from their game. If you decide to comment on Canny, **be respectful** and **avoid mentioning modding** - the team still doesn't like it, obviously.  
 And yes, it will probably be ignored/forever hanging in "under review" like the majority of Canny posts. At least we'll have a nice big upvote number on our ignored posts.
 
+## Installation
+To install these mods, you will need to install [MelonLoader](https://discord.gg/2Wn3N2P) (discord link, see \#how-to-install).
+Then, you will have to put mod .dll files in the `Mods` folder of your game directory. Dll files for mods are provided under the [releases page](https://github.com/knah/VRCMods/releases).
+
 ## AdvancedSafety
 Features:
  * Set hard limits on avatar features, such as polygon count, audio sources, and some other things
@@ -319,10 +323,6 @@ Do note that the coordinates displayed in that menu are local offset of the view
 
 ## ILRepack
 There's a copy of [ILRepack.Lib.MSBuild.Task](https://github.com/ravibpatel/ILRepack.Lib.MSBuild.Task) and [ILRepack](https://github.com/gluck/il-repack) built for netcore/MSBuild 16 shipped with the repo.
-
-## Installation
-To install these mods, you will need to install [MelonLoader](https://discord.gg/2Wn3N2P) (discord link, see \#how-to-install).  
-Then, you will have to put mod .dll files in the `Mods` folder of your game directory
 
 ## Building
 To build these, drop required libraries (found in `<vrchat instanll dir>/MelonLoader/Managed` after melonloader installation, list found in `Directory.Build.props`) into Libs folder, then use your IDE of choice to build.
