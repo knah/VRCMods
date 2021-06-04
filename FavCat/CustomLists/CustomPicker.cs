@@ -12,6 +12,7 @@ namespace FavCat.CustomLists
         private RawImage myImage;
         private Text myLabelText;
         private Image myCornerImage;
+        private Image myLowerCornerImage;
         private GameObject myPrivateImage;
 
         private IPickerElement? myListElement;
@@ -41,6 +42,17 @@ namespace FavCat.CustomLists
                 myCornerImage.sprite = pickerElement.SupportsQuest ? AssetsHandler.IconUni : AssetsHandler.IconPC;
             else
                 myCornerImage.sprite = pickerElement.SupportsQuest ? AssetsHandler.IconQuest : AssetsHandler.IconUni;
+
+            var colorMaybe = pickerElement.CornerIconColor;
+            if (colorMaybe.HasValue)
+            {
+                myLowerCornerImage.enabled = true;
+                myLowerCornerImage.color = colorMaybe.Value;
+            }
+            else
+            {
+                myLowerCornerImage.enabled = false;
+            }
 
             myPrivateImage.SetActive(pickerElement.IsPrivate);
             
@@ -90,6 +102,7 @@ namespace FavCat.CustomLists
             myImage = GetComponentInChildren<RawImage>();
             myLabelText = transform.Find("Label").GetComponent<Text>();
             myCornerImage = transform.Find("CornerIcon").GetComponent<Image>();
+            myLowerCornerImage = transform.Find("LowerCornerIcon").GetComponent<Image>();
             myPrivateImage = transform.Find("CornerLock").gameObject;
             
             GetComponent<Button>().onClick.AddListener(new Action(() => myOnClick?.Invoke(myListElement?.Id)));

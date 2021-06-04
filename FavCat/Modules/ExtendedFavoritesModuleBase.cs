@@ -193,6 +193,12 @@ namespace FavCat.Modules
             foreach (var customPickerList in PickerLists) customPickerList.Value.gameObject.SetActive(true);
         }
 
+        protected void ResortAndRefreshLists()
+        {
+            foreach (var customPickerList in PickerLists.Values)
+                UpdateListElements(customPickerList.Category.CategoryName, customPickerList, true);
+        }
+
         private IEnumerator ReorderListsAfterDelay()
         {
             yield return null;

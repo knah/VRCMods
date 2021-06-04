@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace FavCat.CustomLists
 {
     public interface IPickerElement
@@ -10,5 +12,7 @@ namespace FavCat.CustomLists
         bool IsInaccessible { get; }
         bool SupportsDesktop { get; }
         bool SupportsQuest { get; }
+        
+        Color? CornerIconColor { get; }
     }
 }

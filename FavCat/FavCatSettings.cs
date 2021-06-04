@@ -22,6 +22,7 @@ namespace FavCat
         
         internal static MelonPreferences_Entry<bool> MakeClickSounds;
         internal static MelonPreferences_Entry<string> AvatarSearchMode;
+        internal static MelonPreferences_Entry<bool> SortPlayersByOnline;
 
         internal static void RegisterSettings()
         {
@@ -43,6 +44,7 @@ namespace FavCat
             
             MakeClickSounds = (MelonPreferences_Entry<bool>) category.CreateEntry("MakeClickSounds", true, "Click sounds");
             AvatarSearchMode = (MelonPreferences_Entry<string>) category.CreateEntry(avatarSearchModeName, "select", "Avatar search result action");
+            SortPlayersByOnline = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(SortPlayersByOnline), true, "Show offline players at the end of the list");
             
             ExpansionKitApi.RegisterSettingAsStringEnum(SettingsCategory, "ImageCachingMode", new []{("full", "Full local image cache (fastest, safest)"), ("fast", "Fast, use more RAM"), ("builtin", "Preserve RAM, more API requests")});
             ExpansionKitApi.RegisterSettingAsStringEnum(SettingsCategory, avatarSearchModeName, new []{("select", "Select avatar"), ("author", "Show avatar author (safer)")});

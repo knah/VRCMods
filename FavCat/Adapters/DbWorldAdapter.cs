@@ -1,5 +1,6 @@
 using FavCat.CustomLists;
 using FavCat.Database.Stored;
+using UnityEngine;
 using VRC.Core;
 
 namespace FavCat.Adapters
@@ -26,5 +27,7 @@ namespace FavCat.Adapters
         
         public StoredWorld Model => myWorld;
         public StoredFavorite? StoredFavorite => myFavorite;
+
+        public Color? CornerIconColor => null;
     }
 }

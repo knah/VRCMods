@@ -16,18 +16,17 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.Networking;
 using VRC.Core;
-using ImageDownloaderClosure = ImageDownloader.__c__DisplayClass11_0;
+using VRC.UI;
+using ImageDownloaderClosure = ImageDownloader.__c__DisplayClass11_1;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.1.2", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.1.3", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace FavCat
 {
     public class FavCatMod : CustomizedMelonMod
     {
-        public static readonly DateTime NoMoreVisibleAvatarFavoritesAfter = new(2021, 05, 31);
-        
         public static LocalStoreDatabase? Database;
         internal static FavCatMod Instance;
 
@@ -35,7 +34,7 @@ namespace FavCat
         private WorldsModule? myWorldsModule;
         internal PlayersModule? PlayerModule;
         
-        private static bool ourInitDone;
+        internal static PageUserInfo PageUserInfo;
         
         public override void OnApplicationStart()
         {
@@ -55,8 +54,6 @@ namespace FavCat
             
             Database.ImageHandler.TrimCache(FavCatSettings.MaxCacheSizeBytes).NoAwait();
 
-            ExpansionKitApi.RegisterWaitConditionBeforeDecorating(WaitForInitDone());
-            
             foreach (var methodInfo in typeof(AvatarPedestal).GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public).Where(it => it.Name.StartsWith("Method_Private_Void_ApiContainer_") && it.GetParameters().Length == 1))
             {
                 Harmony.Patch(methodInfo, new HarmonyMethod(typeof(FavCatMod), nameof(AvatarPedestalPatch)));
@@ -71,6 +68,8 @@ namespace FavCat
             var model = __0.Model?.TryCast<ApiAvatar>();
             if (model == null) return;
             
+            if (MelonDebug.IsEnabled())
+                MelonDebug.Msg($"Ingested avatar with ID={model.id}");
             Database?.UpdateStoredAvatar(model);
         }
 
@@ -85,12 +84,6 @@ namespace FavCat
         {
             Database?.Dispose();
             Database = null;
-        }
-
-        private IEnumerator WaitForInitDone()
-        {
-            while (!ourInitDone)
-                yield return null;
         }
 
         public void OnUiManagerInit()
@@ -127,8 +120,8 @@ namespace FavCat
                 MelonLogger.Error($"Exception in player module init: {ex}");
             }
 
+            PageUserInfo = GameObject.Find("UserInterface/MenuContent/Screens/UserInfo").GetComponent<PageUserInfo>();
             MelonLogger.Msg("Initialized!");
-            ourInitDone = true;
         }
 
         public override void OnUpdate()

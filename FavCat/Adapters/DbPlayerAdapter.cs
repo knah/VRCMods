@@ -1,5 +1,7 @@
 using FavCat.CustomLists;
 using FavCat.Database.Stored;
+using FavCat.Modules;
+using UnityEngine;
 
 namespace FavCat.Adapters
 {
@@ -23,5 +25,7 @@ namespace FavCat.Adapters
         public bool SupportsQuest => false;
         public StoredPlayer Model => myPlayer;
         public StoredFavorite? StoredFavorite => myFavorite;
+
+        public Color? CornerIconColor => PlayersModule.IsPlayerOnline(Id) ? new Color(0, 0.75f, 0, 1) : Color.gray;
     }
 }

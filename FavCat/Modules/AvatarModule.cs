@@ -27,7 +27,7 @@ namespace FavCat.Modules
 
         private readonly bool myInitialised;
 
-        public AvatarModule() : base(ExpandedMenu.AvatarMenu, FavCatMod.Database.AvatarFavorites, GetListsParent(), false, DateTime.Now < FavCatMod.NoMoreVisibleAvatarFavoritesAfter)
+        public AvatarModule() : base(ExpandedMenu.AvatarMenu, FavCatMod.Database.AvatarFavorites, GetListsParent(), false, false)
         {
             myCurrentAnnoyingMessage = CanPerformAdditiveActions ? "WillBeObsolete" : (CanShowExistingLists ? "CantAddWithCanny" : "NoFavorites");
             
@@ -60,13 +60,13 @@ namespace FavCat.Modules
 
         private void DoSearchKnownAvatars()
         {
-            if (PlayersModule.PageUserInfo == null)
+            if (FavCatMod.PageUserInfo == null)
                 return;
             
             VRCUiManager.prop_VRCUiManager_0.Method_Public_Void_String_Boolean_0("UserInterface/MenuContent/Screens/Avatar", false);
             SetSearchListHeaderAndScrollToIt("Search running...");
-            LastSearchRequest = "Created by " + PlayersModule.PageUserInfo.field_Public_APIUser_0.displayName;
-            FavCatMod.Database.RunBackgroundAvatarSearchByUser(PlayersModule.PageUserInfo.field_Public_APIUser_0.id, AcceptSearchResult);
+            LastSearchRequest = "Created by " + FavCatMod.PageUserInfo.field_Public_APIUser_0.displayName;
+            FavCatMod.Database.RunBackgroundAvatarSearchByUser(FavCatMod.PageUserInfo.field_Public_APIUser_0.id, AcceptSearchResult);
         }
 
         private static Transform GetListsParent()
@@ -193,16 +193,14 @@ namespace FavCat.Modules
         {
             var popup = ExpansionKitApi.CreateCustomFullMenuPopup(LayoutDescription.WideSlimList);
             
-            popup.AddLabel("Due to recent events, avatar favorites in FavCat are being phased out.");
+            popup.AddLabel("Due to recent events, avatar favorites in FavCat were phased out.");
             popup.AddSimpleButton($"More info (opens in browser)", () => Process.Start("https://github.com/knah/VRCMods#avatar-favorites-deprecation"));
             popup.AddSimpleButton($"Vote on Canny! (opens in browser)", () => Process.Start("https://feedback.vrchat.com/vrchat-plus-feedback/p/reconsider-the-approach-to-paywalling-extra-avatar-favorite-slotsgroups"));
             popup.AddLabel("You can't add new avatar favorites or create new lists");
 
-            popup.AddLabel(CanShowExistingLists
-                ? $"You will no longer be able to see existing avatar favorites starting on {FavCatMod.NoMoreVisibleAvatarFavoritesAfter.ToShortDateString()}"
-                : "You can't see existing avatar favorite lists. You still can export them.");
+            popup.AddLabel("You can't see existing avatar favorite lists. You still can export them.");
 
-            popup.AddLabel("World and user favorites will remain for the time being");
+            popup.AddLabel("World and user favorites and avatar search will remain for the time being");
             popup.AddLabel("Favorite export is available from \"More FavCat...\" menu");
             popup.AddLabel("Scroll down for close buttons");
             popup.AddSimpleButton("Don't show this until game restart", () =>
