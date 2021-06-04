@@ -20,7 +20,7 @@ using VRC.UI;
 using ImageDownloaderClosure = ImageDownloader.__c__DisplayClass11_1;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.1.3", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.1.4", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace FavCat
@@ -64,7 +64,7 @@ namespace FavCat
 
         private static void AvatarPedestalPatch(ApiContainer __0)
         {
-            if (__0.Error != null || __0.Code != 200) return;
+            if (__0.Code != 200) return;
             var model = __0.Model?.TryCast<ApiAvatar>();
             if (model == null) return;
             
