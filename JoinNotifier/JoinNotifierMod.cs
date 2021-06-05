@@ -16,7 +16,7 @@ using VRC.Core;
 using VRC.Management;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(JoinNotifierMod), "JoinNotifier", "1.0.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(JoinNotifierMod), "JoinNotifier", "1.0.2", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace JoinNotifier
@@ -91,7 +91,7 @@ namespace JoinNotifier
                 var uwr = UnityWebRequest.Get($"file://{Path.Combine(Environment.CurrentDirectory, CustomJoinSoundFileName)}");
                 uwr.SendWebRequest();
 
-                while (uwr.isDone) yield return null;
+                while (!uwr.isDone) yield return null;
                 
                 myJoinClip = WebRequestWWW.InternalCreateAudioClipUsingDH(uwr.downloadHandler, uwr.url, false, false, AudioType.UNKNOWN);
             }
@@ -108,7 +108,7 @@ namespace JoinNotifier
                 var uwr = UnityWebRequest.Get($"file://{Path.Combine(Environment.CurrentDirectory, CustomLeaveSoundFileName)}");
                 uwr.SendWebRequest();
 
-                while (uwr.isDone) yield return null;
+                while (!uwr.isDone) yield return null;
                 
                 myLeaveClip = WebRequestWWW.InternalCreateAudioClipUsingDH(uwr.downloadHandler, uwr.url, false, false, AudioType.UNKNOWN);
             }
