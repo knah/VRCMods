@@ -16,7 +16,7 @@ using VRC.Core;
 using VRC.Management;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(JoinNotifierMod), "JoinNotifier", "1.0.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(JoinNotifierMod), "JoinNotifier", "1.0.1", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace JoinNotifier
@@ -239,7 +239,7 @@ namespace JoinNotifier
 
         public void OnPlayerJoined(Player player)
         {
-            var apiUser = player.field_Private_APIUser_0;
+            var apiUser = player.prop_APIUser_0;
             if (apiUser == null) return;
             if (APIUser.CurrentUser.id == apiUser.id)
             {
@@ -268,7 +268,7 @@ namespace JoinNotifier
         
         public void OnPlayerLeft(Player player)
         {
-            var apiUser = player.field_Private_APIUser_0;
+            var apiUser = player.prop_APIUser_0;
             if (apiUser == null) return;
             if (Environment.TickCount - myLastLevelLoad < 5_000) return;
 
