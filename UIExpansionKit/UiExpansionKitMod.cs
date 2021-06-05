@@ -14,7 +14,7 @@ using VRC.UserCamera;
 using VRCSDK2;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.3.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.3.2", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace UIExpansionKit
@@ -240,9 +240,10 @@ namespace UIExpansionKit
                     var content = transform.Find("Content");
                     toggleButton.gameObject.AddComponent<VRC_UiShape>();
                     content.gameObject.AddComponent<VRC_UiShape>();
+                    var toggle = toggleButton.GetComponent<Toggle>();
 
-                    if (ExpansionKitSettings.IsQmExpandoStartsCollapsed())
-                        toggleButton.GetComponent<Toggle>().isOn = false;
+                    if (ExpansionKitSettings.IsQmExpandoStartsCollapsed()) 
+                        toggle.isOn = false;
                     
                     var listener = gameObject.GetOrAddComponent<EnableDisableListener>();
                     listener.OnEnabled += () =>
@@ -256,7 +257,7 @@ namespace UIExpansionKit
 
                     expando.GetOrAddComponent<EnableDisableListener>().OnEnabled += () =>
                     {
-                        MelonCoroutines.Start(ResizeExpandoAfterDelay(expando));
+                        MelonCoroutines.Start(ResizeExpandoAfterDelay(expando, toggle.isOn));
                     };
                     
                     SetLayerRecursively(expando, quickMenuRoot.layer);
@@ -301,8 +302,6 @@ namespace UIExpansionKit
             {
                 expando.SetActive(myHasContents[ExpandedMenu.Camera]);
                 BuiltinUiUtils.InvokeMenuOpened(ExpandedMenu.Camera);
-                // seems like VRC code enables all camera children?
-                SetActiveAfterDelay(content.gameObject, toggleComponent.isOn);
             };
             listener.OnDisabled += () => expando.SetActive(false);
 
@@ -310,7 +309,7 @@ namespace UIExpansionKit
 
             expando.GetOrAddComponent<EnableDisableListener>().OnEnabled += () =>
             {
-                MelonCoroutines.Start(ResizeExpandoAfterDelay(expando));
+                MelonCoroutines.Start(ResizeExpandoAfterDelay(expando, toggleComponent.isOn));
             };
 
             SetLayerRecursively(expando, 4);
@@ -326,13 +325,13 @@ namespace UIExpansionKit
             TaskUtilities.ourFrameEndQueue.Flush();
         }
 
-        private static IEnumerator ResizeExpandoAfterDelay(GameObject expando)
+        private static IEnumerator ResizeExpandoAfterDelay(GameObject expando, bool contentsCanBeVisible)
         {
             yield return null;
-            DoResizeExpando(expando);
+            DoResizeExpando(expando, contentsCanBeVisible);
         }
 
-        private static void DoResizeExpando(GameObject expando)
+        private static void DoResizeExpando(GameObject expando, bool contentsCanBeVisible)
         {
             var totalButtons = 0;
             foreach (var o in expando.transform.Find("Content/Scroll View/Viewport/Content"))
@@ -348,7 +347,7 @@ namespace UIExpansionKit
             expandoRectTransform.anchoredPosition = oldPosition;
             expando.transform.Find("Content").GetComponent<VRC_UiShape>().Awake(); // adjust the box collider for raycasts
             
-            expando.transform.Find("Content").gameObject.SetActive(totalButtons != 0);
+            expando.transform.Find("Content").gameObject.SetActive(totalButtons != 0 && contentsCanBeVisible);
             expando.transform.Find("QuickMenuExpandoToggle").gameObject.SetActive(totalButtons != 0);
         }
 
@@ -464,7 +463,7 @@ namespace UIExpansionKit
                 }
             }
             
-            DoResizeExpando(expando);
+            DoResizeExpando(expando, expando.transform.Find("QuickMenuExpandoToggle").GetComponent<Toggle>().isOn);
         }
 
         private static void SetActiveAfterDelay(GameObject obj, bool active)
