@@ -136,7 +136,7 @@ namespace LagFreeScreenshots
         {
             var apiWorld = RoomManager.field_Internal_Static_ApiWorld_0;
             if (apiWorld == null) return "null,0,Not in any world";
-            return apiWorld.id + "," + RoomManager.field_Internal_Static_ApiWorldInstance_0.shortName + "," + apiWorld.name;
+            return apiWorld.id + "," + RoomManager.field_Internal_Static_ApiWorldInstance_0.name + "," + apiWorld.name;
         }
 
         private static string GetPosition()
