@@ -100,7 +100,7 @@ namespace FavCat.Modules
             {
                 myLastRequestedWorld = "";
                 if (listsParent.gameObject.activeInHierarchy)
-                    ScanningReflectionCache.DisplayWorldInfoPage(world, null, false);
+                    ScanningReflectionCache.DisplayWorldInfoPage(world, null, false, null);
             }), new Action<ApiContainer>(c =>
             {
                 myLastRequestedWorld = "";
