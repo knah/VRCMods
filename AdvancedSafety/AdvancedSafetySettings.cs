@@ -46,6 +46,8 @@ namespace AdvancedSafety
             AllowReadingMixers = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(AllowReadingMixers), false, "Allow audio mixers in assetbundles");
             MaxMaterialSlotsOverSubmeshCount = (MelonPreferences_Entry<int>) category.CreateEntry(nameof(MaxMaterialSlotsOverSubmeshCount), 2, "Maximum material slots over submesh count");
             
+            AllowReadingBadFloats = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(AllowReadingBadFloats), false, "Allow unbounded floats in assetbundles");
+            
             HidePortalsFromBlockedUsers = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(HidePortalsFromBlockedUsers), true, "Hide portals from blocked users");
             HidePortalsFromNonFriends = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(HidePortalsFromNonFriends), false, "Hide portals from non-friends");
             HidePortalsCreatedTooClose = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(HidePortalsCreatedTooClose), true, "Hide portals created too close to local player");
@@ -66,6 +68,7 @@ namespace AdvancedSafety
         public static MelonPreferences_Entry<bool> AllowUiLayer;
         public static MelonPreferences_Entry<bool> AllowCustomMixers;
         public static MelonPreferences_Entry<bool> AllowReadingMixers;
+        public static MelonPreferences_Entry<bool> AllowReadingBadFloats;
 
         public static MelonPreferences_Entry<int> MaxPolygons;
         public static MelonPreferences_Entry<int> MaxTransforms;

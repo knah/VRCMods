@@ -186,6 +186,9 @@ namespace AdvancedSafety
             if (particleSystem.maxParticles > particleLimit) 
                 particleSystem.maxParticles = particleLimit;
 
+            if (particleSystem.collision.maxCollisionShapes > 256)
+                particleSystem.collision.maxCollisionShapes = 256;
+
             particleCount += particleSystem.maxParticles;
 
             if (renderer.renderMode == ParticleSystemRenderMode.Mesh)

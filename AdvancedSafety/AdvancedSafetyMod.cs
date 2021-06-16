@@ -8,20 +8,16 @@ using System.Runtime.InteropServices;
 using AdvancedSafety;
 using MelonLoader;
 using UnhollowerBaseLib;
-using UnhollowerBaseLib.Runtime;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.SceneManagement;
 using VRC.Core;
-using AMEnumA = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObAcOb1GaApAcBoStUnique;
-using AMEnumB = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObAcOb1GaApAcObObUnique;
-using AMEnumC = VRCAvatarManager.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObGaApObBoBoBoObObUnique;
 using Object = UnityEngine.Object;
 
 using ModerationManager = VRC.Management.ModerationManager;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.5.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.5.2", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
 namespace AdvancedSafety
@@ -29,7 +25,11 @@ namespace AdvancedSafety
     public class AdvancedSafetyMod : CustomizedMelonMod
     {
         private static List<object> ourPinnedDelegates = new List<object>();
-        private static bool ourCanReadAudioMixers = true;
+        internal static bool CanReadAudioMixers = true;
+        internal static bool CanReadBadFloats = true;
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate void VoidDelegate(IntPtr thisPtr, IntPtr nativeMethodInfo);
 
         public override void OnApplicationStart()
         {
@@ -58,78 +58,46 @@ namespace AdvancedSafety
                 }
             }
             
-            unsafe
+            foreach (var nestedType in typeof(VRCAvatarManager).GetNestedTypes())
             {
-                var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils
-                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(AMEnumA).GetMethod(
-                        nameof(AMEnumA.MoveNext)))
-                    .GetValue(null);
-                
-                MelonUtils.NativeHookAttach((IntPtr)(&originalMethodPointer), typeof(AdvancedSafetyMod).GetMethod(nameof(MoveNextPatchA), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
+                var moveNext = nestedType.GetMethod("MoveNext");
+                if (moveNext == null) continue;
+                var avatarManagerField = nestedType.GetProperties().SingleOrDefault(it => it.PropertyType == typeof(VRCAvatarManager));
+                if (avatarManagerField == null) continue;
 
-                ourMoveNextA = originalMethodPointer;
-            }
+                var fieldOffset = (int)IL2CPP.il2cpp_field_get_offset((IntPtr)UnhollowerUtils
+                    .GetIl2CppFieldInfoPointerFieldForGeneratedFieldAccessor(avatarManagerField.GetMethod)
+                    .GetValue(null));
 
-            unsafe
-            {
-                var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils
-                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(AMEnumB).GetMethod(
-                        nameof(AMEnumB.MoveNext)))
-                    .GetValue(null);
-                
-                MelonUtils.NativeHookAttach((IntPtr)(&originalMethodPointer), typeof(AdvancedSafetyMod).GetMethod(nameof(MoveNextPatchB), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
-
-                ourMoveNextB = originalMethodPointer;
-            }
-            
-            unsafe
-            {
-                var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils
-                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(AMEnumC).GetMethod(
-                        nameof(AMEnumC.MoveNext)))
-                    .GetValue(null);
-                
-                MelonUtils.NativeHookAttach((IntPtr)(&originalMethodPointer), typeof(AdvancedSafetyMod).GetMethod(nameof(MoveNextPatchC), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
-
-                ourMoveNextC = originalMethodPointer;
-            }
-
-            unsafe
-            {
-                var originalMethodInfo = (Il2CppMethodInfo*) (IntPtr) UnhollowerUtils
-                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(AMEnumB).GetMethod(
-                        nameof(AMEnumB.MoveNext)))
-                    .GetValue(null);
-
-                var methodInfoCopy = (Il2CppMethodInfo*) Marshal.AllocHGlobal(Marshal.SizeOf<Il2CppMethodInfo>());
-                *methodInfoCopy = *originalMethodInfo;
-
-                ourInvokeMethodInfo = (IntPtr) methodInfoCopy;
-            }
-            
-            foreach (ProcessModule module in Process.GetCurrentProcess().Modules)
-            {
-                if (!module.FileName.Contains("UnityPlayer")) continue;
-
-                // ProduceHelper<AudioMixer,0>::Produce, thanks to Ben for finding an adjacent method
-                ourAudioMixerReadPointer = module.BaseAddress + 0x4997C0;
-                var patchDelegate = new AudioMixerReadDelegate(AudioMixerReadPatch);
-                ourPinnedDelegates.Add(patchDelegate);
                 unsafe
                 {
-                    fixed (IntPtr* mixerReadAddress = &ourAudioMixerReadPointer)
-                        MelonUtils.NativeHookAttach((IntPtr) mixerReadAddress, Marshal.GetFunctionPointerForDelegate(patchDelegate));
-                    ourAudioMixerReadDelegate = Marshal.GetDelegateForFunctionPointer<AudioMixerReadDelegate>(ourAudioMixerReadPointer);
-                }
+                    var originalMethodPointer = *(IntPtr*)(IntPtr)UnhollowerUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(moveNext).GetValue(null);
+
+                    VoidDelegate originalDelegate = null;
                     
-                break;
+                    void TaskMoveNextPatch(IntPtr taskPtr, IntPtr nativeMethodInfo)
+                    {
+                        var avatarManager = *(IntPtr*)(taskPtr + fieldOffset);
+                        using (new AvatarManagerCookie(new VRCAvatarManager(avatarManager)))
+                            originalDelegate(taskPtr, nativeMethodInfo);
+                    }
+                    
+                    var patchDelegate = new VoidDelegate(TaskMoveNextPatch);
+                    ourPinnedDelegates.Add(patchDelegate);
+                    
+                    MelonUtils.NativeHookAttach((IntPtr)(&originalMethodPointer), Marshal.GetFunctionPointerForDelegate(patchDelegate));
+                    originalDelegate = Marshal.GetDelegateForFunctionPointer<VoidDelegate>(originalMethodPointer);
+                }
             }
+
+            ReaderPatches.ApplyPatches();
             
             SceneManager.add_sceneLoaded(new Action<Scene, LoadSceneMode>((s, _) =>
             {
                 if (s.buildIndex == -1)
                 {
-                    ourCanReadAudioMixers = false;
+                    CanReadAudioMixers = false;
+                    CanReadBadFloats = false;
                     MelonDebug.Msg("No reading audio mixers anymore");
                 }
             }));
@@ -139,7 +107,8 @@ namespace AdvancedSafety
                 if (s.buildIndex == -1)
                 {
                     // allow loading mixers from world assetbundles 
-                    ourCanReadAudioMixers = true;
+                    CanReadAudioMixers = true;
+                    CanReadBadFloats = true;
                     MelonDebug.Msg("Can read audio mixers now");
                 }
             }));
@@ -155,27 +124,6 @@ namespace AdvancedSafety
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate IntPtr ObjectInstantiateDelegate(IntPtr assetPtr, Vector3 pos, Quaternion rot, byte allowCustomShaders, byte isUI, byte validate, IntPtr nativeMethodPointer);
-        
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate IntPtr AudioMixerReadDelegate(int thisPtr, int readerPtr);
-
-        private static AudioMixerReadDelegate ourAudioMixerReadDelegate;
-        private static IntPtr ourAudioMixerReadPointer;
-
-        private static IntPtr ourMoveNextA;
-        private static IntPtr ourMoveNextB;
-        private static IntPtr ourMoveNextC;
-
-        private static IntPtr ourInvokeMethodInfo;
-
-        private unsafe static bool SafeInvokeMoveNext(IntPtr methodPtr, IntPtr thisPtr)
-        {
-            var exc = IntPtr.Zero;
-            ((Il2CppMethodInfo*) ourInvokeMethodInfo)->methodPointer = methodPtr;
-            var result = IL2CPP.il2cpp_runtime_invoke(ourInvokeMethodInfo, thisPtr, (void**) IntPtr.Zero, ref exc);
-            Il2CppException.RaiseExceptionIfNecessary(exc);
-            return * (bool*) IL2CPP.il2cpp_object_unbox(result);
-        }
 
         private static readonly PriorityQueue<GameObjectWithPriorityData> ourBfsQueue = new PriorityQueue<GameObjectWithPriorityData>(GameObjectWithPriorityData.IsActiveDepthNumChildrenComparer);
         private static void CleanAvatar(VRCAvatarManager avatarManager, GameObject go)
@@ -184,7 +132,7 @@ namespace AdvancedSafety
                 return;
             
             if (AdvancedSafetySettings.AvatarFilteringOnlyInPublic.Value &&
-                RoomManager.field_Internal_Static_ApiWorldInstance_0?.InstanceType != ApiWorldInstance.AccessType.Public)
+                RoomManager.field_Internal_Static_ApiWorldInstance_0?.type != InstanceAccessType.Public)
                 return;
             
             var vrcPlayer = avatarManager.field_Private_VRCPlayer_0;
@@ -303,63 +251,6 @@ namespace AdvancedSafety
                     audioSource.Stop();
         }
 
-        private static bool MoveNextPatchA(IntPtr thisPtr)
-        {
-            try
-            {
-                using (new AvatarManagerCookie(new AMEnumA(thisPtr).field_Public_VRCAvatarManager_0))
-                    return SafeInvokeMoveNext(ourMoveNextA, thisPtr);
-            }
-            catch (Il2CppException ex)
-            {
-                MelonDebug.Msg($"Caught top-level native exception: {ex}");
-                return false;
-            }
-            catch (Exception ex)
-            {
-                MelonLogger.Error($"Error when wrapping avatar creation: {ex}");
-                return false;
-            }
-        }
-        
-        private static bool MoveNextPatchB(IntPtr thisPtr)
-        {
-            try
-            {
-                using (new AvatarManagerCookie(new AMEnumB(thisPtr).field_Public_VRCAvatarManager_0))
-                    return SafeInvokeMoveNext(ourMoveNextB, thisPtr);
-            }
-            catch (Il2CppException ex)
-            {
-                MelonDebug.Msg($"Caught top-level native exception: {ex}");
-                return false;
-            }
-            catch (Exception ex)
-            {
-                MelonLogger.Error($"Error when wrapping avatar creation: {ex}");
-                return false;
-            }
-        }
-
-        private static bool MoveNextPatchC(IntPtr thisPtr)
-        {
-            try
-            {
-                using (new AvatarManagerCookie(new AMEnumC(thisPtr).field_Public_VRCAvatarManager_0))
-                    return SafeInvokeMoveNext(ourMoveNextC, thisPtr);
-            }
-            catch (Il2CppException ex)
-            {
-                MelonDebug.Msg($"Caught top-level native exception: {ex}");
-                return false;
-            }
-            catch (Exception ex)
-            {
-                MelonLogger.Error($"Error when wrapping avatar creation: {ex}");
-                return false;
-            }
-        }
-
         private static IntPtr ObjectInstantiatePatch(IntPtr assetPtr, Vector3 pos, Quaternion rot,
             byte allowCustomShaders, byte isUI, byte validate, IntPtr nativeMethodPointer, ObjectInstantiateDelegate originalInstantiateDelegate)
         {
@@ -409,19 +300,6 @@ namespace AdvancedSafety
             return false;
         }
 
-        private static IntPtr AudioMixerReadPatch(int thisPtr, int readerPtr)
-        {
-            if (!ourCanReadAudioMixers && !AdvancedSafetySettings.AllowReadingMixers.Value)
-            {
-                MelonDebug.Msg("Not reading audio mixer");
-                return IntPtr.Zero;
-            }
-            
-            // just in case something ever races
-            ourAudioMixerReadDelegate ??= Marshal.GetDelegateForFunctionPointer<AudioMixerReadDelegate>(ourAudioMixerReadPointer);
-            return ourAudioMixerReadDelegate(thisPtr, readerPtr);
-        }
-        
         private readonly struct AvatarManagerCookie : IDisposable
         {
             internal static VRCAvatarManager CurrentManager;
