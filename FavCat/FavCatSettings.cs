@@ -30,21 +30,21 @@ namespace FavCat
             
             var category = MelonPreferences.CreateCategory(SettingsCategory, "FavCat");
             
-            DatabasePath = (MelonPreferences_Entry<string>) category.CreateEntry("DatabasePath", "./UserData", "Database directory path", true);
-            ImageCachePath = (MelonPreferences_Entry<string>) category.CreateEntry("ImageCachePath", "./UserData", "Image cache directory path", true);
-            AnnoyingMessageSeen = (MelonPreferences_Entry<string>) category.CreateEntry("AnnoyingMessageSeen", "", is_hidden: true);
+            DatabasePath = category.CreateEntry("DatabasePath", "./UserData", "Database directory path", is_hidden: true, dont_save_default: false);
+            ImageCachePath = category.CreateEntry("ImageCachePath", "./UserData", "Image cache directory path", is_hidden: true, dont_save_default: false);
+            AnnoyingMessageSeen = category.CreateEntry("AnnoyingMessageSeen", "", is_hidden: true);
             
-            EnableAvatarFavs = (MelonPreferences_Entry<bool>) category.CreateEntry("EnableAvatarFavs", true, "Enable avatar favorites (restart required)");
-            EnableWorldFavs = (MelonPreferences_Entry<bool>) category.CreateEntry("EnableWorldFavs", true, "Enable world favorites (restart required)");
-            EnablePlayerFavs = (MelonPreferences_Entry<bool>) category.CreateEntry("EnablePlayerFavs", true, "Enable player favorites (restart required)");
+            EnableAvatarFavs = category.CreateEntry("EnableAvatarFavs", true, "Enable avatar favorites (restart required)");
+            EnableWorldFavs = category.CreateEntry("EnableWorldFavs", true, "Enable world favorites (restart required)");
+            EnablePlayerFavs = category.CreateEntry("EnablePlayerFavs", true, "Enable player favorites (restart required)");
 
-            ImageCacheMode = (MelonPreferences_Entry<string>) category.CreateEntry("ImageCachingMode", "full", "Image caching mode");
-            ImageCacheMaxSize = (MelonPreferences_Entry<int>) category.CreateEntry("ImageCacheMaxSize", 4096, "Image cache max size (MB)");
-            HidePopupAfterFav = (MelonPreferences_Entry<bool>) category.CreateEntry("HidePopupAfterFav", true, "Hide favorite popup after (un)favoriting a world or a player");
+            ImageCacheMode = category.CreateEntry("ImageCachingMode", "full", "Image caching mode");
+            ImageCacheMaxSize = category.CreateEntry("ImageCacheMaxSize", 4096, "Image cache max size (MB)");
+            HidePopupAfterFav = category.CreateEntry("HidePopupAfterFav", true, "Hide favorite popup after (un)favoriting a world or a player");
             
-            MakeClickSounds = (MelonPreferences_Entry<bool>) category.CreateEntry("MakeClickSounds", true, "Click sounds");
-            AvatarSearchMode = (MelonPreferences_Entry<string>) category.CreateEntry(avatarSearchModeName, "select", "Avatar search result action");
-            SortPlayersByOnline = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(SortPlayersByOnline), true, "Show offline players at the end of the list");
+            MakeClickSounds = category.CreateEntry("MakeClickSounds", true, "Click sounds");
+            AvatarSearchMode = category.CreateEntry(avatarSearchModeName, "select", "Avatar search result action");
+            SortPlayersByOnline = category.CreateEntry(nameof(SortPlayersByOnline), true, "Show offline players at the end of the list");
             
             ExpansionKitApi.RegisterSettingAsStringEnum(SettingsCategory, "ImageCachingMode", new []{("full", "Full local image cache (fastest, safest)"), ("fast", "Fast, use more RAM"), ("builtin", "Preserve RAM, more API requests")});
             ExpansionKitApi.RegisterSettingAsStringEnum(SettingsCategory, avatarSearchModeName, new []{("select", "Select avatar"), ("author", "Show avatar author (safer)")});

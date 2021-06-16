@@ -38,32 +38,32 @@ namespace JoinNotifier
         {
             var category = MelonPreferences.CreateCategory("JoinNotifier", "Join Notifier");
             
-            ShouldJoinBlink = (MelonPreferences_Entry<bool>) category.CreateEntry("BlinkIcon", true, "Blink HUD icon on join");
-            ShouldPlayJoinSound = (MelonPreferences_Entry<bool>) category.CreateEntry("PlaySound", true, "Play sound on join");
-            JoinShowName = (MelonPreferences_Entry<bool>) category.CreateEntry("ShowJoinedName", true, "Show joined names");
+            ShouldJoinBlink = category.CreateEntry("BlinkIcon", true, "Blink HUD icon on join");
+            ShouldPlayJoinSound = category.CreateEntry("PlaySound", true, "Play sound on join");
+            JoinShowName = category.CreateEntry("ShowJoinedName", true, "Show joined names");
             
-            ShouldLeaveBlink = (MelonPreferences_Entry<bool>) category.CreateEntry("LeaveBlink", false, "Blink HUD icon on leave");
-            ShouldPlayLeaveSound = (MelonPreferences_Entry<bool>) category.CreateEntry("LeaveSound", false, "Play sound on leave");
-            LeaveShowName = (MelonPreferences_Entry<bool>) category.CreateEntry("ShowLeaveName", false, "Show left names");
+            ShouldLeaveBlink = category.CreateEntry("LeaveBlink", false, "Blink HUD icon on leave");
+            ShouldPlayLeaveSound = category.CreateEntry("LeaveSound", false, "Play sound on leave");
+            LeaveShowName = category.CreateEntry("ShowLeaveName", false, "Show left names");
             
-            SoundVolume = (MelonPreferences_Entry<float>) category.CreateEntry("SoundVolume", .3f, "Sound volume (0-1)");
-            UseUiMixer = (MelonPreferences_Entry<bool>) category.CreateEntry("UseUiMixer", true, "Notifications are affected by UI volume slider");
-            TextSize = (MelonPreferences_Entry<int>) category.CreateEntry("TextSize", 36, "Text size (pt)");
+            SoundVolume = category.CreateEntry("SoundVolume", .3f, "Sound volume (0-1)");
+            UseUiMixer = category.CreateEntry("UseUiMixer", true, "Notifications are affected by UI volume slider");
+            TextSize = category.CreateEntry("TextSize", 36, "Text size (pt)");
             
-            NotifyInPublic = (MelonPreferences_Entry<bool>) category.CreateEntry("NotifyInPublic", false, "Notify in public instances");
-            NotifyInFriends = (MelonPreferences_Entry<bool>) category.CreateEntry("NotifyInFriends", true, "Notify in friends[+] instances");
-            NotifyInPrivate = (MelonPreferences_Entry<bool>) category.CreateEntry("NotifyInPrivate", true, "Notify in private instances");
+            NotifyInPublic = category.CreateEntry("NotifyInPublic", false, "Notify in public instances");
+            NotifyInFriends = category.CreateEntry("NotifyInFriends", true, "Notify in friends[+] instances");
+            NotifyInPrivate = category.CreateEntry("NotifyInPrivate", true, "Notify in private instances");
             
-            ShowFriendsOnly = (MelonPreferences_Entry<bool>) category.CreateEntry("ShowFriendsOnly", false, "Show friend join/leave only");
-            JoinIconColor = (MelonPreferences_Entry<string>) category.CreateEntry("JoinColor", "127 191 255", "Join icon color (r g b)");
-            LeaveIconColor = (MelonPreferences_Entry<string>) category.CreateEntry("LeaveColor", "153 82 51", "Leave icon color (r g b)");
+            ShowFriendsOnly = category.CreateEntry("ShowFriendsOnly", false, "Show friend join/leave only");
+            JoinIconColor = category.CreateEntry("JoinColor", "127 191 255", "Join icon color (r g b)");
+            LeaveIconColor = category.CreateEntry("LeaveColor", "153 82 51", "Leave icon color (r g b)");
             
-            ShowFriendsInDifferentColor = (MelonPreferences_Entry<bool>) category.CreateEntry("ShowFriendsInDifferentColor", true, "Show friend names in different color");
-            FriendsJoinIconColor = (MelonPreferences_Entry<string>) category.CreateEntry("FriendJoinColor", "224 224 0", "Friend join name color (r g b)");
-            FriendsLeaveIconColor = (MelonPreferences_Entry<string>) category.CreateEntry("FriendLeaveColor", "201 201 0", "Friend leave name color (r g b)");
+            ShowFriendsInDifferentColor = category.CreateEntry("ShowFriendsInDifferentColor", true, "Show friend names in different color");
+            FriendsJoinIconColor = category.CreateEntry("FriendJoinColor", "224 224 0", "Friend join name color (r g b)");
+            FriendsLeaveIconColor = category.CreateEntry("FriendLeaveColor", "201 201 0", "Friend leave name color (r g b)");
             
-            ShowFriendsAlways = (MelonPreferences_Entry<bool>) category.CreateEntry("ShowFriendsAlways", false, "Show friend join/leave regardless of instance type");
-            HideBlockedUsers = (MelonPreferences_Entry<bool>) category.CreateEntry("HideBlockedUsers", false, "Hide join/leave of blocked users");
+            ShowFriendsAlways = category.CreateEntry("ShowFriendsAlways", false, "Show friend join/leave regardless of instance type");
+            HideBlockedUsers = category.CreateEntry("HideBlockedUsers", false, "Hide join/leave of blocked users");
         }
 
         public static bool ShouldNotifyInCurrentInstance()

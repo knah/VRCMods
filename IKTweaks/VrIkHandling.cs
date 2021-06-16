@@ -1,6 +1,6 @@
 using System.Linq;
 using System.Reflection;
-using Harmony;
+using HarmonyLib;
 using MelonLoader;
 using RootMotion.FinalIK;
 using UnhollowerBaseLib.Attributes;
@@ -20,7 +20,7 @@ namespace IKTweaks
                 ApplyVrIkSettings(LastInitializedIk);
         }
 
-        public static void HookVrIkInit(HarmonyInstance harmony)
+        public static void HookVrIkInit(HarmonyLib.Harmony harmony)
         {
             var vrikInitMethod = typeof(VRCVrIkController).GetMethod(nameof(VRCVrIkController
                 .Method_Public_Virtual_Final_New_Boolean_VRC_AnimationController_Animator_VRCPlayer_Boolean_0));

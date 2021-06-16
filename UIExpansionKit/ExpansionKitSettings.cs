@@ -20,7 +20,7 @@ namespace UIExpansionKit
         {
             var category = MelonPreferences.CreateCategory(KitCategory,"UI Expansion Kit");
             
-            PinsEntry = (MelonPreferences_Entry<string>) category.CreateEntry(PinnedPrefs, "", is_hidden: true);
+            PinsEntry = category.CreateEntry(PinnedPrefs, "", is_hidden: true);
             
             category.CreateEntry(QmExpandoStartsCollapsed, false, "Quick Menu extra panel starts hidden");
             category.CreateEntry(CategoriesStartCollapsed, false, "Settings categories start collapsed");

@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using Harmony;
+using HarmonyLib;
 using Il2CppSystem.Collections.Generic;
 using MelonLoader;
 using MirrorResolutionUnlimiter;
@@ -8,7 +8,7 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 using VRC.SDKBase;
 
-[assembly:MelonInfo(typeof(MirrorResolutionUnlimiterMod), "MirrorResolutionUnlimiter", "1.1.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(MirrorResolutionUnlimiterMod), "MirrorResolutionUnlimiter", "1.1.2", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -34,11 +34,11 @@ namespace MirrorResolutionUnlimiter
             ClassInjector.RegisterTypeInIl2Cpp<OriginalPixelLightsSettingKeeper>();
 
             var category = MelonPreferences.CreateCategory(ModCategory, "Mirror Resolution");
-            var maxTextureRes = (MelonPreferences_Entry<int>) category.CreateEntry(MaxResPref, 4096, "Max eye texture size");
+            var maxTextureRes = category.CreateEntry(MaxResPref, 4096, "Max eye texture size");
             maxTextureRes.OnValueChanged += (_, v) => ourMaxEyeResolution = v;
             ourMaxEyeResolution = maxTextureRes.Value;
 
-            var mirrorMsaa = (MelonPreferences_Entry<int>) category.CreateEntry(MirrorMsaaPref, 0, "Mirror MSAA (0=default)");
+            var mirrorMsaa = category.CreateEntry(MirrorMsaaPref, 0, "Mirror MSAA (0=default)");
             mirrorMsaa.OnValueChanged += (_, v) =>
             {
                 ourMirrorMsaa = v;
@@ -49,14 +49,14 @@ namespace MirrorResolutionUnlimiter
             if (ourMirrorMsaa != 1 && ourMirrorMsaa != 2 && ourMirrorMsaa != 4 && ourMirrorMsaa != 8)
                 ourMirrorMsaa = 0;
 
-            var forceAutoRes = (MelonPreferences_Entry<bool>) category.CreateEntry(AllMirrorsAutoPref, false, "Force auto resolution");
+            var forceAutoRes = category.CreateEntry(AllMirrorsAutoPref, false, "Force auto resolution");
             forceAutoRes.OnValueChanged += (_, v) => ourAllMirrorsAuto = v;
             ourAllMirrorsAuto = forceAutoRes.Value;
             
-            myPixelLightsSetting = (MelonPreferences_Entry<string>) category.CreateEntry(PixelLightsSetting, "default", "Pixel lights in mirrors");
+            myPixelLightsSetting = category.CreateEntry(PixelLightsSetting, "default", "Pixel lights in mirrors");
             myPixelLightsSetting.OnValueChangedUntyped += UpdateMirrorPixelLights;
 
-            Harmony.Patch(
+            HarmonyInstance.Patch(
                 AccessTools.Method(typeof(VRC_MirrorReflection), nameof(VRC_MirrorReflection.GetReflectionData)),
                 prefix: new HarmonyMethod(typeof(MirrorResolutionUnlimiterMod), nameof(GetReflectionData)));
 

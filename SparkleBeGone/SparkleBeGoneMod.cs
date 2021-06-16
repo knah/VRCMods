@@ -39,13 +39,13 @@ namespace SparkleBeGone
         {
             var category = MelonPreferences.CreateCategory("SparkleBeGone", "Sparkle Be Gone");
             
-            ourStartSparkle = (MelonPreferences_Entry<bool>) category.CreateEntry("StartSparkle", false, "Show start sparkle");
-            ourEndSparkle = (MelonPreferences_Entry<bool>) category.CreateEntry("EndSparks", false, "Show end sparks");
-            ourEndFlare = (MelonPreferences_Entry<bool>) category.CreateEntry("EndFlare", true, "Show end flare");
+            ourStartSparkle = category.CreateEntry("StartSparkle", false, "Show start sparkle");
+            ourEndSparkle = category.CreateEntry("EndSparks", false, "Show end sparks");
+            ourEndFlare = category.CreateEntry("EndFlare", true, "Show end flare");
             
-            var recolorSparks = (MelonPreferences_Entry<bool>) category.CreateEntry("RecolorSparks", false, "Recolor sparks");
-            var recolorBeams = (MelonPreferences_Entry<bool>) category.CreateEntry("RecolorBeams", true, "Recolor beams");
-            var beamColor = (MelonPreferences_Entry<string>) category.CreateEntry("BeamColor", "25 50 255 255", "Beam color (r g b a)");
+            var recolorSparks = category.CreateEntry("RecolorSparks", false, "Recolor sparks");
+            var recolorBeams = category.CreateEntry("RecolorBeams", true, "Recolor beams");
+            var beamColor = category.CreateEntry("BeamColor", "25 50 255 255", "Beam color (r g b a)");
             
             recolorSparks.OnValueChanged += (_, value) => ourDoRecolorSparks = value;
             recolorBeams.OnValueChanged += (_, value) =>

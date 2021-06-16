@@ -114,7 +114,7 @@ namespace AdvancedSafety
             }));
             
             PortalHiding.OnApplicationStart();
-            AvatarHiding.OnApplicationStart(Harmony);
+            AvatarHiding.OnApplicationStart(HarmonyInstance);
             
             if(MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit"))
             {

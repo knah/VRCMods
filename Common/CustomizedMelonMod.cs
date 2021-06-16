@@ -26,8 +26,4 @@ abstract class CustomizedMelonMod : MelonMod
 
         code();
     }
-
-    protected new void VRChat_OnUiManagerInit()
-    {
-    }
 }

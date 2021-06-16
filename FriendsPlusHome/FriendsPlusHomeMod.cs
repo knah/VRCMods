@@ -4,14 +4,14 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using FriendsPlusHome;
-using Harmony;
+using HarmonyLib;
 using MelonLoader;
 using UIExpansionKit.API;
 using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
 using VRC.Core;
 
-[assembly:MelonInfo(typeof(FriendsPlusHomeMod), "Friends+ Home", "1.1.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(FriendsPlusHomeMod), "Friends+ Home", "1.1.1", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -29,8 +29,8 @@ namespace FriendsPlusHome
         public override void OnApplicationStart()
         {
             var category = MelonPreferences.CreateCategory(SettingsCategory, "Friends+ Home");
-            StartupName = (MelonPreferences_Entry<string>) category.CreateEntry(SettingStartupName, nameof(InstanceAccessType.FriendsOfGuests), "Startup instance type");
-            ButtonName = (MelonPreferences_Entry<string>) category.CreateEntry(SettingButtonName, nameof(InstanceAccessType.FriendsOfGuests), "\"Go Home\" instance type");
+            StartupName = category.CreateEntry(SettingStartupName, nameof(InstanceAccessType.FriendsOfGuests), "Startup instance type");
+            ButtonName = category.CreateEntry(SettingButtonName, nameof(InstanceAccessType.FriendsOfGuests), "\"Go Home\" instance type");
 
             if (MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit" && !it.Info.Version.StartsWith("0.1."))) 
                 RegisterUix2Extension();
@@ -44,7 +44,7 @@ namespace FriendsPlusHome
                     continue;
                 
                 MelonLogger.Msg($"Patched {methodInfo.Name}");
-                Harmony.Patch(methodInfo, postfix: new HarmonyMethod(AccessTools.Method(typeof(FriendsPlusHomeMod), nameof(GoHomePatch))));
+                HarmonyInstance.Patch(methodInfo, postfix: new HarmonyMethod(AccessTools.Method(typeof(FriendsPlusHomeMod), nameof(GoHomePatch))));
             }
             
             DoAfterUiManagerInit(OnUiManagerInit);

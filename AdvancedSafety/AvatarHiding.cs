@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
-using Harmony;
+using HarmonyLib;
 using MelonLoader;
 using UnhollowerBaseLib;
 using UnhollowerBaseLib.Attributes;
@@ -22,7 +22,7 @@ namespace AdvancedSafety
         internal static readonly Dictionary<string, string> ourBlockedAvatarAuthors = new Dictionary<string, string>();
         internal static readonly Dictionary<string, string> ourBlockedAvatars = new Dictionary<string, string>();
         
-        public static void OnApplicationStart(HarmonyInstance harmony)
+        public static void OnApplicationStart(HarmonyLib.Harmony harmony)
         {
             if (File.Exists(BlockedAvatarsMakersFilePath))
             {

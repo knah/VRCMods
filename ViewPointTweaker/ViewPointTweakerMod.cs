@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Harmony;
+using HarmonyLib;
 using MelonLoader;
 using MelonLoader.TinyJSON;
 using UIExpansionKit.API;
@@ -13,7 +13,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using ViewPointTweaker;
 
-[assembly:MelonInfo(typeof(ViewPointTweakerMod), "View Point Tweaker", "1.0.2", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(ViewPointTweakerMod), "View Point Tweaker", "1.0.3", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace ViewPointTweaker
@@ -40,7 +40,7 @@ namespace ViewPointTweaker
                 .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
                 .Where(it => it.GetCustomAttribute<CallerCountAttribute>().Count > 0 && it.GetParameters().Length == 1 && it.GetParameters()[0].ParameterType == typeof(Animator)))
             {
-                Harmony.Patch(methodInfo,
+                HarmonyInstance.Patch(methodInfo,
                     postfix: new HarmonyMethod(AccessTools.Method(typeof(ViewPointTweakerMod),
                         nameof(HeadAlignmentInitPatch))));
             }

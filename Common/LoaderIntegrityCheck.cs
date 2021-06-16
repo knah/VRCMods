@@ -1,11 +1,11 @@
 using System;
 using System.IO;
 using System.Reflection;
-using Harmony;
+using HarmonyLib;
 using MelonLoader;
 
 
-[HarmonyShield]
+[PatchShield]
 internal static class LoaderIntegrityCheck
 {
     private static string FilteredAssemblyName
@@ -59,7 +59,7 @@ internal static class LoaderIntegrityCheck
 
         try
         {
-            var harmony = HarmonyInstance.Create(Guid.NewGuid().ToString());
+            var harmony = new HarmonyLib.Harmony(Guid.NewGuid().ToString());
             harmony.Patch(AccessTools.Method(typeof(LoaderIntegrityCheck), nameof(PatchTest)),
                 new HarmonyMethod(typeof(LoaderIntegrityCheck), nameof(ReturnFalse)));
 

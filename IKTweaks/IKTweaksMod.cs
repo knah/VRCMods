@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Harmony;
+using HarmonyLib;
 using IKTweaks;
 using MelonLoader;
 using RootMotionNew.FinalIK;
@@ -18,7 +18,7 @@ using Valve.VR;
 using Delegate = Il2CppSystem.Delegate;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.12", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.13", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -41,8 +41,8 @@ namespace IKTweaks
             ClassInjector.RegisterTypeInIl2Cpp<VRIK_New>();
             ClassInjector.RegisterTypeInIl2Cpp<TwistRelaxer_New>();
 
-            VrIkHandling.HookVrIkInit(Harmony);
-            FullBodyHandling.HookFullBodyController(Harmony);
+            VrIkHandling.HookVrIkInit(HarmonyInstance);
+            FullBodyHandling.HookFullBodyController(HarmonyInstance);
             
             Camera.onPreRender = Delegate.Combine(Camera.onPreRender, (Camera.CameraCallback) OnVeryLateUpdate).Cast<Camera.CameraCallback>();
             
@@ -55,7 +55,7 @@ namespace IKTweaks
                         jt.Type == XrefType.Global &&
                         jt.ReadAsObject()?.ToString() == "Asked for eye height before measured.")));
 
-            Harmony.Patch(typeof(VRCAvatarManager)
+            HarmonyInstance.Patch(typeof(VRCAvatarManager)
                 .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Single(it =>
                     it.GetParameters().Length == 0 && it.ReturnType == typeof(float) && !it.Name.Contains("_PDM") &&
                     XrefScanner.XrefScan(it).Any(jt =>

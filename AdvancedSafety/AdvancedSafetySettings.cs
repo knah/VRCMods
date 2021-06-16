@@ -10,47 +10,47 @@ namespace AdvancedSafety
         {
             var category = MelonPreferences.CreateCategory(SettingsCategory, "Advanced safety");
             
-            AvatarFilteringEnabled = (MelonPreferences_Entry<bool>) category.CreateEntry( nameof(AvatarFilteringEnabled), true, "Enable avatar filtering");
-            IncludeFriends = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(IncludeFriends), false, "Friends are affected by avatar filtering");
-            AbideByShowAvatar = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(AbideByShowAvatar), true, "\"Show avatar\" bypasses avatar filtering");
+            AvatarFilteringEnabled = category.CreateEntry( nameof(AvatarFilteringEnabled), true, "Enable avatar filtering");
+            IncludeFriends = category.CreateEntry(nameof(IncludeFriends), false, "Friends are affected by avatar filtering");
+            AbideByShowAvatar = category.CreateEntry(nameof(AbideByShowAvatar), true, "\"Show avatar\" bypasses avatar filtering");
 
-            AvatarFilteringOnlyInPublic = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(AvatarFilteringOnlyInPublic), false, "Do avatar filtering only in public instances");
-            IncludeFriendsInHides = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(IncludeFriendsInHides), false, "Friends are affected by avatar hiding");
-            HidesAbideByShowAvatar = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(HidesAbideByShowAvatar), true, "\"Show avatar\" bypasses avatar hiding");
+            AvatarFilteringOnlyInPublic = category.CreateEntry(nameof(AvatarFilteringOnlyInPublic), false, "Do avatar filtering only in public instances");
+            IncludeFriendsInHides = category.CreateEntry(nameof(IncludeFriendsInHides), false, "Friends are affected by avatar hiding");
+            HidesAbideByShowAvatar = category.CreateEntry(nameof(HidesAbideByShowAvatar), true, "\"Show avatar\" bypasses avatar hiding");
 
-            AllowSpawnSounds = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(AllowSpawnSounds), false, "Allow avatar spawn sounds");
-            AllowGlobalSounds = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(AllowGlobalSounds), false, "Allow global sounds on avatars");
-            MaxAudioSources = (MelonPreferences_Entry<int>) category.CreateEntry(nameof(MaxAudioSources), 16, "Max audio sources");
+            AllowSpawnSounds = category.CreateEntry(nameof(AllowSpawnSounds), false, "Allow avatar spawn sounds");
+            AllowGlobalSounds = category.CreateEntry(nameof(AllowGlobalSounds), false, "Allow global sounds on avatars");
+            MaxAudioSources = category.CreateEntry(nameof(MaxAudioSources), 16, "Max audio sources");
 
-            MaxPolygons = (MelonPreferences_Entry<int>) category.CreateEntry(nameof(MaxPolygons), 2_000_000, "Max polygons");
-            MaxMaterialSlots = (MelonPreferences_Entry<int>) category.CreateEntry(nameof(MaxMaterialSlots), 100, "Max material slots");
-            HeuristicallyRemoveScreenSpaceBullshit = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(HeuristicallyRemoveScreenSpaceBullshit), true, "Try to remove fullscreen effects");
+            MaxPolygons = category.CreateEntry(nameof(MaxPolygons), 2_000_000, "Max polygons");
+            MaxMaterialSlots = category.CreateEntry(nameof(MaxMaterialSlots), 100, "Max material slots");
+            HeuristicallyRemoveScreenSpaceBullshit = category.CreateEntry(nameof(HeuristicallyRemoveScreenSpaceBullshit), true, "Try to remove fullscreen effects");
             
-            MaxConstraints = (MelonPreferences_Entry<int>) category.CreateEntry(nameof(MaxConstraints), 200, "Max constraints");
-            MaxColliders = (MelonPreferences_Entry<int>) category.CreateEntry(nameof(MaxColliders), 32, "Max colliders");
-            MaxRigidBodies = (MelonPreferences_Entry<int>) category.CreateEntry(nameof(MaxRigidBodies), 32, "Max rigidbodies");
+            MaxConstraints = category.CreateEntry(nameof(MaxConstraints), 200, "Max constraints");
+            MaxColliders = category.CreateEntry(nameof(MaxColliders), 32, "Max colliders");
+            MaxRigidBodies = category.CreateEntry(nameof(MaxRigidBodies), 32, "Max rigidbodies");
 
-            MaxClothVertices = (MelonPreferences_Entry<int>) category.CreateEntry(nameof(MaxClothVertices), 10_000, "Max cloth vertices");
-            MaxTransforms = (MelonPreferences_Entry<int>) category.CreateEntry(nameof(MaxTransforms), 1000, "Max bones/transforms");
-            MaxDepth = (MelonPreferences_Entry<int>) category.CreateEntry(nameof(MaxDepth), 50, "Max transforms depth");
+            MaxClothVertices = category.CreateEntry(nameof(MaxClothVertices), 10_000, "Max cloth vertices");
+            MaxTransforms = category.CreateEntry(nameof(MaxTransforms), 1000, "Max bones/transforms");
+            MaxDepth = category.CreateEntry(nameof(MaxDepth), 50, "Max transforms depth");
             
-            MaxAnimators = (MelonPreferences_Entry<int>) category.CreateEntry(nameof(MaxAnimators), 64, "Max animators");
-            MaxLights = (MelonPreferences_Entry<int>) category.CreateEntry(nameof(MaxLights), 2, "Max lights");
-            MaxComponents = (MelonPreferences_Entry<int>) category.CreateEntry(nameof(MaxComponents), 4_000, "Max total components");
+            MaxAnimators = category.CreateEntry(nameof(MaxAnimators), 64, "Max animators");
+            MaxLights = category.CreateEntry(nameof(MaxLights), 2, "Max lights");
+            MaxComponents = category.CreateEntry(nameof(MaxComponents), 4_000, "Max total components");
             
-            MaxParticles = (MelonPreferences_Entry<int>) category.CreateEntry(nameof(MaxParticles), 1_000_000, "Max total particles");
-            MaxMeshParticleVertices = (MelonPreferences_Entry<int>) category.CreateEntry(nameof(MaxMeshParticleVertices), 1_000_000, "Max total mesh particle polygons");
-            AllowUiLayer = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(AllowUiLayer), false, "Allow UI layer on avatars");
+            MaxParticles = category.CreateEntry(nameof(MaxParticles), 1_000_000, "Max total particles");
+            MaxMeshParticleVertices = category.CreateEntry(nameof(MaxMeshParticleVertices), 1_000_000, "Max total mesh particle polygons");
+            AllowUiLayer = category.CreateEntry(nameof(AllowUiLayer), false, "Allow UI layer on avatars");
             
-            AllowCustomMixers = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(AllowCustomMixers), false, "Allow custom audio mixers on avatars");
-            AllowReadingMixers = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(AllowReadingMixers), false, "Allow audio mixers in assetbundles");
-            MaxMaterialSlotsOverSubmeshCount = (MelonPreferences_Entry<int>) category.CreateEntry(nameof(MaxMaterialSlotsOverSubmeshCount), 2, "Maximum material slots over submesh count");
+            AllowCustomMixers = category.CreateEntry(nameof(AllowCustomMixers), false, "Allow custom audio mixers on avatars");
+            AllowReadingMixers = category.CreateEntry(nameof(AllowReadingMixers), false, "Allow audio mixers in assetbundles");
+            MaxMaterialSlotsOverSubmeshCount = category.CreateEntry(nameof(MaxMaterialSlotsOverSubmeshCount), 2, "Maximum material slots over submesh count");
             
-            AllowReadingBadFloats = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(AllowReadingBadFloats), false, "Allow unbounded floats in assetbundles");
+            AllowReadingBadFloats = category.CreateEntry(nameof(AllowReadingBadFloats), false, "Allow unbounded floats in assetbundles");
             
-            HidePortalsFromBlockedUsers = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(HidePortalsFromBlockedUsers), true, "Hide portals from blocked users");
-            HidePortalsFromNonFriends = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(HidePortalsFromNonFriends), false, "Hide portals from non-friends");
-            HidePortalsCreatedTooClose = (MelonPreferences_Entry<bool>) category.CreateEntry(nameof(HidePortalsCreatedTooClose), true, "Hide portals created too close to local player");
+            HidePortalsFromBlockedUsers = category.CreateEntry(nameof(HidePortalsFromBlockedUsers), true, "Hide portals from blocked users");
+            HidePortalsFromNonFriends = category.CreateEntry(nameof(HidePortalsFromNonFriends), false, "Hide portals from non-friends");
+            HidePortalsCreatedTooClose = category.CreateEntry(nameof(HidePortalsCreatedTooClose), true, "Hide portals created too close to local player");
         }
 
         public static MelonPreferences_Entry<bool> AvatarFilteringEnabled;

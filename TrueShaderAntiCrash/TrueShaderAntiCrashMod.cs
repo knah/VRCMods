@@ -12,7 +12,7 @@ using UIExpansionKit.API;
 using UnityEngine.SceneManagement;
 using VRC.Core;
 
-[assembly:MelonInfo(typeof(TrueShaderAntiCrashMod), "True Shader Anticrash", "1.0.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(TrueShaderAntiCrashMod), "True Shader Anticrash", "1.0.2", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace TrueShaderAntiCrash
@@ -65,9 +65,9 @@ namespace TrueShaderAntiCrash
 
             var category = MelonPreferences.CreateCategory("True Shader Anticrash");
             
-            var loopsEnabled = (MelonPreferences_Entry<bool>) category.CreateEntry("LimitLoops", true, "Limit loops");
-            var geometryEnabled = (MelonPreferences_Entry<bool>) category.CreateEntry("LimitGeometry", true, "Limit geometry shaders");
-            var tessEnabled = (MelonPreferences_Entry<bool>) category.CreateEntry("LimitTesselation", true, "Limit tesselation");
+            var loopsEnabled = category.CreateEntry("LimitLoops", true, "Limit loops");
+            var geometryEnabled = category.CreateEntry("LimitGeometry", true, "Limit geometry shaders");
+            var tessEnabled = category.CreateEntry("LimitTesselation", true, "Limit tesselation");
 
             MelonPreferences_Entry<bool> enabledInPublicsOnly = null;
 
@@ -104,17 +104,17 @@ namespace TrueShaderAntiCrash
             geometryEnabled.OnValueChanged += (_, value) => UpdateLimiters();
             tessEnabled.OnValueChanged += (_, value) => UpdateLimiters();
 
-            var maxLoopIterations = (MelonPreferences_Entry<int>) category.CreateEntry("MaxLoopIterations", 128, "Max loop iterations");
+            var maxLoopIterations = category.CreateEntry("MaxLoopIterations", 128, "Max loop iterations");
             maxLoopIterations.OnValueChanged += (_, value) => ShaderFilterApi.SetLoopLimit(value);
 
-            var maxGeometry = (MelonPreferences_Entry<int>) category.CreateEntry("MaxGeometryOutputs", 60, "Max geometry shader outputs");
+            var maxGeometry = category.CreateEntry("MaxGeometryOutputs", 60, "Max geometry shader outputs");
             maxGeometry.OnValueChanged += (_, value) => ShaderFilterApi.SetLoopLimit(value);
             
-            var maxTess = (MelonPreferences_Entry<float>) category.CreateEntry("MaxTesselation", 5f, "Max tesselation power");
+            var maxTess = category.CreateEntry("MaxTesselation", 5f, "Max tesselation power");
             maxTess.OnValueChanged += (_, value) => ShaderFilterApi.SetMaxTesselationPower(value);
 
-            var enabledForWorlds = (MelonPreferences_Entry<bool>) category.CreateEntry("DisableDuringWorldLoad", true, "Try to avoid affecting world shaders");
-            enabledInPublicsOnly = (MelonPreferences_Entry<bool>) category.CreateEntry("EnabledInPublicsOnly", false, "Only enabled in public instances");
+            var enabledForWorlds = category.CreateEntry("DisableDuringWorldLoad", true, "Try to avoid affecting world shaders");
+            enabledInPublicsOnly = category.CreateEntry("EnabledInPublicsOnly", false, "Only enabled in public instances");
             
             SceneManager.add_sceneLoaded(new Action<Scene, LoadSceneMode>((sc, _) =>
             {

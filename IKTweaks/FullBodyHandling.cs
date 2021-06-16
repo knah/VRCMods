@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Harmony;
+using HarmonyLib;
 using MelonLoader;
 using RootMotion.FinalIK;
 using RootMotionNew.FinalIK;
@@ -450,7 +450,7 @@ namespace IKTweaks
             return true;
         }
 
-        internal static void HookFullBodyController(HarmonyInstance harmony)
+        internal static void HookFullBodyController(HarmonyLib.Harmony harmony)
         {
             var fbbIkInit = typeof(VRCFbbIkController).GetMethod(nameof(VRCFbbIkController.Method_Public_Virtual_Final_New_Boolean_VRC_AnimationController_Animator_VRCPlayer_Boolean_0));
             harmony.Patch(fbbIkInit, new HarmonyMethod(typeof(FullBodyHandling), nameof(FbbIkInitPrefix)),

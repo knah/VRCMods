@@ -18,8 +18,8 @@ namespace CameraMinus
         public override void OnApplicationStart()
         {
             var category = MelonPreferences.CreateCategory("CameraMinus", "CameraMinus");
-            myUseCameraExpando = (MelonPreferences_Entry<bool>) category.CreateEntry("UseCameraExpando", true, "Use Camera expando (instead of QM expando)");
-            myUnlimitCameraPickupDistance = (MelonPreferences_Entry<bool>) category.CreateEntry("UnlimitCameraPickupDistance", true, "Longer camera pickup distance");
+            myUseCameraExpando = category.CreateEntry("UseCameraExpando", true, "Use Camera expando (instead of QM expando)");
+            myUnlimitCameraPickupDistance = category.CreateEntry("UnlimitCameraPickupDistance", true, "Longer camera pickup distance");
 
             ExpansionKitApi.GetSettingsCategory("CameraMinus")
                 .AddLabel("Disable and enable camera to update camera expando visibility");

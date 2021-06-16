@@ -28,7 +28,7 @@ namespace Finitizer
         public override void OnApplicationStart()
         {
             var category = MelonPreferences.CreateCategory(SettingsCategory, SettingsCategory);
-            var entry = (MelonPreferences_Entry<bool>) category.CreateEntry(EnabledSetting, true, "FP fix enabled");
+            var entry = category.CreateEntry(EnabledSetting, true, "FP fix enabled");
             entry.OnValueChanged += (_, value) =>
             {
                 OnModSettingsApplied(value);

@@ -11,7 +11,7 @@ using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text;
-using Harmony;
+using HarmonyLib;
 using LagFreeScreenshots;
 using MelonLoader;
 using UIExpansionKit.API;
@@ -28,7 +28,7 @@ using System.Globalization;
 
 // using CameraUtil = ObjectPublicCaSiVeUnique;
 
-[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.2.1", "knah, Protected", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.2.2", "knah, Protected", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace LagFreeScreenshots
@@ -53,11 +53,11 @@ namespace LagFreeScreenshots
         public override void OnApplicationStart()
         {
             var category = MelonPreferences.CreateCategory(SettingsCategory, "Lag Free Screenshots");
-            ourEnabled = (MelonPreferences_Entry<bool>) category.CreateEntry(SettingEnableMod, true, "Enabled");
-            ourFormat = (MelonPreferences_Entry<string>) category.CreateEntry( SettingScreenshotFormat, "png", "Screenshot format");
-            ourJpegPercent = (MelonPreferences_Entry<int>) category.CreateEntry(SettingJpegPercent, 95, "JPEG quality (0-100)");
-            ourAutorotation = (MelonPreferences_Entry<bool>)category.CreateEntry(SettingAutorotation, true, "Rotate picture to match camera");
-            ourMetadata = (MelonPreferences_Entry<bool>)category.CreateEntry(SettingMetadata, false, "Save metadata in picture");
+            ourEnabled = category.CreateEntry(SettingEnableMod, true, "Enabled");
+            ourFormat = category.CreateEntry( SettingScreenshotFormat, "png", "Screenshot format");
+            ourJpegPercent = category.CreateEntry(SettingJpegPercent, 95, "JPEG quality (0-100)");
+            ourAutorotation = category.CreateEntry(SettingAutorotation, true, "Rotate picture to match camera");
+            ourMetadata = category.CreateEntry(SettingMetadata, false, "Save metadata in picture");
             
             if (!MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit" && it.Assembly.GetName().Version >= new Version(0, 2, 6)))
             {
@@ -65,7 +65,7 @@ namespace LagFreeScreenshots
                 return;
             } 
 
-            Harmony.Patch(
+            HarmonyInstance.Patch(
                 typeof(CameraTakePhotoEnumerator).GetMethod("MoveNext"),
                 new HarmonyMethod(AccessTools.Method(typeof(LagFreeScreenshotsMod), nameof(MoveNextPatchAsyncReadback))));
             
