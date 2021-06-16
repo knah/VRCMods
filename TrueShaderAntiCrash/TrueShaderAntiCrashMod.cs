@@ -90,7 +90,7 @@ namespace TrueShaderAntiCrash
                         return;
                     }
 
-                    if (room.GetAccessType() != ApiWorldInstance.AccessType.Public)
+                    if (room.type != InstanceAccessType.Public)
                     {
                         ShaderFilterApi.SetFilteringState(false, false, false);
                         return;

@@ -68,17 +68,17 @@ namespace JoinNotifier
 
         public static bool ShouldNotifyInCurrentInstance()
         {
-            var instanceType = RoomManager.field_Internal_Static_ApiWorldInstance_0?.InstanceType;
+            var instanceType = RoomManager.field_Internal_Static_ApiWorldInstance_0?.type;
             if (instanceType == null) return false;    
             switch (instanceType)
             {
-                case ApiWorldInstance.AccessType.Public:
+                case InstanceAccessType.Public:
                     return NotifyInPublic.Value;
-                case ApiWorldInstance.AccessType.FriendsOfGuests:
-                case ApiWorldInstance.AccessType.FriendsOnly:
+                case InstanceAccessType.FriendsOfGuests:
+                case InstanceAccessType.FriendsOnly:
                     return NotifyInFriends.Value;
-                case ApiWorldInstance.AccessType.InviteOnly:
-                case ApiWorldInstance.AccessType.InvitePlus:
+                case InstanceAccessType.InviteOnly:
+                case InstanceAccessType.InvitePlus:
                     return NotifyInPrivate.Value;
                 default:
                     return false;

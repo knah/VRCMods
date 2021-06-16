@@ -10,6 +10,7 @@ using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
 using Valve.VR;
 using VRC.Core;
+using VRC.SDKBase;
 using Object = UnityEngine.Object;
 
 namespace IKTweaks

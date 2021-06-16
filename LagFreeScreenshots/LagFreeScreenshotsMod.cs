@@ -30,15 +30,11 @@ using System.Globalization;
 
 [assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.2.1", "knah, Protected", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonOptionalDependencies("UIExpansionKit")]
 
 namespace LagFreeScreenshots
 {
     public class LagFreeScreenshotsMod : CustomizedMelonMod
     {
-        private static readonly AwaitProvider ourToMainThread = new AwaitProvider();
-        private static readonly AwaitProvider ourToEndOfFrame = new AwaitProvider();
-
         private const string SettingsCategory = "LagFreeScreenshots";
         private const string SettingEnableMod = "Enabled";
         private const string SettingScreenshotFormat = "ScreenshotFormat";
@@ -62,13 +58,18 @@ namespace LagFreeScreenshots
             ourJpegPercent = (MelonPreferences_Entry<int>) category.CreateEntry(SettingJpegPercent, 95, "JPEG quality (0-100)");
             ourAutorotation = (MelonPreferences_Entry<bool>)category.CreateEntry(SettingAutorotation, true, "Rotate picture to match camera");
             ourMetadata = (MelonPreferences_Entry<bool>)category.CreateEntry(SettingMetadata, false, "Save metadata in picture");
+            
+            if (!MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit" && it.Assembly.GetName().Version >= new Version(0, 2, 6)))
+            {
+                MelonLogger.Error("UI Expansion Kit is not found. Lag Free Screenshots will not work.");
+                return;
+            } 
 
             Harmony.Patch(
                 typeof(CameraTakePhotoEnumerator).GetMethod("MoveNext"),
                 new HarmonyMethod(AccessTools.Method(typeof(LagFreeScreenshotsMod), nameof(MoveNextPatchAsyncReadback))));
             
-            if (MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit" && !it.Info.Version.StartsWith("0.1."))) 
-                AddEnumSettings();
+            AddEnumSettings();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -135,7 +136,7 @@ namespace LagFreeScreenshots
         {
             var apiWorld = RoomManager.field_Internal_Static_ApiWorld_0;
             if (apiWorld == null) return "null,0,Not in any world";
-            return apiWorld.id + "," + RoomManager.field_Internal_Static_ApiWorldInstance_0.idOnly + "," + apiWorld.name;
+            return apiWorld.id + "," + RoomManager.field_Internal_Static_ApiWorldInstance_0.shortName + "," + apiWorld.name;
         }
 
         private static string GetPosition()
@@ -144,16 +145,6 @@ namespace LagFreeScreenshots
             return position.x.ToString(CultureInfo.InvariantCulture) + "," +
                    position.y.ToString(CultureInfo.InvariantCulture) + "," +
                    position.z.ToString(CultureInfo.InvariantCulture);
-        }
-
-        public override void OnUpdate()
-        {
-            ourToMainThread.Flush();
-        }
-
-        public override void OnGUI()
-        {
-            ourToEndOfFrame.Flush();
         }
 
         public static bool MoveNextPatchAsyncReadback(ref bool __result, CameraTakePhotoEnumerator __instance)
@@ -194,7 +185,7 @@ namespace LagFreeScreenshots
         
         public static async Task TakeScreenshot(Camera camera, int w, int h, bool hasAlpha)
         {
-            await ourToEndOfFrame.Yield();
+            await TaskUtilities.YieldToFrameEnd();
 
             // var renderTexture = RenderTexture.GetTemporary(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, 8);
             var renderTexture = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
@@ -227,7 +218,7 @@ namespace LagFreeScreenshots
                 }));
                 
                 while (!request.done && !request.hasError && data.Item1 == IntPtr.Zero)
-                    await ourToMainThread.Yield();
+                    await TaskUtilities.YieldToMainThread();
 
                 if (request.hasError)
                     MelonLogger.Warning("Readback request finished with error");
@@ -235,7 +226,7 @@ namespace LagFreeScreenshots
                 if (data.Item1 == IntPtr.Zero)
                 {
                     MelonDebug.Msg("Data was null after request was done, waiting more");
-                    await ourToMainThread.Yield();
+                    await TaskUtilities.YieldToMainThread();
                 }
             }
             else
@@ -464,7 +455,7 @@ namespace LagFreeScreenshots
                 }
             }
 
-            await ourToMainThread.Yield();
+            await TaskUtilities.YieldToMainThread();
 
             MelonLogger.Msg($"Image saved to {filePath}");
 

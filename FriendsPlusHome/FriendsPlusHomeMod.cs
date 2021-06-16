@@ -29,8 +29,8 @@ namespace FriendsPlusHome
         public override void OnApplicationStart()
         {
             var category = MelonPreferences.CreateCategory(SettingsCategory, "Friends+ Home");
-            StartupName = (MelonPreferences_Entry<string>) category.CreateEntry(SettingStartupName, nameof(ApiWorldInstance.AccessType.FriendsOfGuests), "Startup instance type");
-            ButtonName = (MelonPreferences_Entry<string>) category.CreateEntry(SettingButtonName, nameof(ApiWorldInstance.AccessType.FriendsOfGuests), "\"Go Home\" instance type");
+            StartupName = (MelonPreferences_Entry<string>) category.CreateEntry(SettingStartupName, nameof(InstanceAccessType.FriendsOfGuests), "Startup instance type");
+            ButtonName = (MelonPreferences_Entry<string>) category.CreateEntry(SettingButtonName, nameof(InstanceAccessType.FriendsOfGuests), "\"Go Home\" instance type");
 
             if (MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit" && !it.Info.Version.StartsWith("0.1."))) 
                 RegisterUix2Extension();
@@ -60,11 +60,11 @@ namespace FriendsPlusHome
         {
             var possibleValues = new []
             {
-                (nameof(ApiWorldInstance.AccessType.Public), "Public"),
-                (nameof(ApiWorldInstance.AccessType.FriendsOfGuests), "Friends+"),
-                (nameof(ApiWorldInstance.AccessType.FriendsOnly), "Friends only"),
-                (nameof(ApiWorldInstance.AccessType.InvitePlus), "Invite+"),
-                (nameof(ApiWorldInstance.AccessType.InviteOnly), "Invite only"),
+                (nameof(InstanceAccessType.Public), "Public"),
+                (nameof(InstanceAccessType.FriendsOfGuests), "Friends+"),
+                (nameof(InstanceAccessType.FriendsOnly), "Friends only"),
+                (nameof(InstanceAccessType.InvitePlus), "Invite+"),
+                (nameof(InstanceAccessType.InviteOnly), "Invite only"),
             };
             ExpansionKitApi.RegisterSettingAsStringEnum(SettingsCategory, SettingStartupName, possibleValues);
             ExpansionKitApi.RegisterSettingAsStringEnum(SettingsCategory, SettingButtonName, possibleValues);
@@ -77,22 +77,22 @@ namespace FriendsPlusHome
 
         private static void StartEnforcingInstanceType(VRCFlowManager flowManager, bool isButton)
         {
-            var targetType = Enum.TryParse<ApiWorldInstance.AccessType>(isButton ? ButtonName.Value : StartupName.Value, out var type) ? type : ApiWorldInstance.AccessType.FriendsOfGuests;
+            var targetType = Enum.TryParse<InstanceAccessType>(isButton ? ButtonName.Value : StartupName.Value, out var type) ? type : InstanceAccessType.FriendsOfGuests;
             MelonLogger.Msg($"Enforcing home instance type: {targetType}");
-            flowManager.field_Protected_AccessType_0 = targetType;
+            flowManager.field_Protected_InstanceAccessType_0 = targetType;
 
             MelonCoroutines.Start(EnforceTargetInstanceType(flowManager, targetType, isButton ? 10 : 30));
         }
         
         private static int ourRequestId;
         
-        private static IEnumerator EnforceTargetInstanceType(VRCFlowManager manager, ApiWorldInstance.AccessType type, float time)
+        private static IEnumerator EnforceTargetInstanceType(VRCFlowManager manager, InstanceAccessType type, float time)
         {
             var endTime = Time.time + time;
             var currentRequestId = ++ourRequestId;
             while (Time.time < endTime && ourRequestId == currentRequestId)
             {
-                manager.field_Protected_AccessType_0 = type;
+                manager.field_Protected_InstanceAccessType_0 = type;
                 yield return null;
             }
         }
