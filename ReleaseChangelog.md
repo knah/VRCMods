@@ -1,5 +1,6 @@
 Changes:
  * New mod: Turbones - dynamic bones that aren't slow!
+ * Turbones: fixed a crash when MDB Moarbones was enabled
  * Advanced Safety: fix avatar filtering
  * Advanced Safety: add sorting queue limiter
  * Lag Free Screenshots: add an option to try limiting framebuffer size for better performance of highres screenshots

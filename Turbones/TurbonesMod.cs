@@ -8,7 +8,7 @@ using Turbones;
 using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 
-[assembly:MelonInfo(typeof(TurbonesMod), "Turbones", "1.0.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(TurbonesMod), "Turbones", "1.0.1", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace Turbones
