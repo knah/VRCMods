@@ -8,7 +8,7 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 using VRC.SDKBase;
 
-[assembly:MelonInfo(typeof(MirrorResolutionUnlimiterMod), "MirrorResolutionUnlimiter", "1.1.2", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(MirrorResolutionUnlimiterMod), "MirrorResolutionUnlimiter", "1.1.3", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -26,6 +26,7 @@ namespace MirrorResolutionUnlimiter
         private static int ourMaxEyeResolution = 2048;
         private static bool ourAllMirrorsAuto = false;
         private static int ourMirrorMsaa = 0;
+        private static MelonPreferences_Entry<bool> ourMsaaIsUpperLimit;
 
         private MelonPreferences_Entry<string> myPixelLightsSetting;
 
@@ -55,6 +56,8 @@ namespace MirrorResolutionUnlimiter
             
             myPixelLightsSetting = category.CreateEntry(PixelLightsSetting, "default", "Pixel lights in mirrors");
             myPixelLightsSetting.OnValueChangedUntyped += UpdateMirrorPixelLights;
+
+            ourMsaaIsUpperLimit = category.CreateEntry("MsaaIsUpperLimit", true, "Mirror MSAA setting is upper limit (otherwise static)");
 
             HarmonyInstance.Patch(
                 AccessTools.Method(typeof(VRC_MirrorReflection), nameof(VRC_MirrorReflection.GetReflectionData)),
@@ -138,10 +141,18 @@ namespace MirrorResolutionUnlimiter
                 else
                     width = height = (int) @this.mirrorResolution;
 
-                int antiAliasing = ourMirrorMsaa == 0
-                    ? Mathf.Clamp(1, QualitySettings.antiAliasing, (int) @this.maximumAntialiasing)
-                    : ourMirrorMsaa;
-                @this._temporaryRenderTexture = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Default, antiAliasing);
+                var requestedMsaa = currentCamera.targetTexture?.antiAliasing ?? QualitySettings.antiAliasing;
+                if (ourMirrorMsaa != 0)
+                {
+                    requestedMsaa = ourMsaaIsUpperLimit.Value
+                        ? Mathf.Clamp(requestedMsaa, 1, ourMirrorMsaa)
+                        : ourMirrorMsaa;
+                }
+                else
+                {
+                    requestedMsaa = Mathf.Clamp(requestedMsaa, 1, (int)@this.maximumAntialiasing);
+                }
+                @this._temporaryRenderTexture = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Default, requestedMsaa);
                 reflectionData.texture[0] = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Default, 1);
                 reflectionData.propertyBlock.SetTexture(VRC_MirrorReflection._texturePropertyId[0], reflectionData.texture[0]);
                 if (currentCamera.stereoEnabled)
