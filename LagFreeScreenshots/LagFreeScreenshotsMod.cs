@@ -28,7 +28,7 @@ using System.Globalization;
 
 // using CameraUtil = ObjectPublicCaSiVeUnique;
 
-[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.2.2", "knah, Protected", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.2.3", "knah, Protected", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace LagFreeScreenshots
@@ -47,6 +47,7 @@ namespace LagFreeScreenshots
         private static MelonPreferences_Entry<int> ourJpegPercent;
         private static MelonPreferences_Entry<bool> ourAutorotation;
         private static MelonPreferences_Entry<bool> ourMetadata;
+        private static MelonPreferences_Entry<int> ourRecommendedMaxFb;
 
         private static Thread ourMainThread;
 
@@ -58,6 +59,7 @@ namespace LagFreeScreenshots
             ourJpegPercent = category.CreateEntry(SettingJpegPercent, 95, "JPEG quality (0-100)");
             ourAutorotation = category.CreateEntry(SettingAutorotation, true, "Rotate picture to match camera");
             ourMetadata = category.CreateEntry(SettingMetadata, false, "Save metadata in picture");
+            ourRecommendedMaxFb = category.CreateEntry("RecommendedMaximumFb", 1024, "Try to keep framebuffer below (MB) by reducing MSAA");
             
             if (!MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit" && it.Assembly.GetName().Version >= new Version(0, 2, 6)))
             {
@@ -171,16 +173,23 @@ namespace LagFreeScreenshots
             return false;
         }
 
+        private static int ourLastUsedMsaaLevel = 0;
         private static int MaxMsaaCount(int w, int h)
         {
             // MSAA rendertargets store depth (24+8 bits?) and color per sample, plus one extra color sample (output color?) for levels >1
             // Unity doesn't like rendertextures over 4 gigs in size, so reduce MSAA if necessary
+            var maxFbSize = (uint) ourRecommendedMaxFb.Value * 1024 * 1024;
             var colorSizePerLevel = w * (long) h * 4 * 2; // ignore no-alpha to be conservative about packing
-            var maxMsaa = (uint.MaxValue - colorSizePerLevel / 2) / colorSizePerLevel;
-            if (maxMsaa >= 8) return 8;
-            if (maxMsaa >= 4) return 4;
-            if (maxMsaa >= 2) return 2;
-            return 1;
+            var maxMsaa = (maxFbSize - colorSizePerLevel / 2) / colorSizePerLevel;
+            if (maxMsaa >= 8) maxMsaa = 8;
+            else if (maxMsaa >= 4) maxMsaa = 4;
+            else if (maxMsaa >= 2) maxMsaa = 2;
+            else maxMsaa = 1;
+
+            if (maxMsaa != ourLastUsedMsaaLevel)
+                MelonLogger.Msg($"Using MSAA x{maxMsaa} for screenshots (FB size {(colorSizePerLevel * maxMsaa + colorSizePerLevel / 2) / 1024 / 1024}MB)");
+
+            return (int) maxMsaa;
         }
         
         public static async Task TakeScreenshot(Camera camera, int w, int h, bool hasAlpha)
