@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IKTweaks", "IKTweaks\IKTwea
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueShaderAntiCrash", "TrueShaderAntiCrash\TrueShaderAntiCrash.csproj", "{A9086D1D-AC75-4E98-89ED-8FB25D16DACA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Turbones", "Turbones\Turbones.csproj", "{4AC2E2AC-3DDD-496F-81A1-FD85B05F22D2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,5 +107,11 @@ Global
 		{A9086D1D-AC75-4E98-89ED-8FB25D16DACA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9086D1D-AC75-4E98-89ED-8FB25D16DACA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9086D1D-AC75-4E98-89ED-8FB25D16DACA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4AC2E2AC-3DDD-496F-81A1-FD85B05F22D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4AC2E2AC-3DDD-496F-81A1-FD85B05F22D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4AC2E2AC-3DDD-496F-81A1-FD85B05F22D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4AC2E2AC-3DDD-496F-81A1-FD85B05F22D2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
 EndGlobal

@@ -301,6 +301,32 @@ This mod prevents practically all known shader crashes. Note that it can affect 
 ### Partial source code
 Main logic of this mod is located in the native DLL that currently is not opensource. The DLL is build upon [HLSLcc](https://github.com/Unity-Technologies/HLSLcc) and uses [Microsoft Detours](https://github.com/microsoft/Detours). An opensource release for it will likely be available at a later point.
 
+## Turbones
+This mod significantly speeds up dynamic bones by optimizing collision checks, the simulation code, and optionally providing multithreading.    
+Features:
+ * Highly efficient collision checks - hundreds thousands per frame without noticeable performance drop
+ * Optimized dynamic-timestep simulation code - no more FPS dropping even more because of DB script doing additional steps per frame
+ * An option for multithreading dynamic bone simulation (but this one is of limited usefulness due to simulation being already too fast)
+ * No more weird twitching or jerkiness (when using optimized simulation)
+ * Collision feedback API for other mods
+ * Integrates seamlessly with VRChat's dynamic bone limiter (you may want to increase limits *a lot*) and global dynamic bone mods 
+
+Big thanks to Zettai for finding that collision checks are a very low-hanging easy-to-optimize target, and a lot of other work on multithreading dynamic bones.  
+Optimized bones have slight visual differences in behavior due to switching to dynamic timestep.  
+Additionally, some weird configurations might have issues with optimized/multithreaded simulation. Specifically, the following *will* behave erratically:
+ * Zero length bones
+ * Dynamic bone colliders on transforms controlled by dynamic bones
+ * Dynamic bone components (or roots) on transforms controlled by other dynamic bones
+
+### Other mod compatibility
+This mod should be compatible with all "global dynamic bones" type mods out of the box.  
+For mods working on collisions (i.e. ImmersiveTouch), you have two options:
+ * Either the mod needs to support collision feedback (see [the collision feedback API](Turbones/JigglySolverApi.cs))
+ * Or you can disable custom dynamic bone solver while leaving optimized collision checks enabled - this should be compatible with other mods patching collisions.
+### Partial source code
+Main logic of this mod is located in the native DLL, which contains the optimized dynamic bone code.  
+Sources to it can't be published due to it being based on the paid Dynamic Bone asset from Asset Store.  
+The DLL uses Rust with `glam` vector math library.
  
 ## UI Expansion Kit
 This mod provides additional UI panels for use by other mods, and a unified mod settings UI.  
