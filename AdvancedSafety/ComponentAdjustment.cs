@@ -123,6 +123,9 @@ namespace AdvancedSafety
             if (skinnedMeshRenderer != null)
                 skinnedRendererList.Add(skinnedMeshRenderer);
 
+            if (!AdvancedSafetySettings.AllowNonDefaultSortingLayers.Value) 
+                renderer.sortingOrder = 0;
+
             renderer.GetSharedMaterials(ourMaterialsList);
             if (ourMaterialsList.Count == 0) return;
             

@@ -47,6 +47,8 @@ namespace AdvancedSafety
             MaxMaterialSlotsOverSubmeshCount = category.CreateEntry(nameof(MaxMaterialSlotsOverSubmeshCount), 2, "Maximum material slots over submesh count");
             
             AllowReadingBadFloats = category.CreateEntry(nameof(AllowReadingBadFloats), false, "Allow unbounded floats in assetbundles");
+            AllowNonDefaultSortingLayers = category.CreateEntry(nameof(AllowNonDefaultSortingLayers), false, "Allow non-default sorting layers (overrender)");
+            EnforceDefaultSortingLayer = category.CreateEntry(nameof(EnforceDefaultSortingLayer), true, "Enforce default sorting layer (less overrender, affects performance)");
             
             HidePortalsFromBlockedUsers = category.CreateEntry(nameof(HidePortalsFromBlockedUsers), true, "Hide portals from blocked users");
             HidePortalsFromNonFriends = category.CreateEntry(nameof(HidePortalsFromNonFriends), false, "Hide portals from non-friends");
@@ -69,6 +71,8 @@ namespace AdvancedSafety
         public static MelonPreferences_Entry<bool> AllowCustomMixers;
         public static MelonPreferences_Entry<bool> AllowReadingMixers;
         public static MelonPreferences_Entry<bool> AllowReadingBadFloats;
+        public static MelonPreferences_Entry<bool> AllowNonDefaultSortingLayers;
+        public static MelonPreferences_Entry<bool> EnforceDefaultSortingLayer;
 
         public static MelonPreferences_Entry<int> MaxPolygons;
         public static MelonPreferences_Entry<int> MaxTransforms;

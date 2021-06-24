@@ -8,16 +8,17 @@ using System.Runtime.InteropServices;
 using AdvancedSafety;
 using MelonLoader;
 using UnhollowerBaseLib;
+using UnhollowerRuntimeLib;
+using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.SceneManagement;
 using VRC.Core;
+using VRC.Management;
 using Object = UnityEngine.Object;
 
-using ModerationManager = VRC.Management.ModerationManager;
-
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.5.2", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.5.3", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
 namespace AdvancedSafety
@@ -34,6 +35,7 @@ namespace AdvancedSafety
         public override void OnApplicationStart()
         {
             AdvancedSafetySettings.RegisterSettings();
+            ClassInjector.RegisterTypeInIl2Cpp<SortingOrderHammerer>();
 
             var matchingMethods = typeof(AssetManagement)
                 .GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly).Where(it =>
@@ -64,6 +66,8 @@ namespace AdvancedSafety
                 if (moveNext == null) continue;
                 var avatarManagerField = nestedType.GetProperties().SingleOrDefault(it => it.PropertyType == typeof(VRCAvatarManager));
                 if (avatarManagerField == null) continue;
+                
+                MelonDebug.Msg($"Patching UniTask type {nestedType.FullName}");
 
                 var fieldOffset = (int)IL2CPP.il2cpp_field_get_offset((IntPtr)UnhollowerUtils
                     .GetIl2CppFieldInfoPointerFieldForGeneratedFieldAccessor(avatarManagerField.GetMethod)
@@ -73,11 +77,13 @@ namespace AdvancedSafety
                 {
                     var originalMethodPointer = *(IntPtr*)(IntPtr)UnhollowerUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(moveNext).GetValue(null);
 
+                    originalMethodPointer = XrefScannerLowLevel.JumpTargets(originalMethodPointer).First();
+
                     VoidDelegate originalDelegate = null;
                     
                     void TaskMoveNextPatch(IntPtr taskPtr, IntPtr nativeMethodInfo)
                     {
-                        var avatarManager = *(IntPtr*)(taskPtr + fieldOffset);
+                        var avatarManager = *(IntPtr*)(taskPtr + fieldOffset - 16);
                         using (new AvatarManagerCookie(new VRCAvatarManager(avatarManager)))
                             originalDelegate(taskPtr, nativeMethodInfo);
                     }
@@ -226,6 +232,9 @@ namespace AdvancedSafety
 
             if (!AdvancedSafetySettings.AllowSpawnSounds.Value)
                 MelonCoroutines.Start(CheckSpawnSounds(go, audioSourcesList));
+
+            if (AdvancedSafetySettings.EnforceDefaultSortingLayer.Value)
+                go.AddComponent<SortingOrderHammerer>();
 
             if (MelonDebug.IsEnabled() || destroyedObjects > 100)
                 MelonLogger.Msg($"Cleaned avatar ({avatarManager.prop_ApiAvatar_0?.name}) used by \"{vrcPlayer.prop_VRCPlayerApi_0?.displayName}\" in {start.ElapsedMilliseconds}ms, scanned {scannedObjects} things, destroyed {destroyedObjects} things");
