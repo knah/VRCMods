@@ -26,7 +26,7 @@ namespace AdvancedSafety
         
         private static readonly List<object> ourPinnedDelegates = new ();
 
-        private static string[] ourAllowedFields = { "m_BreakForce", "m_BreakTorque" };
+        private static string[] ourAllowedFields = { "m_BreakForce", "m_BreakTorque", "collisionSphereDistance", "maxDistance", "inSlope", "outSlope" };
 
         internal static void ApplyPatches()
         {
@@ -63,6 +63,8 @@ namespace AdvancedSafety
             ourFloatReadDelegate(reader, result, fieldName);
 
             if (AdvancedSafetyMod.CanReadBadFloats || *result > MaxAllowedValueBottom && *result < MaxAllowedValueTop || AdvancedSafetySettings.AllowReadingBadFloats.Value) return;
+
+            if (float.IsNaN(*result)) goto clamp;
             
             if (fieldName != null)
             {
@@ -76,6 +78,11 @@ namespace AdvancedSafety
                 }
             }
             
+            clamp:
+
+            if (MelonDebug.IsEnabled())
+                MelonDebug.Msg($"Clamped a float to 0: {*result} {Marshal.PtrToStringAnsi((IntPtr)fieldName)}");
+
             *result = 0;
         }
 
