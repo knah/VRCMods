@@ -1,4 +1,5 @@
 using System;
+using UnhollowerBaseLib;
 using UnityEngine;
 
 namespace AdvancedSafety
@@ -26,7 +27,7 @@ namespace AdvancedSafety
                 {
                     myRenderersToHammer[i].sortingOrder = 0;
                 }
-                catch (NullReferenceException) // this would imply a deleted renderer
+                catch (Il2CppException) // this would imply a deleted renderer
                 {
                     myRenderersToHammer[i] = null;
                 }
