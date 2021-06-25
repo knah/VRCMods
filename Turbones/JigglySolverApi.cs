@@ -36,6 +36,7 @@ namespace Turbones
         internal static ComponentDelegate DynamicBoneOnDisablePatch { get; private set; }
         internal static ComponentDelegate DynamicBoneStartPatch { get; private set; }
         internal static ComponentDelegate DynamicBoneOnDestroyPatch { get; private set; }
+        internal static ComponentDelegate ResetParticlePositions { get; private set; }
 
         public delegate void RegisterColliderForCollisionFeedbackDelegate(IntPtr colliderPtr, byte group);
         public delegate void UnregisterColliderForCollisionFeedbackDelegate(IntPtr colliderPtr);
@@ -88,7 +89,8 @@ namespace Turbones
             DynamicBoneOnEnablePatch = Marshal.GetDelegateForFunctionPointer<ComponentDelegate>(GetProcAddress(lib, nameof(DynamicBoneOnEnablePatch)));
             DynamicBoneOnDisablePatch = Marshal.GetDelegateForFunctionPointer<ComponentDelegate>(GetProcAddress(lib, nameof(DynamicBoneOnDisablePatch)));
             DynamicBoneStartPatch = Marshal.GetDelegateForFunctionPointer<ComponentDelegate>(GetProcAddress(lib, nameof(DynamicBoneStartPatch)));
-            
+            ResetParticlePositions = Marshal.GetDelegateForFunctionPointer<ComponentDelegate>(GetProcAddress(lib, nameof(ResetParticlePositions)));
+
             RegisterColliderForCollisionFeedback = Marshal.GetDelegateForFunctionPointer<RegisterColliderForCollisionFeedbackDelegate>(GetProcAddress(lib, nameof(RegisterColliderForCollisionFeedback)));
             UnregisterColliderForCollisionFeedback = Marshal.GetDelegateForFunctionPointer<UnregisterColliderForCollisionFeedbackDelegate>(GetProcAddress(lib, nameof(UnregisterColliderForCollisionFeedback)));
             ClearCollisionFeedbackColliders = Marshal.GetDelegateForFunctionPointer<VoidDelegate>(GetProcAddress(lib, nameof(ClearCollisionFeedbackColliders)));

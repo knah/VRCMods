@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using MelonLoader;
 using System.Reflection;
@@ -7,8 +8,9 @@ using HarmonyLib;
 using Turbones;
 using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
+using UnhollowerRuntimeLib.XrefScans;
 
-[assembly:MelonInfo(typeof(TurbonesMod), "Turbones", "1.0.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(TurbonesMod), "Turbones", "1.0.2", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace Turbones
@@ -126,6 +128,14 @@ namespace Turbones
             HarmonyInstance.Patch(typeof(DynamicBone).GetMethod(nameof(DynamicBone.OnEnable)), new HarmonyMethod(typeof(TurbonesMod), nameof(OnEnablePrefix)));
             HarmonyInstance.Patch(typeof(DynamicBone).GetMethod(nameof(DynamicBone.OnDisable)), new HarmonyMethod(typeof(TurbonesMod), nameof(OnDisablePrefix)));
             HarmonyInstance.Patch(typeof(AvatarClone).GetMethod(nameof(AvatarClone.LateUpdate)), new HarmonyMethod(typeof(TurbonesMod), nameof(LateUpdatePrefix)));
+            HarmonyInstance.Patch(XrefScanner.XrefScan(typeof(DynamicBone).GetMethod(nameof(DynamicBone.OnEnable)))
+                    .Single(it => it.Type == XrefType.Method && it.TryResolve() != null).TryResolve(),
+                new HarmonyMethod(typeof(TurbonesMod), nameof(ResetParticlesPatch)));
+        }
+
+        public static void ResetParticlesPatch(DynamicBone __instance)
+        {
+            JigglySolverApi.ResetParticlePositions(__instance.Pointer);
         }
 
         public override void OnUpdate()
