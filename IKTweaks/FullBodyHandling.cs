@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 using MelonLoader;
 using RootMotion.FinalIK;
@@ -49,6 +50,24 @@ namespace IKTweaks
 
         public static bool LastCalibrationWasInCustomIk;
         private static Func<bool> ourIsFbtSupported;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static float GetHandWeight(float inWeight)
+        {
+            if ((IkTweaksSettings.IgnoreAnimationsModeParsed & IgnoreAnimationsMode.Hands) != 0)
+                return 1;
+            
+            return inWeight;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static float GetOtherWeight(float inWeight)
+        {
+            if ((IkTweaksSettings.IgnoreAnimationsModeParsed & IgnoreAnimationsMode.Others) != 0)
+                return 1;
+            
+            return inWeight;
+        }
         
         public static void Update()
         {
@@ -75,7 +94,7 @@ namespace IKTweaks
                 // lastInitedController.field_Private_FBBIKHeadEffector_0.rotationWeight = 0f;
 
                 if (vrik == null) return;
-                if (!IkTweaksSettings.IgnoreAnimations.Value || firstPuckDisabled)
+                if ((IkTweaksSettings.IgnoreAnimationsModeParsed & IgnoreAnimationsMode.Head) == 0 || firstPuckDisabled)
                 {
                     vrik.solver.spine.positionWeight = LastInitializedController.field_Private_FBBIKHeadEffector_0.positionWeight;
                     vrik.solver.spine.rotationWeight = LastInitializedController.field_Private_FBBIKHeadEffector_0.rotationWeight;
@@ -89,26 +108,26 @@ namespace IKTweaks
             
             if (vrik == null) return;
 
-            if (!IkTweaksSettings.IgnoreAnimations.Value || firstPuckDisabled)
+            if (IkTweaksSettings.IgnoreAnimationsModeParsed != IgnoreAnimationsMode.All || firstPuckDisabled)
             {
                 var leftLegMappingWeight = fbbik.solver.leftLegMapping.weight;
-                vrik.solver.leftLeg.positionWeight = fbbik.solver.leftFootEffector.positionWeight * leftLegMappingWeight;
-                vrik.solver.leftLeg.rotationWeight = fbbik.solver.leftFootEffector.rotationWeight * leftLegMappingWeight;
+                vrik.solver.leftLeg.positionWeight = GetOtherWeight(fbbik.solver.leftFootEffector.positionWeight * leftLegMappingWeight);
+                vrik.solver.leftLeg.rotationWeight = GetOtherWeight(fbbik.solver.leftFootEffector.rotationWeight * leftLegMappingWeight);
 
                 var rightLegMappingWeight = fbbik.solver.rightLegMapping.weight;
-                vrik.solver.rightLeg.positionWeight = fbbik.solver.rightFootEffector.positionWeight * rightLegMappingWeight;
-                vrik.solver.rightLeg.rotationWeight = fbbik.solver.rightFootEffector.rotationWeight * rightLegMappingWeight;
+                vrik.solver.rightLeg.positionWeight = GetOtherWeight(fbbik.solver.rightFootEffector.positionWeight * rightLegMappingWeight);
+                vrik.solver.rightLeg.rotationWeight = GetOtherWeight(fbbik.solver.rightFootEffector.rotationWeight * rightLegMappingWeight);
                 
-                vrik.solver.spine.pelvisPositionWeight = fbbik.solver.bodyEffector.positionWeight;
-                vrik.solver.spine.pelvisRotationWeight = fbbik.solver.bodyEffector.rotationWeight;
+                vrik.solver.spine.pelvisPositionWeight = GetOtherWeight(fbbik.solver.bodyEffector.positionWeight);
+                vrik.solver.spine.pelvisRotationWeight = GetOtherWeight(fbbik.solver.bodyEffector.rotationWeight);
 
                 var leftArmMappingWeight = fbbik.solver.leftArmMapping.weight;
-                vrik.solver.leftArm.positionWeight = fbbik.solver.leftHandEffector.positionWeight * leftArmMappingWeight;
-                vrik.solver.leftArm.rotationWeight = fbbik.solver.leftHandEffector.rotationWeight * leftArmMappingWeight;
+                vrik.solver.leftArm.positionWeight = GetHandWeight(fbbik.solver.leftHandEffector.positionWeight * leftArmMappingWeight);
+                vrik.solver.leftArm.rotationWeight = GetHandWeight(fbbik.solver.leftHandEffector.rotationWeight * leftArmMappingWeight);
 
                 var rightArmMappingWeight = fbbik.solver.rightArmMapping.weight;
-                vrik.solver.rightArm.positionWeight = fbbik.solver.rightHandEffector.positionWeight * rightArmMappingWeight;
-                vrik.solver.rightArm.rotationWeight = fbbik.solver.rightHandEffector.rotationWeight * rightArmMappingWeight;
+                vrik.solver.rightArm.positionWeight = GetHandWeight(fbbik.solver.rightHandEffector.positionWeight * rightArmMappingWeight);
+                vrik.solver.rightArm.rotationWeight = GetHandWeight(fbbik.solver.rightHandEffector.rotationWeight * rightArmMappingWeight);
             }
             else
             {
@@ -213,7 +232,7 @@ namespace IKTweaks
                     
                     for (var i = 0; i < muscles.Count; i++)
                     {
-                        if (IkTweaksSettings.IgnoreAnimations.Value && IKTweaksMod.ourRandomPuck.activeInHierarchy)
+                        if (IkTweaksSettings.IgnoreAnimationsModeParsed == IgnoreAnimationsMode.All && IKTweaksMod.ourRandomPuck.activeInHierarchy)
                         {
                             muscles[i] *= ourBoneResetMasks[i] == BoneResetMask.Never ? 1 : 0;
                             continue;

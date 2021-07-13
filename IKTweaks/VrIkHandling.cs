@@ -75,6 +75,7 @@ namespace IKTweaks
             ikSolverVr.leftArm.shoulderRotationMode = shoulderMode;
             ikSolverVr.rightArm.shoulderRotationMode = shoulderMode;
             ikSolverVr.plantFeet = IkTweaksSettings.PlantFeet.Value;
+            ikSolverVr.spine.headClampWeight = IkTweaksSettings.Unrestrict3PointHeadRotation.Value ? 0 : 0.6f;
         }
     }
 }

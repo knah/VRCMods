@@ -1,3 +1,4 @@
+using System;
 using MelonLoader;
 using RootMotion.FinalIK;
 
@@ -5,14 +6,14 @@ namespace IKTweaks
 {
     public static class IkTweaksSettings
     {
-        private const string IkTweaksCategory = "IkTweaks";
+        internal const string IkTweaksCategory = "IkTweaks";
 
         internal static void RegisterSettings()
         {
             var category = MelonPreferences.CreateCategory(IkTweaksCategory, "IK Tweaks");
             
             FixShoulders = category.CreateEntry("PitchYawShoulders", true, "Use Pitch-Yaw Shoulders");
-            IgnoreAnimations = category.CreateEntry(nameof(IgnoreAnimations), false, "Ignore animations (always slide around)");
+            IgnoreAnimationsMode = category.CreateEntry(nameof(IgnoreAnimationsMode), nameof(IKTweaks.IgnoreAnimationsMode.HandAndHead), "Animations mode in FBT");
             PlantFeet = category.CreateEntry(nameof(PlantFeet), false, "Feet stick to ground");
             
             FullBodyVrIk = category.CreateEntry(nameof(FullBodyVrIk), true, "Enable IKTweaks (use custom VRIK)");
@@ -45,7 +46,29 @@ namespace IKTweaks
             
             StraightSpineAngle = category.CreateEntry(nameof(StraightSpineAngle), 15f, "Straight spine angle (degrees)");
             StraightSpinePower = category.CreateEntry(nameof(StraightSpinePower), 2f, "Straight spine power");
-            CalibrateToAvatarHeight = category.CreateEntry(nameof(CalibrateToAvatarHeight), false, "Scale avatar to height (instead of wingspan)");
+            MeasureMode = category.CreateEntry(nameof(MeasureMode), nameof(MeasureAvatarMode.ImprovedWingspan), "Avatar scaling mode");
+            
+            APoseCalibration = category.CreateEntry(nameof(APoseCalibration), false, "A-pose calibration");
+            Unrestrict3PointHeadRotation = category.CreateEntry(nameof(Unrestrict3PointHeadRotation), true, "Allow more head rotation in 3/4-point tracking");
+            WingspanMeasurementAdjustFactor = category.CreateEntry(nameof(WingspanMeasurementAdjustFactor), 1.1f, "Improved wingspan adjustment factor");
+
+            IgnoreAnimationsMode.OnValueChanged += (_, v) => UpdateIgnoreAnimationMode(v);
+            UpdateIgnoreAnimationMode(IgnoreAnimationsMode.Value);
+
+            MeasureMode.OnValueChanged += (_, v) => UpdateMeasureMode(v);
+            UpdateMeasureMode(MeasureMode.Value);
+        }
+
+        private static void UpdateMeasureMode(string value)
+        {
+            if (Enum.TryParse(value, true, out MeasureAvatarMode mode)) 
+                MeasureModeParsed = mode;
+        }
+
+        private static void UpdateIgnoreAnimationMode(string value)
+        {
+            if (Enum.TryParse(value, true, out IgnoreAnimationsMode mode)) 
+                IgnoreAnimationsModeParsed = mode;
         }
 
         public static IKSolverVR.Arm.ShoulderRotationMode ShoulderMode => FixShoulders.Value ? IKSolverVR.Arm.ShoulderRotationMode.YawPitch : IKSolverVR.Arm.ShoulderRotationMode.FromTo;
@@ -58,7 +81,7 @@ namespace IKTweaks
         public static MelonPreferences_Entry<bool> UseKneeTrackers;
         public static MelonPreferences_Entry<bool> UseElbowTrackers;
         public static MelonPreferences_Entry<bool> UseChestTracker;
-        public static MelonPreferences_Entry<bool> IgnoreAnimations;
+        public static MelonPreferences_Entry<string> IgnoreAnimationsMode;
         public static MelonPreferences_Entry<bool> PlantFeet;
         public static MelonPreferences_Entry<bool> FullBodyVrIk;
         public static MelonPreferences_Entry<bool> DisableFbt;
@@ -76,6 +99,30 @@ namespace IKTweaks
         public static MelonPreferences_Entry<bool> PinHipRotation;
         public static MelonPreferences_Entry<bool> DoHipShifting;
         public static MelonPreferences_Entry<bool> PreStraightenSpine;
-        public static MelonPreferences_Entry<bool> CalibrateToAvatarHeight;
+        public static MelonPreferences_Entry<string> MeasureMode;
+        public static MelonPreferences_Entry<bool> APoseCalibration;
+        public static MelonPreferences_Entry<bool> Unrestrict3PointHeadRotation;
+        public static MelonPreferences_Entry<float> WingspanMeasurementAdjustFactor;
+
+        public static IgnoreAnimationsMode IgnoreAnimationsModeParsed;
+        public static MeasureAvatarMode MeasureModeParsed;
+    }
+
+    [Flags]
+    public enum IgnoreAnimationsMode
+    {
+        None = 0,
+        Head = 1,
+        Hands = 2,
+        HandAndHead = Head | Hands,
+        Others = 4,
+        All = HandAndHead | Others
+    }
+
+    public enum MeasureAvatarMode
+    {
+        Default,
+        Height,
+        ImprovedWingspan
     }
 }

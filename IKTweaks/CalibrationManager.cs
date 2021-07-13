@@ -110,6 +110,20 @@ namespace IKTweaks
             0.2613016f, 0.432256f, 0.6444503f, 0.6668426f, -0.4670413f, 0.8116828f, 0.8116828f, 0.6677986f, -0.6192409f,
             0.8116841f, 0.811684f, 0.6677839f, -0.6198869f, 0.8116839f, 0.8116838f, 0.6668782f, -0.4667901f, 0.8116842f, 0.811684f
         };
+
+        private static readonly float[] APoseMuscles =
+        {
+            0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0.6001087f, 0f,
+            -0.0003306383f, 0.9999163f, 0f, 0f, 0f, 0f, 0.6001087f, 0f, -0.0003306384f, 0.9999163f, 0f, 0f, 0f, 0f, 0f,
+            0f, -0.1071228f, 0.258636f, 0.1567371f, 0.9998825f, -0.0463457f, 0.002523606f, 0.0003833446f, 0f, 0f,
+            -0.1036742f, 0.2589961f, 0.1562322f, 0.9998825f, -0.04634446f, 0.002522176f, 0.0003835156f, -1.52127f,
+            0.2634749f, 0.4322476f, 0.6443989f, 0.6669405f, -0.4663376f, 0.8116828f, 0.8116829f, 0.6678116f,
+            -0.6186616f, 0.8116839f, 0.8116837f, 0.6677991f, -0.6192248f, 0.8116839f, 0.8116842f, 0.6670038f,
+            -0.4658763f, 0.8116841f, 0.811684f, -1.520108f, 0.2612858f, 0.4322585f, 0.6444519f, 0.6668428f, -0.4670413f,
+            0.8116831f, 0.8116828f, 0.6677985f, -0.6192364f, 0.8116842f, 0.8116842f, 0.667784f, -0.6198866f, 0.8116841f,
+            0.8116835f, 0.6668782f, -0.4667891f, 0.8116841f, 0.811684f
+        };
+        
         private static string? GetTrackerSerial(int trackerId)
         {
             var sb = new StringBuilder(64);
@@ -332,7 +346,7 @@ namespace IKTweaks
             var head = animator.GetBoneTransform(HumanBodyBones.Head);
             var avatarId = avatarRoot.GetComponent<PipelineManager>().blueprintId;
             var avatarRootTransform = avatarRoot.transform;
-            var nativeMuscles = (Il2CppStructArray<float>) TPoseMuscles;
+            var nativeMuscles = (Il2CppStructArray<float>) (IkTweaksSettings.APoseCalibration.Value ? APoseMuscles : TPoseMuscles);
             var dummyMuscles = new Il2CppStructArray<float>(nativeMuscles.Count);
             var poseHandler = new HumanPoseHandler(animator.avatar, animator.transform);
 
@@ -371,6 +385,9 @@ namespace IKTweaks
             }
             
             var willUniversallyCalibrate = false;
+            
+            var triggerInput1 = VRCInputManager.Method_Public_Static_VRCInput_String_0("UseLeft");
+            var triggerInput2 = VRCInputManager.Method_Public_Static_VRCInput_String_0("UseRight");
 
             while (true)
             {
@@ -381,8 +398,8 @@ namespace IKTweaks
                 poseHandler.SetHumanPose(ref humanBodyPose, ref humanBodyRot, nativeMuscles);
                 mirrorClonePoseHandler?.SetHumanPose(ref humanBodyPose, ref humanBodyRot, nativeMuscles);
 
-                var trigger1 = Input.GetAxisRaw("Oculus_CrossPlatform_PrimaryIndexTrigger");
-                var trigger2 = Input.GetAxisRaw("Oculus_CrossPlatform_SecondaryIndexTrigger");
+                var trigger1 = triggerInput1.prop_Single_0;
+                var trigger2 = triggerInput2.prop_Single_0;
                 
                 if (IkTweaksSettings.CalibrateUseUniversal.Value && UniversalData.Count >= 4)
                 {
@@ -578,9 +595,6 @@ namespace IKTweaks
                 StoreBendGoal(CalibrationPoint.Chest, chestTracker, avatarForward * .5f, ref FullBodyHandling.ChestWeight);
             }
 
-            StoreHand(new Vector3(15, 90 + 10, 0), HumanBodyBones.LeftHand, CalibrationPoint.LeftHand);
-            StoreHand(new Vector3(15, -90 - 10, 0), HumanBodyBones.RightHand, CalibrationPoint.RightHand);
-
             if (!willUniversallyCalibrate)
             {
                 var trackerParent = hipsTracker.Value.Tracker.parent;
@@ -589,6 +603,16 @@ namespace IKTweaks
                     GetLocalPosition(trackerParent, preClickHeadPos),
                     GetLocalRotation(trackerParent, preClickHeadRot), "HEAD");
             }
+
+            if (IkTweaksSettings.APoseCalibration.Value) 
+            { // enforce T-pose for hands calibration 
+                nativeMuscles = TPoseMuscles;
+                poseHandler.GetHumanPose(out var humanBodyPose, out var humanBodyRot, dummyMuscles);
+                poseHandler.SetHumanPose(ref humanBodyPose, ref humanBodyRot, nativeMuscles);
+            }
+            
+            StoreHand(new Vector3(15, 90 + 10, 0), HumanBodyBones.LeftHand, CalibrationPoint.LeftHand);
+            StoreHand(new Vector3(15, -90 - 10, 0), HumanBodyBones.RightHand, CalibrationPoint.RightHand);
         }
     }
 }

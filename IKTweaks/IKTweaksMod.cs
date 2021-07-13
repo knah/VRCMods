@@ -18,7 +18,7 @@ using Valve.VR;
 using Delegate = Il2CppSystem.Delegate;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.13", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.14", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -69,16 +69,71 @@ namespace IKTweaks
 
         private static bool WingspanPatch(VRCAvatarManager __instance, ref float __result)
         {
-            if (!IkTweaksSettings.CalibrateToAvatarHeight.Value) return true;
+            switch (IkTweaksSettings.MeasureModeParsed)
+            {
+                case MeasureAvatarMode.Default:
+                    return true;
+                case MeasureAvatarMode.Height:
+                    __result = ourGetEyeHeightDelegate(__instance) * 0.4537f;
+                    return false;
+                case MeasureAvatarMode.ImprovedWingspan:
+                {
+                    var avatarRoot = __instance.transform.Find("Avatar");
+                    if (avatarRoot == null) return true;
+                    var animator = avatarRoot.GetComponent<Animator>();
+                    if (animator == null || !animator.isHuman) return true;
+                    var leftHand = animator.GetBoneTransform(HumanBodyBones.LeftHand);
+                    var rightHand = animator.GetBoneTransform(HumanBodyBones.RightHand);
+                    var leftUpperArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
+                    var rightUpperArm = animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
+                    var leftElbow = animator.GetBoneTransform(HumanBodyBones.LeftLowerArm);
+                    var rightElbow = animator.GetBoneTransform(HumanBodyBones.RightLowerArm);
 
-            __result = ourGetEyeHeightDelegate(__instance) * 0.4537f;
-            return false;
+                    if (leftHand == null || rightHand == null || leftUpperArm == null || rightUpperArm == null ||
+                        leftElbow == null || rightElbow == null)
+                        return true;
+
+                    var leftElbowPos = leftElbow.position;
+                    var rightElbowPos = rightElbow.position;
+                    var leftShoulderPos = leftUpperArm.position;
+                    var rightShoulderPos = rightUpperArm.position;
+                    var measuredRawWingspan = Vector3.Distance(leftHand.position, leftElbowPos) +
+                                              Vector3.Distance(rightHand.position, rightElbowPos) +
+                                              Vector3.Distance(leftElbowPos, leftShoulderPos) +
+                                              Vector3.Distance(rightElbowPos, rightShoulderPos) +
+                                              Vector3.Distance(leftShoulderPos, rightShoulderPos);
+
+                    // this measured wingspan doesn't include hand-to-fingertip length, but eye height doesn't include the rest of the height above eyes either
+                    __result = measuredRawWingspan * 0.4537f * IkTweaksSettings.WingspanMeasurementAdjustFactor.Value;
+                    return false;
+                }
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void AddUixActions()
         {
             ExpansionKitApi.GetExpandedMenu(ExpandedMenu.SettingsMenu).AddSimpleButton("More IKTweaks...", ShowIKTweaksMenu);
+
+            ExpansionKitApi.RegisterSettingAsStringEnum(IkTweaksSettings.IkTweaksCategory,
+                nameof(IkTweaksSettings.IgnoreAnimationsMode),
+                new[]
+                {
+                    (nameof(IgnoreAnimationsMode.None), "Play all animations"),
+                    (nameof(IgnoreAnimationsMode.Head), "Ignore head animations"),
+                    (nameof(IgnoreAnimationsMode.Hands), "Ignore hands animations"),
+                    (nameof(IgnoreAnimationsMode.HandAndHead), "Ignore head and hands"),
+                    (nameof(IgnoreAnimationsMode.All), "Ignore all (always slide around)")
+                });
+
+            ExpansionKitApi.RegisterSettingAsStringEnum(IkTweaksSettings.IkTweaksCategory, nameof(IkTweaksSettings.MeasureMode), new[]
+            {
+                (nameof(MeasureAvatarMode.Default), "VRC default"),
+                (nameof(MeasureAvatarMode.ImprovedWingspan), "Wingspan (accurate)"),
+                (nameof(MeasureAvatarMode.Height), "Height"),
+            });
         }
 
         private static void ShowIKTweaksMenu()
