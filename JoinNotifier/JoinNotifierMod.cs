@@ -231,7 +231,7 @@ namespace JoinNotifier
 
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)
         {
-            // MelonLogger.Log("Scene load");
+            base.OnSceneWasLoaded(buildIndex, sceneName);
             
             myLastLevelLoad = Environment.TickCount;
             myObservedLocalPlayerJoin = false;
