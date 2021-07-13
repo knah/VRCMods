@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using MelonLoader;
 using UIExpansionKit;
@@ -14,7 +15,7 @@ using VRC.UserCamera;
 using VRCSDK2;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.3.2", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.3.3", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace UIExpansionKit
@@ -54,9 +55,9 @@ namespace UIExpansionKit
             (ExpandedMenu.InvitesTab, "UserInterface/QuickMenu/QuickModeMenus/QuickModeNotificationsMenu", false),
         };
         
-        private readonly Dictionary<ExpandedMenu, GameObject> myMenuRoots = new Dictionary<ExpandedMenu, GameObject>();
-        private readonly Dictionary<ExpandedMenu, GameObject> myVisibilitySources = new Dictionary<ExpandedMenu, GameObject>();
-        private readonly Dictionary<ExpandedMenu, bool> myHasContents = new Dictionary<ExpandedMenu, bool>();
+        private readonly Dictionary<ExpandedMenu, GameObject> myMenuRoots = new();
+        private readonly Dictionary<ExpandedMenu, GameObject> myVisibilitySources = new();
+        private readonly Dictionary<ExpandedMenu, bool> myHasContents = new();
 
         public PreloadedBundleContents StuffBundle => myStuffBundle;
         
@@ -128,7 +129,10 @@ namespace UIExpansionKit
                 }
             }
 
-            foreach (var coroutine in ExpansionKitApi.ExtraWaitCoroutines)
+            var waitConditions = ExpansionKitApi.ExtraWaitCoroutines.ToList();
+            ExpansionKitApi.ExtraWaitCoroutines.Clear();
+            ExpansionKitApi.CanAddWaitCoroutines = false;
+            foreach (var coroutine in waitConditions)
             {
                 while (true)
                 {
@@ -292,6 +296,8 @@ namespace UIExpansionKit
             var content = transform.Find("Content");
             toggleButton.gameObject.AddUiShapeWithTriggerCollider();
             content.gameObject.AddUiShapeWithTriggerCollider();
+            toggleButton.localScale *= 3;
+            toggleButton.localPosition += Vector3.left * 60;
             var toggleComponent = toggleButton.GetComponent<Toggle>();
 
             if (ExpansionKitSettings.IsCameraExpandoStartsCollapsed()) 

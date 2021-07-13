@@ -12,6 +12,7 @@ namespace UIExpansionKit.API
         internal static readonly Dictionary<string, GameObject> CustomCategoryUIs = new Dictionary<string, GameObject>();
         internal static readonly Dictionary<string, CustomLayoutedPageImpl> SettingPageExtensions = new Dictionary<string, CustomLayoutedPageImpl>();
         internal static readonly List<IEnumerator> ExtraWaitCoroutines = new List<IEnumerator>();
+        internal static bool CanAddWaitCoroutines = true;
 
         internal static readonly Dictionary<(string, string), IList<(string SettingsValue, string DisplayName)>> EnumSettings = new Dictionary<(string, string), IList<(string SettingsValue, string DisplayName)>>();
 
@@ -120,7 +121,10 @@ namespace UIExpansionKit.API
         /// </summary>
         public static void RegisterWaitConditionBeforeDecorating(IEnumerator coroutine)
         {
-            ExtraWaitCoroutines.Add(coroutine);
+            if (CanAddWaitCoroutines)
+                ExtraWaitCoroutines.Add(coroutine);
+            else
+                throw new InvalidOperationException("UIX init is already running or is complete, it's too late to register wait conditions");
         }
 
         /// <summary>
