@@ -1,0 +1,857 @@
+diff -ur a/IKSolver.cs b/IKSolver.cs
+--- a/IKSolver.cs	2019-09-09 19:49:49.000000000 +0900
++++ b/IKSolver.cs	2021-07-13 21:37:41.093478000 +0900
+@@ -1,7 +1,7 @@
+ using UnityEngine;
+-using System.Collections;
++using RootMotion;
+ 
+-namespace RootMotion.FinalIK {
++namespace RootMotionNew.FinalIK {
+ 
+ 	/// <summary>
+ 	/// The base abstract class for all %IK solvers
+@@ -30,13 +30,13 @@
+ 		public void Initiate(Transform root) {
+ 			if (OnPreInitiate != null) OnPreInitiate();
+ 
+-			if (root == null) Debug.LogError("Initiating IKSolver with null root Transform.");
++			if (root == null) MelonLoader.MelonLogger.Error("Initiating IKSolver with null root Transform.");
+ 			this.root = root;
+ 			initiated = false;
+ 
+ 			string message = string.Empty;
+ 			if (!IsValid(ref message)) {
+-				Warning.Log(message, root, false);
++				MelonLoader.MelonLogger.Warning(message, root);
+ 				return;
+ 			}
+ 
+@@ -233,22 +233,6 @@
+ 			/// </summary>
+ 			public Vector3 axis = -Vector3.right;
+ 			
+-			/// <summary>
+-			/// Gets the rotation limit component from the Transform if there is any.
+-			/// </summary>
+-			public RotationLimit rotationLimit {
+-				get {
+-					if (!isLimited) return null;
+-					if (_rotationLimit == null) _rotationLimit = transform.GetComponent<RotationLimit>();
+-					isLimited = _rotationLimit != null;
+-					return _rotationLimit;
+-				}
+-				set {
+-					_rotationLimit = value;
+-					isLimited = value != null;
+-				}
+-			}
+-				
+ 			/*
+ 			 * Swings the Transform's axis towards the swing target
+ 			 * */
+@@ -291,8 +275,8 @@
+ 				Vector3 from = transform.rotation * axis;
+ 				Vector3 to = swingTarget - transform.position;
+ 
+-				float angleFrom = Mathf.Atan2(from.x, from.y) * Mathf.Rad2Deg;
+-				float angleTo = Mathf.Atan2(to.x, to.y) * Mathf.Rad2Deg;
++				float angleFrom = Mathf.Atan2(from.x, from.y) * Mathf2.Rad2Deg;
++				float angleTo = Mathf.Atan2(to.x, to.y) * Mathf2.Rad2Deg;
+ 
+ 				transform.rotation = Quaternion.AngleAxis(Mathf.DeltaAngle(angleFrom, angleTo) * weight, Vector3.back) * transform.rotation;
+ 			}
+@@ -315,8 +299,6 @@
+ 				this.weight = weight;
+ 			}
+ 			
+-			private RotationLimit _rotationLimit;
+-			private bool isLimited = true;
+ 		}
+ 		
+ 		/// <summary>
+@@ -389,7 +371,7 @@
+ 		[SerializeField][HideInInspector] protected Transform root;
+ 		
+ 		protected void LogWarning(string message) {
+-			Warning.Log(message, root, true);
++			MelonLoader.MelonLogger.Msg(message, root);
+ 		}
+ 
+ 		#region Class Methods
+diff -ur a/IKSolverVR.cs b/IKSolverVR.cs
+--- a/IKSolverVR.cs	2019-09-09 19:52:13.000000000 +0900
++++ b/IKSolverVR.cs	2021-12-29 12:02:59.147270200 +0900
+@@ -3,20 +3,24 @@
+ using System;
+ using RootMotion;
+ 
+-namespace RootMotion.FinalIK {
++namespace RootMotionNew.FinalIK {
+ 
+ 	/// <summary>
+ 	/// Hybrid %IK solver designed for mapping a character to a VR headset and 2 hand controllers 
+ 	/// </summary>
+ 	[System.Serializable]
+ 	public partial class IKSolverVR: IKSolver {
++		public IKSolverVR()
++		{
++			spine = new Spine(this);
++		}
+ 
+ 		#region Wrapper
+ 
+ 		/// <summary>
+ 		/// Sets this VRIK up to the specified bone references.
+ 		/// </summary>
+-		public void SetToReferences(VRIK.References references) {
++		public void SetToReferences(VRIK_New.References references) {
+ 			if (!references.isFilled) {
+ 				Debug.LogError("Invalid references, one or more Transforms are missing.");
+ 				return;
+@@ -40,9 +44,9 @@
+ 		/// <summary>
+ 		/// Guesses the hand bones orientations ('Wrist To Palm Axis' and "Palm To Thumb Axis" of the arms) based on the provided references. if onlyIfZero is true, will only guess an orientation axis if it is Vector3.zero.
+ 		/// </summary>
+-		public void GuessHandOrientations(VRIK.References references, bool onlyIfZero) {
++		public void GuessHandOrientations(VRIK_New.References references, bool onlyIfZero) {
+ 			if (!references.isFilled) {
+-				Debug.LogWarning("VRIK References are not filled in, can not guess hand orientations. Right-click on VRIK header and slect 'Guess Hand Orientations' when you have filled in the References.", references.root);
++				MelonLoader.MelonLogger.Warning("VRIK References are not filled in, can not guess hand orientations. Right-click on VRIK header and slect 'Guess Hand Orientations' when you have filled in the References.", references.root);
+ 				return;
+ 			}
+ 			
+@@ -51,7 +55,7 @@
+ 			}
+ 			
+ 			if (leftArm.palmToThumbAxis == Vector3.zero || !onlyIfZero) {
+-				leftArm.palmToThumbAxis = GuessPalmToThumbAxis(references.leftHand, references.leftForearm);
++				leftArm.palmToThumbAxis = GuessPalmToThumbAxis(references.leftHand, references.leftForearm, references.leftThumb);
+ 			}
+ 			
+ 			if (rightArm.wristToPalmAxis == Vector3.zero || !onlyIfZero) {
+@@ -59,7 +63,7 @@
+ 			}
+ 			
+ 			if (rightArm.palmToThumbAxis == Vector3.zero || !onlyIfZero) {
+-				rightArm.palmToThumbAxis = GuessPalmToThumbAxis(references.rightHand, references.rightForearm);
++				rightArm.palmToThumbAxis = GuessPalmToThumbAxis(references.rightHand, references.rightForearm, references.rightThumb);
+ 			}
+ 		}
+ 
+@@ -172,12 +176,12 @@
+ 		}
+ 		
+ 		public override IKSolver.Point[] GetPoints() {
+-			Debug.LogError("GetPoints() is not applicable to IKSolverVR.");
++			MelonLoader.MelonLogger.Error("GetPoints() is not applicable to IKSolverVR.");
+ 			return null;
+ 		}
+ 		
+ 		public override IKSolver.Point GetPoint(Transform transform) {
+-			Debug.LogError("GetPoint is not applicable to IKSolverVR.");
++			MelonLoader.MelonLogger.Error("GetPoint is not applicable to IKSolverVR.");
+ 			return null;
+ 		}
+ 		
+@@ -243,24 +247,13 @@
+ 			return axis;
+ 		}
+ 
+-		private Vector3 GuessPalmToThumbAxis(Transform hand, Transform forearm) {
++		private Vector3 GuessPalmToThumbAxis(Transform hand, Transform forearm, Transform thumb) {
+ 			if (hand.childCount == 0) {
+-				Debug.LogWarning("Hand " + hand.name + " does not have any fingers, VRIK can not guess the hand bone's orientation. Please assign 'Wrist To Palm Axis' and 'Palm To Thumb Axis' manually for both arms in VRIK settings.", hand);
++				MelonLoader.MelonLogger.Warning("Hand " + hand.name + " does not have any fingers, VRIK can not guess the hand bone's orientation. Please assign 'Wrist To Palm Axis' and 'Palm To Thumb Axis' manually for both arms in VRIK settings.", hand);
+ 				return Vector3.zero;
+ 			}
+ 
+-			float closestSqrMag = Mathf.Infinity;
+-			int thumbIndex = 0;
+-
+-			for (int i = 0; i < hand.childCount; i++) {
+-				float sqrMag = Vector3.SqrMagnitude(hand.GetChild(i).position -hand.position);
+-				if (sqrMag < closestSqrMag) {
+-					closestSqrMag = sqrMag;
+-					thumbIndex = i;
+-				}
+-			}
+-
+-			Vector3 handNormal = Vector3.Cross(hand.position - forearm.position, hand.GetChild(thumbIndex).position - hand.position);
++			Vector3 handNormal = Vector3.Cross(hand.position - forearm.position, thumb.position - hand.position);
+ 			Vector3 toThumb = Vector3.Cross(handNormal, hand.position -forearm.position);
+ 			Vector3 axis = AxisTools.ToVector3(AxisTools.GetAxisToDirection(hand, toThumb));
+ 			if (Vector3.Dot(toThumb, hand.rotation * axis) < 0f) axis = -axis;
+@@ -389,7 +382,6 @@
+ 
+ 		#region Generic API
+ 
+-		private Vector3 rootV;
+ 		private Vector3 rootVelocity;
+ 		private Vector3 bodyOffset;
+ 		private int supportLegIndex;
+@@ -445,11 +437,12 @@
+ 			spine.Solve(rootBone, legs, arms);
+ 
+ 			if (hasLegs && spine.pelvisPositionWeight > 0f && plantFeet) {
+-				Warning.Log("If VRIK 'Pelvis Position Weight' is > 0, 'Plant Feet' should be disabled to improve performance and stability.", root);
++				MelonLoader.MelonLogger.Msg("If VRIK 'Pelvis Position Weight' is > 0, 'Plant Feet' should be disabled to improve performance and stability.", root);
+ 			}
+ 
+ 			// Locomotion
+-			if (hasLegs && locomotion.weight > 0f) {
++			bool locomotionEnabled = locomotion.weight > 0f;
++			if (hasLegs && locomotionEnabled) {
+ 				Vector3 leftFootPosition = Vector3.zero;
+ 				Vector3 rightFootPosition = Vector3.zero;
+ 				Quaternion leftFootRotation = Quaternion.identity;
+@@ -504,7 +497,10 @@
+                 }
+                 if (!plantFeet || LOD > 0)
+                 {
+-                    spine.InverseTranslateToHead(legs, false, false, bodyOffset, 1f);
++                    if (locomotionEnabled)
++                    {
++                        spine.InverseTranslateToHead(legs, false, false, bodyOffset, 1f);
++                    }
+ 
+                     foreach (Leg leg in legs) leg.TranslateRoot(spine.pelvis.solverPosition, spine.pelvis.solverRotation);
+                     foreach (Leg leg in legs)
+@@ -516,7 +512,10 @@
+                 {
+                     for (int i = 0; i < 2; i++)
+                     {
+-                        spine.InverseTranslateToHead(legs, true, true, bodyOffset, 1f);
++                        if (locomotionEnabled)
++                        {
++                            spine.InverseTranslateToHead(legs, true, true, bodyOffset, 1f);
++                        }
+ 
+                         foreach (Leg leg in legs) leg.TranslateRoot(spine.pelvis.solverPosition, spine.pelvis.solverRotation);
+                         foreach (Leg leg in legs)
+@@ -525,7 +524,7 @@
+                         }
+                     }
+                 }
+-            } else
++            } else if (locomotionEnabled)
+             {
+                 spine.InverseTranslateToHead(legs, false, false, bodyOffset, 1f);
+             }
+@@ -557,7 +556,7 @@
+             if (hasLegs)
+             {
+                 supportLegIndex = -1;
+-                float shortestMag = Mathf.Infinity;
++                float shortestMag = Mathf2.Infinity;
+                 for (int i = 0; i < legs.Length; i++)
+                 {
+                     float mag = Vector3.SqrMagnitude(legs[i].lastBone.solverPosition - legs[i].bones[0].solverPosition);
+@@ -601,7 +600,7 @@
+ 		/// <summary>
+ 		/// The spine solver.
+ 		/// </summary>
+-		public Spine spine = new Spine();
++		public Spine spine;
+ 
+ 		[Tooltip("The left arm solver.")]
+ 		/// <summary>
+@@ -635,14 +634,8 @@
+ 
+ 		private Leg[] legs = new Leg[2];
+ 		private Arm[] arms = new Arm[2];
+-		private Vector3 headPosition;
+-		private Vector3 headDeltaPosition;
+ 		private Vector3 raycastOriginPelvis;
+ 		private Vector3 lastOffset;
+-		private Vector3 debugPos1;
+-		private Vector3 debugPos2;
+-		private Vector3 debugPos3;
+-		private Vector3 debugPos4;
+ 
+ 		private void Write() {
+ 			solvedPositions[0] = rootBone.solverPosition;
+diff -ur a/IKSolverVRArm.cs b/IKSolverVRArm.cs
+--- a/IKSolverVRArm.cs	2019-09-09 19:53:21.000000000 +0900
++++ b/IKSolverVRArm.cs	2021-07-13 20:53:41.854660000 +0900
+@@ -3,7 +3,7 @@
+ using System;
+ using RootMotion;
+ 
+-namespace RootMotion.FinalIK
++namespace RootMotionNew.FinalIK
+ {
+ 
+     /// <summary>
+@@ -306,7 +306,7 @@
+ 
+                             //Debug.DrawRay(Vector3.up * 2f, sDirWorking);
+ 
+-                            float yaw = Mathf.Atan2(sDirWorking.x, sDirWorking.z) * Mathf.Rad2Deg;
++                            float yaw = Mathf.Atan2(sDirWorking.x, sDirWorking.z) * Mathf2.Rad2Deg;
+ 
+                             float dotY = Vector3.Dot(sDirWorking, Vector3.up);
+                             dotY = 1f - Mathf.Abs(dotY);
+@@ -341,7 +341,7 @@
+ 
+                             //Debug.DrawRay(Vector3.up * 2f, sDirWorking);
+ 
+-                            float pitch = Mathf.Atan2(sDirWorking.y, sDirWorking.z) * Mathf.Rad2Deg;
++                            float pitch = Mathf.Atan2(sDirWorking.y, sDirWorking.z) * Mathf2.Rad2Deg;
+ 
+                             pitch -= pitchOffsetAngle;
+                             pitch = DamperValue(pitch, -45f - pitchOffsetAngle, 45f - pitchOffsetAngle);
+@@ -386,8 +386,8 @@
+                             Quaternion q = Quaternion.Inverse(Quaternion.LookRotation(chestUp, chestForward));
+                             Vector3 vBefore = q * (shoulderRotation * shoulder.axis);
+                             Vector3 vAfter = q * (shoulder.solverRotation * shoulder.axis);
+-                            float angleBefore = Mathf.Atan2(vBefore.x, vBefore.z) * Mathf.Rad2Deg;
+-                            float angleAfter = Mathf.Atan2(vAfter.x, vAfter.z) * Mathf.Rad2Deg;
++                            float angleBefore = Mathf.Atan2(vBefore.x, vBefore.z) * Mathf2.Rad2Deg;
++                            float angleAfter = Mathf.Atan2(vAfter.x, vAfter.z) * Mathf2.Rad2Deg;
+                             float pitchAngle = Mathf.DeltaAngle(angleBefore, angleAfter);
+                             if (isLeft) pitchAngle = -pitchAngle;
+                             pitchAngle = Mathf.Clamp(pitchAngle * shoulderRotationWeight * shoulderTwistWeight * 2f * positionWeight, 0f, 180f);
+@@ -418,7 +418,7 @@
+                     // Fix upperarm twist relative to bend normal
+                     Quaternion space = Quaternion.LookRotation(upperArm.solverRotation * upperArmBendAxis, forearm.solverPosition - upperArm.solverPosition);
+                     Vector3 upperArmTwist = Quaternion.Inverse(space) * bendNormal;
+-                    float angle = Mathf.Atan2(upperArmTwist.x, upperArmTwist.z) * Mathf.Rad2Deg;
++                    float angle = Mathf.Atan2(upperArmTwist.x, upperArmTwist.z) * Mathf2.Rad2Deg;
+                     upperArm.solverRotation = Quaternion.AngleAxis(angle, forearm.solverPosition - upperArm.solverPosition) * upperArm.solverRotation;
+ 
+                     // Fix forearm twist relative to upper arm
+diff -ur a/IKSolverVRBodyPart.cs b/IKSolverVRBodyPart.cs
+--- a/IKSolverVRBodyPart.cs	2019-09-09 19:52:37.000000000 +0900
++++ b/IKSolverVRBodyPart.cs	2021-07-13 21:39:54.234711100 +0900
+@@ -3,7 +3,7 @@
+ using System;
+ using RootMotion;
+ 
+-namespace RootMotion.FinalIK {
++namespace RootMotionNew.FinalIK {
+ 	
+ 	/// <summary>
+ 	/// Hybrid %IK solver designed for mapping a character to a VR headset and 2 hand controllers.
+@@ -32,6 +32,8 @@
+ 			protected int index = -1;
+             protected int LOD;
+ 
++            public void UnInitiate() => this.initiated = false;
++
+             public void SetLOD(int LOD)
+             {
+                 this.LOD = LOD;
+diff -ur a/IKSolverVRFootstep.cs b/IKSolverVRFootstep.cs
+--- a/IKSolverVRFootstep.cs	2019-09-09 19:49:44.000000000 +0900
++++ b/IKSolverVRFootstep.cs	2021-07-13 20:55:31.365083200 +0900
+@@ -1,8 +1,8 @@
+ ﻿using UnityEngine;
+-using System.Collections;
++using RootMotion;
+ using UnityEngine.Events;
+ 
+-namespace RootMotion.FinalIK {
++namespace RootMotionNew.FinalIK {
+ 
+ 	public partial class IKSolverVR: IKSolver {
+ 
+diff -ur a/IKSolverVRLeg.cs b/IKSolverVRLeg.cs
+--- a/IKSolverVRLeg.cs	2019-09-09 19:50:28.000000000 +0900
++++ b/IKSolverVRLeg.cs	2021-07-13 21:40:53.883181700 +0900
+@@ -3,7 +3,7 @@
+ using System;
+ using RootMotion;
+ 
+-namespace RootMotion.FinalIK {
++namespace RootMotionNew.FinalIK {
+ 	
+ 	/// <summary>
+ 	/// Hybrid %IK solver designed for mapping a character to a VR headset and 2 hand controllers 
+@@ -14,7 +14,7 @@
+ 		/// 4-segmented analytic leg chain.
+ 		/// </summary>
+ 		[System.Serializable]
+-		public class Leg: BodyPart {
++		public partial class Leg: BodyPart {
+ 
+ 			[Tooltip("The foot/toe target. This should not be the foot tracker itself, but a child GameObject parented to it so you could adjust it's position/rotation to match the orientation of the foot/toe bone. If a toe bone is assigned in the References, the solver will match the toe bone to this target. If no toe bone assigned, foot bone will be used instead.")]
+             /// <summary>
+@@ -221,7 +221,7 @@
+                 }
+ 			}
+ 
+-			public override void ApplyOffsets() {
++			public void ApplyOffsetsOld() {
+ 				ApplyPositionOffset(footPositionOffset, 1f);
+ 				ApplyRotationOffset(footRotationOffset, 1f);
+ 
+@@ -237,7 +237,7 @@
+ 					Vector3 b = Vector3.Cross(bendGoal.position - thigh.solverPosition, position - thigh.solverPosition);
+ 					Quaternion l = Quaternion.LookRotation(bendNormal, thigh.solverPosition - foot.solverPosition);
+ 					Vector3 bRelative = Quaternion.Inverse(l) * b;
+-					bAngle = Mathf.Atan2(bRelative.x, bRelative.z) * Mathf.Rad2Deg * bendGoalWeight;
++					bAngle = Mathf.Atan2(bRelative.x, bRelative.z) * Mathf2.Rad2Deg * bendGoalWeight;
+ 				}
+ 
+ 				float sO = swivelOffset + bAngle;
+@@ -274,6 +274,7 @@
+ 			public void Solve(bool stretch) {
+ 				if (stretch && LOD < 1) Stretching();
+ 
++				ApplyBendGoal();
+ 				// Foot pass
+ 				VirtualBone.SolveTrigonometric(bones, 0, 1, 2, footPosition, bendNormal, 1f);
+ 
+diff -ur a/IKSolverVRLocomotion.cs b/IKSolverVRLocomotion.cs
+--- a/IKSolverVRLocomotion.cs	2019-09-09 19:52:13.000000000 +0900
++++ b/IKSolverVRLocomotion.cs	2021-07-13 20:56:01.052809300 +0900
+@@ -1,8 +1,8 @@
+ ﻿using UnityEngine;
+-using System.Collections;
++using RootMotion;
+ using UnityEngine.Events;
+ 
+-namespace RootMotion.FinalIK {
++namespace RootMotionNew.FinalIK {
+ 
+ 	/// <summary>
+ 	/// Hybrid %IK solver designed for mapping a character to a VR headset and 2 hand controllers 
+@@ -264,7 +264,7 @@
+ 				// Triggering new footsteps
+ 				if (CanStep()) {
+ 					int stepLegIndex = -1;
+-					float bestValue = -Mathf.Infinity;
++					float bestValue = -Mathf2.Infinity;
+ 
+ 					for (int i = 0; i < footsteps.Length; i++) {
+ 						if (!footsteps[i].isStepping) {
+diff -ur a/IKSolverVRSpine.cs b/IKSolverVRSpine.cs
+--- a/IKSolverVRSpine.cs	2019-09-09 19:52:25.000000000 +0900
++++ b/IKSolverVRSpine.cs	2021-07-14 01:35:37.208509500 +0900
+@@ -4,7 +4,7 @@
+ using RootMotion;
+ using UnityEngine.Serialization;
+ 
+-namespace RootMotion.FinalIK {
++namespace RootMotionNew.FinalIK {
+ 	
+ 	/// <summary>
+ 	/// Hybrid %IK solver designed for mapping a character to a VR headset and 2 hand controllers 
+@@ -15,7 +15,7 @@
+ 		/// Spine solver for IKSolverVR.
+ 		/// </summary>
+ 		[System.Serializable]
+-		public class Spine: BodyPart {
++		public partial class Spine: BodyPart {
+ 
+ 			[Tooltip("The head target. This should not be the camera Transform itself, but a child GameObject parented to it so you could adjust it's position/rotation  to match the orientation of the head bone. The best practice for setup would be to move the camera to the avatar's eyes, duplicate the avatar's head bone and parent it to the camera. Then assign the duplicate to this slot.")]
+             /// <summary>
+@@ -281,6 +281,8 @@
+ 					IKPositionPelvis = pelvisPos;
+ 					IKRotationPelvis = pelvisRot;
+ 					goalPositionChest = chestPos + rotations[0] * Vector3.forward;
++					length = Vector3.Distance(headPos, pelvisPos);
++					MelonLoader.MelonLogger.Msg("Spine length is {0}", length);
+ 				}
+ 
+                 // Forward and up axes
+@@ -368,7 +370,7 @@
+                     Vector3 f = faceDirection;
+                     if (rootHeadingOffset != 0f) f = Quaternion.AngleAxis(rootHeadingOffset, Vector3.up) * f;
+                     Vector3 faceDirLocal = Quaternion.Inverse(rootBone.solverRotation) * f;
+-                    float angle = Mathf.Atan2(faceDirLocal.x, faceDirLocal.z) * Mathf.Rad2Deg;
++                    float angle = Mathf.Atan2(faceDirLocal.x, faceDirLocal.z) * Mathf2.Rad2Deg;
+ 
+                     float rotation = 0f;
+                     float maxAngle = maxRootAngle;
+@@ -411,6 +413,7 @@
+             }
+ 
+ 			private void FABRIKPass(Vector3 animatedPelvisPos, Vector3 rootUp, float weight) {
++                weight = Mathf.Clamp01(weight - pelvisPositionWeight);
+                 Vector3 startPos = Vector3.Lerp(pelvis.solverPosition, animatedPelvisPos, maintainPelvisPosition) + pelvisPositionOffset;// - chestPositionOffset;
+                 Vector3 endPos = headPosition - chestPositionOffset;
+                 //Vector3 startOffset = rootUp * (bones[bones.Length - 1].solverPosition - bones[0].solverPosition).magnitude;
+@@ -421,35 +424,6 @@
+ 				VirtualBone.SolveFABRIK(bones, startPos, endPos, weight, 1f, 1, dist, startOffset);
+ 			}
+ 
+-			private void SolvePelvis() {
+-				// Pelvis target
+-				if (pelvisPositionWeight > 0f) {
+-					Quaternion headSolverRotation = head.solverRotation;
+-					
+-					Vector3 delta = ((IKPositionPelvis + pelvisPositionOffset) - pelvis.solverPosition) * pelvisPositionWeight;
+-					foreach (VirtualBone bone in bones) bone.solverPosition += delta;
+-
+-                    Vector3 bendNormal = anchorRotation * Vector3.right;
+-                    
+-					if (hasChest && hasNeck) {
+-                        VirtualBone.SolveTrigonometric(bones, pelvisIndex, spineIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 0.6f);
+-                        VirtualBone.SolveTrigonometric(bones, pelvisIndex, chestIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 0.6f);
+-                        VirtualBone.SolveTrigonometric(bones, pelvisIndex, neckIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 1f);
+-                    } else if (hasChest && !hasNeck) {
+-                        VirtualBone.SolveTrigonometric(bones, pelvisIndex, spineIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 0.75f);
+-						VirtualBone.SolveTrigonometric(bones, pelvisIndex, chestIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 1f);
+-                    }
+-                    else if (!hasChest && hasNeck) {
+-						VirtualBone.SolveTrigonometric(bones, pelvisIndex, spineIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 0.75f);
+-						VirtualBone.SolveTrigonometric(bones, pelvisIndex, neckIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight * 1f);
+-					} else if (!hasNeck && !hasChest) {
+-						VirtualBone.SolveTrigonometric(bones, pelvisIndex, spineIndex, headIndex, headPosition, bendNormal, pelvisPositionWeight);
+-					}
+-					
+-					head.solverRotation = headSolverRotation;
+-				}
+-			}
+-
+ 			public override void Write(ref Vector3[] solvedPositions, ref Quaternion[] solvedRotations) {
+ 				// Pelvis
+ 				solvedPositions[index] = bones[0].solverPosition;
+@@ -493,7 +467,7 @@
+ 				c.x -= pRight.z * Mathf.Abs(pRight.z);
+ 				c.x *= 5f * rotateChestByHands;
+ 
+-				float angle = Mathf.Atan2(c.x, c.z) * Mathf.Rad2Deg;
++				float angle = Mathf.Atan2(c.x, c.z) * Mathf2.Rad2Deg;
+ 				Quaternion q = Quaternion.AngleAxis(angle, rootRotation * Vector3.up);
+ 
+ 				chestTargetRotation = q * chestTargetRotation;
+@@ -503,7 +477,7 @@
+ 				t.x -= pRight.y;
+ 				t.x *= 0.5f * rotateChestByHands;
+ 
+-				angle = Mathf.Atan2(t.x, t.y) * Mathf.Rad2Deg;
++				angle = Mathf.Atan2(t.x, t.y) * Mathf2.Rad2Deg;
+ 				q = Quaternion.AngleAxis(angle, rootRotation * Vector3.back);
+ 
+ 				chestTargetRotation = q * chestTargetRotation;
+diff -ur a/IKSolverVRUtilities.cs b/IKSolverVRUtilities.cs
+--- a/IKSolverVRUtilities.cs	2019-09-09 19:49:35.000000000 +0900
++++ b/IKSolverVRUtilities.cs	2021-07-13 20:59:39.176292500 +0900
+@@ -3,7 +3,7 @@
+ using System;
+ using RootMotion;
+ 
+-namespace RootMotion.FinalIK {
++namespace RootMotionNew.FinalIK {
+ 	
+ 	/// <summary>
+ 	/// Hybrid %IK solver designed for mapping a character to a VR headset and 2 hand controllers 
+@@ -165,7 +165,7 @@
+ 			//Calculates the bend direction based on the law of cosines. NB! Magnitude of the returned vector does not equal to the length of the first bone!
+ 			private static Vector3 GetDirectionToBendPoint(Vector3 direction, float directionMag, Vector3 bendDirection, float sqrMag1, float sqrMag2) {
+ 				float x = ((directionMag * directionMag) + (sqrMag1 - sqrMag2)) / 2f / directionMag;
+-				float y = (float)Math.Sqrt(Mathf.Clamp(sqrMag1 - x * x, 0, Mathf.Infinity));
++				float y = (float)Math.Sqrt(Mathf.Clamp(sqrMag1 - x * x, 0, Mathf2.Infinity));
+ 				
+ 				if (direction == Vector3.zero) return Vector3.zero;
+ 				return Quaternion.LookRotation(direction, bendDirection) * new Vector3(0f, y, x);
+Only in b/: Placeholder.cs
+diff -ur a/TwistRelaxer.cs b/TwistRelaxer.cs
+--- a/TwistRelaxer.cs	2019-09-09 19:53:04.000000000 +0900
++++ b/TwistRelaxer.cs	2021-07-14 02:00:19.175848400 +0900
+@@ -1,14 +1,16 @@
+ ﻿using UnityEngine;
+ using System.Collections;
++using System;
++using UnhollowerBaseLib.Attributes;
+ 
+-namespace RootMotion.FinalIK {
++namespace RootMotionNew.FinalIK {
+ 
+ 	/// <summary>
+ 	/// Relaxes the twist rotation of this Transform relative to a parent and a child Transform, using their initial rotations as the most relaxed pose.
+ 	/// </summary>
+-	public class TwistRelaxer : MonoBehaviour {
++	public class TwistRelaxer_New : MonoBehaviour {
+ 
+-		public IK ik;
++		public VRIK_New ik;
+ 
+         [Tooltip("If this is the forearm roll bone, the parent should be the forearm bone. If null, will be found automatically.")]
+         public Transform parent;
+@@ -25,9 +27,15 @@
+         [Tooltip("Rotation offset around the twist axis.")]
+         [Range(-180f, 180f)] public float twistAngleOffset;
+ 
++		public TwistRelaxer_New(IntPtr ptr)
++			: base(ptr)
++		{
++		}
++
+ 		/// <summary>
+ 		/// Rotate this Transform to relax it's twist angle relative to the "parent" and "child" Transforms.
+ 		/// </summary>
++		[HideFromIl2Cpp]
+ 		public void Relax() {
+ 			if (weight <= 0f) return; // Nothing to do here
+ 
+@@ -47,7 +55,7 @@
+ 			relaxedAxis = Quaternion.Inverse(r) * relaxedAxis;
+ 			
+ 			// Calculate the angle by which we need to rotate this Transform around the twist axis.
+-			float angle = Mathf.Atan2(relaxedAxis.x, relaxedAxis.z) * Mathf.Rad2Deg;
++			float angle = Mathf.Atan2(relaxedAxis.x, relaxedAxis.z) * Mathf2.Rad2Deg;
+ 			
+ 			// Store the rotation of the child so it would not change with twisting this Transform
+ 			Quaternion childRotation = child.rotation;
+@@ -99,6 +107,7 @@
+ 			if (ik != null) ik.GetIKSolver().OnPostUpdate += OnPostUpdate;
+ 		}
+ 
++		[HideFromIl2Cpp]
+ 		void OnPostUpdate() {
+ 			if (ik != null) Relax();
+ 		}
+diff -ur a/VRIK.cs b/VRIK.cs
+--- a/VRIK.cs	2019-09-09 19:52:17.000000000 +0900
++++ b/VRIK.cs	2021-07-14 01:59:36.084033500 +0900
+@@ -1,15 +1,138 @@
+ ﻿using UnityEngine;
+ using System.Collections;
+ using System.Collections.Generic;
++using UnhollowerBaseLib.Attributes;
+ 
+-namespace RootMotion.FinalIK {
++namespace RootMotionNew.FinalIK {
+ 	
+ 	/// <summary>
+ 	/// A full-body IK solver designed specifically for a VR HMD and hand controllers.
+ 	/// </summary>
+ 	//[HelpURL("http://www.root-motion.com/finalikdox/html/page16.html")]
+ 	[AddComponentMenu("Scripts/RootMotion.FinalIK/IK/VR IK")]
+-	public class VRIK : IK {
++	public partial class VRIK_New : MonoBehaviour {
++		public bool fixTransforms = true;
++		[HideFromIl2Cpp]
++		public void PublicInitiateSolver() => this.InitiateSolver();
++
++		[HideFromIl2Cpp]
++		protected void FixTransforms()
++		{
++			if (!GetIKSolver().initiated) return;
++			GetIKSolver().FixTransforms();
++		}
++
++		private Animator animator;
++		private Animation legacy;
++		private bool updateFrame;
++		private bool componentInitiated;
++
++		[HideFromIl2Cpp]
++		public void Disable()
++        {
++			MelonLoader.MelonLogger.Msg("IK.Disable() is deprecated. Use enabled = false instead", transform);
++			enabled = false;
++        }
++
++		void OnDisable()
++		{
++			if (!Application.isPlaying) return;
++			Initiate();
++		}
++
++		void Start()
++		{
++			Initiate();
++		}
++
++		private bool animatePhysics
++		{
++			[HideFromIl2Cpp]
++			get
++			{
++				if (animator != null) return animator.updateMode == AnimatorUpdateMode.AnimatePhysics;
++				if (legacy != null) return legacy.animatePhysics;
++				return false;
++			}
++		}
++
++		[HideFromIl2Cpp]
++		private void Initiate()
++		{
++			if (componentInitiated) return;
++
++			FindAnimatorRecursive(transform, true);
++
++			InitiateSolver();
++			componentInitiated = true;
++		}
++
++		internal void Update_ManualDrive()
++		{
++			if (skipSolverUpdate) return;
++			if (animatePhysics) return;
++
++			if (fixTransforms) FixTransforms();
++		}
++
++		[HideFromIl2Cpp]
++		private void FindAnimatorRecursive(Transform t, bool findInChildren)
++		{
++			if (isAnimated) return;
++
++			animator = t.GetComponent<Animator>();
++			legacy = t.GetComponent<Animation>();
++
++			if (isAnimated) return;
++
++			if (animator == null && findInChildren) animator = t.GetComponentInChildren<Animator>();
++			if (legacy == null && findInChildren) legacy = t.GetComponentInChildren<Animation>();
++
++			if (!isAnimated && t.parent != null) FindAnimatorRecursive(t.parent, false);
++		}
++
++		private bool isAnimated
++		{
++			[HideFromIl2Cpp]
++			get
++			{
++				return animator != null || legacy != null;
++			}
++		}
++		internal void FixedUpdate_ManualDrive()
++		{
++			if (skipSolverUpdate)
++			{
++				skipSolverUpdate = false;
++			}
++
++			updateFrame = true;
++
++			if (animatePhysics && fixTransforms) FixTransforms();
++		}
++
++		internal void LateUpdate_ManualDrive()
++		{
++			if (skipSolverUpdate) return;
++
++			// Check if either animatePhysics is false or FixedUpdate has been called
++			if (!animatePhysics) updateFrame = true;
++			if (!updateFrame) return;
++			updateFrame = false;
++
++			UpdateSolver();
++		}
++		private bool skipSolverUpdate;
++
++		[HideFromIl2Cpp]
++		public void UpdateSolverExternal()
++		{
++			if (!enabled) return;
++
++			skipSolverUpdate = true;
++
++			UpdateSolver();
++		}
+ 
+ 		/// <summary>
+ 		/// VRIK-specific definition of a humanoid biped.
+@@ -61,12 +184,14 @@
+             public Transform rightFoot;     // 20 Optional
+ 
+             [Tooltip("Optional")]
+-            public Transform rightToes;		// 21 Optional
++            public Transform rightToes;     // 21 Optional
++			public Transform leftThumb;
++			public Transform rightThumb;
+ 
+-            /// <summary>
+-            /// Returns an array of all the Transforms in the definition.
+-            /// </summary>
+-            public Transform[] GetTransforms() {
++			/// <summary>
++			/// Returns an array of all the Transforms in the definition.
++			/// </summary>
++			public Transform[] GetTransforms() {
+ 				return new Transform[22] {
+ 					root, pelvis, spine, chest, neck, head, leftShoulder, leftUpperArm, leftForearm, leftHand, rightShoulder, rightUpperArm, rightForearm, rightHand, leftThigh, leftCalf, leftFoot, leftToes, rightThigh, rightCalf, rightFoot, rightToes
+ 				};
+@@ -153,6 +278,7 @@
+ 			/// <summary>
+ 			/// Auto-detects VRIK references. Works with a Humanoid Animator on the root gameobject only.
+ 			/// </summary>
++			[HideFromIl2Cpp]
+ 			public static bool AutoDetectReferences(Transform root, out References references) {
+ 				references = new References();
+ 
+@@ -184,29 +310,12 @@
+ 				references.rightCalf = animator.GetBoneTransform(HumanBodyBones.RightLowerLeg);
+ 				references.rightFoot = animator.GetBoneTransform(HumanBodyBones.RightFoot);
+ 				references.rightToes = animator.GetBoneTransform(HumanBodyBones.RightToes);
+-
++				references.leftThumb = animator.GetBoneTransform(HumanBodyBones.LeftThumbProximal);
++				references.rightThumb = animator.GetBoneTransform(HumanBodyBones.RightThumbProximal);
+ 				return true;
+ 			}
+ 		}
+ 
+-		// Open the User Manual URL
+-		[ContextMenu("User Manual")]
+-		protected override void OpenUserManual() {
+-			Application.OpenURL("http://www.root-motion.com/finalikdox/html/page16.html");
+-		}
+-		
+-		// Open the Script Reference URL
+-		[ContextMenu("Scrpt Reference")]
+-		protected override void OpenScriptReference() {
+-			Application.OpenURL("http://www.root-motion.com/finalikdox/html/class_root_motion_1_1_final_i_k_1_1_v_r_i_k.html");
+-		}
+-
+-		// Open a video tutorial about setting up the component
+-		[ContextMenu("TUTORIAL VIDEO (STEAMVR SETUP)")]
+-		void OpenSetupTutorial() {
+-			Application.OpenURL("https://www.youtube.com/watch?v=6Pfx7lYQiIA&feature=youtu.be");
+-		}
+-
+         /// <summary>
+         /// Bone mapping. Right-click on the component header and select 'Auto-detect References' of fill in manually if not a Humanoid character. Chest, neck, shoulder and toe bones are optional. VRIK also supports legless characters. If you do not wish to use legs, leave all leg references empty.
+         /// </summary>
+@@ -232,29 +341,38 @@
+ 		/// Fills in arm wristToPalmAxis and palmToThumbAxis.
+ 		/// </summary>
+ 		[ContextMenu("Guess Hand Orientations")]
++		[HideFromIl2Cpp]
+ 		public void GuessHandOrientations() {
+ 			solver.GuessHandOrientations(references, false);
+ 		}
+ 
+-		public override IKSolver GetIKSolver() {
+-			return solver as IKSolver;
++		[HideFromIl2Cpp]
++		public IKSolver GetIKSolver() {
++			return solver;
+ 		}
+ 
+-		protected override void InitiateSolver() {
++		[HideFromIl2Cpp]
++		protected void InitiateSolver() {
+ 			if (references.isEmpty) AutoDetectReferences();
+ 			if (references.isFilled) solver.SetToReferences(references);
+ 
+-			base.InitiateSolver();
++			if (GetIKSolver().initiated) return;
++
++			GetIKSolver().Initiate(transform);
+ 		}
+ 
+-		protected override void UpdateSolver() {
++		[HideFromIl2Cpp]
++		protected void UpdateSolver() {
+ 			if (references.root != null && references.root.localScale == Vector3.zero) {
+-				Debug.LogError("VRIK Root Transform's scale is zero, can not update VRIK. Make sure you have not calibrated the character to a zero scale.", transform);
++				MelonLoader.MelonLogger.Error("VRIK Root Transform's scale is zero, can not update VRIK. Make sure you have not calibrated the character to a zero scale.", transform);
+ 				enabled = false;
+ 				return;
+ 			}
+ 
+-			base.UpdateSolver();
++			if (!GetIKSolver().initiated) InitiateSolver();
++			if (!GetIKSolver().initiated) return;
++
++			GetIKSolver().Update();
+ 		}
+ 	}
+ }

@@ -266,16 +266,20 @@ Given that this mod is still work in progress, these are subject to change.
 ### Partial source code
 This mod includes parts of FinalIK, which is a paid Unity Store asset, therefore source code for those is not provided.  
 If you want to build the mod yourself, you'll need to do the following:
-* Get a copy of FinalIK from asset store
-* Copy the VRIK solver, VRIK component and TwistRelaxer component into mod sources folder
-* Rename them to match with what the rest of mod source expects, make VRIK_New `partial`
-* Add the following line to start of `RootMotionNew.FinalIK.IKSolverVR.Spine.FABRIKPass` : `weight = Mathf.Clamp01(weight - pelvisPositionWeight);`
-* Remove `RootMotionNew.FinalIK.IKSolverVR.Spine.SolvePelvis` from the original VRIK solver
-* Rename `RootMotionNew.FinalIK.IKSolverVR.Leg.ApplyOffsets` to `ApplyOffsetsOld`, remove `override` from it
-* Add `ApplyBendGoal();` to the second line of `RootMotionNew.FinalIK.IKSolverVR.Leg.Solve(bool)`
-* Rename `Update`, `FixedUpdate` and `LateUpdate` on VRIK_New by adding `_ManualDrive` suffix to them and make them `internal` instead of `private`
-* In `IKSolverVR.Solve` comment out `spine.InverseTranslateToHead` in legs section
-* Fix compilation if broken
+* Get a copy of FinalIK v1.9 from asset store
+* Copy the the files below into `IKTweaks/FinalIK`
+  * `Plugins/RootMotion/FinalIK/IK Solvers/IKSolver.cs`
+  * `Plugins/RootMotion/FinalIK/IK Solvers/IKSolverVR.cs`
+  * `Plugins/RootMotion/FinalIK/IK Solvers/IKSolverVRArm.cs`
+  * `Plugins/RootMotion/FinalIK/IK Solvers/IKSolverVRBodyPart.cs`
+  * `Plugins/RootMotion/FinalIK/IK Solvers/IKSolverVRFootstep.cs`
+  * `Plugins/RootMotion/FinalIK/IK Solvers/IKSolverVRLeg.cs`
+  * `Plugins/RootMotion/FinalIK/IK Solvers/IKSolverVRLocomotion.cs`
+  * `Plugins/RootMotion/FinalIK/IK Solvers/IKSolverVRSpine.cs`
+  * `Plugins/RootMotion/FinalIK/IK Solvers/IKSolverVRUtilities.cs`
+  * `Plugins/RootMotion/FinalIK/IK Solvers/TwistRelaxer.cs`
+  * `Plugins/RootMotion/FinalIK/IK Components/VRIK.cs`
+* `patch -p1 < ../FinalIK.patch` to apply patch
 
 ## JoinNotifier
 A VRChat mod to notify you when someone joins the instance you're in
