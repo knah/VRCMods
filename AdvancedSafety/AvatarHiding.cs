@@ -50,7 +50,7 @@ namespace AdvancedSafety
             {
                 var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils
                     .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(VRCAvatarManager).GetMethod(
-                        nameof(VRCAvatarManager.Method_Public_UniTask_ApiAvatar_Single_Action_1_Boolean_0)))
+                        nameof(VRCAvatarManager.Method_Public_UniTask_1_Boolean_ApiAvatar_Single_0)))
                     .GetValue(null);
                 
                 MelonUtils.NativeHookAttach((IntPtr)(&originalMethodPointer), typeof(AvatarHiding).GetMethod(nameof(SwitchAvatarPatch), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
@@ -69,14 +69,14 @@ namespace AdvancedSafety
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate IntPtr SwitchAvatarDelegate(IntPtr hiddenValueTypeReturn, IntPtr thisPtr, IntPtr apiAvatarPtr, float someFloat, IntPtr someDelegate, IntPtr nativeMethodInfo);
+        private delegate IntPtr SwitchAvatarDelegate(IntPtr hiddenValueTypeReturn, IntPtr thisPtr, IntPtr apiAvatarPtr, float someFloat, IntPtr nativeMethodInfo);
 
         private static SwitchAvatarDelegate ourSwitchAvatar;
         
-        private static IntPtr SwitchAvatarPatch(IntPtr hiddenStructReturn, IntPtr thisPtr, IntPtr apiAvatarPtr, float someFloat, IntPtr someDelegate, IntPtr nativeMethodInfo)
+        private static IntPtr SwitchAvatarPatch(IntPtr hiddenStructReturn, IntPtr thisPtr, IntPtr apiAvatarPtr, float someFloat, IntPtr nativeMethodInfo)
         {
             using (new SwitchAvatarCookie(new VRCAvatarManager(thisPtr), apiAvatarPtr == IntPtr.Zero ? null : new ApiAvatar(apiAvatarPtr)))
-                return ourSwitchAvatar(hiddenStructReturn, thisPtr, apiAvatarPtr, someFloat, someDelegate, nativeMethodInfo);
+                return ourSwitchAvatar(hiddenStructReturn, thisPtr, apiAvatarPtr, someFloat, nativeMethodInfo);
         }
 
         private static void CanUseCustomAvatarPostfix(ref bool __result)
