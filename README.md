@@ -229,6 +229,34 @@ Chest tracker is kinda useless and janky, so don't bother buying a tracker for i
 It's recommended to put elbow/knee trackers as close to the joint they're tracking as possible (but not on the joint itself). For arms, the recommended position is on the outer surface of the lower or upper arm next to the elbow.  
 If you're using additional trackers, your avatar should generally match your physical proportions - that is, all body parts should line up reasonably well without real height hacks.
 
+### Brief settings description
+Given that this mod is still work in progress, these are subject to change.
+ * Use Pitch-Yaw Shoulders - changes how shoulder angles are computed in 3/4-point tracking. Enabling it usually provides better-looking results
+ * Animations mode in FBT - control which part of your body can be controlled by animations when using custom FBT IK
+ * Feet stick to ground - uncheck if you want your feet (and the rest of your avatar) to be unable to leave the ground, like in ol' good times
+ * Enable IKTweaks (use custom VRIK) - uncheck to go back to default VRC FBT IK. Most mod features won't work.
+ * Enforce local NetIK (see what others see) - adds an extra pass similar to NetIK so that you can be certain that you see the smae thing that remote players do. Does nothing for Index Controllers users (VRC does that already)
+ * Map toes (use if your feet trackers move with your toes) - if enabled, IK will control your avatar's toes with tracker positions, enabling you to tiptoe. Works best if your trackers actually move with your toes (i.e. are mounted on shoe toes)
+ * Use extra trackers - must be enabled to make use of extra trackers. Don't enable options for trackers you don't have.
+ * Avatar follows head when calibrating (recommended) - avatars moves with your head when calibrating. This provides better calibration results.
+ * Freeze avatar on one trigger hold in follow head mode - if you have previous setting enabled, holding one trigger when calibrating will stop your avatar from following your head. You can use this to align your feet.
+ * Use universal calibration (requires follow head mode) - allows you to calibrate once for all avatars. No more standing up to switch avatars!
+ * Store calibration per avatar (when not using universal calibration) - if you don't want universal calibration, enable this to save calibration per-avatar.
+ * Disable FBT even if trackers are present - you can enable this if you plug your trackers into your PC to charge but don't want to use FBT while doing so
+ * Enforce hip rotation match - if enabled, avatar's hip rotation will exactly match tracker's rotation. Otherwise, IK may rotate the hip to bend the spine more.
+ * Shift hip pivot (support inverted hip) - if enabled, the hip will be rotated around the midpoint of two leg bones (where thi hip bone should be normally). This greatly improves IK on avatars with the inverted hip rig hack.
+ * Pre-straighten spine (improve IK stability) - if enabled, you avatar's spine will be forcefully straightened before solving it. This reduces flippiness/jitter on avatars that have spine bent backwards by default.
+ * Straighten neck - this does something cursed to the neck. No further description can be provided.
+ * Spine Relax Iterations (max 25) - how much work will be done on bending the spine. Below 5 is not recommended, 10 will provide about 1mm precision for hip positioning, 25 is the maximum sensible value.
+ * Maximum bend angles - how much spine/neck can be bent forward/back. If your spine bends too much to your taste or looks cursed on your specific avatar, reduce these angles (minimum recommended value is 1 though)
+ * Neck bend priority - neck will bend this much faster than the spine. This is intended to handle the fact that people move their neck way more than their spine, so IK should start off by bending it, not spine.
+ * Straight spine angle - withing this angle from perfectly straight, the spine will be considered almost straight and maximum bend angles will be reduced.
+ * Straight spine power - controls the curve with which the spine transitions from straight to bend within the straight angle. Recommended values are between 1 and 2.
+ * Avatar scaling mode - controls how your avatar scale is computed. "Height" scales the avatar so that your real floor alights with the virtual one (at the cost of you likely getting t-rex arms), "Improved wingspan" attempts to measure avatar arm span more accurately than VRC default.
+ * A-pose calibration - use a different calibration pose. In case you don't want to assert too much dominance with a T-pose.
+ * Allow more head rotation in 3/4-point tracking - ever tried to look up when close to the ground in 3/4-point tracking? Now you can, even if it breaks your neck.
+ * Improved wingspan adjustment factor - your wingspan is adjusted by this factor in "Improved wingspan" scaling mode. If you consistently get avatar arms too long/short, consider tweaking this a tiny bit (to like 1.05 or 1.15)
+
 ### Partial source code
 This mod includes parts of FinalIK, which is a paid Unity Store asset, therefore source code for those is not provided.  
 If you want to build the mod yourself, you'll need to do the following:
