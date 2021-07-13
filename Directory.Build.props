@@ -1,5 +1,5 @@
 <Project>
-    <ItemGroup>
+    <ItemGroup Condition="'$(NoModReferences)' != 'true'">
         <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
             <SpecificVersion>false</SpecificVersion>
             <Private>false</Private>
@@ -96,13 +96,14 @@
             <HintPath>$(MsBuildThisFileDirectory)Libs\Il2CppSystem.Core.dll</HintPath>
         </Reference>
     </ItemGroup>
-    <ItemGroup>
+    <ItemGroup Condition="'$(NoModReferences)' != 'true'">
         <EmbeddedResource Include="$(MsBuildThisFileDirectory)/Common/_dummy_.dll" Link="Common/_dummy_.dll" />
         <EmbeddedResource Include="$(MsBuildThisFileDirectory)/Common/_dummy2_.dll" Link="Common/_dummy2_.dll" />
         <Compile Include="$(MsBuildThisFileDirectory)/Common/LoaderIntegrityCheck.cs" Link="Common/LoaderIntegrityCheck.cs"/>
+        <Compile Include="$(MsBuildThisFileDirectory)/Common/AnnoyingMessagePrinter.cs" Link="Common/AnnoyingMessagePrinter.cs"/>
         <Compile Include="$(MsBuildThisFileDirectory)/Common/CustomizedMelonMod.cs" Link="Common/CustomizedMelonMod.cs" />
     </ItemGroup>
-    <ItemGroup>
+    <ItemGroup Condition="'$(NoModReferences)' != 'true'">
         <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
             <SpecificVersion>false</SpecificVersion>
             <Private>false</Private>
@@ -184,4 +185,12 @@
         <OutputPath>$(MsBuildThisFileDirectory)\Output\$(Configuration)\</OutputPath>
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
+    
+    <ItemGroup Condition="'$(NoModReferences)' != 'true'">
+        <ProjectReference Include="$(MsBuildThisFileDirectory)IntegrityCheckWeaver\IntegrityCheckWeaver.csproj" PrivateAssets="all"/>
+    </ItemGroup>
+    
+    <Target Name="RandomizeIntegrityChecks" AfterTargets="PostBuildEvent" Condition="'$(NoModReferences)' != 'true'">
+        <Exec Command="$(MsBuildThisFileDirectory)\Output\$(Configuration)\net472\IntegrityCheckWeaver.exe $(OutputPath)/$(AssemblyName).dll" />
+    </Target>
 </Project>

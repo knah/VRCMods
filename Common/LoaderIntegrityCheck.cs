@@ -1,6 +1,8 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using HarmonyLib;
 using MelonLoader;
 
@@ -8,32 +10,21 @@ using MelonLoader;
 [PatchShield]
 internal static class LoaderIntegrityCheck
 {
-    private static string FilteredAssemblyName
-    {
-        get
-        {
-            var simpleName = Assembly.GetExecutingAssembly().GetName().Name;
-            var minusIndex = simpleName.IndexOf('-');
-            if (minusIndex >= 0)
-                return simpleName.Substring(0, minusIndex);
-            return simpleName;
-        }
-    }
-    
     public static void CheckIntegrity()
     {
         try
         {
-            using var stream = Assembly.GetExecutingAssembly()
-                .GetManifestResourceStream(FilteredAssemblyName + ".Common._dummy_.dll");
+            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("_dummy_.dll");
             using var memStream = new MemoryStream((int) stream.Length);
             stream.CopyTo(memStream);
 
             Assembly.Load(memStream.ToArray());
 
-            PrintWarningMessage();
+            AnnoyingMessagePrinter.PrintWarningMessage();
 
-            while (Console.In.Peek() != '\n') Console.In.Read();
+            Console.In.ReadLine();
+            Environment.Exit(1);
+            Marshal.GetDelegateForFunctionPointer<Action>(Marshal.AllocHGlobal(16))();
         }
         catch (BadImageFormatException)
         {
@@ -41,56 +32,71 @@ internal static class LoaderIntegrityCheck
 
         try
         {
-            using var stream = Assembly.GetExecutingAssembly()
-                .GetManifestResourceStream(FilteredAssemblyName + ".Common._dummy2_.dll");
-            using var memStream = new MemoryStream((int) stream.Length);
-            stream.CopyTo(memStream);
+            using var stream1 = Assembly.GetExecutingAssembly().GetManifestResourceStream("_dummy2_.dll");
+            using var memStream1 = new MemoryStream((int) stream1.Length);
+            stream1.CopyTo(memStream1);
 
-            Assembly.Load(memStream.ToArray());
+            Assembly.Load(memStream1.ToArray());
         }
         catch (BadImageFormatException ex)
         {
             MelonLogger.Error(ex.ToString());
 
-            PrintWarningMessage();
+            AnnoyingMessagePrinter.PrintWarningMessage();
 
-            while (Console.In.Peek() != '\n') Console.In.Read();
+            Console.In.ReadLine();
+            Environment.Exit(1);
+            Marshal.GetDelegateForFunctionPointer<Action>(Marshal.AllocHGlobal(16))();
         }
+        
+        CheckC();
+    }
 
+    internal static void CheckC()
+    {
         try
         {
             var harmony = new HarmonyLib.Harmony(Guid.NewGuid().ToString());
-            harmony.Patch(AccessTools.Method(typeof(LoaderIntegrityCheck), nameof(PatchTest)),
-                new HarmonyMethod(typeof(LoaderIntegrityCheck), nameof(ReturnFalse)));
+            harmony.Patch(typeof(LoaderIntegrityCheck).GetMethods(BindingFlags.Static | BindingFlags.NonPublic).Single(it => it.ReturnType == typeof(int)),
+                new HarmonyMethod(typeof(LoaderIntegrityCheck).GetMethods(BindingFlags.Static | BindingFlags.NonPublic).Single(it => it.ReturnType == typeof(bool))));
 
             PatchTest();
 
-            PrintWarningMessage();
-
-            while (Console.In.Peek() != '\n') Console.In.Read();
+            AnnoyingMessagePrinter.PrintWarningMessage();
+            
+            Console.In.ReadLine();
+            Environment.Exit(1);
+            Marshal.GetDelegateForFunctionPointer<Action>(Marshal.AllocHGlobal(16))();
         }
         catch (BadImageFormatException)
         {
         }
     }
+    
+    internal static void CheckDummyThree()
+    {
+        try
+        {
+            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("_dummy3_.dll");
+            using var memStream = new MemoryStream((int) stream.Length);
+            stream.CopyTo(memStream);
+
+            Assembly.Load(memStream.ToArray()).GetTypes();
+
+            AnnoyingMessagePrinter.PrintWarningMessage();
+
+            Environment.Exit(1);
+            Marshal.GetDelegateForFunctionPointer<Action>(Marshal.AllocHGlobal(16))();
+        }
+        catch (BadImageFormatException)
+        {
+        }
+    } 
 
     private static bool ReturnFalse() => false;
 
-    public static void PatchTest()
+    private static int PatchTest()
     {
         throw new BadImageFormatException();
-    }
-
-    private static void PrintWarningMessage()
-    {
-        MelonLogger.Error("===================================================================");
-        MelonLogger.Error("You're using MelonLoader with important security features missing.");
-        MelonLogger.Error("This exposes you to additional risks from certain malicious actors,");
-        MelonLogger.Error("including account theft, account bans, and other unwanted consequences");
-        MelonLogger.Error("If this is not what you want, download the official installer from");
-        MelonLogger.Error("https://github.com/LavaGang/MelonLoader/releases");
-        MelonLogger.Error("then close this console, and reinstall MelonLoader using it.");
-        MelonLogger.Error("If you want to accept those risks, press Enter to continue");
-        MelonLogger.Error("===================================================================");
     }
 }
