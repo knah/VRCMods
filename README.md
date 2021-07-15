@@ -1,5 +1,6 @@
 This repository contains my mods for VRChat. Join the [VRChat Modding Group discord](https://discord.gg/rCqKSvR) for support and more mods!  
-Looking for more (universal) mods? [Check out my universal mods repository!](https://github.com/knah/ML-UniversalMods)
+Looking for more (universal) mods? [Check out my universal mods repository!](https://github.com/knah/ML-UniversalMods)  
+**Don't want to install mods manually? [Check out the VRCMelonAssistant, an automatic mod installer!](https://github.com/knah/VRCMelonAssistant)**  
 
 ## Preface
 Modifying the VRChat client is not allowed by VRChat Terms of Service and can lead to your account being banned.  
@@ -373,6 +374,9 @@ Do note that the coordinates displayed in that menu are local offset of the view
 
 ## ILRepack
 There's a copy of [ILRepack.Lib.MSBuild.Task](https://github.com/ravibpatel/ILRepack.Lib.MSBuild.Task) and [ILRepack](https://github.com/gluck/il-repack) built for netcore/MSBuild 16 shipped with the repo.
+
+## IntegrityCheckGenerator and IntegrityCheckWeaver
+These two serve to tightly integrate integrity check with mods to make automated patching of it harder. See [this writeup](Malicious-Mods.md) for rationale for this.
 
 ## Installation
 To install these mods, you will need to install [MelonLoader](https://discord.gg/2Wn3N2P) (discord link, see \#how-to-install).  
