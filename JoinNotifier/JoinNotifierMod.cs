@@ -21,7 +21,7 @@ using Object = UnityEngine.Object;
 
 namespace JoinNotifier
 {
-    public class JoinNotifierMod : CustomizedMelonMod
+    internal partial class JoinNotifierMod : MelonMod
     {
         private const string CustomJoinSoundFileName = "UserData/JN-Join.ogg";
         private const string CustomLeaveSoundFileName = "UserData/JN-Leave.ogg";
@@ -229,7 +229,7 @@ namespace JoinNotifier
             myLeaveText = CreateTextNear(myLeaveImage, 110f, TextAnchor.LowerLeft);
         }
 
-        public override void OnSceneWasLoaded(int buildIndex, string sceneName)
+        partial void OnSceneWasLoaded2(int buildIndex, string sceneName)
         {
             base.OnSceneWasLoaded(buildIndex, sceneName);
             

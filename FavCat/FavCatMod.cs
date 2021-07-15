@@ -25,7 +25,7 @@ using Object = UnityEngine.Object;
 
 namespace FavCat
 {
-    public class FavCatMod : CustomizedMelonMod
+    internal partial class FavCatMod : MelonMod
     {
         public static LocalStoreDatabase? Database;
         internal static FavCatMod Instance;

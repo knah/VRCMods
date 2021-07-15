@@ -23,7 +23,7 @@ using Object = UnityEngine.Object;
 
 namespace AdvancedSafety
 {
-    public class AdvancedSafetyMod : CustomizedMelonMod
+    internal partial class AdvancedSafetyMod : MelonMod
     {
         private static List<object> ourPinnedDelegates = new List<object>();
         internal static bool CanReadAudioMixers = true;

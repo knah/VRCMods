@@ -99,9 +99,10 @@
     <ItemGroup Condition="'$(NoModReferences)' != 'true'">
         <EmbeddedResource Include="$(MsBuildThisFileDirectory)/Common/_dummy_.dll" Link="Common/_dummy_.dll" />
         <EmbeddedResource Include="$(MsBuildThisFileDirectory)/Common/_dummy2_.dll" Link="Common/_dummy2_.dll" />
-        <Compile Include="$(MsBuildThisFileDirectory)/Common/LoaderIntegrityCheck.cs" Link="Common/LoaderIntegrityCheck.cs"/>
-        <Compile Include="$(MsBuildThisFileDirectory)/Common/AnnoyingMessagePrinter.cs" Link="Common/AnnoyingMessagePrinter.cs"/>
-        <Compile Include="$(MsBuildThisFileDirectory)/Common/CustomizedMelonMod.cs" Link="Common/CustomizedMelonMod.cs" />
+
+        <ProjectReference Include="$(MsBuildThisFileDirectory)/IntegrityCheckGenerator/IntegrityCheckGenerator.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false" />
     </ItemGroup>
     <ItemGroup Condition="'$(NoModReferences)' != 'true'">
         <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
@@ -183,7 +184,7 @@
 
     <PropertyGroup>
         <OutputPath>$(MsBuildThisFileDirectory)\Output\$(Configuration)\</OutputPath>
-        <LangVersion>latest</LangVersion>
+        <LangVersion>preview</LangVersion>
     </PropertyGroup>
     
     <ItemGroup Condition="'$(NoModReferences)' != 'true'">

@@ -12,7 +12,7 @@ using Object = UnityEngine.Object;
 
 namespace EmojiPageButtons
 {
-    public class EmojiPageButtonsMod : CustomizedMelonMod
+    internal partial class EmojiPageButtonsMod : MelonMod
     {
         public override void OnApplicationStart()
         {

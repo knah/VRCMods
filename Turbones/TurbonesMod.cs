@@ -15,7 +15,7 @@ using UnhollowerRuntimeLib.XrefScans;
 
 namespace Turbones
 {
-    public class TurbonesMod : CustomizedMelonMod
+    internal partial class TurbonesMod : MelonMod
     {
         private static IntPtr ourDynBoneCollideEntryPoint;
         private static IntPtr ourDynBoneUpdateEntryPoint;

@@ -17,7 +17,7 @@ using VRC.Core;
 
 namespace FriendsPlusHome
 {
-    public class FriendsPlusHomeMod : CustomizedMelonMod
+    internal partial class FriendsPlusHomeMod : MelonMod
     {
         private const string SettingsCategory = "FriendsPlusHome";
         private const string SettingStartupName = "StartupWorldType";

@@ -10,7 +10,7 @@ using VRC.UserCamera;
 
 namespace CameraMinus
 {
-    public class CameraMinusMod : CustomizedMelonMod
+    internal partial class CameraMinusMod : MelonMod
     {
         private MelonPreferences_Entry<bool> myUseCameraExpando;
         private MelonPreferences_Entry<bool> myUnlimitCameraPickupDistance;

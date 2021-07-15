@@ -18,7 +18,7 @@ using ViewPointTweaker;
 
 namespace ViewPointTweaker
 {
-    public class ViewPointTweakerMod : CustomizedMelonMod
+    internal partial class ViewPointTweakerMod : MelonMod
     {
         private const string ViewPointsFilePath = "UserData/ViewPoints.json";
         

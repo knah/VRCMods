@@ -33,7 +33,7 @@ using System.Globalization;
 
 namespace LagFreeScreenshots
 {
-    public class LagFreeScreenshotsMod : CustomizedMelonMod
+    internal partial class LagFreeScreenshotsMod : MelonMod
     {
         private const string SettingsCategory = "LagFreeScreenshots";
         private const string SettingEnableMod = "Enabled";

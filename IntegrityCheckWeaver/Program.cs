@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Mono.Cecil;
@@ -21,24 +22,14 @@ namespace IntegrityCheckWeaver
             }
 
             using var assembly = AssemblyDefinition.ReadAssembly(new FileStream(args[0], FileMode.Open, FileAccess.ReadWrite));
-            var loaderCheckType = assembly.MainModule.GetType("LoaderIntegrityCheck");
-            var customizedModType = assembly.MainModule.GetType("CustomizedMelonMod");
-            var annoyingMessage = assembly.MainModule.GetType("AnnoyingMessagePrinter");
+            var modType = assembly.MainModule.Types.SingleOrDefault(it => it.BaseType?.Name == "MelonMod");
 
-            if (loaderCheckType == null || customizedModType == null || annoyingMessage == null)
+            if (modType == null)
             {
                 Console.Error.WriteLine("Required types not found");
                 return 1;
             }
 
-            loaderCheckType.Name = Utils.CompletelyRandomString();
-            customizedModType.Name = Utils.CompletelyRandomString();
-            annoyingMessage.Name = Utils.CompletelyRandomString();
-
-            CleanMethods(loaderCheckType);
-            CleanMethods(customizedModType);
-            CleanMethods(annoyingMessage);
-            
             var dummyOneResource = DummyThree.ProduceDummyThree();
             var dummyOneName = Utils.CompletelyRandomString() + ".dll";
             assembly.MainModule.Resources.Add(new EmbeddedResource(dummyOneName, ManifestResourceAttributes.Private, dummyOneResource));
@@ -52,35 +43,63 @@ namespace IntegrityCheckWeaver
             assembly.MainModule.Resources.Remove(assembly.MainModule.Resources.Single(it => it.Name.EndsWith("_dummy_.dll"))); // is replaced
             assembly.MainModule.Resources.Single(it => it.Name.EndsWith("_dummy2_.dll")).Name = dummyTwoName;
             
-            foreach (var method in loaderCheckType.Methods)
+            var methodRenameMap = CleanMethods(modType);
+
+            foreach (var method in modType.Methods)
             foreach (var instr in method.Body.Instructions)
                 if (instr.OpCode == OpCodes.Ldstr)
-                    instr.Operand = (string)instr.Operand switch
+                {
+                    var value = (string)instr.Operand;
+                    instr.Operand = value switch
                     {
                         "_dummy_.dll" => dummyOneName,
                         "_dummy2_.dll" => dummyTwoName,
                         "_dummy3_.dll" => dummyThreeName,
-                        _ => instr.Operand
+                        _ => methodRenameMap.TryGetValue(value, out var renamed) ? renamed : value
                     };
+                }
 
-            // todo: insert spicier checks!
-            
             assembly.Write();
 
             return 0;
         }
-        
-        private static void CleanMethods(TypeDefinition type)
+
+        private static readonly HashSet<string> ourNamesToRename = new()
         {
-            foreach (var method in type.Methods) 
-                if (method.Name != ".ctor" && method.Name != ".cctor" && !method.IsVirtual)
-                    method.Name = Utils.CompletelyRandomString();
-            
+            "CheckA",
+            "CheckB",
+            "CheckC",
+            "PatchTest",
+            "ReturnFalse",
+            "CheckWasSuccessful",
+            "MustStayFalse",
+            "MustStayTrue",
+            "RanCheck3",
+            "CheckDummyThree",
+            "ourAnnoyingMessages"
+        };
+
+        private static Dictionary<string, string> CleanMethods(TypeDefinition type)
+        {
+            var result = new Dictionary<string, string>();
+
+            foreach (var method in type.Methods)
+                if (ourNamesToRename.Contains(method.Name))
+                {
+                    var newName = Utils.CompletelyRandomString();
+                    result[method.Name] = newName;
+                    method.Name = newName;
+                }
+
             foreach (var property in type.Properties) 
-                property.Name = Utils.CompletelyRandomString();
+                if (ourNamesToRename.Contains(property.Name))
+                    property.Name = Utils.CompletelyRandomString();
 
             foreach (var field in type.Fields) 
-                field.Name = Utils.CompletelyRandomString();
+                if (ourNamesToRename.Contains(field.Name))
+                    field.Name = Utils.CompletelyRandomString();
+
+            return result;
         }
     }
 }

@@ -24,7 +24,7 @@ using Object = UnityEngine.Object;
 
 namespace IKTweaks
 {
-    public class IKTweaksMod : CustomizedMelonMod
+    internal partial class IKTweaksMod : MelonMod
     {
         private static readonly Queue<Action> ourToMainThreadQueue = new Queue<Action>();
         private static readonly Queue<Action> ourToIKLateUpdateQueue = new Queue<Action>();

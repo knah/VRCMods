@@ -14,7 +14,7 @@ using VRC.SDKBase;
 
 namespace MirrorResolutionUnlimiter
 {
-    public class MirrorResolutionUnlimiterMod : CustomizedMelonMod
+    internal partial class MirrorResolutionUnlimiterMod : MelonMod
     {
         internal const string ModCategory = "MirrorResolutionUnlimiter";
         

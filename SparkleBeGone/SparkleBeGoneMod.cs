@@ -14,7 +14,7 @@ using UnityEngine;
 
 namespace SparkleBeGone
 {
-    public class SparkleBeGoneMod : CustomizedMelonMod
+    internal partial class SparkleBeGoneMod : MelonMod
     {
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void VoidDelegate(IntPtr thisPtr);

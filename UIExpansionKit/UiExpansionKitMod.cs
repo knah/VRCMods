@@ -20,7 +20,7 @@ using Object = UnityEngine.Object;
 
 namespace UIExpansionKit
 {
-    internal class UiExpansionKitMod : CustomizedMelonMod
+    internal partial class UiExpansionKitMod : MelonMod
     {
         internal static UiExpansionKitMod Instance;
         
