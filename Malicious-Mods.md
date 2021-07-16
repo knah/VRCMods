@@ -20,7 +20,7 @@ Most (if not all) antiviruses don't detect anything wrong with malware mods - th
 
 MelonLoader has certain protections that make it harder to hide what a mod is doing. While this doesn't prevent a mod from being malware in the first place, it's way easier to analyze a mod that passes MelonLoader checks to figure out if it does anything bad.
 
-A normal mod has nothing to hide from its users. Trying to hide things is more often than not indicative of malicious intent, especially in the context of the VRChat modding scene, where the proportion of malicious mod makers is unusually high. Coincidentally, mods having something to hide are practically guaranteed to contain malicious features (more on that in the following sections).
+**A normal mod has nothing to hide from its users**. Trying to hide things is more often than not indicative of malicious intent, especially in the context of the VRChat modding scene, where the proportion of malicious mod makers is unusually high. Coincidentally, mods having something to hide are practically guaranteed to contain malicious features (more on that in the following sections).
 
 Historically, there have been several cases of malicious mods stealing accounts (not limited to VRC accounts) or harming users' PCs in other ways, so this is not empty fear-mongering - the dangers are real, if uncommon. See the [References section](#References) for examples of this.    
 
@@ -106,7 +106,8 @@ Malicious mod users should become a shunned minority, using a malicious mod shou
 ## References
 
 #### Malicious mods being malware:
-These discord links lead to [VRChat Modding Group Discord server](https://discord.gg/7EQCmgrUnH) #announcements channel.
+These discord links lead to [VRChat Modding Group Discord server](https://discord.gg/7EQCmgrUnH) #announcements channel.  
+Please note that these are just examples that were caught once - **if something is not listed here, it can still be dangerous.**  
 
 ##### KiraiMod/KiraiLib
 This (technically opensource) mod was caught filling its users' desktop with hard-to-delete files and closing the game.  
