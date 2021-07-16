@@ -10,7 +10,7 @@ using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 using UnhollowerRuntimeLib.XrefScans;
 
-[assembly:MelonInfo(typeof(TurbonesMod), "Turbones", "1.0.2", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(TurbonesMod), "Turbones", "1.1.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace Turbones
@@ -19,6 +19,7 @@ namespace Turbones
     {
         private static IntPtr ourDynBoneCollideEntryPoint;
         private static IntPtr ourDynBoneUpdateEntryPoint;
+        private static IntPtr ourLastPatchPointer;
         
         public override void OnApplicationStart()
         {
@@ -85,29 +86,42 @@ namespace Turbones
                 isCollidePatched = false;
             }
 
-            var isUpdatePatched = false;
-            var isUpdateMtPatched = false;
             unsafe void RepatchUpdate(bool useFast, bool useMt)
             {
-                if (isUpdatePatched)
+                if (ourLastPatchPointer != IntPtr.Zero)
                 {
                     fixed(IntPtr* a = &ourDynBoneUpdateEntryPoint)
-                        MelonUtils.NativeHookDetach((IntPtr)a, isUpdateMtPatched ? JigglySolverApi.LibDynBoneUpdateMultiThreaded : JigglySolverApi.LibDynBoneUpdateSingleThreaded);
+                        MelonUtils.NativeHookDetach((IntPtr)a, ourLastPatchPointer);
                     
                     MelonLogger.Msg("Unpatched DynamicBone Update");
-                    isUpdatePatched = false;
+                    ourLastPatchPointer = IntPtr.Zero;
                 }
+                
+                if (!CheckWasSuccessful) return;
                 
                 if (useFast)
                 {
+                    ourLastPatchPointer = useMt ? JigglySolverApi.LibDynBoneUpdateMultiThreaded : JigglySolverApi.LibDynBoneUpdateSingleThreaded;
+                    
                     fixed(IntPtr* a = &ourDynBoneUpdateEntryPoint)
-                        MelonUtils.NativeHookAttach((IntPtr)a, useMt ? JigglySolverApi.LibDynBoneUpdateMultiThreaded : JigglySolverApi.LibDynBoneUpdateSingleThreaded);
+                        MelonUtils.NativeHookAttach((IntPtr)a, ourLastPatchPointer);
 
                     MelonLogger.Msg($"Patched DynamicBone Update (multithreaded: {useMt})");
-                    isUpdatePatched = true;
-                    isUpdateMtPatched = useMt;
+                }
+                else
+                {
+                    ourLastPatchPointer = JigglySolverApi.DynamicBoneUpdateNotifyPatch;
+                    
+                    fixed(IntPtr* a = &ourDynBoneUpdateEntryPoint)
+                        MelonUtils.NativeHookAttach((IntPtr)a, ourLastPatchPointer);
+
+                    JigglySolverApi.SetOriginalBoneUpdateDelegate(ourDynBoneUpdateEntryPoint);
+
+                    MelonLogger.Msg($"Patched DynamicBone Update (notify)");
                 }
             }
+            
+            CheckDummyThree();
 
             enableCollisionChecks.OnValueChanged += (_, v) =>
             {
