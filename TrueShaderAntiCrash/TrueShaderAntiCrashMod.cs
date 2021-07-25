@@ -1,27 +1,53 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using MelonLoader;
 using TrueShaderAntiCrash;
 using UIExpansionKit.API;
 using UnityEngine.SceneManagement;
 using VRC.Core;
 
-[assembly:MelonInfo(typeof(TrueShaderAntiCrashMod), "True Shader Anticrash", "1.0.2", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(TrueShaderAntiCrashMod), "True Shader Anticrash", "1.0.3", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace TrueShaderAntiCrash
 {
     internal partial class TrueShaderAntiCrashMod : MelonMod
     {
+        private static readonly Dictionary<string, int> ourOffsets = new()
+        {
+            { "aCEmIwSIcjYriBQDFjQlpTNNW1/kA8Wlbkqelmt1USOMB09cnKwK7QWyOulz9d7DEYJh4+vO0Ldv8gdH+dZCrg==", 0x819130 }, // U2018.4.20 non-dev
+            { "5dkhl/dWeTREXhHCIkZK17mzZkbjhTKlxb+IUSk+YaWzZrrV+G+M0ekTOEGjZ4dJuB4O3nU/oE3dycXWeJq9uA==", 0x79B3F0 }, // U2019.4.28 non-dev
+        };
+
         public override void OnApplicationStart()
         {
+            if (!CheckWasSuccessful || !MustStayTrue || MustStayFalse) return;
+            
+            string unityPlayerHash;
+            {
+                using var sha = SHA512.Create();
+                using var unityPlayerStream = File.OpenRead("UnityPlayer.dll");
+                unityPlayerHash = Convert.ToBase64String(sha.ComputeHash(unityPlayerStream));
+            }
+
+            if (!ourOffsets.TryGetValue(unityPlayerHash, out var offset))
+            {
+                MelonLogger.Error($"Unknown UnityPlayer hash: {unityPlayerHash}");
+                MelonLogger.Error("The mod will not work");
+                return;
+            }
+            
             var pluginsPath = MelonUtils.GetGameDataDirectory() + "/Plugins";
+            var deeperPluginsPath = Path.Combine(pluginsPath, "x86_64");
+            if (Directory.Exists(deeperPluginsPath)) pluginsPath = deeperPluginsPath;
             var dllName = ShaderFilterApi.DLLName + ".dll";
 
             try
@@ -43,12 +69,12 @@ namespace TrueShaderAntiCrash
             {
                 if (!module.FileName.Contains("UnityPlayer")) continue;
                 
-                var loadLibraryAddress = module.BaseAddress + 0x819130;
+                var loadLibraryAddress = module.BaseAddress + offset;
                 var dg = Marshal.GetDelegateForFunctionPointer<FindAndLoadUnityPlugin>(loadLibraryAddress);
 
                 var strPtr = Marshal.StringToHGlobalAnsi(ShaderFilterApi.DLLName);
 
-                dg(strPtr, out var loaded);
+                dg(strPtr, out var loaded, 1);
 
                 if (loaded == IntPtr.Zero)
                 {
@@ -146,6 +172,6 @@ namespace TrueShaderAntiCrash
         }
 
         [UnmanagedFunctionPointer(CallingConvention.FastCall)]
-        private delegate void FindAndLoadUnityPlugin(IntPtr name, out IntPtr loadedModule);
+        private delegate void FindAndLoadUnityPlugin(IntPtr name, out IntPtr loadedModule, byte bEnableSomeDebug);
     }
 }

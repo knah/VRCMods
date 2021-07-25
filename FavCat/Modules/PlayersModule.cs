@@ -23,7 +23,7 @@ namespace FavCat.Modules
         {
             ExpansionKitApi.GetExpandedMenu(ExpandedMenu.UserDetailsMenu).AddSimpleButton("Local Favorite", ShowFavMenu);
             
-            ourFriendsListManager = FriendsListManager.prop_FriendsListManager_0;
+            ourFriendsListManager = FriendsListManager.field_Private_Static_FriendsListManager_0;
 
             listsParent.GetComponent<EnableDisableListener>().OnEnabled += ResortAndRefreshLists;
         }
@@ -161,7 +161,7 @@ namespace FavCat.Modules
 
         private static void ShowUserPage(APIUser user)
         {
-            VRCUiManager.prop_VRCUiManager_0.Method_Public_Void_String_Boolean_0("UserInterface/MenuContent/Screens/UserInfo", true);
+            FavCatMod.GetUiManager().Method_Public_Void_String_Boolean_0("UserInterface/MenuContent/Screens/UserInfo", true);
             var friendState = APIUser.IsFriendsWith(user.id)
                 ? (user.statusValue == APIUser.UserStatus.Offline
                     ? PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa10Unique.OfflineFriend

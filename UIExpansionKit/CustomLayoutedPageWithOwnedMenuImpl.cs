@@ -34,7 +34,7 @@ namespace UIExpansionKit
             }
 
             var newInstance = Object.Instantiate(MenuPrefab, ParentTransform);
-            UiExpansionKitMod.SetLayerRecursively(newInstance, QuickMenu.prop_QuickMenu_0.gameObject.layer);
+            UiExpansionKitMod.SetLayerRecursively(newInstance, UiExpansionKitMod.GetQuickMenu().gameObject.layer);
             AdjustMenuTransform(newInstance.transform, PanelStack.Count + 1);
             var topLevelTransform = GetTopLevelUiObject(newInstance.transform);
             if (LayoutDescription != null)

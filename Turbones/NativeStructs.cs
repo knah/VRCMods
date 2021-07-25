@@ -15,6 +15,7 @@ namespace Turbones
 
         public IntPtr gchandle_create;
         public IntPtr gchandle_drop;
+        public IntPtr gchandle_get;
 
         public IntPtr transform_get_local_rotation;
     }

@@ -16,7 +16,7 @@ using VRC.Core;
 using VRC.Management;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(JoinNotifierMod), "JoinNotifier", "1.0.3", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(JoinNotifierMod), "JoinNotifier", "1.0.4", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace JoinNotifier
@@ -48,6 +48,8 @@ namespace JoinNotifier
 
         public override void OnApplicationStart()
         {
+            if (!CheckWasSuccessful || !MustStayTrue || MustStayFalse) return;
+            
             JoinNotifierSettings.RegisterSettings();
 
             MelonCoroutines.Start(InitThings());
@@ -59,7 +61,7 @@ namespace JoinNotifier
             
             while (ReferenceEquals(NetworkManager.field_Internal_Static_NetworkManager_0, null)) yield return null;
             while (ReferenceEquals(VRCAudioManager.field_Private_Static_VRCAudioManager_0, null)) yield return null;
-            while (ReferenceEquals(VRCUiManager.prop_VRCUiManager_0, null)) yield return null;
+            while (ReferenceEquals(GetUiManager(), null)) yield return null;
 
             var audioManager = VRCAudioManager.field_Private_Static_VRCAudioManager_0;
 

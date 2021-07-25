@@ -60,23 +60,32 @@ namespace IntegrityCheckGenerator
             generatedCode.AppendLine("using System;");
             generatedCode.AppendLine("using System.Collections;");
             generatedCode.AppendLine("using System.IO;");
+            generatedCode.AppendLine("using System.Linq;");
             generatedCode.AppendLine("using System.Reflection;");
             generatedCode.AppendLine("using System.Runtime.InteropServices;");
             generatedCode.AppendLine("using MelonLoader;");
             
             generatedCode.AppendLine($"namespace {modNamespace} {{");
-            generatedCode.AppendLine($"[PatchShield]");
+            generatedCode.AppendLine("[PatchShield]");
             generatedCode.AppendLine($"partial class {modTypeName} {{");
         
             generatedCode.AppendLine("internal static bool CheckWasSuccessful;");
             generatedCode.AppendLine("internal static bool MustStayFalse = false;");
             generatedCode.AppendLine("internal static bool MustStayTrue = true;");
             generatedCode.AppendLine("internal static bool RanCheck3 = false;");
+            generatedCode.AppendLine("private static readonly Func<VRCUiManager> ourGetUiManager;");
+            generatedCode.AppendLine("private static readonly Func<QuickMenu> ourGetQuickMenu;");
 
             generatedCode.AppendLine($"static {modTypeName}() {{");
             generatedCode.AppendLine("CheckA();");
             generatedCode.AppendLine("CheckB();");
+            generatedCode.AppendLine("ourGetUiManager = (Func<VRCUiManager>) Delegate.CreateDelegate(typeof(Func<VRCUiManager>), typeof(VRCUiManager)");
+            generatedCode.AppendLine("    .GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly)");
+            generatedCode.AppendLine("    .First(it => it.PropertyType == typeof(VRCUiManager)).GetMethod);");
             generatedCode.AppendLine("CheckC();");
+            generatedCode.AppendLine("ourGetQuickMenu = (Func<QuickMenu>) Delegate.CreateDelegate(typeof(Func<QuickMenu>), typeof(QuickMenu)");
+            generatedCode.AppendLine("    .GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly)");
+            generatedCode.AppendLine("    .First(it => it.PropertyType == typeof(QuickMenu)).GetMethod);");
             generatedCode.AppendLine("CheckWasSuccessful = true;");
             generatedCode.AppendLine("}");
         
@@ -94,6 +103,9 @@ namespace IntegrityCheckGenerator
             generatedCode.AppendLine("    ");
             PrintCheckFailedCode(generatedCode, 1);
             generatedCode.AppendLine("}");
+
+            generatedCode.AppendLine("internal static VRCUiManager GetUiManager() => ourGetUiManager();");
+            generatedCode.AppendLine("internal static QuickMenu GetQuickMenu() => ourGetQuickMenu();");
         
         
             generatedCode.AppendLine("private static void DoAfterUiManagerInit(Action code) {");
@@ -101,7 +113,7 @@ namespace IntegrityCheckGenerator
             generatedCode.AppendLine("}");
 
             generatedCode.AppendLine("private static IEnumerator OnUiManagerInitCoro(Action code) {");
-            generatedCode.AppendLine("    while (VRCUiManager.prop_VRCUiManager_0 == null)");
+            generatedCode.AppendLine("    while (GetUiManager() == null)");
             generatedCode.AppendLine("        yield return null;");
             generatedCode.AppendLine("    code();");
             generatedCode.AppendLine("}");

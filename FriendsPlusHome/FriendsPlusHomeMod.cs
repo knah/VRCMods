@@ -11,7 +11,7 @@ using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
 using VRC.Core;
 
-[assembly:MelonInfo(typeof(FriendsPlusHomeMod), "Friends+ Home", "1.1.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(FriendsPlusHomeMod), "Friends+ Home", "1.1.2", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -52,7 +52,7 @@ namespace FriendsPlusHome
 
         private void OnUiManagerInit()
         {
-            StartEnforcingInstanceType(VRCFlowManager.prop_VRCFlowManager_0, false); // just in case startup is slow
+            StartEnforcingInstanceType(VRCFlowManager.field_Private_Static_VRCFlowManager_0, false); // just in case startup is slow
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

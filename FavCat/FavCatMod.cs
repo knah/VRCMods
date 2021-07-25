@@ -20,7 +20,7 @@ using VRC.UI;
 using ImageDownloaderClosure = ImageDownloader.__c__DisplayClass11_1;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.1.5", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.1.6", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace FavCat
@@ -39,6 +39,7 @@ namespace FavCat
         public override void OnApplicationStart()
         {
             Instance = this;
+            if (!CheckWasSuccessful || !MustStayTrue || MustStayFalse) return;
 
             Directory.CreateDirectory("./UserData/FavCatImport");
             

@@ -63,7 +63,7 @@ namespace FavCat.Modules
             if (FavCatMod.PageUserInfo == null)
                 return;
             
-            VRCUiManager.prop_VRCUiManager_0.Method_Public_Void_String_Boolean_0("UserInterface/MenuContent/Screens/Avatar", false);
+            FavCatMod.GetUiManager().Method_Public_Void_String_Boolean_0("UserInterface/MenuContent/Screens/Avatar", false);
             SetSearchListHeaderAndScrollToIt("Search running...");
             LastSearchRequest = "Created by " + FavCatMod.PageUserInfo.field_Public_APIUser_0.displayName;
             FavCatMod.Database.RunBackgroundAvatarSearchByUser(FavCatMod.PageUserInfo.field_Public_APIUser_0.id, AcceptSearchResult);

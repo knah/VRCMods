@@ -29,7 +29,7 @@ namespace AdvancedSafety
 
         private static void OnHideAvatarClick()
         {
-            var apiAvatar = QuickMenu.prop_QuickMenu_0.field_Private_Player_0?.prop_VRCPlayer_0?.prop_VRCAvatarManager_0?.prop_ApiAvatar_0;
+            var apiAvatar = AdvancedSafetyMod.GetQuickMenu().field_Private_Player_0?.prop_VRCPlayer_0?.prop_VRCAvatarManager_0?.field_Private_ApiAvatar_1;
             if (apiAvatar == null) return;
 
             if (AvatarHiding.ourBlockedAvatars.ContainsKey(apiAvatar.id))
@@ -68,10 +68,10 @@ namespace AdvancedSafety
 
         private static IEnumerator InitThings()
         {
-            while (VRCUiManager.prop_VRCUiManager_0 == null || QuickMenu.prop_QuickMenu_0 == null)
+            while (AdvancedSafetyMod.GetUiManager() == null || AdvancedSafetyMod.GetQuickMenu() == null)
                 yield return null;
 
-            VRCUiManager.prop_VRCUiManager_0.Method_Internal_add_Void_Action_1_VRCUiPage_0(new Action<VRCUiPage>(OnPageShown));
+            AdvancedSafetyMod.GetUiManager().Method_Internal_add_Void_Action_1_VRCUiPage_0(new Action<VRCUiPage>(OnPageShown));
         }
 
         private static void OnPageShown(VRCUiPage obj)
@@ -94,7 +94,7 @@ namespace AdvancedSafety
 
         public static void QuickMenuUpdateTick(VRCPlayer player)
         {
-            var currentAvatar = player.prop_VRCAvatarManager_0?.prop_ApiAvatar_0;
+            var currentAvatar = player.prop_VRCAvatarManager_0?.field_Private_ApiAvatar_1;
             if (currentAvatar == null) return;
 
             ourQuickMenuHideText.text = AvatarHiding.ourBlockedAvatars.ContainsKey(currentAvatar.id)

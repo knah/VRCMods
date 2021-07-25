@@ -14,7 +14,7 @@ namespace AdvancedSafety
 
         private void Awake()
         {
-            myQuickMenu = QuickMenu.prop_QuickMenu_0;
+            myQuickMenu = AdvancedSafetyMod.GetQuickMenu();
         }
 
         private void Update()

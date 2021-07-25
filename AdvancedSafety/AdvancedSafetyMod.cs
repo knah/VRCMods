@@ -18,7 +18,7 @@ using VRC.Management;
 using Object = UnityEngine.Object;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.5.5", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.5.6", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
 namespace AdvancedSafety
@@ -34,6 +34,8 @@ namespace AdvancedSafety
 
         public override void OnApplicationStart()
         {
+            if (!CheckWasSuccessful || !MustStayTrue || MustStayFalse) return;
+            
             AdvancedSafetySettings.RegisterSettings();
             ClassInjector.RegisterTypeInIl2Cpp<SortingOrderHammerer>();
 
@@ -237,7 +239,7 @@ namespace AdvancedSafety
                 go.AddComponent<SortingOrderHammerer>();
 
             if (MelonDebug.IsEnabled() || destroyedObjects > 100)
-                MelonLogger.Msg($"Cleaned avatar ({avatarManager.prop_ApiAvatar_0?.name}) used by \"{vrcPlayer.prop_VRCPlayerApi_0?.displayName}\" in {start.ElapsedMilliseconds}ms, scanned {scannedObjects} things, destroyed {destroyedObjects} things");
+                MelonLogger.Msg($"Cleaned avatar ({avatarManager.field_Private_ApiAvatar_1?.name}) used by \"{vrcPlayer.prop_VRCPlayerApi_0?.displayName}\" in {start.ElapsedMilliseconds}ms, scanned {scannedObjects} things, destroyed {destroyedObjects} things");
         }
 
         private static IEnumerator CheckSpawnSounds(GameObject go, List<AudioSource> audioSourcesList)

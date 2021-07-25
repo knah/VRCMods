@@ -85,6 +85,7 @@ namespace Turbones
                 
                 gchandle_create = GetProcAddressSafe(ga, nameof(IL2CPP.il2cpp_gchandle_new)),
                 gchandle_drop = GetProcAddressSafe(ga, nameof(IL2CPP.il2cpp_gchandle_free)),
+                gchandle_get = GetProcAddressSafe(ga, nameof(IL2CPP.il2cpp_gchandle_get_target)),
                 
                 transform_get_local_rotation = GetICall("UnityEngine.Transform::get_localRotation_Injected")
             };
