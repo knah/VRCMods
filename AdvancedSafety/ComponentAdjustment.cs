@@ -55,13 +55,13 @@ namespace AdvancedSafety
             }
         }
 
-        public static void VisitConstraint(this IConstraint constraint, ref int totalCount, ref int deletedCount, ref int specificCount, GameObject obj)
+        public static void VisitConstraint(this Behaviour constraint, ref int totalCount, ref int deletedCount, ref int specificCount, GameObject obj)
         {
             totalCount++;
 
             if (specificCount++ > AdvancedSafetySettings.MaxConstraints.Value)
             {
-                Object.DestroyImmediate(constraint.Cast<Behaviour>(), true);
+                Object.DestroyImmediate(constraint, true);
                 deletedCount++;
             }
         }
