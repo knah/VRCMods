@@ -18,7 +18,7 @@ using Valve.VR;
 using Delegate = Il2CppSystem.Delegate;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.15", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.16", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -106,7 +106,7 @@ namespace IKTweaks
                                               Vector3.Distance(leftShoulderPos, rightShoulderPos);
 
                     // this measured wingspan doesn't include hand-to-fingertip length, but eye height doesn't include the rest of the height above eyes either
-                    __result = measuredRawWingspan * 0.4537f * IkTweaksSettings.WingspanMeasurementAdjustFactor.Value;
+                    __result = measuredRawWingspan * 0.4537f * Mathf.Clamp(IkTweaksSettings.WingspanMeasurementAdjustFactor.Value, 0.1f, 2.0f);
                     return false;
                 }
                 default:
@@ -168,7 +168,7 @@ namespace IKTweaks
                     if (IkTweaksSettings.CalibrateUseUniversal.Value)
                         CalibrationManager.Clear();
                     else
-                        CalibrationManager.Clear(VRCPlayer.field_Internal_Static_VRCPlayer_0.field_Private_ApiAvatar_1.id);
+                        CalibrationManager.Clear(VRCPlayer.field_Internal_Static_VRCPlayer_0.prop_VRCAvatarManager_0.field_Private_ApiAvatar_1.id);
                 }
 
                 oldCalibrate.Invoke();
