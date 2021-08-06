@@ -14,7 +14,7 @@ using UIExpansionKit.API;
 using UnityEngine.SceneManagement;
 using VRC.Core;
 
-[assembly:MelonInfo(typeof(TrueShaderAntiCrashMod), "True Shader Anticrash", "1.0.3", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(TrueShaderAntiCrashMod), "True Shader Anticrash", "1.0.4", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace TrueShaderAntiCrash
@@ -25,6 +25,7 @@ namespace TrueShaderAntiCrash
         {
             { "aCEmIwSIcjYriBQDFjQlpTNNW1/kA8Wlbkqelmt1USOMB09cnKwK7QWyOulz9d7DEYJh4+vO0Ldv8gdH+dZCrg==", 0x819130 }, // U2018.4.20 non-dev
             { "5dkhl/dWeTREXhHCIkZK17mzZkbjhTKlxb+IUSk+YaWzZrrV+G+M0ekTOEGjZ4dJuB4O3nU/oE3dycXWeJq9uA==", 0x79B3F0 }, // U2019.4.28 non-dev
+            { "MV6xP7theydao4ENbGi6BbiBxdZsgGOBo/WrPSeIqh6A/E00NImjUNZn+gL+ZxzpVbJms7nUb6zluLL3+aIcfg==", 0x79C060 }, // U2019.4.29 non-dev
         };
 
         public override void OnApplicationStart()
