@@ -1,10 +1,11 @@
+using System;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using HarmonyLib;
 using MelonLoader;
 using RootMotion.FinalIK;
-using UnhollowerBaseLib.Attributes;
-using UnhollowerBaseLib.Maps;
+using UnhollowerBaseLib;
 using UnhollowerRuntimeLib.XrefScans;
 using VRC.Core;
 
@@ -24,8 +25,16 @@ namespace IKTweaks
         {
             var vrikInitMethod = typeof(VRCVrIkController).GetMethod(nameof(VRCVrIkController
                 .Method_Public_Virtual_Final_New_Boolean_VRC_AnimationController_Animator_VRCPlayer_Boolean_0));
-            harmony.Patch(vrikInitMethod,
-                postfix: new HarmonyMethod(AccessTools.Method(typeof(VrIkHandling), nameof(VrikInitPatch))));
+
+            unsafe
+            {
+                var ptr = *(IntPtr*)(IntPtr)UnhollowerUtils
+                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(vrikInitMethod).GetValue(null);
+                var patch = AccessTools.Method(typeof(VrIkHandling), nameof(VrIkInitReplacement)).MethodHandle
+                    .GetFunctionPointer();
+                MelonUtils.NativeHookAttach((IntPtr)(&ptr), patch);
+                ourOriginalVrIkInit = Marshal.GetDelegateForFunctionPointer<VrIkInit>(ptr);
+            }
 
             var methodThatChecksHipTracking = typeof(VRCVrIkController)
                 .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Single(it =>
@@ -57,6 +66,19 @@ namespace IKTweaks
             }
 
             return true;
+        }
+        
+        private delegate byte VrIkInit(IntPtr a, IntPtr b, IntPtr c, IntPtr d, byte e, IntPtr n);
+
+        private static VrIkInit ourOriginalVrIkInit;
+
+        private static byte VrIkInitReplacement(IntPtr thisPtr, IntPtr vrcAnimController, IntPtr animatorPtr, IntPtr playerPtr, byte isLocalPlayer, IntPtr nativeMethod)
+        {
+            var __instance = new VRCVrIkController(thisPtr);
+            var __2 = playerPtr == IntPtr.Zero ? null : new VRCPlayer(playerPtr);
+            var result = ourOriginalVrIkInit(thisPtr, vrcAnimController, animatorPtr, playerPtr, isLocalPlayer, nativeMethod);
+            VrikInitPatch(__instance, __2);
+            return result;
         }
 
         private static void VrikInitPatch(VRCVrIkController __instance, VRCPlayer? __2)

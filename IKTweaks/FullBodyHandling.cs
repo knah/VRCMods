@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using HarmonyLib;
 using MelonLoader;
 using RootMotion.FinalIK;
@@ -375,6 +376,22 @@ namespace IKTweaks
             return vrik;
         }
 
+        private delegate byte FbbIkInit(IntPtr a, IntPtr b, IntPtr c, IntPtr d, byte e, IntPtr n);
+
+        private static FbbIkInit ourOriginalFbbIkInit;
+
+        private static byte FbbIkInitReplacement(IntPtr thisPtr, IntPtr vrcAnimController, IntPtr animatorPtr, IntPtr playerPtr,
+            byte isLocalPlayer, IntPtr nativeMethod)
+        {
+            var __instance = new VRCFbbIkController(thisPtr);
+            var animator = animatorPtr == IntPtr.Zero ? null : new Animator(animatorPtr);
+            var __2 = playerPtr == IntPtr.Zero ? null : new VRCPlayer(playerPtr);
+            FbbIkInitPrefix(__instance, __2, isLocalPlayer != 0);
+            var result = ourOriginalFbbIkInit(thisPtr, vrcAnimController, animatorPtr, playerPtr, isLocalPlayer, nativeMethod);
+            FbbIkInitPostfix(animator, isLocalPlayer != 0);
+            return result;
+        }
+
         private static void FbbIkInitPrefix(VRCFbbIkController __instance, VRCPlayer? __2, bool __3)
         {
             var vrcPlayer = __2;
@@ -472,8 +489,16 @@ namespace IKTweaks
         internal static void HookFullBodyController(HarmonyLib.Harmony harmony)
         {
             var fbbIkInit = typeof(VRCFbbIkController).GetMethod(nameof(VRCFbbIkController.Method_Public_Virtual_Final_New_Boolean_VRC_AnimationController_Animator_VRCPlayer_Boolean_0));
-            harmony.Patch(fbbIkInit, new HarmonyMethod(typeof(FullBodyHandling), nameof(FbbIkInitPrefix)),
-                new HarmonyMethod(typeof(FullBodyHandling), nameof(FbbIkInitPostfix)));
+            
+            unsafe
+            {
+                var ptr = *(IntPtr*)(IntPtr)UnhollowerUtils
+                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(fbbIkInit).GetValue(null);
+                var patch = AccessTools.Method(typeof(FullBodyHandling), nameof(FbbIkInitReplacement)).MethodHandle
+                    .GetFunctionPointer();
+                MelonUtils.NativeHookAttach((IntPtr)(&ptr), patch);
+                ourOriginalFbbIkInit = Marshal.GetDelegateForFunctionPointer<FbbIkInit>(ptr);
+            }
 
             harmony.Patch(AccessTools.Method(typeof(FullBodyBipedIK), nameof(FullBodyBipedIK.LateUpdate)),
                 new HarmonyMethod(typeof(FullBodyHandling), nameof(LateUpdatePrefix)));
@@ -482,8 +507,8 @@ namespace IKTweaks
             harmony.Patch(AccessTools.Method(typeof(FullBodyBipedIK), nameof(FullBodyBipedIK.FixedUpdate)),
                 new HarmonyMethod(typeof(FullBodyHandling), nameof(FixedUpdatePrefix)));
 
-            harmony.Patch(AccessTools.Method(typeof(VRCTrackingManager), nameof(VRCTrackingManager.Method_Public_Static_Boolean_String_0)),
-                new HarmonyMethod(typeof(FullBodyHandling), nameof(IsCalibratedForAvatarPrefix)));
+            var isCalibrated = AccessTools.Method(typeof(VRCTrackingManager), nameof(VRCTrackingManager.Method_Public_Static_Boolean_String_0));
+            harmony.Patch(isCalibrated, new HarmonyMethod(typeof(FullBodyHandling), nameof(IsCalibratedForAvatarPrefix)));
             
             var userOfHfts = typeof(VRCFbbIkController)
                 .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Where(it =>
