@@ -432,7 +432,10 @@ namespace IKTweaks
             {
                 Update();
                 if(LastInitializedVRIK != null)
+                {
+                    LastInitializedController.field_Private_IkController_0.FixedUpdate();
                     LastInitializedVRIK.LateUpdate_ManualDrive();
+                }
                 return false;
             }
 
