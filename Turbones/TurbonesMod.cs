@@ -10,7 +10,7 @@ using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 using UnhollowerRuntimeLib.XrefScans;
 
-[assembly:MelonInfo(typeof(TurbonesMod), "Turbones", "1.1.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(TurbonesMod), "Turbones", "1.1.2", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace Turbones
@@ -28,8 +28,8 @@ namespace Turbones
             var category = MelonPreferences.CreateCategory("Turbones");
             var enableCollisionChecks = category.CreateEntry("OptimizedCollisionChecks", true, "Enable optimized collision checks");
             var enableUpdate = category.CreateEntry("OptimizedUpdate", true, "Enable optimized simulation");
-            var updateMultiThread = category.CreateEntry("OptimizedMultiThread", false, "Enable multithreading");
-            var threadCount = category.CreateEntry("DynamicBoneThreads", Math.Max(1, Environment.ProcessorCount / 2 - 1), "Thread count", dont_save_default: true);
+            var updateMultiThread = category.CreateEntry("OptimizedMultiThread", false, "Enable multithreading (placebo!)");
+            var threadCount = category.CreateEntry("DynamicBoneThreads", Math.Max(1, Environment.ProcessorCount / 2 - 1), "Thread count (placebo!)", dont_save_default: true);
             
             var dllName = "JigglyRustSolver.dll";
 
@@ -88,6 +88,9 @@ namespace Turbones
 
             unsafe void RepatchUpdate(bool useFast, bool useMt)
             {
+                // TODO: re-enable multithreading if it ever gets useful/stable
+                useMt = false;
+                
                 if (ourLastPatchPointer != IntPtr.Zero)
                 {
                     fixed(IntPtr* a = &ourDynBoneUpdateEntryPoint)

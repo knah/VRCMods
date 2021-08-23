@@ -4,5 +4,6 @@ Changes:
  * IKTweaks: fix the issue where calibrating required holding triggers, and one-trigger freeze didn't work
  * IKTweaks: added an option to allow one-handed calibration
  * Lag Free Screenshots: reduce log spam from MSAA values
+ * Turbones: temporarily disable multithreading option as it caused more issues than it provided performance
 
 **USE IT AT YOUR OWN RISK.** Modding the client is against VRChat ToS. I am not responsible for any bans or other punishments you may get by using these mods!
