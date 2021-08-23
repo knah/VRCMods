@@ -43,6 +43,10 @@ namespace IKTweaks
         internal static VRCFbbIkController LastInitializedController;
         internal static VRIK_New LastInitializedVRIK;
 
+        internal static Transform LeftEffector;
+        internal static Transform RightEffector;
+        internal static Transform HeadEffector;
+
         internal static float LeftElbowWeight = 0f;
         internal static float RightElbowWeight = 0f;
         internal static float LeftKneeWeight = 0f;
@@ -68,6 +72,17 @@ namespace IKTweaks
                 return 1;
             
             return inWeight;
+        }
+
+        private static void MoveHeadAndHandTargets()
+        {
+            var headTracker = VRCTrackingManager.Method_Public_Static_Transform_EnumNPublicSealedva19Unique_0(VRCTracking.EnumNPublicSealedva19Unique.EnumValue0);
+            var leftTracker = VRCTrackingManager.Method_Public_Static_Transform_EnumNPublicSealedva19Unique_0(VRCTracking.EnumNPublicSealedva19Unique.EnumValue1);
+            var rightTracker = VRCTrackingManager.Method_Public_Static_Transform_EnumNPublicSealedva19Unique_0(VRCTracking.EnumNPublicSealedva19Unique.EnumValue2);
+            
+            LeftEffector.SetPositionAndRotation(leftTracker.position, leftTracker.rotation);
+            RightEffector.SetPositionAndRotation(rightTracker.position, rightTracker.rotation);
+            HeadEffector.SetPositionAndRotation(headTracker.position, headTracker.rotation);
         }
         
         public static void Update()
@@ -409,6 +424,10 @@ namespace IKTweaks
             if (!__3 || !IkTweaksSettings.FullBodyVrIk.Value || !ourIsFbtSupported()) return;
             
             LastCalibrationWasInCustomIk = true;
+            LeftEffector = LastInitializedController.field_Private_IkController_0.transform.Find("LeftEffector");
+            RightEffector = LastInitializedController.field_Private_IkController_0.transform.Find("RightEffector");
+            HeadEffector = LastInitializedController.field_Private_IkController_0.transform.Find("HeadEffector");
+            
             CalibrationManager.Calibrate(__1.gameObject);
         }
 
@@ -430,9 +449,13 @@ namespace IKTweaks
             if (IkTweaksSettings.FullBodyVrIk.Value && LastCalibrationWasInCustomIk &&
                 LastInitializedController.field_Private_FullBodyBipedIK_0 == __instance)
             {
+                if (IkTweaksSettings.NoWallFreeze.Value)
+                    MoveHeadAndHandTargets();
+                
                 Update();
-                if(LastInitializedVRIK != null)
+                if (LastInitializedVRIK != null) 
                     LastInitializedVRIK.LateUpdate_ManualDrive();
+
                 return false;
             }
 

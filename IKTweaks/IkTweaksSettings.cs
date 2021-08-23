@@ -53,6 +53,7 @@ namespace IKTweaks
             WingspanMeasurementAdjustFactor = category.CreateEntry(nameof(WingspanMeasurementAdjustFactor), 1.1f, "Improved wingspan adjustment factor");
             
             OneHandedCalibration = category.CreateEntry(nameof(OneHandedCalibration), false, "One-handed calibration");
+            NoWallFreeze = category.CreateEntry(nameof(NoWallFreeze), true, "Don't freeze head/hands inside walls");
 
             IgnoreAnimationsMode.OnValueChanged += (_, v) => UpdateIgnoreAnimationMode(v);
             UpdateIgnoreAnimationMode(IgnoreAnimationsMode.Value);
@@ -106,6 +107,7 @@ namespace IKTweaks
         public static MelonPreferences_Entry<bool> Unrestrict3PointHeadRotation;
         public static MelonPreferences_Entry<float> WingspanMeasurementAdjustFactor;
         public static MelonPreferences_Entry<bool> OneHandedCalibration;
+        public static MelonPreferences_Entry<bool> NoWallFreeze;
 
         public static IgnoreAnimationsMode IgnoreAnimationsModeParsed;
         public static MeasureAvatarMode MeasureModeParsed;
