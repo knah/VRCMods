@@ -42,6 +42,7 @@ namespace IKTweaks
         
         internal static VRCFbbIkController LastInitializedController;
         internal static VRIK_New LastInitializedVRIK;
+        internal static float LastAvatarScale;
 
         internal static Transform LeftEffector;
         internal static Transform RightEffector;
@@ -403,7 +404,7 @@ namespace IKTweaks
             var __2 = playerPtr == IntPtr.Zero ? null : new VRCPlayer(playerPtr);
             FbbIkInitPrefix(__instance, __2, isLocalPlayer != 0);
             var result = ourOriginalFbbIkInit(thisPtr, vrcAnimController, animatorPtr, playerPtr, isLocalPlayer, nativeMethod);
-            FbbIkInitPostfix(animator, isLocalPlayer != 0);
+            FbbIkInitPostfix(__instance, animator, isLocalPlayer != 0);
             return result;
         }
 
@@ -419,7 +420,7 @@ namespace IKTweaks
             LastInitializedController = __instance;
         }
 
-        private static void FbbIkInitPostfix(Animator __1, bool __3)
+        private static void FbbIkInitPostfix(VRCFbbIkController __instance, Animator __1, bool __3)
         {
             if (!__3 || !IkTweaksSettings.FullBodyVrIk.Value || !ourIsFbtSupported()) return;
             
@@ -427,6 +428,8 @@ namespace IKTweaks
             LeftEffector = LastInitializedController.field_Private_IkController_0.transform.Find("LeftEffector");
             RightEffector = LastInitializedController.field_Private_IkController_0.transform.Find("RightEffector");
             HeadEffector = LastInitializedController.field_Private_IkController_0.transform.Find("HeadEffector");
+            
+            LastAvatarScale = IKTweaksMod.GetEyeHeight(__instance.field_Private_VRCAvatarManager_0);
             
             CalibrationManager.Calibrate(__1.gameObject);
         }

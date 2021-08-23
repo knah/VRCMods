@@ -9,6 +9,7 @@ using IKTweaks;
 using MelonLoader;
 using RootMotionNew.FinalIK;
 using UIExpansionKit.API;
+using UIExpansionKit.Components;
 using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 using UnhollowerRuntimeLib.XrefScans;
@@ -68,6 +69,8 @@ namespace IKTweaks
             if (MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit" && !it.Info.Version.StartsWith("0.1."))) 
                 AddUixActions();
         }
+        
+        internal static float GetEyeHeight(VRCAvatarManager manager) => ourGetEyeHeightDelegate(manager);
 
         private static bool WingspanPatch(VRCAvatarManager __instance, ref float __result)
         {
@@ -144,15 +147,88 @@ namespace IKTweaks
 
             menu.AddSimpleButton("Clear per-avatar stored calibrations", CalibrationManager.ClearNonUniversal);
             menu.AddSpacer();
-            menu.AddSpacer();
             menu.AddSimpleButton("Open documentation in browser", () => Process.Start("https://github.com/knah/VRCMods#iktweaks"));
-            
             menu.AddSpacer();
-            menu.AddSpacer();
+
+            menu.AddSimpleButton("Adjust hand offsets",
+                () => ShowHandsCalibrationMenu(IkTweaksSettings.HandPositionOffset, IkTweaksSettings.DefaultHandOffset,
+                    0.001f, "Offsets:", CalibrationManager.ApplyHandOffsets));
+            menu.AddSimpleButton("Adjust hand angles",
+                () => ShowHandsCalibrationMenu(IkTweaksSettings.HandAngleOffset, IkTweaksSettings.DefaultHandAngle, 1,
+                    "Angles:", CalibrationManager.ModifyStoredHandAnglesAndApply));
             menu.AddSpacer();
             menu.AddSimpleButton("Close", menu.Hide);
             
             menu.Show();
+        }
+
+        private static void ShowHandsCalibrationMenu(MelonPreferences_Entry<Vector3> entry, Vector3 defaultValue, float moveStep, string label, Action<Vector3, Vector3> apply)
+        {
+            var menu = ExpansionKitApi.CreateCustomFullMenuPopup(LayoutDescription.QuickMenu4Columns);
+
+            var highPrecisionMoves = true;
+            var offset = entry.Value;
+            var prevOffset = offset;
+            
+            void SetHandAngles()
+            {
+                apply(prevOffset, offset);
+                prevOffset = offset;
+            }
+            
+            menu.OnContentRootCreated += go =>
+            {
+                (go.GetComponent<EnableDisableListener>() ?? go.AddComponent<EnableDisableListener>()).OnDisabled +=
+                    () =>
+                    {
+                        MelonDebug.Msg("Menu closed, cleaning up");
+
+                        entry.Value = offset;
+                        IkTweaksSettings.Category.SaveToFile();
+                    };
+            };
+
+            Text xLabel = null;
+            Text yLabel = null;
+            Text zLabel = null;
+
+            void DoMove(Vector3 direction)
+            {
+                offset += direction * (highPrecisionMoves ? moveStep : moveStep * 10);
+                SetHandAngles();
+
+                xLabel.text = $"X:\n{offset.x:F3}";
+                yLabel.text = $"Y:\n{offset.y:F3}";
+                zLabel.text = $"Z:\n{offset.z:F3}";
+            }
+            
+            menu.AddSimpleButton("+Y", () => DoMove(Vector3.up));
+            menu.AddSimpleButton("+Z", () => DoMove(Vector3.forward));
+            menu.AddSimpleButton("+X", () => DoMove(Vector3.right));
+            menu.AddToggleButton("High precision", b => highPrecisionMoves = b, () => highPrecisionMoves);
+
+            menu.AddSimpleButton("-Y", () => DoMove(Vector3.down));
+            menu.AddSimpleButton("-Z", () => DoMove(Vector3.back));
+            menu.AddSimpleButton("-X", () => DoMove(Vector3.left));
+            menu.AddSpacer();
+
+            menu.AddLabel(label, o => o.GetComponentInChildren<Text>().alignment = TextAnchor.MiddleCenter);
+            menu.AddLabel("X:", o => (xLabel = o.GetComponentInChildren<Text>()).alignment = TextAnchor.MiddleCenter);
+            menu.AddLabel("Y:", o => (yLabel = o.GetComponentInChildren<Text>()).alignment = TextAnchor.MiddleCenter);
+            menu.AddLabel("Z:", o => (zLabel = o.GetComponentInChildren<Text>()).alignment = TextAnchor.MiddleCenter);
+
+            menu.AddSimpleButton("Reset", () =>
+            {
+                offset = defaultValue;
+                DoMove(Vector3.zero);
+            });
+            menu.AddSpacer();
+            menu.AddSpacer();
+            menu.AddSimpleButton("Back", menu.Hide);
+            
+            menu.Show(true);
+            
+            DoMove(Vector3.zero);
         }
 
         public void OnUiManagerInit()

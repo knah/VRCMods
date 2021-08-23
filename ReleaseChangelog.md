@@ -5,6 +5,8 @@ Changes:
  * IKTweaks: added an option to allow one-handed calibration
  * IKTweaks: added an option to disable avatar freeze inside walls (contributed by @mog422 in PR #151)
  * IKTweaks: fixed hands assuming a weird pose when SteamVR overlay is open 
+ * IKTweaks: added a feature to adjust hand angles and offsets (in Settings -> More IKTweaks menu)
+ * IKTweaks: change default hand angles and offsets
  * Lag Free Screenshots: reduce log spam from MSAA values
  * Turbones: temporarily disable multithreading option as it caused more issues than it provided performance
 

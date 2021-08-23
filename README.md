@@ -248,7 +248,7 @@ Given that this mod is still work in progress, these are subject to change.
  * Store calibration per avatar (when not using universal calibration) - if you don't want universal calibration, enable this to save calibration per-avatar.
  * Disable FBT even if trackers are present - you can enable this if you plug your trackers into your PC to charge but don't want to use FBT while doing so
  * Enforce hip rotation match - if enabled, avatar's hip rotation will exactly match tracker's rotation. Otherwise, IK may rotate the hip to bend the spine more.
- * Shift hip pivot (support inverted hip) - if enabled, the hip will be rotated around the midpoint of two leg bones (where thi hip bone should be normally). This greatly improves IK on avatars with the inverted hip rig hack.
+ * Shift hip pivot (support inverted hip) - if enabled, the hip will be rotated around the midpoint of two leg bones (where the hip bone should be normally). This greatly improves IK on avatars with the inverted hip rig hack.
  * Pre-straighten spine (improve IK stability) - if enabled, you avatar's spine will be forcefully straightened before solving it. This reduces flippiness/jitter on avatars that have spine bent backwards by default.
  * Straighten neck - this does something cursed to the neck. No further description can be provided.
  * Spine Relax Iterations (max 25) - how much work will be done on bending the spine. Below 5 is not recommended, 10 will provide about 1mm precision for hip positioning, 25 is the maximum sensible value.
@@ -261,6 +261,7 @@ Given that this mod is still work in progress, these are subject to change.
  * Allow more head rotation in 3/4-point tracking - ever tried to look up when close to the ground in 3/4-point tracking? Now you can, even if it breaks your neck.
  * Improved wingspan adjustment factor - your wingspan is adjusted by this factor in "Improved wingspan" scaling mode. If you consistently get avatar arms too long/short, consider tweaking this a tiny bit (to like 1.05 or 1.15)
  * One-handed calibration - pressing one trigger will be enough to calibrate. Holding the trigger slightly pressed will freeze the avatar (if enabled).
+ * Hand angles/offsets (found in VRChat Settings menu -> left blue panel -> More IKTweaks -> Adjust hand angles/offsets) - you can configure how avatar hands are positioned relative to controllers. Defaults were tuned for Index controllers, but should be applicable to most other controllers too.
 
 ### Partial source code
 This mod includes parts of FinalIK, which is a paid Unity Store asset, therefore source code for those is not provided.  

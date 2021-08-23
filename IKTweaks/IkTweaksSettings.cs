@@ -1,6 +1,7 @@
 using System;
 using MelonLoader;
 using RootMotion.FinalIK;
+using UnityEngine;
 
 namespace IKTweaks
 {
@@ -8,9 +9,13 @@ namespace IKTweaks
     {
         internal const string IkTweaksCategory = "IkTweaks";
 
+        internal static Vector3 DefaultHandAngle = new(0, -115, 0);
+        internal static Vector3 DefaultHandOffset = new(0.015f, -0.005f, 0);
+        
+
         internal static void RegisterSettings()
         {
-            var category = MelonPreferences.CreateCategory(IkTweaksCategory, "IK Tweaks");
+            var category = Category = MelonPreferences.CreateCategory(IkTweaksCategory, "IK Tweaks");
             
             FixShoulders = category.CreateEntry("PitchYawShoulders", true, "Use Pitch-Yaw Shoulders");
             IgnoreAnimationsMode = category.CreateEntry(nameof(IgnoreAnimationsMode), nameof(IKTweaks.IgnoreAnimationsMode.HandAndHead), "Animations mode in FBT");
@@ -54,6 +59,9 @@ namespace IKTweaks
             
             OneHandedCalibration = category.CreateEntry(nameof(OneHandedCalibration), false, "One-handed calibration");
             NoWallFreeze = category.CreateEntry(nameof(NoWallFreeze), true, "Don't freeze head/hands inside walls");
+            
+            HandAngleOffset = category.CreateEntry(nameof(HandAngleOffset), DefaultHandAngle, "Hand angle offset", null, true);
+            HandPositionOffset = category.CreateEntry(nameof(HandPositionOffset), DefaultHandOffset, "Hand position offset", null, true);
 
             IgnoreAnimationsMode.OnValueChanged += (_, v) => UpdateIgnoreAnimationMode(v);
             UpdateIgnoreAnimationMode(IgnoreAnimationsMode.Value);
@@ -76,6 +84,8 @@ namespace IKTweaks
 
         public static IKSolverVR.Arm.ShoulderRotationMode ShoulderMode => FixShoulders.Value ? IKSolverVR.Arm.ShoulderRotationMode.YawPitch : IKSolverVR.Arm.ShoulderRotationMode.FromTo;
 
+        internal static MelonPreferences_Category Category;
+        
         public static MelonPreferences_Entry<bool> FixShoulders;
         public static MelonPreferences_Entry<bool> CalibrateHalfFreeze;
         public static MelonPreferences_Entry<bool> CalibrateFollowHead;
@@ -108,6 +118,9 @@ namespace IKTweaks
         public static MelonPreferences_Entry<float> WingspanMeasurementAdjustFactor;
         public static MelonPreferences_Entry<bool> OneHandedCalibration;
         public static MelonPreferences_Entry<bool> NoWallFreeze;
+        
+        public static MelonPreferences_Entry<Vector3> HandAngleOffset;
+        public static MelonPreferences_Entry<Vector3> HandPositionOffset;
 
         public static IgnoreAnimationsMode IgnoreAnimationsModeParsed;
         public static MeasureAvatarMode MeasureModeParsed;

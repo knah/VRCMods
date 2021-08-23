@@ -206,12 +206,16 @@ namespace IKTweaks
                 return targetTransform;
             }
 
-            Transform MakeHandTarget(Quaternion localRotation, Transform parent)
+            Transform MakeHandTarget(Quaternion localRotation, Transform parent, bool isLeft)
             {
                 var targetGo = new GameObject("CustomIkHandTarget");
                 var targetTransform = targetGo.transform;
                 targetTransform.SetParent(parent, false);
                 targetTransform.localRotation = localRotation;
+                var posOffset = IkTweaksSettings.HandPositionOffset.Value * FullBodyHandling.LastAvatarScale;
+                if (isLeft) posOffset.x *= -1;
+                targetTransform.localPosition = posOffset;
+                
 
                 newTargets.Add(targetGo);
                 return targetTransform;
@@ -222,9 +226,9 @@ namespace IKTweaks
             var rightFoot = GetTarget(CalibrationPoint.RightFoot);
 
             vrik.solver.leftArm.target = MakeHandTarget(datas[CalibrationPoint.LeftHand].LocalRotation,
-                FullBodyHandling.LastInitializedController.field_Private_FullBodyBipedIK_0.solver.leftHandEffector.target);
+                FullBodyHandling.LastInitializedController.field_Private_FullBodyBipedIK_0.solver.leftHandEffector.target, true);
             vrik.solver.rightArm.target = MakeHandTarget(datas[CalibrationPoint.RightHand].LocalRotation,
-                FullBodyHandling.LastInitializedController.field_Private_FullBodyBipedIK_0.solver.rightHandEffector.target);
+                FullBodyHandling.LastInitializedController.field_Private_FullBodyBipedIK_0.solver.rightHandEffector.target, false);
 
             vrik.solver.leftLeg.bendGoal = GetTarget(CalibrationPoint.LeftKnee);
             vrik.solver.rightLeg.bendGoal = GetTarget(CalibrationPoint.RightKnee);
@@ -338,6 +342,51 @@ namespace IKTweaks
         private static Vector3 GetLocalPosition(Transform parent, Vector3 childPosition) => parent.InverseTransformPoint(childPosition);
         private static Quaternion GetLocalRotation(Transform parent, Transform child) => Quaternion.Inverse(parent.rotation) * child.rotation;
         private static Quaternion GetLocalRotation(Transform parent, Quaternion childRotation) => Quaternion.Inverse(parent.rotation) * childRotation;
+
+        internal static void ModifyStoredHandAnglesAndApply(Vector3 oldAngleOffset, Vector3 newAngleOffset)
+        {
+            var rightHandOffset = Quaternion.Euler(newAngleOffset) * Quaternion.Inverse(Quaternion.Euler(oldAngleOffset));
+            oldAngleOffset.y *= -1;
+            newAngleOffset.y *= -1;
+            var leftHandOffset = Quaternion.Euler(newAngleOffset) * Quaternion.Inverse(Quaternion.Euler(oldAngleOffset));
+            
+            foreach (var keyValuePair in SavedAvatars)
+            {
+                if (keyValuePair.Value.TryGetValue(CalibrationPoint.LeftHand, out var leftHandData))
+                {
+                    leftHandData.LocalRotation = leftHandOffset * leftHandData.LocalRotation;
+                    keyValuePair.Value[CalibrationPoint.LeftHand] = leftHandData;
+                }
+
+                if (keyValuePair.Value.TryGetValue(CalibrationPoint.RightHand, out var rightHandData))
+                {
+                    rightHandData.LocalRotation = rightHandOffset * rightHandData.LocalRotation;
+                    keyValuePair.Value[CalibrationPoint.RightHand] = rightHandData;
+                }
+
+                if (keyValuePair.Key == VRCPlayer.field_Internal_Static_VRCPlayer_0.field_Private_VRCAvatarManager_0.prop_ApiAvatar_0.id)
+                {
+                    var vrik = FullBodyHandling.LastInitializedVRIK;
+                    if (vrik != null)
+                    {
+                        vrik.solver.leftArm.target.localRotation = leftHandData.LocalRotation;
+                        vrik.solver.rightArm.target.localRotation = rightHandData.LocalRotation;
+                    }
+                }
+            }
+        }
+
+        internal static void ApplyHandOffsets(Vector3 old, Vector3 newOffset)
+        {
+            var vrik = FullBodyHandling.LastInitializedVRIK;
+            newOffset *= FullBodyHandling.LastAvatarScale;
+            if (vrik != null)
+            {
+                vrik.solver.rightArm.target.localPosition = newOffset;
+                newOffset.x *= -1;
+                vrik.solver.leftArm.target.localPosition = newOffset;
+            }
+        }
 
         private static async Task ManualCalibrateCoro(GameObject avatarRoot)
         {
@@ -613,9 +662,13 @@ namespace IKTweaks
                 poseHandler.GetHumanPose(out var humanBodyPose, out var humanBodyRot, dummyMuscles);
                 poseHandler.SetHumanPose(ref humanBodyPose, ref humanBodyRot, nativeMuscles);
             }
+
+            var handAngleOffset = IkTweaksSettings.HandAngleOffset.Value;
+            var leftHandOffset = handAngleOffset;
+            leftHandOffset.y *= -1;
             
-            StoreHand(new Vector3(15, 90 + 10, 0), HumanBodyBones.LeftHand, CalibrationPoint.LeftHand);
-            StoreHand(new Vector3(15, -90 - 10, 0), HumanBodyBones.RightHand, CalibrationPoint.RightHand);
+            StoreHand(leftHandOffset, HumanBodyBones.LeftHand, CalibrationPoint.LeftHand);
+            StoreHand(handAngleOffset, HumanBodyBones.RightHand, CalibrationPoint.RightHand);
         }
 
         private delegate float InputFloatDelegate(VRCInput input);
