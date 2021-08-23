@@ -57,18 +57,18 @@ namespace IKTweaks
         private static Func<bool> ourIsFbtSupported;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static float GetHandWeight(float inWeight)
+        private static float GetHandWeight(float inWeight, bool firstPuckDisabled)
         {
-            if ((IkTweaksSettings.IgnoreAnimationsModeParsed & IgnoreAnimationsMode.Hands) != 0)
+            if ((IkTweaksSettings.IgnoreAnimationsModeParsed & IgnoreAnimationsMode.Hands) != 0 && !firstPuckDisabled)
                 return 1;
             
             return inWeight;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static float GetOtherWeight(float inWeight)
+        private static float GetOtherWeight(float inWeight, bool firstPuckDisabled)
         {
-            if ((IkTweaksSettings.IgnoreAnimationsModeParsed & IgnoreAnimationsMode.Others) != 0)
+            if ((IkTweaksSettings.IgnoreAnimationsModeParsed & IgnoreAnimationsMode.Others) != 0 && !firstPuckDisabled)
                 return 1;
             
             return inWeight;
@@ -127,23 +127,23 @@ namespace IKTweaks
             if (IkTweaksSettings.IgnoreAnimationsModeParsed != IgnoreAnimationsMode.All || firstPuckDisabled)
             {
                 var leftLegMappingWeight = fbbik.solver.leftLegMapping.weight;
-                vrik.solver.leftLeg.positionWeight = GetOtherWeight(fbbik.solver.leftFootEffector.positionWeight * leftLegMappingWeight);
-                vrik.solver.leftLeg.rotationWeight = GetOtherWeight(fbbik.solver.leftFootEffector.rotationWeight * leftLegMappingWeight);
+                vrik.solver.leftLeg.positionWeight = GetOtherWeight(fbbik.solver.leftFootEffector.positionWeight * leftLegMappingWeight, firstPuckDisabled);
+                vrik.solver.leftLeg.rotationWeight = GetOtherWeight(fbbik.solver.leftFootEffector.rotationWeight * leftLegMappingWeight, firstPuckDisabled);
 
                 var rightLegMappingWeight = fbbik.solver.rightLegMapping.weight;
-                vrik.solver.rightLeg.positionWeight = GetOtherWeight(fbbik.solver.rightFootEffector.positionWeight * rightLegMappingWeight);
-                vrik.solver.rightLeg.rotationWeight = GetOtherWeight(fbbik.solver.rightFootEffector.rotationWeight * rightLegMappingWeight);
+                vrik.solver.rightLeg.positionWeight = GetOtherWeight(fbbik.solver.rightFootEffector.positionWeight * rightLegMappingWeight, firstPuckDisabled);
+                vrik.solver.rightLeg.rotationWeight = GetOtherWeight(fbbik.solver.rightFootEffector.rotationWeight * rightLegMappingWeight, firstPuckDisabled);
                 
-                vrik.solver.spine.pelvisPositionWeight = GetOtherWeight(fbbik.solver.bodyEffector.positionWeight);
-                vrik.solver.spine.pelvisRotationWeight = GetOtherWeight(fbbik.solver.bodyEffector.rotationWeight);
+                vrik.solver.spine.pelvisPositionWeight = GetOtherWeight(fbbik.solver.bodyEffector.positionWeight, firstPuckDisabled);
+                vrik.solver.spine.pelvisRotationWeight = GetOtherWeight(fbbik.solver.bodyEffector.rotationWeight, firstPuckDisabled);
 
                 var leftArmMappingWeight = fbbik.solver.leftArmMapping.weight;
-                vrik.solver.leftArm.positionWeight = GetHandWeight(fbbik.solver.leftHandEffector.positionWeight * leftArmMappingWeight);
-                vrik.solver.leftArm.rotationWeight = GetHandWeight(fbbik.solver.leftHandEffector.rotationWeight * leftArmMappingWeight);
+                vrik.solver.leftArm.positionWeight = GetHandWeight(fbbik.solver.leftHandEffector.positionWeight * leftArmMappingWeight, firstPuckDisabled);
+                vrik.solver.leftArm.rotationWeight = GetHandWeight(fbbik.solver.leftHandEffector.rotationWeight * leftArmMappingWeight, firstPuckDisabled);
 
                 var rightArmMappingWeight = fbbik.solver.rightArmMapping.weight;
-                vrik.solver.rightArm.positionWeight = GetHandWeight(fbbik.solver.rightHandEffector.positionWeight * rightArmMappingWeight);
-                vrik.solver.rightArm.rotationWeight = GetHandWeight(fbbik.solver.rightHandEffector.rotationWeight * rightArmMappingWeight);
+                vrik.solver.rightArm.positionWeight = GetHandWeight(fbbik.solver.rightHandEffector.positionWeight * rightArmMappingWeight, firstPuckDisabled);
+                vrik.solver.rightArm.rotationWeight = GetHandWeight(fbbik.solver.rightHandEffector.rotationWeight * rightArmMappingWeight, firstPuckDisabled);
             }
             else
             {
