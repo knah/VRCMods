@@ -1,6 +1,9 @@
 This repository contains my mods for VRChat. Join the [VRChat Modding Group discord](https://discord.gg/rCqKSvR) for support and more mods!  
-Looking for more (universal) mods? [Check out my universal mods repository!](https://github.com/knah/ML-UniversalMods)  
-**Don't want to install mods manually? [Check out the VRCMelonAssistant, an automatic mod installer!](https://github.com/knah/VRCMelonAssistant)**  
+Looking for more (universal) mods? [Check out my universal mods repository!](https://github.com/knah/ML-UniversalMods)
+
+# **Don't want to install mods manually? [Check out the VRCMelonAssistant, an automatic mod installer!](https://github.com/knah/VRCMelonAssistant)**
+
+## Alternatively, [read the manual installation section](#installation)
 
 ## Preface
 Modifying the VRChat client is not allowed by VRChat Terms of Service and can lead to your account being banned.  
@@ -381,7 +384,7 @@ These two serve to tightly integrate integrity check with mods to make automated
 
 ## Installation
 To install these mods, you will need to install [MelonLoader](https://discord.gg/2Wn3N2P) (discord link, see \#how-to-install).  
-Then, you will have to put mod .dll files in the `Mods` folder of your game directory
+Then, you will have to put mod .dll files from [releases](https://github.com/knah/VRCMods/releases) into the `Mods` folder of your game directory
 
 ## Building
 To build these, drop required libraries (found in `<vrchat instanll dir>/MelonLoader/Managed` after melonloader installation, list found in `Directory.Build.props`) into Libs folder, then use your IDE of choice to build.
