@@ -398,8 +398,8 @@ namespace IKTweaks
                 poseHandler.SetHumanPose(ref humanBodyPose, ref humanBodyRot, nativeMuscles);
                 mirrorClonePoseHandler?.SetHumanPose(ref humanBodyPose, ref humanBodyRot, nativeMuscles);
 
-                var trigger1 = triggerInput1.prop_Single_0;
-                var trigger2 = triggerInput2.prop_Single_0;
+                var trigger1 = triggerInput1.GetPressedness();
+                var trigger2 = triggerInput2.GetPressedness();
                 
                 if (IkTweaksSettings.CalibrateUseUniversal.Value && UniversalData.Count >= 4)
                 {
@@ -613,6 +613,17 @@ namespace IKTweaks
             
             StoreHand(new Vector3(15, 90 + 10, 0), HumanBodyBones.LeftHand, CalibrationPoint.LeftHand);
             StoreHand(new Vector3(15, -90 - 10, 0), HumanBodyBones.RightHand, CalibrationPoint.RightHand);
+        }
+
+        private delegate float InputFloatDelegate(VRCInput input);
+        private static InputFloatDelegate ourInputPressednessDelegate;
+
+        private static float GetPressedness(this VRCInput input)
+        {
+            ourInputPressednessDelegate ??= (InputFloatDelegate)Delegate.CreateDelegate(typeof(InputFloatDelegate),
+                typeof(VRCInput).GetProperty(nameof(VRCInput.prop_Single_0))!.GetMethod);
+
+            return ourInputPressednessDelegate(input);
         }
     }
 }
