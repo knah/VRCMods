@@ -386,8 +386,11 @@ namespace IKTweaks
             
             var willUniversallyCalibrate = false;
             
-            var triggerInput1 = VRCInputManager.Method_Public_Static_VRCInput_String_0("UseLeft");
-            var triggerInput2 = VRCInputManager.Method_Public_Static_VRCInput_String_0("UseRight");
+            var triggerInput1 = VRCInputManager.Method_Public_Static_VRCInput_String_0("UseAxisLeft");
+            var triggerInput2 = VRCInputManager.Method_Public_Static_VRCInput_String_0("UseAxisRight");
+
+            var freezeThreshold = IkTweaksSettings.OneHandedCalibration.Value ? 0.1f : 0.75f;
+            var calibrateThreshold = IkTweaksSettings.OneHandedCalibration.Value ? 0.9f : 1.75f;
 
             while (true)
             {
@@ -407,7 +410,7 @@ namespace IKTweaks
                     willUniversallyCalibrate = true;
                 }
 
-                if (IkTweaksSettings.CalibrateHalfFreeze.Value && trigger1 + trigger2 > 0.75f)
+                if (IkTweaksSettings.CalibrateHalfFreeze.Value && trigger1 + trigger2 > freezeThreshold)
                 {
                     hips.position = oldHipPos;
                     hips.rotation = oldHipRot;
@@ -447,7 +450,7 @@ namespace IKTweaks
                     preClickHeadRot = headsetTracker.rotation;
                 }
 
-                if (trigger1 + trigger2 > 1.75f || willUniversallyCalibrate)
+                if (trigger1 + trigger2 > calibrateThreshold || willUniversallyCalibrate)
                 {
                     break;
                 }

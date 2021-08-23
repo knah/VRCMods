@@ -51,6 +51,8 @@ namespace IKTweaks
             APoseCalibration = category.CreateEntry(nameof(APoseCalibration), false, "A-pose calibration");
             Unrestrict3PointHeadRotation = category.CreateEntry(nameof(Unrestrict3PointHeadRotation), true, "Allow more head rotation in 3/4-point tracking");
             WingspanMeasurementAdjustFactor = category.CreateEntry(nameof(WingspanMeasurementAdjustFactor), 1.1f, "Improved wingspan adjustment factor");
+            
+            OneHandedCalibration = category.CreateEntry(nameof(OneHandedCalibration), false, "One-handed calibration");
 
             IgnoreAnimationsMode.OnValueChanged += (_, v) => UpdateIgnoreAnimationMode(v);
             UpdateIgnoreAnimationMode(IgnoreAnimationsMode.Value);
@@ -103,6 +105,7 @@ namespace IKTweaks
         public static MelonPreferences_Entry<bool> APoseCalibration;
         public static MelonPreferences_Entry<bool> Unrestrict3PointHeadRotation;
         public static MelonPreferences_Entry<float> WingspanMeasurementAdjustFactor;
+        public static MelonPreferences_Entry<bool> OneHandedCalibration;
 
         public static IgnoreAnimationsMode IgnoreAnimationsModeParsed;
         public static MeasureAvatarMode MeasureModeParsed;
