@@ -176,7 +176,7 @@ namespace AdvancedSafety
             materialCount += renderer.GetMaterialCount();
         }
 
-        public static void VisitParticleSystem(this ParticleSystem particleSystem, ParticleSystemRenderer renderer, ref int totalCount, ref int deletedCount, ref int particleCount, ref int meshParticleVertexCount, GameObject obj)
+        public static void VisitParticleSystem(this ParticleSystem particleSystem, ParticleSystemRenderer renderer, ref int totalCount, ref int deletedCount, ref int particleCount, ref int meshParticleVertexCount, ref int trailLimit, GameObject obj)
         {
             totalCount++;
 
@@ -194,6 +194,11 @@ namespace AdvancedSafety
 
             if (particleSystem.collision.maxCollisionShapes > 256)
                 particleSystem.collision.maxCollisionShapes = 256;
+
+            if (particleSystem.trails.ribbonCount > trailLimit) 
+                particleSystem.trails.ribbonCount = trailLimit;
+
+            trailLimit -= particleSystem.trails.ribbonCount;
 
             particleCount += particleSystem.maxParticles;
 

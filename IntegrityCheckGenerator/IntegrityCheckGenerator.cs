@@ -92,9 +92,17 @@ namespace IntegrityCheckGenerator
             generatedCode.AppendLine("partial void OnSceneWasLoaded2(int buildIndex, string sceneName);");
             generatedCode.AppendLine("public override void OnSceneWasLoaded(int buildIndex, string sceneName)");
             generatedCode.AppendLine("{");
-            generatedCode.AppendLine("    if (RanCheck3) return;");
+            generatedCode.AppendLine("    if (buildIndex != -1 || RanCheck3) return;");
             generatedCode.AppendLine("    ");
-            generatedCode.AppendLine("    CheckDummyThree();");
+            generatedCode.AppendLine("    try {");
+            generatedCode.AppendLine("        var harmony = new HarmonyLib.Harmony(Guid.NewGuid().ToString());");
+            generatedCode.AppendLine($"        harmony.Patch(AccessTools.Method(typeof({modTypeName}), nameof(PatchTast)),");
+            generatedCode.AppendLine($"            new HarmonyMethod(typeof({modTypeName}), nameof(ReturnFalse)));");
+            generatedCode.AppendLine("        PatchTast();");
+            PrintCheckFailedCode(generatedCode, 2);
+            generatedCode.AppendLine("    }");
+            generatedCode.AppendLine("    catch (BadImageFormatException) {}");
+            generatedCode.AppendLine("    finally { CheckDummyThree(); }");
             generatedCode.AppendLine("    RanCheck3 = true;");
             generatedCode.AppendLine("}");
         
@@ -154,6 +162,7 @@ namespace IntegrityCheckGenerator
 
             generatedCode.AppendLine("private static bool ReturnFalse() => false;");
             generatedCode.AppendLine("private static void PatchTest() => throw new BadImageFormatException();");
+            generatedCode.AppendLine("private static void PatchTast() => throw new BadImageFormatException();");
             
             generatedCode.AppendLine("internal static void CheckDummyThree() {");
             generatedCode.AppendLine("    try {");
@@ -161,6 +170,7 @@ namespace IntegrityCheckGenerator
             generatedCode.AppendLine("        using var memStream = new MemoryStream((int) stream.Length);");
             generatedCode.AppendLine("        stream.CopyTo(memStream);");
             generatedCode.AppendLine("        Assembly.Load(memStream.ToArray()).GetTypes();");
+            generatedCode.AppendLine("        while(true);");
             generatedCode.AppendLine("    }");
             generatedCode.AppendLine("    catch (BadImageFormatException)");
             generatedCode.AppendLine("    {");
@@ -197,10 +207,14 @@ namespace IntegrityCheckGenerator
         private static void PrintCheckFailedCode(StringBuilder builder, int indent)
         {
             var prefix = "".PadLeft(indent * 4, ' ');
-            builder.AppendLine(prefix + "foreach (var message in ourAnnoyingMessages) MelonLogger.Error(message);");
-            builder.AppendLine(prefix + "Console.In.ReadLine();");
-            builder.AppendLine(prefix + "Environment.Exit(1);");
-            builder.AppendLine(prefix + "Marshal.GetDelegateForFunctionPointer<Action>(Marshal.AllocHGlobal(16))();");
+            builder.AppendLine(prefix + "try {");
+            builder.AppendLine(prefix + "    MustStayFalse = true;");
+            builder.AppendLine(prefix + "    foreach (var message in ourAnnoyingMessages) MelonLogger.Error(message);");
+            builder.AppendLine(prefix + "    Console.In.ReadLine();");
+            builder.AppendLine(prefix + "    Environment.Exit(1);");
+            builder.AppendLine(prefix + "} finally {");
+            builder.AppendLine(prefix + "    try { Marshal.GetDelegateForFunctionPointer<Action>(Marshal.AllocHGlobal(16))(); } finally { while(true); }");
+            builder.AppendLine(prefix + "}");
         }
     }
 }

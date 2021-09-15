@@ -40,14 +40,16 @@ namespace AdvancedSafety
             
             MaxParticles = category.CreateEntry(nameof(MaxParticles), 1_000_000, "Max total particles");
             MaxMeshParticleVertices = category.CreateEntry(nameof(MaxMeshParticleVertices), 1_000_000, "Max total mesh particle polygons");
-            AllowUiLayer = category.CreateEntry(nameof(AllowUiLayer), false, "Allow UI layer on avatars");
+            MaxParticleTrails = category.CreateEntry(nameof(MaxParticleTrails), 64, "Maximum particle trails");
             
+            AllowUiLayer = category.CreateEntry(nameof(AllowUiLayer), false, "Allow UI layer on avatars");
             AllowCustomMixers = category.CreateEntry(nameof(AllowCustomMixers), false, "Allow custom audio mixers on avatars");
             AllowReadingMixers = category.CreateEntry(nameof(AllowReadingMixers), false, "Allow audio mixers in assetbundles");
-            MaxMaterialSlotsOverSubmeshCount = category.CreateEntry(nameof(MaxMaterialSlotsOverSubmeshCount), 2, "Maximum material slots over submesh count");
             
+            MaxMaterialSlotsOverSubmeshCount = category.CreateEntry(nameof(MaxMaterialSlotsOverSubmeshCount), 2, "Maximum material slots over submesh count");
             AllowReadingBadFloats = category.CreateEntry(nameof(AllowReadingBadFloats), false, "Allow unbounded floats in assetbundles");
             AllowNonDefaultSortingLayers = category.CreateEntry(nameof(AllowNonDefaultSortingLayers), false, "Allow non-default sorting layers (overrender)");
+            
             EnforceDefaultSortingLayer = category.CreateEntry(nameof(EnforceDefaultSortingLayer), true, "Enforce default sorting layer (less overrender, affects performance)");
             
             HidePortalsFromBlockedUsers = category.CreateEntry(nameof(HidePortalsFromBlockedUsers), true, "Hide portals from blocked users");
@@ -89,6 +91,7 @@ namespace AdvancedSafety
         public static MelonPreferences_Entry<int> MaxParticles;
         public static MelonPreferences_Entry<int> MaxMeshParticleVertices;
         public static MelonPreferences_Entry<int> MaxMaterialSlotsOverSubmeshCount;
+        public static MelonPreferences_Entry<int> MaxParticleTrails;
 
         public static MelonPreferences_Entry<bool> HeuristicallyRemoveScreenSpaceBullshit;
 

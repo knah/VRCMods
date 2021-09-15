@@ -18,7 +18,7 @@ using VRC.Management;
 using Object = UnityEngine.Object;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.5.7", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.5.8", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
 namespace AdvancedSafety
@@ -170,6 +170,7 @@ namespace AdvancedSafety
             var seenComponents = 0;
             var seenParticles = 0;
             var seenMeshParticleVertices = 0;
+            var trailLimit = AdvancedSafetySettings.MaxParticleTrails.Value;
 
             var animator = go.GetComponent<Animator>();
 
@@ -223,7 +224,7 @@ namespace AdvancedSafety
                     component.TryCast<Light>()?.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenLights, AdvancedSafetySettings.MaxLights.Value);
                     
                     component.TryCast<Renderer>()?.VisitRenderer(ref scannedObjects, ref destroyedObjects, ref seenPolys, ref seenMaterials, obj, skinnedRendererListList);
-                    component.TryCast<ParticleSystem>()?.VisitParticleSystem(component.GetComponent<ParticleSystemRenderer>(), ref scannedObjects, ref destroyedObjects, ref seenParticles, ref seenMeshParticleVertices, obj);
+                    component.TryCast<ParticleSystem>()?.VisitParticleSystem(component.GetComponent<ParticleSystemRenderer>(), ref scannedObjects, ref destroyedObjects, ref seenParticles, ref seenMeshParticleVertices, ref trailLimit, obj);
                     
                     if (ReferenceEquals(component.TryCast<Transform>(), null))
                         component.VisitGeneric(ref scannedObjects, ref destroyedObjects, ref seenComponents, AdvancedSafetySettings.MaxComponents.Value);
