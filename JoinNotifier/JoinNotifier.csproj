@@ -9,4 +9,12 @@
   <ItemGroup>
     <EmbeddedResource Include="joinnotifier.assetbundle" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="MelonLoader">
+      <HintPath>S:\Steam\steamapps\common\VRChat\MelonLoader\MelonLoader.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="move &quot;$(TargetPath)&quot; &quot;S:\Steam\steamapps\common\VRChat\Mods\$(TargetFileName)&quot;" />
+  </Target>
 </Project>

@@ -20,8 +20,9 @@ namespace JoinNotifier
             {
                 AFiredFirst = true;
                 SeenFire = true;
-                
+#if DEBUG
                 MelonDebug.Msg("A fired first");
+#endif
             }
 
             if (player == null) return;
@@ -34,8 +35,9 @@ namespace JoinNotifier
             {
                 AFiredFirst = false;
                 SeenFire = true;
-                
+#if DEBUG
                 MelonDebug.Msg("B fired first");
+#endif
             }
             
             if (player == null) return;

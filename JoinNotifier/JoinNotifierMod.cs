@@ -16,7 +16,7 @@ using VRC.Core;
 using VRC.Management;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(JoinNotifierMod), "JoinNotifier", "1.0.5", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(JoinNotifierMod), "JoinNotifier", "1.0.6", "knah, Bluscream", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace JoinNotifier
@@ -266,6 +266,8 @@ namespace JoinNotifier
                myJoinSource.Play();
             if (JoinNotifierSettings.ShouldShowNames(true))
                 MelonCoroutines.Start(ShowName(myJoinText, myJoinNames, playerName, true, isFriendsWith));
+            if (JoinNotifierSettings.LogJoinsLeavesToConsole.Value)
+                MelonLogger.Msg(isFriendsWith ? ConsoleColor.Yellow : ConsoleColor.Cyan, $"{(isFriendsWith ? "Friend " : string.Empty)}{playerName} joined.");
         }
         
         public void OnPlayerLeft(Player player)
@@ -283,13 +285,15 @@ namespace JoinNotifier
                 if (JoinNotifierSettings.ShowFriendsOnly.Value && !isFriendsWith) return;
             }
 
-            var playerName = apiUser.displayName ?? "!null!";
+            var playerName = apiUser.displayName ?? "!null!";       
             if (JoinNotifierSettings.ShouldBlinkIcon(false))
                 MelonCoroutines.Start(BlinkIconCoroutine(myLeaveImage));
             if (JoinNotifierSettings.ShouldPlaySound(false))
                 myLeaveSource.Play();
             if (JoinNotifierSettings.ShouldShowNames(false))
                 MelonCoroutines.Start(ShowName(myLeaveText, myLeaveNames, playerName, false, isFriendsWith));
+            if(JoinNotifierSettings.LogJoinsLeavesToConsole.Value)
+                MelonLogger.Msg(isFriendsWith ? ConsoleColor.DarkYellow : ConsoleColor.DarkCyan, $"{(isFriendsWith ? "Friend " : string.Empty)}{playerName} left.");
         }
 
         public IEnumerator ShowName(Text text, List<string> namesList, string name, bool isJoin, bool isFriend)
@@ -342,9 +346,7 @@ namespace JoinNotifier
                 if (playerModeration != null && playerModeration.moderationType == ApiPlayerModeration.ModerationType.Block)
                     return true;
             }
-            
             return false;
-            
         }
     }
 }
