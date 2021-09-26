@@ -13,7 +13,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using ViewPointTweaker;
 
-[assembly:MelonInfo(typeof(ViewPointTweakerMod), "View Point Tweaker", "1.0.4", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(ViewPointTweakerMod), "View Point Tweaker", "1.0.5", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace ViewPointTweaker
@@ -96,9 +96,9 @@ namespace ViewPointTweaker
             ourCurrentDefaultOffset = xform.localPosition;
             ourCurrentHeadOffsetTransform = xform;
             
-            MelonDebug.Msg($"avatar id: {avatarManager.field_Private_ApiAvatar_1?.id}");
+            MelonDebug.Msg($"avatar id: {avatarManager.field_Private_ApiAvatar_0?.id}");
 
-            var avatarId = avatarManager.field_Private_ApiAvatar_1?.id;
+            var avatarId = avatarManager.field_Private_ApiAvatar_0?.id;
             if (avatarId == null) return;
             if (ourSavedViewpoints.TryGetValue(avatarId, out var triple))
             {
@@ -147,7 +147,7 @@ namespace ViewPointTweaker
                         MelonDebug.Msg("Menu closed, cleaning up");
                         Object.Destroy(ball);
                         
-                        var avatarId = VRCPlayer.field_Internal_Static_VRCPlayer_0.prop_VRCAvatarManager_0.field_Private_ApiAvatar_1.id;
+                        var avatarId = VRCPlayer.field_Internal_Static_VRCPlayer_0.prop_VRCAvatarManager_0.field_Private_ApiAvatar_0.id;
                         var localPosition = ourCurrentHeadOffsetTransform.localPosition;
 
                         if (localPosition != ourCurrentDefaultOffset)
