@@ -33,6 +33,7 @@ namespace JoinNotifier
         
         internal static MelonPreferences_Entry<bool> ShowFriendsAlways;
         internal static MelonPreferences_Entry<bool> HideBlockedUsers;
+        internal static MelonPreferences_Entry<bool> LogToConsole;
 
         public static void RegisterSettings()
         {
@@ -64,6 +65,7 @@ namespace JoinNotifier
             
             ShowFriendsAlways = category.CreateEntry("ShowFriendsAlways", false, "Show friend join/leave regardless of instance type");
             HideBlockedUsers = category.CreateEntry("HideBlockedUsers", false, "Hide join/leave of blocked users");
+            LogToConsole = category.CreateEntry("LogToConsole", false, "Log user join/leave to console");
         }
 
         public static bool ShouldNotifyInCurrentInstance()
