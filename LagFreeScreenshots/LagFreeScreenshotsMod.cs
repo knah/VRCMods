@@ -28,7 +28,7 @@ using System.Globalization;
 
 // using CameraUtil = ObjectPublicCaSiVeUnique;
 
-[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.2.4", "knah, Protected", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.2.5", "knah, Protected", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace LagFreeScreenshots
@@ -201,17 +201,26 @@ namespace LagFreeScreenshots
 
             // var renderTexture = RenderTexture.GetTemporary(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, 8);
             var renderTexture = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
-            renderTexture.antiAliasing = MaxMsaaCount(w, h);
+            var maxMsaa = MaxMsaaCount(w, h);
+            renderTexture.antiAliasing = maxMsaa;
 
             var oldCameraTarget = camera.targetTexture;
             var oldCameraFov = camera.fieldOfView;
+            var oldAllowMsaa = camera.allowMSAA;
+            var oldGraphicsMsaa = QualitySettings.antiAliasing;
 
             camera.targetTexture = renderTexture;
+            camera.allowMSAA = maxMsaa > 1;
+            QualitySettings.antiAliasing = maxMsaa;
             
             camera.Render();
 
             camera.targetTexture = oldCameraTarget;
             camera.fieldOfView = oldCameraFov;
+            camera.allowMSAA = oldAllowMsaa;
+            QualitySettings.antiAliasing = oldGraphicsMsaa;
+            
+            renderTexture.ResolveAntiAliasedSurface();
 
             (IntPtr, int) data = default;
             var readbackSupported = SystemInfo.supportsAsyncGPUReadback;
