@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -20,7 +19,7 @@ using VRC.UI;
 using ImageDownloaderClosure = ImageDownloader.__c__DisplayClass11_0;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.1.7", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.1.8", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace FavCat
@@ -31,7 +30,7 @@ namespace FavCat
         internal static FavCatMod Instance;
 
         internal AvatarModule? AvatarModule;
-        private WorldsModule? myWorldsModule;
+        internal WorldsModule? WorldsModule;
         internal PlayersModule? PlayerModule;
         
         internal static PageUserInfo PageUserInfo;
@@ -104,7 +103,7 @@ namespace FavCat
             try
             {
                 if (FavCatSettings.EnableWorldFavs.Value)
-                    myWorldsModule = new WorldsModule();
+                    WorldsModule = new WorldsModule();
             }
             catch (Exception ex)
             {
@@ -128,7 +127,7 @@ namespace FavCat
         public override void OnUpdate()
         {
             AvatarModule?.Update();
-            myWorldsModule?.Update();
+            WorldsModule?.Update();
             PlayerModule?.Update();
             GlobalImageCache.OnUpdate();
         }

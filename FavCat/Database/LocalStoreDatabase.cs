@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Threading;
 using FavCat.Database.Stored;
 using LiteDB;
@@ -34,7 +35,17 @@ namespace FavCat.Database
             
             myStoreDatabase = new LiteDatabase(new ConnectionString {Filename = $"{databasePath}/favcat-store.db", Connection = connectionType});
             myFavDatabase = new LiteDatabase(new ConnectionString {Filename = $"{databasePath}/favcat-favs.db", Connection = connectionType});
-            myImageDatabase = new LiteDatabase(new ConnectionString {Filename = $"{imageCachePath}/favcat-images.db", Connection = connectionType});
+            var imageDbPath = $"{imageCachePath}/favcat-images.db";
+            try
+            {
+                myImageDatabase = new LiteDatabase(new ConnectionString { Filename = imageDbPath, Connection = connectionType });
+            }
+            catch (Exception ex)
+            {
+                MelonLogger.Warning("Exception when creating image cache; assuming it's corrupted and deleting it. Exception: " + ex);
+                File.Delete(imageDbPath);
+                myImageDatabase = new LiteDatabase(new ConnectionString { Filename = imageDbPath, Connection = connectionType });
+            }
             
             myStoreDatabase.Mapper.EmptyStringToNull = false;
             myFavDatabase.Mapper.EmptyStringToNull = false;

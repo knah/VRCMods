@@ -6,7 +6,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
     <ClearOutputDirectory>False</ClearOutputDirectory>
-    <AssemblyVersion>1.1.7.0</AssemblyVersion>
+    <AssemblyVersion>1.1.8.0</AssemblyVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="LiteDB" Version="5.0.9" />
