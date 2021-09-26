@@ -20,7 +20,7 @@ namespace FavCat.Database
             {
                 PlayerId = player.id,
                 Name = player.displayName,
-                ThumbnailUrl = player.currentAvatarThumbnailImageUrl
+                ThumbnailUrl = player.profilePicThumbnailImageUrl // already includes override/avatar check
             };
             
             myUpdateThreadQueue.Enqueue(() =>

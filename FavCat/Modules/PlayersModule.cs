@@ -130,6 +130,19 @@ namespace FavCat.Modules
                     comparison = (a, b) => (a.Fav?.AddedOn ?? DateTime.MinValue).CompareTo(b.Fav?.AddedOn ?? DateTime.MinValue) * (inverted ? -1 : 1);
                     break;
             }
+            
+            if (FavCatSettings.SortPlayersByJoinable.Value)
+            {
+                var oldComparison = comparison;
+                comparison = (a, b) =>
+                {
+                    var aJoinable = IsPlayerJoinable(a.Model.PlayerId);
+                    var bJoinable = IsPlayerJoinable(b.Model.PlayerId);
+                    var joinableCompare = -aJoinable.CompareTo(bJoinable);
+                    if (joinableCompare != 0) return joinableCompare;
+                    return oldComparison(a, b);
+                };
+            }
 
             if (FavCatSettings.SortPlayersByOnline.Value)
             {
@@ -191,5 +204,17 @@ namespace FavCat.Modules
         }
 
         public static bool IsPlayerOnline(string id) => ourFriendsListManager?.field_Private_Dictionary_2_String_APIUser_0.ContainsKey(id) == true;
+
+        public static bool IsPlayerJoinable(string id)
+        {
+            var user = GetOnlineApiUser(id);
+            if (user?.location == null) return false;
+            if (user.status == "join me") return true;
+            return user.location != "private";
+        }
+
+        public static APIUser? GetOnlineApiUser(string id) => IsPlayerOnline(id)
+            ? ourFriendsListManager?.field_Private_Dictionary_2_String_APIUser_0[id]
+            : null;
     }
 }
