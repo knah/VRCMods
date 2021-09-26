@@ -22,14 +22,14 @@ namespace AdvancedSafety
             ExpansionKitApi.GetExpandedMenu(ExpandedMenu.UserDetailsMenu).AddSimpleButton("Hide all avatars by this author", OnHideBigClick, ConsumeHideBigInstance);
             ExpansionKitApi.GetExpandedMenu(ExpandedMenu.UserQuickMenu).AddSimpleButton("Hide this avatar (on anyone)", OnHideAvatarClick, ConsumeOnHideAvatar);
             
-            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.SettingsMenu).AddSimpleButton("Reload all avatars", ReloadAllAvatars);
+            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.SettingsMenu).AddSimpleButton("Reload all avatars", () => ScanningReflectionCache.ReloadAllAvatars(false));
 
             MelonCoroutines.Start(InitThings());
         }
 
         private static void OnHideAvatarClick()
         {
-            var apiAvatar = AdvancedSafetyMod.GetQuickMenu().field_Private_Player_0?.prop_VRCPlayer_0?.prop_VRCAvatarManager_0?.field_Private_ApiAvatar_1;
+            var apiAvatar = AdvancedSafetyMod.GetQuickMenu().field_Private_Player_0?._vrcplayer?.prop_VRCAvatarManager_0?.field_Private_ApiAvatar_0;
             if (apiAvatar == null) return;
 
             if (AvatarHiding.ourBlockedAvatars.ContainsKey(apiAvatar.id))
@@ -39,7 +39,7 @@ namespace AdvancedSafety
             
             AvatarHiding.SaveBlockedAvatars();
             
-            ReloadAllAvatars();
+            ScanningReflectionCache.ReloadAllAvatars(true);
         }
 
         private static void ConsumeOnHideAvatar(GameObject obj)
@@ -63,7 +63,7 @@ namespace AdvancedSafety
 
             OnPageShown(ourUserInfoPage);
             
-            ReloadAllAvatars();
+            ScanningReflectionCache.ReloadAllAvatars(true);
         }
 
         private static IEnumerator InitThings()
@@ -94,17 +94,12 @@ namespace AdvancedSafety
 
         public static void QuickMenuUpdateTick(VRCPlayer player)
         {
-            var currentAvatar = player.prop_VRCAvatarManager_0?.field_Private_ApiAvatar_1;
+            var currentAvatar = player.prop_VRCAvatarManager_0?.field_Private_ApiAvatar_0;
             if (currentAvatar == null) return;
 
             ourQuickMenuHideText.text = AvatarHiding.ourBlockedAvatars.ContainsKey(currentAvatar.id)
                 ? "Unhide this avatar (on anyone)"
                 : "Hide this avatar (on anyone)";
-        }
-        
-        private static void ReloadAllAvatars() {
-            var vrcPlayer = VRCPlayer.field_Internal_Static_VRCPlayer_0;
-            vrcPlayer.StartCoroutine(vrcPlayer.Method_Private_IEnumerator_Boolean_PDM_0(false));
         }
     }
 }
