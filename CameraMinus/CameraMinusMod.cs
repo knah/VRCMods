@@ -6,7 +6,7 @@ using VRC.SDKBase;
 using VRC.UserCamera;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(CameraMinusMod), "CameraMinus", "2.0.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(CameraMinusMod), "CameraMinus", "2.0.1", "knah", "https://github.com/knah/VRCMods")]
 
 namespace CameraMinus
 {
@@ -122,6 +122,8 @@ namespace CameraMinus
             foreach (var camera in cameraController.GetComponentsInChildren<Camera>())
                 if (camera.fieldOfView > 10)
                     camera.fieldOfView -= 10;
+                else if (camera.fieldOfView > 1)
+                    camera.fieldOfView -= 1;
         }
 
         private void ZoomOut()
@@ -129,7 +131,9 @@ namespace CameraMinus
             var cameraController = UserCameraController.field_Internal_Static_UserCameraController_0;
             if (cameraController == null) return;
             foreach (var camera in cameraController.GetComponentsInChildren<Camera>())
-                if (camera.fieldOfView < 170)
+                if (camera.fieldOfView < 10)
+                    camera.fieldOfView += 1;
+                else if (camera.fieldOfView < 170)
                     camera.fieldOfView += 10;
         }
 
