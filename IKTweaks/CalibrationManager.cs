@@ -188,11 +188,11 @@ namespace IKTweaks
 
                 if (bestTracker == null)
                 {
-                    MelonLogger.Msg($"Null target for tracker {data.TrackerSerial}");
+                    MelonDebug.Msg($"Null target for tracker {data.TrackerSerial}");
                     return null;
                 }
 
-                MelonLogger.Msg($"Found tracker with serial {data.TrackerSerial} for point {point}");
+                MelonDebug.Msg($"Found tracker with serial {data.TrackerSerial} for point {point}");
 
                 var result = bestTracker;
 
@@ -243,6 +243,9 @@ namespace IKTweaks
             vrik.solver.spine.pelvisTarget = hips;
             vrik.solver.leftLeg.target = leftFoot;
             vrik.solver.rightLeg.target = rightFoot;
+
+            // reset ForwardDirection to where it belongs - VRC loves to set it to something weird
+            avatarRoot.transform.parent.localPosition = Vector3.zero;
 
             MelonLogger.Msg("Applied stored calibration");
         }
@@ -325,6 +328,8 @@ namespace IKTweaks
             var avatarId = avatarRoot.GetComponent<PipelineManager>().blueprintId;
             if (IkTweaksSettings.CalibrateStorePerAvatar.Value && HasSavedCalibration(avatarId))
             {
+                // wait same three frames as universal calibration would - this *should* let VRC do whatever avatar root move logic that it does without IK interfering
+                for (var i = 0; i < 3; i++) await IKTweaksMod.AwaitVeryLateUpdate();
                 await ApplyStoredCalibration(avatarRoot, avatarId);
                 return;
             }
@@ -348,6 +353,8 @@ namespace IKTweaks
             var rightHandOffset = Quaternion.Euler(newAngleOffset) * Quaternion.Inverse(Quaternion.Euler(oldAngleOffset));
             oldAngleOffset.y *= -1;
             newAngleOffset.y *= -1;
+            oldAngleOffset.z *= -1;
+            newAngleOffset.z *= -1;
             var leftHandOffset = Quaternion.Euler(newAngleOffset) * Quaternion.Inverse(Quaternion.Euler(oldAngleOffset));
             
             foreach (var keyValuePair in SavedAvatars)
@@ -666,6 +673,7 @@ namespace IKTweaks
             var handAngleOffset = IkTweaksSettings.HandAngleOffset.Value;
             var leftHandOffset = handAngleOffset;
             leftHandOffset.y *= -1;
+            leftHandOffset.z *= -1;
             
             StoreHand(leftHandOffset, HumanBodyBones.LeftHand, CalibrationPoint.LeftHand);
             StoreHand(handAngleOffset, HumanBodyBones.RightHand, CalibrationPoint.RightHand);

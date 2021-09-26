@@ -9,7 +9,7 @@ namespace IKTweaks
     {
         internal const string IkTweaksCategory = "IkTweaks";
 
-        internal static Vector3 DefaultHandAngle = new(0, -115, 0);
+        internal static Vector3 DefaultHandAngle = new(0, -105, 0);
         internal static Vector3 DefaultHandOffset = new(0.015f, -0.005f, 0);
         
 
