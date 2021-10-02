@@ -35,6 +35,7 @@ namespace AdvancedSafety
             { "5dkhl/dWeTREXhHCIkZK17mzZkbjhTKlxb+IUSk+YaWzZrrV+G+M0ekTOEGjZ4dJuB4O3nU/oE3dycXWeJq9uA==", (0xA80660, 0xC7B40) }, // U2019.4.28 non-dev
             { "MV6xP7theydao4ENbGi6BbiBxdZsgGOBo/WrPSeIqh6A/E00NImjUNZn+gL+ZxzpVbJms7nUb6zluLL3+aIcfg==", (0xA82350, 0xC7E50) }, // U2019.4.29 non-dev
             { "ccZ4F7iE7a78kWdXdMekJzP7/ktzS5jOOS8IOITxa1C5Jg2TKxC0/ywY8F0o9I1vZHsxAO4eh7G2sOGzsR/+uQ==", (0xA83410, 0xC7E80) }, // U2019.4.30 non-dev
+            { "sgZUlX3+LSHKnTiTC+nXNcdtLOTrAB1fNjBLOwDdKzCyndlFLAdL0udR4S1szTC/q5pnFhG3Kdspsj5jvwLY1A==", (0xA86270, 0xC8230) }, // U2019.4.31 non-dev
         };
 
         internal static void ApplyPatches()

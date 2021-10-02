@@ -77,6 +77,11 @@ namespace IntegrityCheckGenerator
             generatedCode.AppendLine("private static readonly Func<QuickMenu> ourGetQuickMenu;");
 
             generatedCode.AppendLine($"static {modTypeName}() {{");
+            generatedCode.AppendLine("try { if(typeof(MelonMod).Assembly.GetCustomAttribute<AssemblyDescriptionAttribute>().Description.IndexOf(\"free\", StringComparison.OrdinalIgnoreCase) != -1) {");
+            PrintCheckFailedCode(generatedCode, 1);
+            generatedCode.AppendLine("} } catch {");
+            PrintCheckFailedCode(generatedCode, 1);
+            generatedCode.AppendLine("}");
             generatedCode.AppendLine("CheckA();");
             generatedCode.AppendLine("CheckB();");
             generatedCode.AppendLine("ourGetUiManager = (Func<VRCUiManager>) Delegate.CreateDelegate(typeof(Func<VRCUiManager>), typeof(VRCUiManager)");
