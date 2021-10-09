@@ -16,8 +16,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UIExpansionKit", "UIExpansi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MirrorResolutionUnlimiter", "MirrorResolutionUnlimiter\MirrorResolutionUnlimiter.csproj", "{C43A909B-85B4-460F-BD6C-976C0EEF73DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkleBeGone", "SparkleBeGone\SparkleBeGone.csproj", "{5DA19CEB-F684-4916-B8AD-9FFE286A4D63}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CameraMinus", "CameraMinus\CameraMinus.csproj", "{4A6FC5B5-CEBA-4385-AB4B-F1B2DBA09DA7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdvancedSafety", "AdvancedSafety\AdvancedSafety.csproj", "{0D678D2D-D094-42D5-AD52-BACD1EEE4A20}"
@@ -62,10 +60,6 @@ Global
 		{C43A909B-85B4-460F-BD6C-976C0EEF73DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C43A909B-85B4-460F-BD6C-976C0EEF73DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C43A909B-85B4-460F-BD6C-976C0EEF73DE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5DA19CEB-F684-4916-B8AD-9FFE286A4D63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5DA19CEB-F684-4916-B8AD-9FFE286A4D63}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5DA19CEB-F684-4916-B8AD-9FFE286A4D63}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5DA19CEB-F684-4916-B8AD-9FFE286A4D63}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4A6FC5B5-CEBA-4385-AB4B-F1B2DBA09DA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4A6FC5B5-CEBA-4385-AB4B-F1B2DBA09DA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A6FC5B5-CEBA-4385-AB4B-F1B2DBA09DA7}.Release|Any CPU.ActiveCfg = Release|Any CPU

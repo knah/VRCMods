@@ -324,9 +324,7 @@ Requires UI Expansion Kit. Settings are placed into the Mod Settings menu.
 * [Particle Limiter](https://feedback.vrchat.com/feature-requests/p/particle-limitier)
 
 ## SparkleBeGone
-This mod allows removing start and end sparkles from VR laser pointers, as well as recoloring them.  
-It will do nothing on desktop.   
-Settings are fairly self-explanatory.
+This mod is deprecated with the new Quick Menu (UI 1.5). Last revision containing its code can be found [here](https://github.com/knah/VRCMods/tree/c1c21edbb0ce13ef4c12b5ffefe0d9fcc0161f77)
 
 ## True Shader Anticrash
 This mod prevents practically all known shader crashes. Note that it can affect how stuff looks as it rewrites shader code to be non-crashy. Setting changes require world rejoin to reload shaders.
