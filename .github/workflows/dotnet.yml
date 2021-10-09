@@ -48,7 +48,6 @@ jobs:
         files: |
           Output/Debug/net472/AdvancedSafety.dll
           Output/Debug/net472/CameraMinus.dll
-          Output/Debug/net472/EmojiPageButtons.dll
           Output/Debug/net472/FavCat-merged.dll
           Output/Debug/net472/Finitizer.dll
           Output/Debug/net472/FriendsPlusHome.dll

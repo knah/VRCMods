@@ -53,9 +53,7 @@ Requires UI Expansion Kit - new buttons are added to Camera expando (collapsed b
 * [Move the camera lens to not be instrusively in the middle of the camera screen](https://feedback.vrchat.com/feature-requests/p/move-the-camera-lens-to-not-be-instrusively-in-the-middle-of-the-camera-screen)
 
 ## EmojiPageButtons
-This mod adds page buttons to old emoji menu that allow faster switching.  
-Requires UI Expansion Kit.  
-![emoji page buttons screenshot](https://imgur.com/gIq2vKw.png)
+This mod is deprecated with the new Quick Menu (UI 1.5).  Last revision containing its code can be found [here](https://github.com/knah/VRCMods/tree/c1c21edbb0ce13ef4c12b5ffefe0d9fcc0161f77)
 
 ## FavCat
 An all-in-one local favorites mod. Unlimited favorite lists with unlimited favorites in them and a searchable local database of content and players.  
