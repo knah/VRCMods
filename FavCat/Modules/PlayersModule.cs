@@ -11,19 +11,17 @@ using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
 using UnityEngine.UI;
 using VRC.Core;
+using VRC.DataModel.Core;
 using VRC.UI;
 
 namespace FavCat.Modules
 {
     public class PlayersModule : ExtendedFavoritesModuleBase<StoredPlayer>
     {
-        private static FriendsListManager ourFriendsListManager;
         
         public PlayersModule() : base(ExpandedMenu.SocialMenu, FavCatMod.Database.PlayerFavorites, GetListsParent(), true, true, false)
         {
             ExpansionKitApi.GetExpandedMenu(ExpandedMenu.UserDetailsMenu).AddSimpleButton("Local Favorite", ShowFavMenu);
-            
-            ourFriendsListManager = FriendsListManager.field_Private_Static_FriendsListManager_0;
 
             listsParent.GetComponent<EnableDisableListener>().OnEnabled += ResortAndRefreshLists;
         }
@@ -181,29 +179,32 @@ namespace FavCat.Modules
                     : PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa10Unique.OnlineFriend)
                 : PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa10Unique.NotFriends;
 
-            SetUserPageUser(FavCatMod.PageUserInfo, user, friendState, UiUserList.EnumNPublicSealedvaNoInFrOnOfSeInFa9vUnique.FavoriteFriends);
+            SetUserPageUser(FavCatMod.PageUserInfo, user, friendState, UiUserList.ListType.FavoriteFriends);
         }
 
         private static
             Action<PageUserInfo, APIUser, PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa10Unique,
-                UiUserList.EnumNPublicSealedvaNoInFrOnOfSeInFa9vUnique>? ourSetUserInfo;
+                UiUserList.ListType>? ourSetUserInfo;
 
         private static void SetUserPageUser(PageUserInfo pageUserInfo, APIUser user, PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa10Unique enumA,
-            UiUserList.EnumNPublicSealedvaNoInFrOnOfSeInFa9vUnique enumB)
+            UiUserList.ListType enumB)
         {
             if (ourSetUserInfo == null)
             {
                 var targetMethod = typeof(PageUserInfo).GetMethods().Single(it =>
                     it.Name.StartsWith("Method_Public_Void_APIUser_EnumNPublicSealedvaNoOnOfSeReBlInFa10Unique_EnumNPublicSealedvaNoInFrOnOfSeInFa9vUnique_") && XrefScanner.XrefScan(it).Any(jt => jt.Type == XrefType.Global && jt.ReadAsObject()?.ToString() == " wants to be your friend"));
                 ourSetUserInfo = (Action<PageUserInfo, APIUser, PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa10Unique,
-                    UiUserList.EnumNPublicSealedvaNoInFrOnOfSeInFa9vUnique>) Delegate.CreateDelegate(typeof(Action<PageUserInfo, APIUser, PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa10Unique,
-                    UiUserList.EnumNPublicSealedvaNoInFrOnOfSeInFa9vUnique>), targetMethod);
+                    UiUserList.ListType>) Delegate.CreateDelegate(typeof(Action<PageUserInfo, APIUser, PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa10Unique,
+                    UiUserList.ListType>), targetMethod);
             }
 
             ourSetUserInfo(pageUserInfo, user, enumA, enumB);
         }
 
-        public static bool IsPlayerOnline(string id) => ourFriendsListManager?.field_Private_Dictionary_2_String_APIUser_0.ContainsKey(id) == true;
+        public static bool IsPlayerOnline(string id)
+        {
+            return GetOnlineApiUser(id) != null;
+        }
 
         public static bool IsPlayerJoinable(string id)
         {
@@ -213,8 +214,18 @@ namespace FavCat.Modules
             return user.location != "private";
         }
 
-        public static APIUser? GetOnlineApiUser(string id) => IsPlayerOnline(id)
-            ? ourFriendsListManager?.field_Private_Dictionary_2_String_APIUser_0[id]
-            : null;
+        public static APIUser? GetOnlineApiUser(string id)
+        {
+            var list = FriendsListManager.field_Private_Static_FriendsListManager_0.field_Private_List_1_IUser_1;
+            if (list == null) return null;
+            foreach (var userI in list)
+            {
+                var user = userI.Cast<DataModel<APIUser>>();
+                if (user.field_Protected_TYPE_0.id == id)
+                    return user.field_Protected_TYPE_0;
+            }
+
+            return null;
+        }
     }
 }

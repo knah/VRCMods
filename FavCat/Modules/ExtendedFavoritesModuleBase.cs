@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using FavCat.Adapters;
 using FavCat.CustomLists;
@@ -12,7 +11,6 @@ using FavCat.Database.Stored;
 using MelonLoader;
 using UIExpansionKit.API;
 using UIExpansionKit.Components;
-using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -151,8 +149,8 @@ namespace FavCat.Modules
                 listener.OnDisabled += OnSearchListHidden;
             }
 
-            mySoundCollection = GameObject.Find("/UserInterface/QuickMenu/CameraMenu/BackButton")
-                .GetComponent<ButtonReaction>().field_Public_UISoundCollection_0;
+            mySoundCollection = GameObject.Find("/UserInterface/MenuContent/Popups/AvatarStatsPopup/AvatarStatsMenu/_Buttons/_BackButton")?
+                .GetComponent<ButtonReaction>()?.field_Public_UISoundCollection_0;
         }
 
         private void ShowListSortingMenu()
@@ -501,7 +499,7 @@ namespace FavCat.Modules
             if (customList) return customList.Category.CategoryName;
 
             var avatarList = listRoot.GetComponent<UiAvatarList>();
-            if (avatarList && avatarList.field_Public_EnumNPublicSealedvaInPuMiFaSpClPuLi11Unique_0 == UiAvatarList.EnumNPublicSealedvaInPuMiFaSpClPuLi11Unique.PublicQuest) 
+            if (avatarList && avatarList.field_Public_Category_0 == UiAvatarList.Category.PublicQuest) 
                 return null; // nobody likes this one
 
             return listRoot.transform.Find("Button/TitleText")?.GetComponent<Text>()?.text?.StripParenthesis() ?? listRoot.name;
