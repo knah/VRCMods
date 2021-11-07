@@ -25,10 +25,11 @@ using Object = UnityEngine.Object;
 using CameraTakePhotoEnumerator = VRC.UserCamera.CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObBoAcIn2StInTeCaUnique;
 using System.Collections.Generic;
 using System.Globalization;
+using Unity.Collections.LowLevel.Unsafe;
 
 // using CameraUtil = ObjectPublicCaSiVeUnique;
 
-[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.2.5", "knah, Protected", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.2.6", "knah, Protected", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace LagFreeScreenshots
@@ -252,21 +253,25 @@ namespace LagFreeScreenshots
             }
             else
             {
-                MelonLogger.Msg("Does not support readback, using fallback texture read method");
+                unsafe
+                {
+                    MelonLogger.Msg("Does not support readback, using fallback texture read method");
                 
-                RenderTexture.active = renderTexture;
-                var newTexture = new Texture2D(w, h, hasAlpha ? TextureFormat.ARGB32 : TextureFormat.RGB24, false);
-                newTexture.ReadPixels(new Rect(0, 0, w, h), 0, 0);
-                newTexture.Apply();
-                RenderTexture.active = null;
+                    RenderTexture.active = renderTexture;
+                    var newTexture = new Texture2D(w, h, hasAlpha ? TextureFormat.ARGB32 : TextureFormat.RGB24, false);
+                    newTexture.ReadPixels(new Rect(0, 0, w, h), 0, 0);
+                    newTexture.Apply();
+                    RenderTexture.active = null;
 
-                var bytes = newTexture.GetRawTextureData();
-                data = (Marshal.AllocHGlobal(bytes.Length), bytes.Length);
-                Il2CppSystem.Runtime.InteropServices.Marshal.Copy(bytes, 0, data.Item1, bytes.Length);
-                
-                Object.Destroy(newTexture);
+                    var bytes = newTexture.GetRawTextureData<byte>();
+                    data = (Marshal.AllocHGlobal(bytes.Length), bytes.Length);
+                    UnsafeUtility.MemCpy((void*) data.Item1, bytes.m_Buffer, bytes.Length);
+
+                    Object.Destroy(newTexture);
+                }
             }
             
+            renderTexture.Release();
             Object.Destroy(renderTexture);
 
             var targetFile = GetPath(w, h);
