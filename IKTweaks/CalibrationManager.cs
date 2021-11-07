@@ -142,7 +142,7 @@ namespace IKTweaks
 
             return steamVrControllerManager.field_Public_ArrayOf_GameObject_0
                 .Where(it => it != steamVrControllerManager.field_Public_GameObject_0 && it != steamVrControllerManager.field_Public_GameObject_1 && it != null)
-                .First(it => GetTrackerSerial((int) it.GetComponent<SteamVR_TrackedObject>().field_Public_EnumNPublicSealedvaNoHmDe18DeDeDeDeDeUnique_0) == serial)
+                .First(it => GetTrackerSerial((int) it.GetComponent<SteamVR_TrackedObject>().field_Public_EIndex_0) == serial)
                 .transform;
         }
 
@@ -532,8 +532,8 @@ namespace IKTweaks
                 {
                     var possibleTracker = possibleTrackers[index];
                     var steamVRTrackedObject = possibleTracker.GetComponent<SteamVR_TrackedObject>();
-                    if (steamVRTrackedObject.field_Public_EnumNPublicSealedvaNoHmDe18DeDeDeDeDeUnique_0 ==
-                        SteamVR_TrackedObject.EnumNPublicSealedvaNoHmDe18DeDeDeDeDeUnique.None)
+                    if (steamVRTrackedObject.field_Public_EIndex_0 ==
+                        SteamVR_TrackedObject.EIndex.None)
                         continue;
 
                     var distance = Vector3.Distance(possibleTracker.position, bonePosition);
@@ -562,7 +562,7 @@ namespace IKTweaks
                 var tracker = pair.Value.tracker;
                 var bone = pair.Value.bone;
 
-                var serial = GetTrackerSerial((int) tracker.GetComponent<SteamVR_TrackedObject>().field_Public_EnumNPublicSealedvaNoHmDe18DeDeDeDeDeUnique_0);
+                var serial = GetTrackerSerial((int) tracker.GetComponent<SteamVR_TrackedObject>().field_Public_EIndex_0);
 
                 var trackerRelativeData = new CalibrationData(GetLocalPosition(tracker, bone),
                     GetLocalRotation(tracker, bone), serial);
@@ -596,7 +596,7 @@ namespace IKTweaks
                 var tracker = pair.Value.tracker;
                 var bone = pair.Value.bone;
 
-                var serial = GetTrackerSerial((int) tracker.GetComponent<SteamVR_TrackedObject>().field_Public_EnumNPublicSealedvaNoHmDe18DeDeDeDeDeUnique_0);
+                var serial = GetTrackerSerial((int) tracker.GetComponent<SteamVR_TrackedObject>().field_Public_EIndex_0);
 
                 var trackerRelativeData = new CalibrationData(tracker.InverseTransformPoint(bone.position + offset),
                     Quaternion.identity, serial);

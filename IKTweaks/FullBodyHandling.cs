@@ -75,11 +75,29 @@ namespace IKTweaks
             return inWeight;
         }
 
+        private static Func<VRCTracking.ID, Transform> ourGetTrackedTransform;
+
+        private static Transform GetTrackedTransform(VRCTracking.ID id)
+        {
+            ourGetTrackedTransform ??= (Func<VRCTracking.ID, Transform>)Delegate.CreateDelegate(
+                typeof(Func<VRCTracking.ID, Transform>), typeof(VRCTrackingManager)
+                    .GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly).Single(it =>
+                        it.Name.StartsWith("Method_Public_Static_Transform_ID_") && XrefScanner.UsedBy(it)
+                            .Any(
+                                jt =>
+                                {
+                                    var mr = jt.TryResolve();
+                                    return mr?.DeclaringType == typeof(PedalOption_HudPosition) && mr.Name == "Update";
+                                })));
+
+            return ourGetTrackedTransform(id);
+        }
+
         private static void MoveHeadAndHandTargets()
         {
-            var headTracker = VRCTrackingManager.Method_Public_Static_Transform_EnumNPublicSealedva19Unique_0(VRCTracking.EnumNPublicSealedva19Unique.EnumValue0);
-            var leftTracker = VRCTrackingManager.Method_Public_Static_Transform_EnumNPublicSealedva19Unique_0(VRCTracking.EnumNPublicSealedva19Unique.EnumValue1);
-            var rightTracker = VRCTrackingManager.Method_Public_Static_Transform_EnumNPublicSealedva19Unique_0(VRCTracking.EnumNPublicSealedva19Unique.EnumValue2);
+            var headTracker = GetTrackedTransform(VRCTracking.ID.Hmd);
+            var leftTracker = GetTrackedTransform(VRCTracking.ID.HandTracker_LeftWrist);
+            var rightTracker = GetTrackedTransform(VRCTracking.ID.HandTracker_RightWrist);
             
             LeftEffector.SetPositionAndRotation(leftTracker.position, leftTracker.rotation);
             RightEffector.SetPositionAndRotation(rightTracker.position, rightTracker.rotation);

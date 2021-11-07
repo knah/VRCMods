@@ -19,7 +19,7 @@ using Valve.VR;
 using Delegate = Il2CppSystem.Delegate;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.19", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.20", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -54,16 +54,13 @@ namespace IKTweaks
             ourGetEyeHeightDelegate = (Func<VRCAvatarManager, float>) System.Delegate.CreateDelegate(typeof(Func<VRCAvatarManager, float>), typeof(VRCAvatarManager)
                 .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Single(it =>
                     it.GetParameters().Length == 0 && it.ReturnType == typeof(float) && !it.Name.Contains("_PDM") &&
-                    XrefScanner.XrefScan(it).Any(jt =>
-                        jt.Type == XrefType.Global &&
-                        jt.ReadAsObject()?.ToString() == "Asked for eye height before measured.")));
+                    XrefScanner.UsedBy(it).Any(jt => jt.TryResolve()?.DeclaringType == typeof(IkController))));
 
             HarmonyInstance.Patch(typeof(VRCAvatarManager)
                 .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Single(it =>
                     it.GetParameters().Length == 0 && it.ReturnType == typeof(float) && !it.Name.Contains("_PDM") &&
-                    XrefScanner.XrefScan(it).Any(jt =>
-                        jt.Type == XrefType.Global &&
-                        jt.ReadAsObject()?.ToString() == "Asked for arm length before measured.")),
+                    XrefScanner.UsedBy(it).Any(jt =>
+                        jt.TryResolve()?.DeclaringType == typeof(VRCTrackingManager))),
                 new HarmonyMethod(typeof(IKTweaksMod), nameof(WingspanPatch)));
             
             if (MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit" && !it.Info.Version.StartsWith("0.1."))) 
@@ -231,24 +228,26 @@ namespace IKTweaks
             DoMove(Vector3.zero);
         }
 
+        private static void CalibratePrefix()
+        {
+            if (!IkTweaksSettings.FullBodyVrIk.Value) return;
+            
+            MelonLogger.Msg("Clearing stored calibrations due to calibrate button press");
+            
+            if (IkTweaksSettings.CalibrateUseUniversal.Value)
+                CalibrationManager.Clear();
+            else
+                CalibrationManager.Clear(VRCPlayer.field_Internal_Static_VRCPlayer_0.prop_VRCAvatarManager_0.field_Private_ApiAvatar_0.id);
+        }
+
         public void OnUiManagerInit()
         {
-            var calibrateButton = GameObject.Find("UserInterface/QuickMenu/ShortcutMenu/CalibrateButton")
-                .GetComponent<Button>();
-            var oldCalibrate = calibrateButton.onClick;
-            calibrateButton.onClick = new Button.ButtonClickedEvent();
-            calibrateButton.onClick.AddListener(new Action(() =>
+            foreach (var methodInfo in typeof(VRCTrackingManager).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly))
             {
-                if (IkTweaksSettings.FullBodyVrIk.Value)
-                {
-                    if (IkTweaksSettings.CalibrateUseUniversal.Value)
-                        CalibrationManager.Clear();
-                    else
-                        CalibrationManager.Clear(VRCPlayer.field_Internal_Static_VRCPlayer_0.prop_VRCAvatarManager_0.field_Private_ApiAvatar_0.id);
-                }
-
-                oldCalibrate.Invoke();
-            }));
+                if (!methodInfo.Name.StartsWith("Method_Public_Virtual_Final_New_Void_") || methodInfo.GetParameters().Length != 0) continue;
+                
+                HarmonyInstance.Patch(methodInfo, new HarmonyMethod(typeof(IKTweaksMod), nameof(CalibratePrefix)));
+            }
 
             var steamVrControllerManager = CalibrationManager.GetControllerManager();
             var puckPrefab = steamVrControllerManager.field_Public_ArrayOf_GameObject_0.First(it =>
@@ -268,7 +267,7 @@ namespace IKTweaks
             {
                 var newPuck = Object.Instantiate(puckPrefab, trackersParent, true);
                 newPuck.name = "Puck" + (i + 4);
-                newPuck.GetComponent<SteamVR_TrackedObject>().field_Public_EnumNPublicSealedvaNoHmDe18DeDeDeDeDeUnique_0 = SteamVR_TrackedObject.EnumNPublicSealedvaNoHmDe18DeDeDeDeDeUnique.None;
+                newPuck.GetComponent<SteamVR_TrackedObject>().field_Public_EIndex_0 = SteamVR_TrackedObject.EIndex.None;
                 newPuck.SetActive(false);
                 newPucks[i + 5] = newPuck;
                 newUints[i + 5] = UInt32.MaxValue;

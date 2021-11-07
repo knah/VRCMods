@@ -47,9 +47,7 @@ namespace IKTweaks
                 if (it.Type != XrefType.Method) return false;
                 var resolved = it.TryResolve();
                 if (resolved == null || !resolved.IsStatic) return false;
-                if(!(resolved.DeclaringType == typeof(VRCTrackingManager) && resolved is MethodInfo mi && mi.ReturnType == typeof(bool) && resolved.GetParameters().Length == 0)) return false;
-                return XrefScanner.UsedBy(resolved).Any(jt =>
-                    jt.Type == XrefType.Method && jt.TryResolve().DeclaringType == typeof(QuickMenu));
+                return resolved.DeclaringType == typeof(VRCTrackingManager) && resolved is MethodInfo mi && mi.ReturnType == typeof(bool) && resolved.GetParameters().Length == 0;
             }).ToList();
 
             var canSupportHipTracking = canSupportHipTrackingCandidates.Single().TryResolve();
