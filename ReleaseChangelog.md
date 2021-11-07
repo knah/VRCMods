@@ -1,6 +1,7 @@
 Read the [Malicious Mods and you](https://github.com/knah/VRCMods/blob/master/Malicious-Mods.md) doc!
 
 Changes:
+ * All mods: updated for UI 1.5/Build 1148+
  * Emoji Page Buttons: deprecated with new UI
  * SparkleBeGone: deprecated with new UI
 

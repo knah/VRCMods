@@ -67,7 +67,7 @@ namespace AdvancedSafety
                 if (denyReason == null) return;
                 
                 var instantiator = new ObjectInstantiator(thisPtr);
-                var dict = instantiator.field_Private_Dictionary_2_Int32_ObjectNPrivateStVeQuGaInStUnique_0;
+                var dict = instantiator.field_Private_Dictionary_2_Int32_ObjectInfo_0;
                 if (dict.ContainsKey(networkId))
                 {
                     var someStruct = dict[networkId];

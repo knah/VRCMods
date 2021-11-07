@@ -1,11 +1,15 @@
 using System;
 using System.Collections;
+using System.Linq;
 using MelonLoader;
+using UIExpansionKit;
 using UIExpansionKit.API;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.UI;
+using VRC.DataModel;
 using VRC.UI;
+using VRC.UI.Elements.Menus;
 
 namespace AdvancedSafety
 {
@@ -14,6 +18,8 @@ namespace AdvancedSafety
         private static Text ourBigMenuHideText;
         private static Text ourQuickMenuHideText;
         private static PageUserInfo ourUserInfoPage;
+
+        private static SelectedUserMenuQM ourSelectedUserQm;
 
         public static void OnApplicationStart()
         {
@@ -27,9 +33,19 @@ namespace AdvancedSafety
             MelonCoroutines.Start(InitThings());
         }
 
+        internal static IUser GetUserSelectedInQm()
+        {
+            if (ourSelectedUserQm == null)
+                ourSelectedUserQm = UnityUtils.FindInactiveObjectInActiveRoot("/UserInterface/Canvas_QuickMenu(Clone)")
+                    ?.GetComponentsInChildren<SelectedUserMenuQM>().Single();
+
+            return ourSelectedUserQm?.field_Private_IUser_0;
+        }
+
         private static void OnHideAvatarClick()
         {
-            var apiAvatar = AdvancedSafetyMod.GetQuickMenu().field_Private_Player_0?._vrcplayer?.prop_VRCAvatarManager_0?.field_Private_ApiAvatar_0;
+            
+            var apiAvatar = GetUserSelectedInQm()?.GetPlayer()?._vrcplayer?.prop_VRCAvatarManager_0?.field_Private_ApiAvatar_0;
             if (apiAvatar == null) return;
 
             if (AvatarHiding.ourBlockedAvatars.ContainsKey(apiAvatar.id))
@@ -68,7 +84,7 @@ namespace AdvancedSafety
 
         private static IEnumerator InitThings()
         {
-            while (AdvancedSafetyMod.GetUiManager() == null || AdvancedSafetyMod.GetQuickMenu() == null)
+            while (AdvancedSafetyMod.GetUiManager() == null)
                 yield return null;
 
             AdvancedSafetyMod.GetUiManager().Method_Internal_add_Void_Action_1_VRCUiPage_0(new Action<VRCUiPage>(OnPageShown));
