@@ -1,3 +1,5 @@
+using System;
+
 namespace UIExpansionKit.API
 {
     /// <summary>
@@ -11,7 +13,7 @@ namespace UIExpansionKit.API
         QuickMenu,
         
         /// <summary>
-        /// QuickMenu with a user selected
+        /// QuickMenu with a user (in instance) selected
         /// </summary>
         UserQuickMenu,
         
@@ -51,9 +53,12 @@ namespace UIExpansionKit.API
         SafetyMenu,
         
         /// <summary>
-        /// Emote Quick Menu page
+        /// Here Quick Menu tab
         /// </summary>
-        EmoteQuickMenu,
+        QuickMenuHere,
+        
+        [Obsolete("There is no Emote page in Quick Menu anymore; buttons added here will end up on the Here page")]
+        EmoteQuickMenu = QuickMenuHere,
         
         /// <summary>
         /// Emoji Quick Menu page
@@ -71,13 +76,14 @@ namespace UIExpansionKit.API
         UiElementsQuickMenu,
         
         /// <summary>
-        /// Moderation Quick Menu page
+        /// Quick Menu Audio Settings tab
         /// </summary>
-        ModerationQuickMenu,
+        QuickMenuAudioSettings,
         
-        /// <summary>
-        /// Avatar stats Quick Menu page
-        /// </summary>
+        [Obsolete("There is no Moderation page in Quick Menu anymore; buttons added here will end up on the Here page")]
+        ModerationQuickMenu = QuickMenuAudioSettings,
+        
+        [Obsolete("There is no avatar stats page in Quick Menu anymore; buttons added here will not show up anywhere!", true)]
         AvatarStatsQuickMenu,
         
         /// <summary>
@@ -89,5 +95,10 @@ namespace UIExpansionKit.API
         /// The handheld camera object
         /// </summary>
         Camera,
+        
+        /// <summary>
+        /// The user selection quick menu for not-in-instance users
+        /// </summary>
+        UserQuickMenuRemote,
     }
 }

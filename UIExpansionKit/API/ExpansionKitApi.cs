@@ -113,6 +113,11 @@ namespace UIExpansionKit.API
             
             public Action<bool> ToggleAction;
             public Func<bool> InitialState;
+
+            public override string ToString()
+            {
+                return $"{Text} Prefab={Prefab?.name} IsButton={Action != null} IsToggle={ToggleAction != null}";
+            }
         }
 
         /// <summary>
@@ -149,6 +154,7 @@ namespace UIExpansionKit.API
         {
             return new CustomQuickMenuPageImpl(requestedLayout);
         }
+        
         /// <summary>
         /// Creates a custom quick menu page.
         /// When shown, the page will be positioned over the camera expando.
@@ -157,6 +163,18 @@ namespace UIExpansionKit.API
         public static ICustomShowableLayoutedMenu CreateCustomCameraExpandoPage(LayoutDescription? requestedLayout)
         {
             return new CustomCameraPageImpl(requestedLayout);
+        }
+        
+        
+        /// <summary>
+        /// Creates a custom quick menu expando overlay page.
+        /// When shown, the page will be positioned over the quick menu expando.
+        /// This overlay is not affected by which quick menu page is shown, or by current page's expando visibility.
+        /// </summary>
+        /// <param name="requestedLayout">The layout of the page. If null, a custom layout is assumed - your mod code will need to assign sizes and positions to buttons manually</param>
+        public static ICustomShowableLayoutedMenu CreateCustomQmExpandoPage(LayoutDescription? requestedLayout)
+        {
+            return new CustomExpandoOverlayImpl(requestedLayout);
         }
 
         /// <summary>

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using MelonLoader;
 using UIExpansionKit.API;
 using UIExpansionKit.Components;
@@ -21,6 +22,32 @@ namespace UIExpansionKit
         {
             ourStuffBundle = stuffBundle;
         }
+
+        private static void AttachPinToggle(Transform controlRoot, string categoryId, string prefId, List<(string, string)> pinnedSettings)
+        {
+            var pinToggle = controlRoot.transform.Find("PinToggle").GetComponent<Toggle>();
+            pinToggle.isOn = pinnedSettings.Contains((categoryId, prefId));
+            pinToggle.onValueChanged.AddListener(new Action<bool>(isSet =>
+            {
+                if (isSet) 
+                    ExpansionKitSettings.PinPref(categoryId, prefId);
+                else
+                    ExpansionKitSettings.UnpinPref(categoryId, prefId);
+            }));
+            ExpansionKitSettings.PinsEntry.OnValueChanged += (_, __) =>
+            {
+                pinToggle.isOn = ExpansionKitSettings.IsPinned(categoryId, prefId);
+            };
+        }
+
+        private static void ResetValue(MelonPreferences_Entry entry)
+        {
+            var innerType = entry.GetReflectedType();
+            typeof(ModSettingsHandler).GetMethod(nameof(ResetValueGeneric), BindingFlags.Static | BindingFlags.NonPublic)!
+                .MakeGenericMethod(innerType)
+                .Invoke(null, new object[] { entry });
+        }
+        private static void ResetValueGeneric<T>(MelonPreferences_Entry<T> entry) => entry.Value = entry.DefaultValue;
 
         public static IEnumerator PopulateSettingsPanel(RectTransform settingsContentRoot)
         {
@@ -52,7 +79,7 @@ namespace UIExpansionKit
 
                 var prefsToPopulate = prefDict.Where(it => !it.IsHidden).ToList();
                 
-                if (prefsToPopulate.Count == 0 && customEntries?.RegisteredButtons.Count == 0)
+                if (prefsToPopulate.Count == 0 && (customEntries?.RegisteredButtons.Count ?? 0) == 0)
                     continue;
 
                 var categoryUi = Object.Instantiate(categoryPrefab, settingsContentRoot, false);
@@ -77,6 +104,53 @@ namespace UIExpansionKit
                     ourCategoryExpanded[categoryId] = !ExpansionKitSettings.IsCategoriesStartCollapsed();
                 
                 SetExpanded(ourCategoryExpanded[categoryId]);
+
+                var resetButton = categoryUi.transform.Find("ResetButton").GetComponent<Button>();
+                resetButton.onClick.AddListener(new Action(() =>
+                {
+                    var clicksLeft = 3;
+                    Text resetButtonText = null;
+                    var menu = ExpansionKitApi.CreateCustomFullMenuPopup(LayoutDescription.WideSlimList);
+                    var resetInvisible = false;
+
+                    menu.AddLabel("Are you sure you want to reset all settings in the following category:");
+                    menu.AddLabel(category.DisplayName ?? categoryId);
+                    
+                    menu.AddSimpleButton("Reset (3 clicks more...)", () =>
+                    {
+                        clicksLeft--;
+                        switch (clicksLeft)
+                        {
+                            case 0:
+                            {
+                                foreach (var melonPreferencesEntry in category.Entries)
+                                {
+                                    if (melonPreferencesEntry.IsHidden && !resetInvisible) continue;
+                                    
+                                    ResetValue(melonPreferencesEntry);
+                                }
+                                
+                                menu.Hide();
+                                
+                                MelonPreferences.Save();
+
+                                break;
+                            }
+                            case 1:
+                                resetButtonText!.text = "Reset (1 click left...)";
+                                break;
+                            case 2:
+                                resetButtonText!.text = "Reset (2 clicks left...)";
+                                break;
+                        }
+                    }, go => resetButtonText = go.GetComponentInChildren<Text>(true));
+                    
+                    menu.AddToggleButton("Also reset invisible settings", b => resetInvisible = b, () => resetInvisible);
+                    
+                    menu.AddSimpleButton("Cancel", menu.Hide);
+                    
+                    menu.Show(true);
+                }));
 
                 void CreateNumericSetting<T>(MelonPreferences_Entry<T> entry, Func<T, string> toString, Func<string, T?> fromString) where T:struct, IEquatable<T>
                 {
@@ -178,6 +252,8 @@ namespace UIExpansionKit
                                     if (newIndex != -1)
                                         dropdown.value = newIndex;
                                 };
+                                
+                                AttachPinToggle(comboSetting.transform, categoryId, prefId, pinnedSettings);
                             }
                             else
                             {
@@ -221,19 +297,7 @@ namespace UIExpansionKit
                                     if (boolEntry.Value != isSet)
                                         boolEntry.Value = isSet;
                                 }));
-                            var pinToggle = boolSetting.transform.Find("PinToggle").GetComponent<Toggle>();
-                            pinToggle.isOn = pinnedSettings.Contains((categoryId, prefId));
-                            pinToggle.onValueChanged.AddListener(new Action<bool>(isSet =>
-                            {
-                                if (isSet) 
-                                    ExpansionKitSettings.PinPref(categoryId, prefId);
-                                else
-                                    ExpansionKitSettings.UnpinPref(categoryId, prefId);
-                            }));
-                            ExpansionKitSettings.PinsEntry.OnValueChanged += (_, __) =>
-                            {
-                                pinToggle.isOn = ExpansionKitSettings.IsPinned(categoryId, prefId);
-                            };
+                            AttachPinToggle(boolSetting.transform, categoryId, prefId, pinnedSettings);
                             boolEntry.OnValueChanged += (old, newValue) =>
                             {
                                 UiExpansionKitMod.AreSettingsDirty = true;
@@ -266,6 +330,16 @@ namespace UIExpansionKit
                                 s => long.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out var f) ? f : null);
                             break;
                         default:
+                            var entryType = pref.GetReflectedType();
+                            if (entryType.IsEnum)
+                            {
+                                var settingTransform = (Transform) typeof(ModSettingsHandler)
+                                    .GetMethod(nameof(CreateEnumSetting), BindingFlags.Static | BindingFlags.NonPublic)
+                                    .MakeGenericMethod(entryType)
+                                    .Invoke(null, new object[] { pref, comboBoxPrefab, categoryUiContent});
+                                AttachPinToggle(settingTransform, categoryId, prefId, pinnedSettings);
+                                break;
+                            }
                             if (MelonDebug.IsEnabled())
                                 MelonLogger.Msg($"Unknown mod pref type {pref.GetType()}");
                             break;
@@ -276,6 +350,58 @@ namespace UIExpansionKit
             }
 
             UiExpansionKitMod.SetLayerRecursively(settingsContentRoot.gameObject, 12);
+        }
+
+        private static Transform CreateEnumSetting<T>(MelonPreferences_Entry<T> entry, GameObject comboBoxPrefab, Transform categoryUiContent) where T : Enum
+        {
+            var enumValues = EnumPrefUtil.GetEnumSettingOptions<T>();
+            
+            var comboSetting = Object.Instantiate(comboBoxPrefab, categoryUiContent, false);
+            comboSetting.GetComponentInChildren<Text>().text = entry.DisplayName ?? entry.Identifier;
+            var dropdown = comboSetting.GetComponentInChildren<Dropdown>();
+            
+            var options = new Il2CppSystem.Collections.Generic.List<Dropdown.OptionData>();
+            var currentValue = entry.Value;
+            var selectedIndex = enumValues.Count;
+            for (var i = 0; i < enumValues.Count; i++)
+            {
+                var valueTuple = enumValues[i];
+                options.Add(new Dropdown.OptionData(valueTuple.DisplayName));
+                if (currentValue.CompareTo(valueTuple.SettingsValue) == 0)
+                    selectedIndex = i;
+            }
+            
+            dropdown.options = options;
+            dropdown.value = selectedIndex;
+
+            dropdown.onValueChanged.AddListener(new Action<int>(value =>
+            {
+                var currentValue = entry.Value;
+                var newValue = value >= enumValues.Count
+                    ? currentValue
+                    : enumValues[value].SettingsValue;
+                if (entry.Value.CompareTo(newValue) != 0)
+                    entry.Value = newValue;
+            }));
+            entry.OnValueChanged += (_, newValue) =>
+            {
+                UiExpansionKitMod.AreSettingsDirty = true;
+
+                int newIndex = -1;
+                for (var i = 0; i < enumValues.Count; i++)
+                {
+                    if (enumValues[i].SettingsValue.CompareTo(newValue) == 0)
+                    {
+                        newIndex = i;
+                        break;
+                    }
+                }
+
+                if (newIndex != -1)
+                    dropdown.value = newIndex;
+            };
+
+            return comboSetting.transform;
         }
     }
 }

@@ -23,6 +23,15 @@ namespace UIExpansionKit.API
         public static LayoutDescription QuickMenu3Columns = new LayoutDescription {NumColumns = 3, RowHeight = 380 / 3, NumRows = 3};
         public static LayoutDescription QuickMenu4Columns = new LayoutDescription {NumColumns = 4, RowHeight = 95, NumRows = 4 };
         public static LayoutDescription WideSlimList = new LayoutDescription {NumColumns = 1, RowHeight = 50, NumRows = 8 };
-        
+
+        public LayoutDescription With(int? numColumns = null, int? rowHeight = null, int? numRows = null)
+        {
+            return new LayoutDescription
+            {
+                NumColumns = numColumns ?? NumColumns,
+                RowHeight = rowHeight ?? RowHeight,
+                NumRows = numRows ?? NumRows,
+            };
+        }
     }
 }

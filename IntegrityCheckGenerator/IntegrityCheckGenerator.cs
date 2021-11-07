@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -64,6 +63,7 @@ namespace IntegrityCheckGenerator
             generatedCode.AppendLine("using System.Reflection;");
             generatedCode.AppendLine("using System.Runtime.InteropServices;");
             generatedCode.AppendLine("using MelonLoader;");
+            generatedCode.AppendLine("using UnityEngine;");
             
             generatedCode.AppendLine($"namespace {modNamespace} {{");
             generatedCode.AppendLine("[PatchShield]");
@@ -74,10 +74,9 @@ namespace IntegrityCheckGenerator
             generatedCode.AppendLine("internal static bool MustStayTrue = true;");
             generatedCode.AppendLine("internal static bool RanCheck3 = false;");
             generatedCode.AppendLine("private static readonly Func<VRCUiManager> ourGetUiManager;");
-            generatedCode.AppendLine("private static readonly Func<QuickMenu> ourGetQuickMenu;");
 
             generatedCode.AppendLine($"static {modTypeName}() {{");
-            generatedCode.AppendLine("try { if(typeof(MelonMod).Assembly.GetCustomAttribute<AssemblyDescriptionAttribute>().Description.IndexOf(\"free\", StringComparison.OrdinalIgnoreCase) != -1) {");
+            generatedCode.AppendLine("try { if(typeof(MelonMod).Assembly.GetCustomAttribute<AssemblyProductAttribute>().Product.IndexOf(\"free\", StringComparison.OrdinalIgnoreCase) != -1) {");
             PrintCheckFailedCode(generatedCode, 1);
             generatedCode.AppendLine("} } catch {");
             PrintCheckFailedCode(generatedCode, 1);
@@ -88,9 +87,6 @@ namespace IntegrityCheckGenerator
             generatedCode.AppendLine("    .GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly)");
             generatedCode.AppendLine("    .First(it => it.PropertyType == typeof(VRCUiManager)).GetMethod);");
             generatedCode.AppendLine("CheckC();");
-            generatedCode.AppendLine("ourGetQuickMenu = (Func<QuickMenu>) Delegate.CreateDelegate(typeof(Func<QuickMenu>), typeof(QuickMenu)");
-            generatedCode.AppendLine("    .GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly)");
-            generatedCode.AppendLine("    .First(it => it.PropertyType == typeof(QuickMenu)).GetMethod);");
             generatedCode.AppendLine("CheckWasSuccessful = true;");
             generatedCode.AppendLine("}");
         
@@ -118,8 +114,6 @@ namespace IntegrityCheckGenerator
             generatedCode.AppendLine("}");
 
             generatedCode.AppendLine("internal static VRCUiManager GetUiManager() => ourGetUiManager();");
-            generatedCode.AppendLine("internal static QuickMenu GetQuickMenu() => ourGetQuickMenu();");
-        
         
             generatedCode.AppendLine("private static void DoAfterUiManagerInit(Action code) {");
             generatedCode.AppendLine("    MelonCoroutines.Start(OnUiManagerInitCoro(code));");

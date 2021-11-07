@@ -1,12 +1,27 @@
+using System;
+using MelonLoader;
 using UIExpansionKit.API;
 using UnityEngine;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace UIExpansionKit
 {
     internal static class ButtonFactory
     {
         internal static void CreateButtonForRegistration(ExpansionKitApi.ButtonRegistration registration, Transform root, bool isQuickMenu)
+        {
+            try
+            {
+                CreateButtonForRegistrationImpl(registration, root, isQuickMenu);
+            }
+            catch (Exception ex)
+            {
+                MelonLogger.Error($"Exception when creating a button for registration of {registration}: {ex}");
+            }
+        }
+        
+        private static void CreateButtonForRegistrationImpl(ExpansionKitApi.ButtonRegistration registration, Transform root, bool isQuickMenu)
         {
             if (registration.Prefab != null)
             {

@@ -8,7 +8,7 @@ namespace UIExpansionKit.Components
         private Transform myTransform;
         public Transform PlayerCamera;
         public Transform CameraTransform;
-        public float myScaleableDistance = 0.175f;
+        public float myScaleableDistance = 0.185f;
 
         public CameraExpandoHandler(IntPtr ptr) : base(ptr)
         {
