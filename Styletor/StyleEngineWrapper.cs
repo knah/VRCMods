@@ -16,7 +16,7 @@ namespace Styletor
     {
         public readonly StyleEngine StyleEngine;
         
-        private readonly List<(int styleIndex, ulong selectorPriority, Selector selector, List<(int, StyleElement.ValueTypeNPublicSealedInSiBoInCoObObUnique)> Properties)> myOriginalStylesBackup = new();
+        private readonly List<(int styleIndex, ulong selectorPriority, Selector selector, List<(int, StyleElement.PropertyValue)> Properties)> myOriginalStylesBackup = new();
         private readonly Dictionary<string, Sprite> myOriginalSprites = new();
         private readonly Dictionary<string, Sprite> myOriginalSpritesByLowercaseShortKey = new();
         private readonly Dictionary<string, Sprite> myOriginalSpritesByLowercaseFullKey = new();
@@ -62,11 +62,11 @@ namespace Styletor
 
         internal void UpdateStylesForSpriteOverrides()
         {
-            var writeAccumulator = new List<(int, StyleElement.ValueTypeNPublicSealedInSiBoInCoObObUnique)>();
+            var writeAccumulator = new List<(int, StyleElement.PropertyValue)>();
             
             foreach (var elementStyle in StyleEngine.field_Private_List_1_ElementStyle_0)
             {
-                foreach (var keyValuePair in elementStyle.field_Public_Dictionary_2_Int32_ValueTypeNPublicSealedInSiBoInCoObObUnique_0)
+                foreach (var keyValuePair in elementStyle.field_Public_Dictionary_2_Int32_PropertyValue_0)
                 {
                     var styleProperty = keyValuePair.Value;
                     var maybeSprite = styleProperty.field_Public_Object_0?.TryCast<Sprite>();
@@ -78,7 +78,7 @@ namespace Styletor
 
                 // ah yes, ConcurrentModificationException
                 foreach (var (k, v) in writeAccumulator)
-                    elementStyle.field_Public_Dictionary_2_Int32_ValueTypeNPublicSealedInSiBoInCoObObUnique_0[k] = v;
+                    elementStyle.field_Public_Dictionary_2_Int32_PropertyValue_0[k] = v;
                 
                 writeAccumulator.Clear();
             }
@@ -96,7 +96,7 @@ namespace Styletor
                 style.field_Public_Int32_0 = backup.styleIndex;
                 style.field_Public_UInt64_0 = backup.selectorPriority;
                 style.field_Public_Selector_0 = backup.selector;
-                var propsDict = style.field_Public_Dictionary_2_Int32_ValueTypeNPublicSealedInSiBoInCoObObUnique_0;
+                var propsDict = style.field_Public_Dictionary_2_Int32_PropertyValue_0;
                 propsDict.Clear();
                 foreach (var (key, value) in backup.Properties) 
                     propsDict[key] = value;
@@ -115,8 +115,8 @@ namespace Styletor
         {
             foreach (var elementStyle in StyleEngine.field_Private_List_1_ElementStyle_0)
             {
-                var innerList = new List<(int, StyleElement.ValueTypeNPublicSealedInSiBoInCoObObUnique)>();
-                foreach (var keyValuePair in elementStyle.field_Public_Dictionary_2_Int32_ValueTypeNPublicSealedInSiBoInCoObObUnique_0)
+                var innerList = new List<(int, StyleElement.PropertyValue)>();
+                foreach (var keyValuePair in elementStyle.field_Public_Dictionary_2_Int32_PropertyValue_0)
                     innerList.Add((keyValuePair.Key, keyValuePair.Value));
                 myOriginalStylesBackup.Add((elementStyle.field_Public_Int32_0, elementStyle.field_Public_UInt64_0, elementStyle.field_Public_Selector_0, innerList));
 

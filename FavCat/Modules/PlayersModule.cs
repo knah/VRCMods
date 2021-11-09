@@ -175,26 +175,26 @@ namespace FavCat.Modules
             FavCatMod.GetUiManager().Method_Public_Void_String_Boolean_0("UserInterface/MenuContent/Screens/UserInfo", true);
             var friendState = APIUser.IsFriendsWith(user.id)
                 ? (user.statusValue == APIUser.UserStatus.Offline
-                    ? PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa10Unique.OfflineFriend
-                    : PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa10Unique.OnlineFriend)
-                : PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa10Unique.NotFriends;
+                    ? PageUserInfo.InfoType.OfflineFriend
+                    : PageUserInfo.InfoType.OnlineFriend)
+                : PageUserInfo.InfoType.NotFriends;
 
             SetUserPageUser(FavCatMod.PageUserInfo, user, friendState, UiUserList.ListType.FavoriteFriends);
         }
 
         private static
-            Action<PageUserInfo, APIUser, PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa10Unique,
+            Action<PageUserInfo, APIUser, PageUserInfo.InfoType,
                 UiUserList.ListType>? ourSetUserInfo;
 
-        private static void SetUserPageUser(PageUserInfo pageUserInfo, APIUser user, PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa10Unique enumA,
+        private static void SetUserPageUser(PageUserInfo pageUserInfo, APIUser user, PageUserInfo.InfoType enumA,
             UiUserList.ListType enumB)
         {
             if (ourSetUserInfo == null)
             {
                 var targetMethod = typeof(PageUserInfo).GetMethods().Single(it =>
-                    it.Name.StartsWith("Method_Public_Void_APIUser_EnumNPublicSealedvaNoOnOfSeReBlInFa10Unique_EnumNPublicSealedvaNoInFrOnOfSeInFa9vUnique_") && XrefScanner.XrefScan(it).Any(jt => jt.Type == XrefType.Global && jt.ReadAsObject()?.ToString() == " wants to be your friend"));
-                ourSetUserInfo = (Action<PageUserInfo, APIUser, PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa10Unique,
-                    UiUserList.ListType>) Delegate.CreateDelegate(typeof(Action<PageUserInfo, APIUser, PageUserInfo.EnumNPublicSealedvaNoOnOfSeReBlInFa10Unique,
+                    it.Name.StartsWith("Method_Public_Void_APIUser_InfoType_ListType_") && XrefScanner.XrefScan(it).Any(jt => jt.Type == XrefType.Global && jt.ReadAsObject()?.ToString() == " wants to be your friend"));
+                ourSetUserInfo = (Action<PageUserInfo, APIUser, PageUserInfo.InfoType,
+                    UiUserList.ListType>) Delegate.CreateDelegate(typeof(Action<PageUserInfo, APIUser, PageUserInfo.InfoType,
                     UiUserList.ListType>), targetMethod);
             }
 

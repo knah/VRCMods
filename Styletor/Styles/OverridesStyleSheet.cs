@@ -99,9 +99,9 @@ namespace Styletor.Styles
                 var style = new ElementStyle();
                 myStyleEngine.StyleEngine.Method_Public_Void_ElementStyle_String_0(style, colorizer.ReplacePlaceholders(keyValuePair.Value));
                 
-                foreach (var newStylePair in style.field_Public_Dictionary_2_Int32_ValueTypeNPublicSealedInSiBoInCoObObUnique_0)
+                foreach (var newStylePair in style.field_Public_Dictionary_2_Int32_PropertyValue_0)
                 foreach (var baseStyle in baseStyles)
-                    baseStyle.field_Public_Dictionary_2_Int32_ValueTypeNPublicSealedInSiBoInCoObObUnique_0[newStylePair.Key] = newStylePair.Value;
+                    baseStyle.field_Public_Dictionary_2_Int32_PropertyValue_0[newStylePair.Key] = newStylePair.Value;
             }
             
             MelonLogger.Msg($"Applies {myStyleOverrides.Count} overrides");
