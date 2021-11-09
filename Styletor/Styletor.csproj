@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net472</TargetFramework>
+        <Version>0.1.0.0</Version>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\UIExpansionKit\UIExpansionKit.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="System.IO.Compression, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+        <HintPath>C:\Windows\Microsoft.NET\Framework64\v4.0.30319\System.IO.Compression.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="BundledStyles" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="BundledStyles\bigger-mic-button.styletor.zip" />
+      <EmbeddedResource Include="BundledStyles\default-fixes.styletor.zip" />
+      <EmbeddedResource Include="BundledStyles\qm-background-lemon.styletor.zip" />
+      <EmbeddedResource Include="BundledStyles\basic-recolorable.styletor.zip" />
+    </ItemGroup>
+
+</Project>

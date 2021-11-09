@@ -1,5 +1,8 @@
 Read the [Malicious Mods and you](https://github.com/knah/VRCMods/blob/master/Malicious-Mods.md) doc!
 
+New mod:
+ * Styletor - reskin your Quick Menu easily and flexibly!
+
 New features:
  * UI Expansion Kit: added an option to pin dropdown-type settings to Quick Menu expando
 

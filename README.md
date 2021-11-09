@@ -326,6 +326,59 @@ Requires UI Expansion Kit. Settings are placed into the Mod Settings menu.
 ## SparkleBeGone
 This mod is deprecated with the new Quick Menu (UI 1.5). Last revision containing its code can be found [here](https://github.com/knah/VRCMods/tree/c1c21edbb0ce13ef4c12b5ffefe0d9fcc0161f77)
 
+## Styletor
+This mod allows you to reskin your Quick Menu (and, eventually, main menu and other UI elements) using VRChat's new UI Styling system.  
+
+**Important note:** VRChat's UI Style system is currently not released for general use, and, as such, may change at any moment without notice. In practical terms this means that UI styles made for this mod can break on updates easily and frequently.  
+Custom UI styles (both user-provided and world-provided) are planned for UI 2.5 update. Pray that neither of those will be a VRC+ feature, because you know how that goes.
+
+*Styletor will be back next week with new questionable styling facts*
+
+**Requires UI Expansion Kit**
+
+#### Usage (simple):
+ 1. Install the mod and UI Expansion Kit
+ 2. Select "Basic Recolorable Style" in mod settings
+ 3. Adjust colors as you see fit
+ 4. To easily replace QM background:
+    1. Find an image you want. Ideally it would be a transparent PNG image with 797x1024 resolution. JPEG images are supported too.
+       * A more square aspect ratio for the image might be required - that resolution is based on default style, but the actual menu looks way more square than that. Perhaps 1024x1024 would be good?
+    2. Put the image into `UserData/StyletorStyles`, named exactly `background_layer_02_lines` (including image format extension).
+    3. Click "Reload styles from disk" button in mod settings to apply it without restarting.
+ 5. To install custom styles/skins, put them into `UserData/StyletorStyles`. Both directory-based skins and ZIP files are supported. "Reload styles from disk" button will show them in UI without restarting.
+
+#### Creating styles
+ * You can export the default style to use as a reference using "Export default VRChat style" button in mod settings
+ * Create a new folder in `UserData/StyletorStyles`, i.e. `UserData/StyletorStyles/my-cool-style`
+ * In that folder, create a file named `info.json`, i.e. `UserData/StyletorStyles/my-cool-style/info.json`. This JSON file contains some info about your skin, such as name. See [this class](Styletor/Jsons/StyleMetadata.cs) for a description of its format.
+ * If you want to override style properties, create a file named `overrides.vrcss`. This file uses the same format as styles in the default skin. No, the format is not documented anywhere, just follow the example of default style.
+ * If you want to override images/sprites, place them in same files (and paths) as the default example skin.
+ * You can additionally specify certain sprite properties using an extra JSON file named same as image file with added `.json` extensions, i.e. `background.png.json`. The format for this JSON is described in [this file](Styletor/Jsons/SpriteJson.cs)
+ * If you want to make an user-friendly distribution of your style, you can add all contents of your style folder to a ZIP file (so that info.json is in ZIP file root) and distribute that.
+ * Note that you should not redistribute original VRChat assets (as provided by default skin export) due to copyright restrictions.
+ * If you want your style to support user-provided colors, you can use special color placeholders. A list of them can be found in [this file](Styletor/Styles/ColorizerManager.cs) (look for `ReplacePlaceholders`)
+ * You can look at example styles in [this folder](Styletor/BundledStyles)
+
+#### Integration for other mods
+ * Other (GPL-compatible) mods can provide custom styles via [an API](Styletor/API/StyletorApi.cs)
+ * Alternatively, mods can have embedded resources with names ending in `.styletor.zip` for mod-provided styles
+ * For mods that modify Quick Menu, cloning default elements should be sufficient to make them styled (as long as you don't delete StyleElement component off them)
+
+#### Known limitations
+ * It takes a bit of time to apply QM style after opening it for the first time. This is due to VRChat only initializing styles when the menu is opened for the first time, and the mod having to do a bit of work on top of that.
+ * Main menu is not currently recolored. It doesn't use the style system, although I'm looking into applying styles to it too before UI 2.0 update (which would make this menu styleable too).
+ * Action menu is not currently recolored. I'll likely add this recoloring as a feature eventually.
+ * UI Expansion Kit is not currently recolored. I'm planning to move it to UI style system eventually.
+ * New selectors (the "what to apply this style to" part of stylesheet) can't be added currently. Not that it would be useful, but this will likely be supported too, eventually.
+ * If you add new properties to a style, changing to another style without those properties will leave them applied to elements.
+   * This is why the "Default style fixes" mix-in exists - it adds some properties over the default style to make reverting to it work properly
+   * In general, if your skin has issues with reverting to default VRC style, you should also ship a similar "fixes" mix-in style to add missing properties to the default style.
+ * UI sounds (or any other resources other than styles and textures/sprites) can't be overridden. This will likely be expanded upon eventually.
+
+#### Extra credits
+ * Non-readable texture export method was adapted from [UnityExplorer](https://github.com/sinai-dev/UnityExplorer)
+ * Lemon image used on the sample lemon QM background comes from [Twitter Emoji](https://github.com/twitter/twemoji)
+
 ## True Shader Anticrash
 This mod prevents practically all known shader crashes. Note that it can affect how stuff looks as it rewrites shader code to be non-crashy. Setting changes require world rejoin to reload shaders.
 ### Partial source code

@@ -56,6 +56,7 @@ jobs:
           Output/Debug/net472/LagFreeScreenshots.dll
           Output/Debug/net472/MirrorResolutionUnlimiter.dll
           Output/Debug/net472/ParticleAndBoneLimiterSettings.dll
+          Output/Debug/net472/Styletor.dll
           Output/Debug/net472/TrueShaderAntiCrash.dll
           Output/Debug/net472/Turbones.dll
           Output/Debug/net472/UIExpansionKit.dll
