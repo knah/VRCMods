@@ -45,7 +45,7 @@ namespace CameraMinus
                 qmEnlargeButton = go;
                 qmEnlargeButton.SetActive(!myUseCameraExpando.Value);
             });
-            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.CameraQuickMenu).AddSimpleButton("Shrink camera", Enlarge, go =>
+            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.CameraQuickMenu).AddSimpleButton("Shrink camera", Shrink, go =>
             {
                 qmShrinkButton = go;
                 qmShrinkButton.SetActive(!myUseCameraExpando.Value);
