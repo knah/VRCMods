@@ -82,6 +82,8 @@ namespace IntegrityCheckGenerator
             PrintCheckFailedCode(generatedCode, 1);
             generatedCode.AppendLine("}");
             generatedCode.AppendLine("CheckA();");
+            generatedCode.AppendLine("var mm = typeof(MelonUtils).GetMethod(\"ToggleObfuscation\"); if(mm != null) { mm.Invoke(null, null); ");
+            generatedCode.AppendLine("CheckA(); }");
             generatedCode.AppendLine("CheckB();");
             generatedCode.AppendLine("ourGetUiManager = (Func<VRCUiManager>) Delegate.CreateDelegate(typeof(Func<VRCUiManager>), typeof(VRCUiManager)");
             generatedCode.AppendLine("    .GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly)");

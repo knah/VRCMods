@@ -11,6 +11,7 @@ using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
 using UnityEngine.UI;
 using VRC.Core;
+using VRC.DataModel;
 using VRC.DataModel.Core;
 using VRC.UI;
 
@@ -18,12 +19,18 @@ namespace FavCat.Modules
 {
     public class PlayersModule : ExtendedFavoritesModuleBase<StoredPlayer>
     {
-        
+
+        private static readonly Dictionary<string, APIUser> ourUsersCache = new();
+
         public PlayersModule() : base(ExpandedMenu.SocialMenu, FavCatMod.Database.PlayerFavorites, GetListsParent(), true, true, false)
         {
             ExpansionKitApi.GetExpandedMenu(ExpandedMenu.UserDetailsMenu).AddSimpleButton("Local Favorite", ShowFavMenu);
 
-            listsParent.GetComponent<EnableDisableListener>().OnEnabled += ResortAndRefreshLists;
+            listsParent.GetComponent<EnableDisableListener>().OnEnabled += () =>
+            {
+                UpdateUsersCache();
+                ResortAndRefreshLists();
+            };
         }
 
         private void ShowFavMenu()
@@ -214,18 +221,22 @@ namespace FavCat.Modules
             return user.location != "private";
         }
 
-        public static APIUser? GetOnlineApiUser(string id)
+        private static void UpdateUsersCache()
         {
+            ourUsersCache.Clear();
+            
             var list = FriendsListManager.field_Private_Static_FriendsListManager_0.field_Private_List_1_IUser_1;
-            if (list == null) return null;
+            if (list == null) return;
             foreach (var userI in list)
             {
-                var user = userI.Cast<DataModel<APIUser>>();
-                if (user.field_Protected_TYPE_0.id == id)
-                    return user.field_Protected_TYPE_0;
+                var apiUser = userI.Cast<DataModel<APIUser>>().field_Protected_TYPE_0;
+                ourUsersCache[apiUser.id] = apiUser;
             }
+        }
 
-            return null;
+        public static APIUser? GetOnlineApiUser(string id)
+        {
+            return ourUsersCache.TryGetValue(id, out var apiUser) ? apiUser : null;
         }
     }
 }

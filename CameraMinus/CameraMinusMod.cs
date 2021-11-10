@@ -6,7 +6,7 @@ using VRC.SDKBase;
 using VRC.UserCamera;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(CameraMinusMod), "CameraMinus", "3.0.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(CameraMinusMod), "CameraMinus", "3.0.1", "knah", "https://github.com/knah/VRCMods")]
 
 namespace CameraMinus
 {
@@ -45,7 +45,7 @@ namespace CameraMinus
                 qmEnlargeButton = go;
                 qmEnlargeButton.SetActive(!myUseCameraExpando.Value);
             });
-            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.CameraQuickMenu).AddSimpleButton("Shrink camera", Enlarge, go =>
+            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.CameraQuickMenu).AddSimpleButton("Shrink camera", Shrink, go =>
             {
                 qmShrinkButton = go;
                 qmShrinkButton.SetActive(!myUseCameraExpando.Value);

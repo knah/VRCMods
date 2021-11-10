@@ -424,8 +424,6 @@ namespace IKTweaks
 
             var headTarget = FullBodyHandling.LastInitializedController.field_Private_FBBIKHeadEffector_0.transform;
             var headsetTracker = headTarget.parent;
-            
-            SetTrackerVisibility(true);
 
             var preClickHeadPos = Vector3.zero;
             var preClickHeadRot = Quaternion.identity;
@@ -452,6 +450,8 @@ namespace IKTweaks
             {
                 await IKTweaksMod.AwaitIKLateUpdate();
                 if (avatarRoot == null) break;
+                
+                SetTrackerVisibility(true);
                 
                 poseHandler.GetHumanPose(out var humanBodyPose, out var humanBodyRot, dummyMuscles);
                 poseHandler.SetHumanPose(ref humanBodyPose, ref humanBodyRot, nativeMuscles);

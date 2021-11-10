@@ -1,15 +1,10 @@
 Read the [Malicious Mods and you](https://github.com/knah/VRCMods/blob/master/Malicious-Mods.md) doc!
 
-New mod:
- * Styletor - reskin your Quick Menu easily and flexibly!
-
-New features:
- * UI Expansion Kit: added an option to pin dropdown-type settings to Quick Menu expando
-
 Changes:
- * All mods: updated for UI 1.5/Build 1148+
- * Emoji Page Buttons: deprecated with new UI
- * SparkleBeGone: deprecated with new UI
+ * FavCat: Improved performance when opening Social menu
+ * IKTweaks: Fixed not showing tracker balls when calibrating
+ * CameraMinus: Fixed Shrink button in QM expando not shrinking the camera
+ * Advanced Safety: Fixed "Hide this avatar on all users" button not working 
 
 
 **USE IT AT YOUR OWN RISK.** Modding the client is against VRChat ToS. I am not responsible for any bans or other punishments you may get by using these mods!

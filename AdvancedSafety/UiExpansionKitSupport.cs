@@ -36,15 +36,14 @@ namespace AdvancedSafety
         internal static IUser GetUserSelectedInQm()
         {
             if (ourSelectedUserQm == null)
-                ourSelectedUserQm = UnityUtils.FindInactiveObjectInActiveRoot("/UserInterface/Canvas_QuickMenu(Clone)")
-                    ?.GetComponentsInChildren<SelectedUserMenuQM>().Single();
+                ourSelectedUserQm = UnityUtils.FindInactiveObjectInActiveRoot("UserInterface/Canvas_QuickMenu(Clone)/Container/Window/QMParent/Menu_SelectedUser_Local")
+                    ?.GetComponent<SelectedUserMenuQM>();
 
             return ourSelectedUserQm?.field_Private_IUser_0;
         }
 
         private static void OnHideAvatarClick()
         {
-            
             var apiAvatar = GetUserSelectedInQm()?.GetPlayer()?._vrcplayer?.prop_VRCAvatarManager_0?.field_Private_ApiAvatar_0;
             if (apiAvatar == null) return;
 
