@@ -217,6 +217,7 @@
     </ItemGroup>
     
     <Target Name="RandomizeIntegrityChecks" AfterTargets="PostBuildEvent" Condition="'$(NoModReferences)' != 'true'">
-        <Exec Command="$(MsBuildThisFileDirectory)\Output\$(Configuration)\net472\IntegrityCheckWeaver.exe $(OutputPath)/$(AssemblyName).dll" />
+        <Exec Condition="'$(OS)' != 'Unix'" Command="$(MsBuildThisFileDirectory)\Output\$(Configuration)\net472\IntegrityCheckWeaver.exe $(OutputPath)/$(AssemblyName).dll" />
+        <Exec Condition="'$(OS)' == 'Unix'" Command="$(MsBuildThisFileDirectory)\Output\net6.0\IntegrityCheckWeaver $(OutputPath)/$(AssemblyName).dll" />
     </Target>
 </Project>
