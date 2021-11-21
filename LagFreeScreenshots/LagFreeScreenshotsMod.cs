@@ -22,7 +22,6 @@ using VRC.UserCamera;
 using VRC.Core;
 using VRC;
 using Object = UnityEngine.Object;
-using CameraTakePhotoEnumerator = VRC.UserCamera.CameraUtil.ObjectNPrivateSealedIEnumerator1ObjectIEnumeratorIDisposableInObBoAcIn2StInTeCaUnique;
 using System.Collections.Generic;
 using System.Globalization;
 using Unity.Collections.LowLevel.Unsafe;
@@ -69,7 +68,7 @@ namespace LagFreeScreenshots
             } 
 
             HarmonyInstance.Patch(
-                typeof(CameraTakePhotoEnumerator).GetMethod("MoveNext"),
+                typeof(CameraUtil._TakeScreenShot_d__5).GetMethod("MoveNext"),
                 new HarmonyMethod(AccessTools.Method(typeof(LagFreeScreenshotsMod), nameof(MoveNextPatchAsyncReadback))));
             
             AddEnumSettings();
@@ -150,7 +149,7 @@ namespace LagFreeScreenshots
                    position.z.ToString(CultureInfo.InvariantCulture);
         }
 
-        public static bool MoveNextPatchAsyncReadback(ref bool __result, CameraTakePhotoEnumerator __instance)
+        public static bool MoveNextPatchAsyncReadback(ref bool __result, CameraUtil._TakeScreenShot_d__5 __instance)
         {
             var resX = __instance.field_Public_Int32_0;
             var resY = __instance.field_Public_Int32_1;
