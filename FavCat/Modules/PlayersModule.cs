@@ -36,7 +36,7 @@ namespace FavCat.Modules
         private void ShowFavMenu()
         {
             var availableListsMenu = ExpansionKitApi.CreateCustomFullMenuPopup(LayoutDescription.WideSlimList);
-            var currentUser = FavCatMod.PageUserInfo.field_Public_APIUser_0;
+            var currentUser = FavCatMod.PageUserInfo.field_Private_APIUser_0;
             
             var storedCategories = GetCategoriesInSortedOrder();
 

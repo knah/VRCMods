@@ -65,7 +65,7 @@ namespace AdvancedSafety
 
         private static void OnHideBigClick()
         {
-            var apiUser = ourUserInfoPage?.field_Public_APIUser_0;
+            var apiUser = ourUserInfoPage?.field_Private_APIUser_0;
             var userId = apiUser?.id;
             if (userId == null) return;
             
@@ -102,7 +102,7 @@ namespace AdvancedSafety
         {
             yield return new WaitForSeconds(.5f);
 
-            ourBigMenuHideText.text = AvatarHiding.ourBlockedAvatarAuthors.ContainsKey(pageUserInfo.field_Public_APIUser_0?.id ?? "") ? "Unhide all avatars by this author" : "Hide all avatars by this author";
+            ourBigMenuHideText.text = AvatarHiding.ourBlockedAvatarAuthors.ContainsKey(pageUserInfo.field_Private_APIUser_0?.id ?? "") ? "Unhide all avatars by this author" : "Hide all avatars by this author";
         }
 
         private static void ConsumeHideBigInstance(GameObject obj) => ourBigMenuHideText = obj.GetComponentInChildren<Text>();
