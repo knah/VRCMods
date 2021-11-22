@@ -65,8 +65,8 @@ namespace FavCat.Modules
             
             FavCatMod.GetUiManager().Method_Public_Void_String_Boolean_0("UserInterface/MenuContent/Screens/Avatar", false);
             SetSearchListHeaderAndScrollToIt("Search running...");
-            LastSearchRequest = "Created by " + FavCatMod.PageUserInfo.field_Public_APIUser_0.displayName;
-            FavCatMod.Database.RunBackgroundAvatarSearchByUser(FavCatMod.PageUserInfo.field_Public_APIUser_0.id, AcceptSearchResult);
+            LastSearchRequest = "Created by " + FavCatMod.PageUserInfo.field_Private_APIUser_0.displayName;
+            FavCatMod.Database.RunBackgroundAvatarSearchByUser(FavCatMod.PageUserInfo.field_Private_APIUser_0.id, AcceptSearchResult);
         }
 
         private static Transform GetListsParent()
