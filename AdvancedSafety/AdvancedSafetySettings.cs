@@ -51,6 +51,8 @@ namespace AdvancedSafety
             AllowNonDefaultSortingLayers = category.CreateEntry(nameof(AllowNonDefaultSortingLayers), false, "Allow non-default sorting layers (overrender)");
             
             EnforceDefaultSortingLayer = category.CreateEntry(nameof(EnforceDefaultSortingLayer), true, "Enforce default sorting layer (less overrender, affects performance)");
+            RiskyAssertDisable = category.CreateEntry(nameof(RiskyAssertDisable), false, "Disable assertions from corrupted bundles (potentially risky, but prevents more crashes)");
+            RemoveSuspiciousThings = category.CreateEntry(nameof(RemoveSuspiciousThings), true, "Completely remove suspicious gameobjects (instead of trying to limit then)");
             
             HidePortalsFromBlockedUsers = category.CreateEntry(nameof(HidePortalsFromBlockedUsers), true, "Hide portals from blocked users");
             HidePortalsFromNonFriends = category.CreateEntry(nameof(HidePortalsFromNonFriends), false, "Hide portals from non-friends");
@@ -75,6 +77,8 @@ namespace AdvancedSafety
         public static MelonPreferences_Entry<bool> AllowReadingBadFloats;
         public static MelonPreferences_Entry<bool> AllowNonDefaultSortingLayers;
         public static MelonPreferences_Entry<bool> EnforceDefaultSortingLayer;
+        public static MelonPreferences_Entry<bool> RiskyAssertDisable;
+        public static MelonPreferences_Entry<bool> RemoveSuspiciousThings;
 
         public static MelonPreferences_Entry<int> MaxPolygons;
         public static MelonPreferences_Entry<int> MaxTransforms;

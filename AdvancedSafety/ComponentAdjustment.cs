@@ -162,7 +162,11 @@ namespace AdvancedSafety
                 }
             }
 
-            var allowedMaterialCount = Math.Min(AdvancedSafetySettings.MaxMaterialSlots.Value - materialCount, submeshCount + AdvancedSafetySettings.MaxMaterialSlotsOverSubmeshCount.Value);
+            var allowedCountBasedOnSubmeshes = submeshCount + AdvancedSafetySettings.MaxMaterialSlotsOverSubmeshCount.Value;
+            if (AdvancedSafetySettings.RemoveSuspiciousThings.Value && allowedCountBasedOnSubmeshes < renderer.GetMaterialCount())
+                Object.Destroy(renderer.gameObject);
+            
+            var allowedMaterialCount = Math.Min(AdvancedSafetySettings.MaxMaterialSlots.Value - materialCount, allowedCountBasedOnSubmeshes);
             if (allowedMaterialCount < renderer.GetMaterialCount())
             {
                 renderer.GetSharedMaterials(ourMaterialsList);
