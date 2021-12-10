@@ -12,6 +12,7 @@ namespace Styletor.Utils
     public class SpriteSnipperUtil
     {
         public static readonly Dictionary<Texture2D, Texture2D> ourTextureToReadableMap = new();
+        public static readonly Dictionary<Texture2D, Texture2D> ourGrayscaledTexturesMap = new();
         public static readonly Dictionary<Sprite, Sprite> ourGrayscaledSpritesMap = new();
 
         public static void SaveSpriteAsPngWithMetadata(Sprite original, string path)
@@ -29,35 +30,55 @@ namespace Styletor.Utils
             Object.Destroy(newTexture);
         }
 
+        private static void ProcessPixelsToGrayscaleNormalized(Il2CppStructArray<Color> pixels)
+        {
+            var scaleFactor = 0f;
+            for (var i = 0; i < pixels.Count; i++)
+            {
+                var pixel = pixels[i];
+                if (pixel.a == 0) continue;
+
+                var g = pixel.Grayscale();
+                if (g > scaleFactor)
+                    scaleFactor = g;
+            }
+
+            for (var i = 0; i < pixels.Count; i++)
+            {
+                var pixel = pixels[i];
+                var g = pixel.Grayscale() / scaleFactor;
+                pixels[i] = new Color { r = g, g = g, b = g, a = pixel.a };
+            }
+        }
+
+        private static void ProcessPixelsToGrayscale(Il2CppStructArray<Color> pixels)
+        {
+            for (var i = 0; i < pixels.Count; i++)
+            {
+                var pixel = pixels[i];
+                var g = pixel.Grayscale();
+                pixels[i] = new Color { r = g, g = g, b = g, a = pixel.a };
+            }
+        }
+
+        public static Texture2D GetGrayscaledTexture(Texture2D original, bool normalizeWhite)
+        {
+            if (ourGrayscaledTexturesMap.ContainsKey(original))
+                return ourGrayscaledTexturesMap[original];
+
+            var newTexture = Copy(EnsureReadable(original), normalizeWhite ? ProcessPixelsToGrayscaleNormalized : ProcessPixelsToGrayscale);
+            
+            newTexture.hideFlags |= HideFlags.DontUnloadUnusedAsset;
+
+            return ourGrayscaledTexturesMap[original] = newTexture;
+        }
+
         public static Sprite GetGrayscaledSprite(Sprite original, bool normalizeWhite)
         {
             if (ourGrayscaledSpritesMap.ContainsKey(original))
                 return ourGrayscaledSpritesMap[original];
 
-            var newTexture = Copy(EnsureReadable(original.texture), original.textureRect, pixels =>
-            {
-                var scaleFactor = 1f;
-                if (normalizeWhite)
-                {
-                    scaleFactor = 0;
-                    for (var i = 0; i < pixels.Count; i++)
-                    {
-                        var pixel = pixels[i];
-                        if (pixel.a == 0) continue;
-                        
-                        var g = pixel.Grayscale();
-                        if (g > scaleFactor)
-                            scaleFactor = g;
-                    }
-                }
-
-                for (var i = 0; i < pixels.Count; i++)
-                {
-                    var pixel = pixels[i];
-                    var g = pixel.Grayscale() / scaleFactor;
-                    pixels[i] = new Color { r = g, g = g, b = g, a = pixel.a };
-                }
-            });
+            var newTexture = Copy(EnsureReadable(original.texture), original.textureRect, normalizeWhite ? ProcessPixelsToGrayscaleNormalized : ProcessPixelsToGrayscale);
 
             newTexture.hideFlags |= HideFlags.DontUnloadUnusedAsset;
 
@@ -81,6 +102,11 @@ namespace Styletor.Utils
             var newTexture = ourTextureToReadableMap[source] = ForceReadTexture(source);
             newTexture.hideFlags |= HideFlags.DontUnloadUnusedAsset;
             return newTexture;
+        }
+
+        public static Texture2D Copy(Texture2D orig, Action<Il2CppStructArray<Color>>? processPixels = null)
+        {
+            return Copy(orig, new Rect(0, 0, orig.width, orig.height), processPixels);
         }
 
         // These two methods are adapted from UnityExplorer, licensed under GPLv3

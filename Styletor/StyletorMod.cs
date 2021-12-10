@@ -1,17 +1,21 @@
+using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using HarmonyLib;
 using MelonLoader;
 using Styletor;
+using Styletor.ExtraHandlers;
 using Styletor.Styles;
+using UIExpansionKit;
 using UIExpansionKit.API;
+using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
 using VRC.UI.Core.Styles;
 
-[assembly:MelonInfo(typeof(StyletorMod), "Styletor", "0.1.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(StyletorMod), "Styletor", "0.2.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 #nullable disable
@@ -26,6 +30,11 @@ namespace Styletor
         private StylesLoader myStylesLoader;
 
         private SettingsHolder mySettings;
+
+        private UiLasersHandler myLasersHandler;
+        private ActionMenuHandler myActionMenuHandler;
+        
+        public SettingsHolder Settings => mySettings;
 
         public override void OnApplicationStart()
         {
@@ -110,12 +119,24 @@ namespace Styletor
             while (myStyleEngine == null)
             {
                 yield return null;
-                var qmHolder = GameObject.Find("/UserInterface/Canvas_QuickMenu(Clone)");
+                var qmHolder = UnityUtils.FindInactiveObjectInActiveRoot("UserInterface/Canvas_QuickMenu(Clone)");
                 if (qmHolder == null) continue;
                 var styleEngine = qmHolder.GetComponent<StyleEngine>();
                 if (styleEngine != null)
                     myStyleEngine = new StyleEngineWrapper(styleEngine);
             }
+
+            var initCandidates = typeof(StyleEngine).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                .Where(it => it.Name.StartsWith("Method_Public_Void_") && it.GetParameters().Length == 0).ToList();
+
+            var initMethod = initCandidates.SingleOrDefault(it =>
+                XrefScanner.XrefScan(it).Any(jt =>
+                    jt.Type == XrefType.Global && jt.ReadAsObject()?.ToString() == "style-sheet"));
+
+            if (initMethod == null) 
+                MelonLogger.Warning("No Init method on StyleEngine, will wait for natural init");
+            else
+                initMethod.Invoke(myStyleEngine.StyleEngine, Array.Empty<object>());
 
             while (myStyleEngine.StyleEngine.field_Private_List_1_ElementStyle_0.Count == 0)
                 yield return null;
@@ -123,6 +144,24 @@ namespace Styletor
             myStyleEngine.BackupDefaultStyle();
 
             myStylesLoader = new StylesLoader(myStyleEngine, mySettings);
+
+            try
+            {
+                myLasersHandler = new UiLasersHandler(mySettings);
+            }
+            catch (Exception ex)
+            {
+                MelonLogger.Error($"UI Laser recoloring handler failed to initialize: {ex}");
+            }
+            
+            try
+            {
+                myActionMenuHandler = new ActionMenuHandler(mySettings);
+            }
+            catch (Exception ex)
+            {
+                MelonLogger.Error($"Action Menu recoloring handler failed to initialize: {ex}");
+            }
         }
 
         public void ReloadStyles()

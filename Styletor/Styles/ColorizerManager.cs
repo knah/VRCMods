@@ -6,6 +6,7 @@ namespace Styletor.Styles
 {
     public class ColorizerManager
     {
+        private readonly SettingsHolder mySettings;
         public string MenuColorBase { get; private set; } = "";
         public string MenuColorHighlight { get; private set; } = "";
         public string MenuColorBackground { get; private set; } = "";
@@ -17,40 +18,19 @@ namespace Styletor.Styles
         public string MenuColorAccent { get; private set; } = "";
         public string MenuColorAccentDarker { get; private set; } = "";
 
-        public ColorizerManager(SettingsHolder settingsHolder)
+        public ColorizerManager(SettingsHolder settings)
         {
-            var baseColorEntry = settingsHolder.BaseColorEntry;
-            var accentColorEntry = settingsHolder.AccentColorEntry;
-            var textColorEntry = settingsHolder.TextColorEntry;
+            mySettings = settings;
             
-            baseColorEntry.OnValueChanged += (_, _) => { UpdateColors(baseColorEntry, accentColorEntry, textColorEntry); };
-            accentColorEntry.OnValueChanged += (_, _) => { UpdateColors(baseColorEntry, accentColorEntry, textColorEntry); };
-            UpdateColors(baseColorEntry, accentColorEntry, textColorEntry);
+            settings.BaseColorEntry.OnValueChanged += (_, _) => { UpdateColors(); };
+            settings.AccentColorEntry.OnValueChanged += (_, _) => { UpdateColors(); };
+            settings.TextColorEntry.OnValueChanged += (_, _) => { UpdateColors(); };
+            UpdateColors();
         }
 
-        private static int ParseComponent(string[] split, int idx, int defaultValue = 255)
+        private void UpdateColors()
         {
-            if (split.Length <= idx || !int.TryParse(split[idx], out var parsed)) parsed = defaultValue;
-            if (parsed < 0) parsed = 0;
-            else if (parsed > 255) parsed = 255;
-            return parsed;
-        }
-
-        private static Color ParseColor(string str)
-        {
-            var split = str.Split(' ');
-            var r = ParseComponent(split, 0, 200);
-            var g = ParseComponent(split, 1, 200);
-            var b = ParseComponent(split, 2, 200);
-            var a = ParseComponent(split, 3, 255);
-
-            return new Color(r / 255f, g / 255f, b / 255f, a / 255f);
-        }
-
-        private void UpdateColors(MelonPreferences_Entry<string> baseColorEntry, MelonPreferences_Entry<string> accentColorEntry, MelonPreferences_Entry<string> textColorEntry)
-        {
-            var textValue = textColorEntry.Value.Trim().Length == 0 ? accentColorEntry.Value : textColorEntry.Value;
-            UpdateColors(ParseColor(baseColorEntry.Value), ParseColor(accentColorEntry.Value), ParseColor(textValue));
+            UpdateColors(mySettings.BaseColor, mySettings.AccentColor, mySettings.TextColor);
         }
 
         public string ReplacePlaceholders(string input)

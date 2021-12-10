@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
 using VRC.UI.Core.Styles;
 
 namespace Styletor.Utils
@@ -136,9 +138,18 @@ namespace Styletor.Utils
             builder.Append("])");
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Grayscale(this Color c) => 0.29899999499321f * c.r + 0.587000012397766f * c.g + 57.0f / 500.0f * c.b;
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color RGBMultipliedClamped(this Color c, float m) => new() { r = Math.Min(c.r * m, 1f), g = Math.Min(c.g * m, 1f), b = Math.Min(c.b * m, 1f), a = c.a };
 
+        public static void RecolorKeepAlpha(this Graphic graphic, Color newColor)
+        {
+            newColor.a = graphic.color.a;
+            graphic.color = newColor;
+        }
+        
         public static byte[] ReadAllBytes(this Stream stream)
         {
             using var memStream = new MemoryStream();
