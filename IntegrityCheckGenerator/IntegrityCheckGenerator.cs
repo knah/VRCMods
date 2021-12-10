@@ -107,6 +107,7 @@ namespace IntegrityCheckGenerator
             generatedCode.AppendLine("    catch (BadImageFormatException) {}");
             generatedCode.AppendLine("    finally { CheckDummyThree(); }");
             generatedCode.AppendLine("    RanCheck3 = true;");
+            generatedCode.AppendLine("    OnSceneWasLoaded2(buildIndex, sceneName);");
             generatedCode.AppendLine("}");
         
             generatedCode.AppendLine($"protected {modTypeName}() {{");

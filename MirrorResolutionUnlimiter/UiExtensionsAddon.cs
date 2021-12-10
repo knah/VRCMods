@@ -11,6 +11,7 @@ namespace MirrorResolutionUnlimiter
         private static int PlayerLocalLayer = 1 << 10;
         private static int UiLayer = 1 << 5;
         private static int UiMenuLayer = 1 << 12;
+        private static int UiInternalLayer = 1 << 19;
         private static int MirrorReflectionLayer = 1 << 18;
         
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -28,14 +29,19 @@ namespace MirrorResolutionUnlimiter
         {
             foreach (var vrcMirrorReflection in Object.FindObjectsOfType<VRC_MirrorReflection>())
                 if (vrcMirrorReflection.isActiveAndEnabled)
-                    vrcMirrorReflection.m_ReflectLayers = -1 & ~UiLayer & ~UiMenuLayer & ~PlayerLocalLayer;
+                    if (MirrorResolutionUnlimiterMod.UiInMirrors.Value)
+                        vrcMirrorReflection.m_ReflectLayers = -1 & ~PlayerLocalLayer;
+                    else
+                        vrcMirrorReflection.m_ReflectLayers =
+                            -1 & ~UiLayer & ~UiMenuLayer & ~PlayerLocalLayer & ~UiInternalLayer;
+
         }
 
         private static void OptimizeMirrors()
         {
             foreach (var vrcMirrorReflection in Object.FindObjectsOfType<VRC_MirrorReflection>())
                 if (vrcMirrorReflection.isActiveAndEnabled)
-                    vrcMirrorReflection.m_ReflectLayers = PlayerLayer | MirrorReflectionLayer;
+                    vrcMirrorReflection.m_ReflectLayers = PlayerLayer | MirrorReflectionLayer | (MirrorResolutionUnlimiterMod.UiInMirrors.Value ? UiMenuLayer | UiInternalLayer | UiLayer : 0);
         }
     }
 }

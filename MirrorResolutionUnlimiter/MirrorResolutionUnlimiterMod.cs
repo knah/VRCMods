@@ -8,7 +8,7 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 using VRC.SDKBase;
 
-[assembly:MelonInfo(typeof(MirrorResolutionUnlimiterMod), "MirrorResolutionUnlimiter", "1.1.3", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(MirrorResolutionUnlimiterMod), "MirrorResolutionUnlimiter", "1.1.4", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -27,6 +27,7 @@ namespace MirrorResolutionUnlimiter
         private static bool ourAllMirrorsAuto = false;
         private static int ourMirrorMsaa = 0;
         private static MelonPreferences_Entry<bool> ourMsaaIsUpperLimit;
+        internal static MelonPreferences_Entry<bool> UiInMirrors;
 
         private MelonPreferences_Entry<string> myPixelLightsSetting;
 
@@ -58,6 +59,8 @@ namespace MirrorResolutionUnlimiter
             myPixelLightsSetting.OnValueChangedUntyped += UpdateMirrorPixelLights;
 
             ourMsaaIsUpperLimit = category.CreateEntry("MsaaIsUpperLimit", true, "Mirror MSAA setting is upper limit (otherwise static)");
+
+            UiInMirrors = category.CreateEntry("UiInMirrors", false, "Include UI in mirrors when using Optimize/Beautify buttons");
 
             HarmonyInstance.Patch(
                 AccessTools.Method(typeof(VRC_MirrorReflection), nameof(VRC_MirrorReflection.GetReflectionData)),
