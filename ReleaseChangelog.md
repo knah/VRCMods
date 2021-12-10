@@ -2,6 +2,8 @@ Read the [Malicious Mods and you](https://github.com/knah/VRCMods/blob/master/Ma
 
 Changes:
  * Advanced Safety: added protection for uncommon skid crashes (contributed by Requi and Ben)
+ * UI Expansion Kit: added APIs to dynamically show or hide mod settings entries
+ * UI Expansion Kit: fixed compatibility with build 1160
 
 
 **USE IT AT YOUR OWN RISK.** Modding the client is against VRChat ToS. I am not responsible for any bans or other punishments you may get by using these mods!

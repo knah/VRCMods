@@ -98,6 +98,7 @@ namespace UIExpansionKit
             Action<string, string> handler = (_, _) => { UpdateText(); };
             stringEntry.OnValueChanged += handler;
             button.GetOrAddComponent<DestroyListener>().OnDestroyed += () => stringEntry.OnValueChanged -= handler;
+            button.GetOrAddComponent<EnableDisableListener>().OnEnabled += UpdateText;
         }
 
         private static void CreatePinnedPrefButtonForEnum<T>(MelonPreferences_Entry<T> enumEntry, Transform expandoRoot, GameObject buttonPrefab) where T: Enum

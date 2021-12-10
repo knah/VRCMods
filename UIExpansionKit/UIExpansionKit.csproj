@@ -3,7 +3,7 @@
         <TargetFramework>net472</TargetFramework>
         <VrcReferences>true</VrcReferences>
         <LangVersion>latest</LangVersion>
-        <AssemblyVersion>0.4.0.0</AssemblyVersion>
+        <AssemblyVersion>0.4.1.0</AssemblyVersion>
     </PropertyGroup>
     <ItemGroup>
         <EmbeddedResource Include="modui.assetbundle" />

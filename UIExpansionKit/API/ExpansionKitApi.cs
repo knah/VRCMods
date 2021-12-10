@@ -8,15 +8,29 @@ namespace UIExpansionKit.API
 {
     public static class ExpansionKitApi
     {
-        internal static readonly Dictionary<ExpandedMenu, CustomLayoutedPageImpl> ExpandedMenus = new Dictionary<ExpandedMenu, CustomLayoutedPageImpl>();
-        internal static readonly Dictionary<string, GameObject> CustomCategoryUIs = new Dictionary<string, GameObject>();
-        internal static readonly Dictionary<string, CustomLayoutedPageImpl> SettingPageExtensions = new Dictionary<string, CustomLayoutedPageImpl>();
-        internal static readonly List<IEnumerator> ExtraWaitCoroutines = new List<IEnumerator>();
+        internal static readonly Dictionary<ExpandedMenu, CustomLayoutedPageImpl> ExpandedMenus = new();
+        internal static readonly Dictionary<string, GameObject> CustomCategoryUIs = new();
+        internal static readonly Dictionary<string, CustomLayoutedPageImpl> SettingPageExtensions = new();
+        internal static readonly List<IEnumerator> ExtraWaitCoroutines = new();
         internal static bool CanAddWaitCoroutines = true;
 
-        internal static readonly Dictionary<(string, string), IList<(string SettingsValue, string DisplayName)>> EnumSettings = new Dictionary<(string, string), IList<(string SettingsValue, string DisplayName)>>();
+        internal static readonly Dictionary<(string, string), IList<(string SettingsValue, string DisplayName)>> EnumSettings = new();
+        internal static readonly Dictionary<(string, string), SettingVisibilityRegistrationValue> SettingsVisibilities = new();
 
         internal static List<Action> onUiManagerInitDelegateList = new();
+
+        internal class SettingVisibilityRegistrationValue
+        {
+            internal readonly Func<bool> IsVisible;
+            internal event Action OnUpdateVisibility;
+
+            public SettingVisibilityRegistrationValue(Func<bool> isVisible)
+            {
+                IsVisible = isVisible;
+            }
+
+            internal void FireUpdateVisibility() => OnUpdateVisibility?.Invoke();
+        }
         
         /// <summary>
         /// Actions added to this even will be called during UI Expansion Kit init, after VrcUiManager has been created
@@ -202,6 +216,17 @@ namespace UIExpansionKit.API
         public static PreloadedBundleContents GetUiExpansionKitBundleContents()
         {
             return UiExpansionKitMod.Instance.StuffBundle;
+        }
+
+        /// <summary>
+        /// Registers a visibility callback for a given settings entry.
+        /// </summary>
+        /// <returns>A delegate that can be called to update visibility of settings entry</returns>
+        public static Action RegisterSettingsVisibilityCallback(string category, string setting, Func<bool> isVisible)
+        {
+            var value = new SettingVisibilityRegistrationValue(isVisible);
+            SettingsVisibilities[(category, setting)] = value;
+            return value.FireUpdateVisibility;
         }
     }
 }

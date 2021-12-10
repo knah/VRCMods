@@ -188,6 +188,7 @@ namespace UIExpansionKit
 
                         textField.text = toString(newValue);
                     };
+                    AttachVisibilityHandlerToEntry(textSetting, entry);
                 }
                 
                 
@@ -253,6 +254,8 @@ namespace UIExpansionKit
                                         dropdown.value = newIndex;
                                 };
                                 
+                                AttachVisibilityHandlerToEntry(comboSetting, pref);
+                                
                                 AttachPinToggle(comboSetting.transform, categoryId, prefId, pinnedSettings);
                             }
                             else
@@ -282,6 +285,8 @@ namespace UIExpansionKit
                                     UiExpansionKitMod.AreSettingsDirty = true;
                                     textField.text = newValue;
                                 };
+                                
+                                AttachVisibilityHandlerToEntry(textSetting, pref);
                             }
 
                             break;
@@ -304,6 +309,7 @@ namespace UIExpansionKit
                                 
                                 mainToggle.isOn = newValue;
                             };
+                            AttachVisibilityHandlerToEntry(boolSetting, pref);
                             break;
                         case MelonPreferences_Entry<float> floatEntry:
                             CreateNumericSetting(floatEntry, f => f.ToString(CultureInfo.InvariantCulture),
@@ -349,7 +355,7 @@ namespace UIExpansionKit
                 customEntries?.PopulateButtons(categoryUiContent, false, false);
             }
 
-            UiExpansionKitMod.SetLayerRecursively(settingsContentRoot.gameObject, 12);
+            UiExpansionKitMod.SetLayerRecursively(settingsContentRoot.gameObject, 19);
         }
 
         private static Transform CreateEnumSetting<T>(MelonPreferences_Entry<T> entry, GameObject comboBoxPrefab, Transform categoryUiContent) where T : Enum
@@ -400,8 +406,21 @@ namespace UIExpansionKit
                 if (newIndex != -1)
                     dropdown.value = newIndex;
             };
+            
+            AttachVisibilityHandlerToEntry(comboSetting, entry);
 
             return comboSetting.transform;
+        }
+
+        private static void AttachVisibilityHandlerToEntry(GameObject entry, MelonPreferences_Entry prefsEntry)
+        {
+            var category = prefsEntry.Category.Identifier;
+            var setting = prefsEntry.Identifier;
+            
+            if (!ExpansionKitApi.SettingsVisibilities.TryGetValue((category, setting), out var value)) return;
+
+            entry.active = value.IsVisible();
+            value.OnUpdateVisibility += () => { entry.active = value.IsVisible(); };
         }
     }
 }
