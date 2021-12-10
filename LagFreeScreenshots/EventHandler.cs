@@ -1,7 +1,9 @@
 ﻿using System;
+using LagFreeScreenshots.API;
 
 namespace LagFreeScreenshots
 {
+    [Obsolete("Use LagFreeScreenshots.API.LfsApi")]
     public static class EventHandler
     {
         /// <summary>
@@ -9,6 +11,9 @@ namespace LagFreeScreenshots
         /// </summary>
         public static event Action<string, int, int, Metadata> OnScreenshotSaved;
 
-        internal static void InvokeScreenshotSaved(string filePath, int width, int height, Metadata metadata) => OnScreenshotSaved?.Invoke(filePath, width, height, metadata);
+        internal static void InvokeScreenshotSaved(string filePath, int width, int height, MetadataV2 metadata)
+        {
+            OnScreenshotSaved?.Invoke(filePath, width, height, new Metadata(metadata));
+        }
     }
 }

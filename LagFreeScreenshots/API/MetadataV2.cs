@@ -1,23 +1,21 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using LagFreeScreenshots.API;
+using System.Linq;
 using UnityEngine;
 using VRC;
 using VRC.Core;
 
-namespace LagFreeScreenshots
+namespace LagFreeScreenshots.API
 {
-    [Obsolete("Use LagFreeScreenshots.API.MetadataV2")]
-    public class Metadata
+    public class MetadataV2
     {
-        public int ImageRotation;
-        public APIUser ApiUser;
-        public ApiWorldInstance WorldInstance;
+        public readonly ScreenshotRotation ImageRotation;
+        public readonly APIUser ApiUser;
+        public readonly ApiWorldInstance WorldInstance;
         public Vector3 Position;
-        public List<Tuple<Player, Vector3>> PlayerList;
+        public readonly List<(Player, Vector3)> PlayerList;
 
-        public Metadata(int imageRotation, APIUser apiUser, ApiWorldInstance apiWorldInstance, Vector3 position, List<Tuple<Player, Vector3>> playerList)
+        public MetadataV2(ScreenshotRotation imageRotation, APIUser apiUser, ApiWorldInstance apiWorldInstance, Vector3 position, List<(Player, Vector3)> playerList)
         {
             ImageRotation = imageRotation;
             ApiUser = apiUser;
@@ -26,14 +24,7 @@ namespace LagFreeScreenshots
             PlayerList = playerList;
         }
 
-        public Metadata(MetadataV2 newMetadata) : this((int) newMetadata.ImageRotation, newMetadata.ApiUser,
-            newMetadata.WorldInstance, newMetadata.Position,
-            newMetadata.PlayerList.ConvertAll(it => Tuple.Create(it.Item1, it.Item2)))
-        {
-            
-        }
-
-        public string ConvertToString()
+        public override string ToString()
         {
             var worldString = "null,0,Not in any world";
             if (WorldInstance != null && WorldInstance.world != null)
@@ -45,11 +36,11 @@ namespace LagFreeScreenshots
                 + ApiUser.id + "," + ApiUser.displayName
                 + "|world:" + worldString
                 + "|pos:" + positionString
-                + (ImageRotation != -1 ? "|rq:" + ImageRotation : "")
-                + "|players:" + string.Join(";", PlayerList.ConvertAll(new Converter<Tuple<Player, Vector3>, string>(PlayerListToString)));
+                + (ImageRotation != ScreenshotRotation.NoRotation ? "|rq:" + ImageRotation : "")
+                + "|players:" + string.Join(";", PlayerList.Select(PlayerListToString));
         }
 
-        private static string PlayerListToString(Tuple<Player, Vector3> playerData)
+        private static string PlayerListToString((Player, Vector3) playerData)
         {
             if (playerData.Item1 == null || playerData.Item1.prop_APIUser_0 == null) return "null,0,0,0,null";
             return playerData.Item1.prop_APIUser_0.id + "," +

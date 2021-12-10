@@ -2,6 +2,7 @@ Read the [Malicious Mods and you](https://github.com/knah/VRCMods/blob/master/Ma
 
 Changes:
  * Advanced Safety: added protection for uncommon skid crashes (contributed by Requi and Ben)
+ * Lag Free Screenshots: added screenshot taken event for other mods (contributed by @DragonPlayerX in #178)
  * Mirror Resolution Unlimiter: added an option to show UI in mirrors when using Optimize/Beautify buttons, support new UI layer
  * Styletor: added export for default menu audio clips (replacement is not supported yet)
  * Styletor: added support for Action Menu recoloring (the round one)

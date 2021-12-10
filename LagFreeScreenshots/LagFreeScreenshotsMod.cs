@@ -24,12 +24,12 @@ using VRC;
 using Object = UnityEngine.Object;
 using CameraTakePhotoEnumerator = VRC.UserCamera.CameraUtil._TakeScreenShot_d__5;
 using System.Collections.Generic;
-using System.Globalization;
+using LagFreeScreenshots.API;
 using Unity.Collections.LowLevel.Unsafe;
 
 // using CameraUtil = ObjectPublicCaSiVeUnique;
 
-[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.2.7", "knah, Protected", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.3.0", "knah, Protected", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace LagFreeScreenshots
@@ -81,27 +81,27 @@ namespace LagFreeScreenshots
             ExpansionKitApi.RegisterSettingAsStringEnum(SettingsCategory, SettingScreenshotFormat, new []{("png", "PNG"), ("jpeg", "JPEG")});
         }
 
-        private static int GetPictureAutorotation(Camera camera)
+        private static ScreenshotRotation GetPictureAutorotation(Camera camera)
         {
             var pitch = Vector3.Angle(camera.transform.forward, new Vector3(0, 1, 0));
-            if (pitch < 45 || pitch > 135) return 0; //Pointing up/down, rotation doesn't matter
+            if (pitch < 45 || pitch > 135) return ScreenshotRotation.NoRotation; //Pointing up/down, rotation doesn't matter
 
             var rot = camera.transform.localEulerAngles.z;
-            if (rot >= 45 && rot < 135) return 3;
-            if (rot >= 135 && rot < 225) return 2;
-            if (rot >= 225 && rot < 315) return 1;
-            return 0;
+            if (rot >= 45 && rot < 135) return ScreenshotRotation.CounterClockwise90;
+            if (rot >= 135 && rot < 225) return ScreenshotRotation.Clockwise180;
+            if (rot >= 225 && rot < 315) return ScreenshotRotation.Clockwise90;
+            return ScreenshotRotation.NoRotation;
         }
 
-        private static List<Tuple<Player, Vector3>> GetPlayerList(Camera camera)
+        private static List<(Player, Vector3)> GetPlayerList(Camera camera)
         {
             var playerManager = PlayerManager.field_Private_Static_PlayerManager_0;
-            if (playerManager == null) return new List<Tuple<Player, Vector3>>();
+            if (playerManager == null) return new();
 
             var localPlayer = VRCPlayer.field_Internal_Static_VRCPlayer_0;
-            if (localPlayer == null) return new List<Tuple<Player, Vector3>>();
+            if (localPlayer == null) return new();
 
-            var result = new List<Tuple<Player, Vector3>>();
+            var result = new List<(Player, Vector3)>();
 
             var localPosition = localPlayer.gameObject.transform.position;
 
@@ -115,12 +115,12 @@ namespace LagFreeScreenshots
                 if (viewPos.z < 2 && Vector3.Distance(localPosition, playerPosition) < 2)
                 {
                     //User standing right next to photographer, might be visible (approx.)
-                    result.Add(Tuple.Create(p, viewPos));
+                    result.Add((p, viewPos));
                 }
                 else if (viewPos.x > -0.03 && viewPos.x < 1.03 && viewPos.y > -0.03 && viewPos.y < 1.03 && viewPos.z > 2 && viewPos.z < 30)
                 {
                     //User in viewport, might be obstructed but still...
-                    result.Add(Tuple.Create(p, viewPos));
+                    result.Add((p, viewPos));
                 }
             }
 
@@ -256,14 +256,14 @@ namespace LagFreeScreenshots
             if (!Directory.Exists(targetDir))
                 Directory.CreateDirectory(targetDir);
 
-            Metadata metadata = null;
-            int rotationQuarters = 0;
+            MetadataV2 metadata = null;
+            var rotationQuarters = ScreenshotRotation.AutoRotationDisabled;
             
             if (ourAutorotation.Value) 
                 rotationQuarters = GetPictureAutorotation(camera);
 
             if (ourMetadata.Value)
-                metadata = new Metadata(ourAutorotation.Value ? rotationQuarters : -1, APIUser.CurrentUser, RoomManager.field_Internal_Static_ApiWorldInstance_0, VRCPlayer.field_Internal_Static_VRCPlayer_0 == null ? new Vector3(0, 0, 0) : VRCPlayer.field_Internal_Static_VRCPlayer_0.transform.position, GetPlayerList(camera));
+                metadata = new MetadataV2(rotationQuarters, APIUser.CurrentUser, RoomManager.field_Internal_Static_ApiWorldInstance_0, VRCPlayer.field_Internal_Static_VRCPlayer_0 == null ? new Vector3(0, 0, 0) : VRCPlayer.field_Internal_Static_VRCPlayer_0.transform.position, GetPlayerList(camera));
 
             await EncodeAndSavePicture(targetFile, data, w, h, hasAlpha, rotationQuarters, metadata)
                 .ConfigureAwait(false);
@@ -340,7 +340,7 @@ namespace LagFreeScreenshots
 
 
         private static async Task EncodeAndSavePicture(string filePath, (IntPtr, int Length) pixelsPair, int w, int h,
-            bool hasAlpha, int rotationQuarters, Metadata metadata)
+            bool hasAlpha, ScreenshotRotation rotationQuarters, MetadataV2 metadata)
         {
             if (pixelsPair.Item1 == IntPtr.Zero) return;
             
@@ -369,18 +369,18 @@ namespace LagFreeScreenshots
                 }
             }
 
-            if (rotationQuarters == 1) //90deg cw
+            if (rotationQuarters == ScreenshotRotation.Clockwise90) //90deg cw
             {
                 pixelsPair = TransposeAndDestroyOriginal(pixelsPair, w, h, step);
                 var t = w;
                 w = h;
                 h = t;
             }
-            else if (rotationQuarters == 2) //180deg cw
+            else if (rotationQuarters == ScreenshotRotation.Clockwise180) //180deg cw
             {
                 FlipHorInPlace(pixelsPair, w, h, step);
             }
-            else if (rotationQuarters == 3) //270deg cw
+            else if (rotationQuarters == ScreenshotRotation.CounterClockwise90) //270deg cw
             {
                 FlipHorInPlace(pixelsPair, w, h, step);
                 FlipVertInPlace(pixelsPair, w, h, step);
@@ -404,13 +404,14 @@ namespace LagFreeScreenshots
             bitmap.UnlockBits(bitmapData);
             Marshal.FreeHGlobal(pixelsPair.Item1);
 
+            var description = metadata?.ToString();
+
             // https://docs.microsoft.com/en-us/windows/win32/gdiplus/-gdiplus-constant-property-item-descriptions
-            if (metadata != null)
+            if (description != null)
             {
                 // png description is saved as iTXt chunk manually
                 if (ourFormat.Value == "jpeg")
                 {
-                    var description = metadata.ConvertToString();
                     var stringBytesCount = Encoding.Unicode.GetByteCount(description);
                     var allBytes = new byte[8 + stringBytesCount];
                     Encoding.ASCII.GetBytes("UNICODE\0", 0, 8, allBytes, 0);
@@ -438,9 +439,8 @@ namespace LagFreeScreenshots
             else
             {
                 bitmap.Save(filePath, ImageFormat.Png);
-                if (metadata != null)
+                if (description != null)
                 {
-                    var description = metadata.ConvertToString();
                     using var pngStream = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite);
                     var originalEndChunkBytes = new byte[12];
                     pngStream.Position = pngStream.Length - 12;
@@ -460,6 +460,7 @@ namespace LagFreeScreenshots
             UnityEngine.Debug.Log($"Took screenshot to: {filePath}");
 
             EventHandler.InvokeScreenshotSaved(filePath, w, h, metadata);
+            LfsApi.InvokeScreenshotSaved(filePath, w, h, metadata);
 
             // yield to background thread for disposes
             await Task.Delay(1).ConfigureAwait(false);
