@@ -80,6 +80,11 @@
             <Private>false</Private>
             <HintPath>$(MsBuildThisFileDirectory)Libs\UnityEngine.VRModule.dll</HintPath>
         </Reference>
+        <Reference Include="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <SpecificVersion>false</SpecificVersion>
+            <Private>false</Private>
+            <HintPath>$(MsBuildThisFileDirectory)Libs\Unity.TextMeshPro.dll</HintPath>
+        </Reference>
         <Reference Include="MelonLoader, Version=0.3.0.0, Culture=neutral, PublicKeyToken=null">
             <SpecificVersion>false</SpecificVersion>
             <Private>false</Private>
