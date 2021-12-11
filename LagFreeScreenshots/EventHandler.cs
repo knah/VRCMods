@@ -13,7 +13,7 @@ namespace LagFreeScreenshots
 
         internal static void InvokeScreenshotSaved(string filePath, int width, int height, MetadataV2 metadata)
         {
-            OnScreenshotSaved?.Invoke(filePath, width, height, new Metadata(metadata));
+            OnScreenshotSaved?.Invoke(filePath, width, height, metadata == null ? null : new Metadata(metadata));
         }
     }
 }
