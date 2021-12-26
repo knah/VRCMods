@@ -264,13 +264,15 @@ namespace IKTweaks
                 ourSetVisibilityDelegate = (Action<VRCTrackingSteam, bool>) Delegate.CreateDelegate(typeof(Action<VRCTrackingSteam, bool>), method);
             }
             
-            foreach (var vrcTracking in VRCTrackingManager.field_Private_Static_VRCTrackingManager_0.field_Private_List_1_VRCTracking_0)
+            var trackingManager = VRCTrackingManager.field_Private_Static_VRCTrackingManager_0;
+            if (trackingManager == null) return;
+            foreach (var vrcTracking in trackingManager.field_Private_List_1_VRCTracking_0)
             {
+                if (vrcTracking == null) continue;
                 var vrcTrackingSteam = vrcTracking.TryCast<VRCTrackingSteam>();
                 if (vrcTrackingSteam == null) continue;
 
                 ourSetVisibilityDelegate(vrcTrackingSteam, visible);
-                return;
             }
         }
 
