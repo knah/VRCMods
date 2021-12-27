@@ -114,7 +114,8 @@ namespace IKTweaks
             
             var vrik = fbbik.GetComponent<VRIK_New>();
 
-            var firstPuckDisabled = !IKTweaksMod.ourRandomPuck.activeInHierarchy;
+            // AFK is similar to not having trackers, i.e. overlay
+            var firstPuckDisabled = !IKTweaksMod.ourRandomPuck.activeInHierarchy || IKTweaksMod.IsAfk;
             
             fbbik.skipSolverUpdate = true;
             if (LastInitializedController.field_Private_FBBIKHeadEffector_0 != null)

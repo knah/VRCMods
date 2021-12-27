@@ -32,6 +32,7 @@ namespace IKTweaks
         private static Func<VRCAvatarManager, float> ourGetEyeHeightDelegate;
         
         internal static GameObject ourRandomPuck;
+        private GameObject myAfkIcon;
 
         public override void OnApplicationStart()
         {
@@ -280,13 +281,25 @@ namespace IKTweaks
             steamVrControllerManager.field_Private_Action_0.TryCast<SteamVR_Events.Action<VREvent_t>>()?.action?.Invoke(new VREvent_t());
             steamVrControllerManager.field_Private_Action_1.TryCast<SteamVR_Events.Action<VREvent_t>>()?.action?.Invoke(new VREvent_t());
             steamVrControllerManager.field_Private_Action_2.TryCast<SteamVR_Events.Action<VREvent_t>>()?.action?.Invoke(new VREvent_t());
+
+            myAfkIcon = GameObject.Find("UserInterface/UnscaledUI/HudContent/Hud/AFK").transform.Find("Icon").gameObject;
         }
 
+        public static bool IsAfk { get; private set; }
+
+        private int myAfkUpdateCounter = 45;
         private static bool ourHadUpdateThisFrame = false;
         public override void OnUpdate()
         {
             VrIkHandling.Update();
             ourHadUpdateThisFrame = false;
+            // Only check AFK icon once per 45 frames - integer math is fast, touching il2cpp is slow
+            if (myAfkUpdateCounter-- > 0) return;
+            
+            myAfkUpdateCounter = 45;
+            if (!ReferenceEquals(myAfkIcon, null)) 
+                IsAfk = myAfkIcon.activeSelf;
+
         }
 
         public void OnVeryLateUpdate(Camera _)
