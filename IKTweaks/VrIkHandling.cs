@@ -35,35 +35,6 @@ namespace IKTweaks
                 MelonUtils.NativeHookAttach((IntPtr)(&ptr), patch);
                 ourOriginalVrIkInit = Marshal.GetDelegateForFunctionPointer<VrIkInit>(ptr);
             }
-
-            var methodThatChecksHipTracking = typeof(VRCVrIkController)
-                .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly).Single(it =>
-                    XrefScanner.XrefScan(it).Any(jt =>
-                        jt.Type == XrefType.Global && "Hip Tracking: Hip tracker found. tracking enabled." ==
-                        jt.ReadAsObject()?.ToString()));
-            
-            var canSupportHipTrackingCandidates = XrefScanner.XrefScan(methodThatChecksHipTracking).Where(it =>
-            {
-                if (it.Type != XrefType.Method) return false;
-                var resolved = it.TryResolve();
-                if (resolved == null || !resolved.IsStatic) return false;
-                return resolved.DeclaringType == typeof(VRCTrackingManager) && resolved is MethodInfo mi && mi.ReturnType == typeof(bool) && resolved.GetParameters().Length == 0;
-            }).ToList();
-
-            var canSupportHipTracking = canSupportHipTrackingCandidates.Single().TryResolve();
-
-            harmony.Patch(canSupportHipTracking, new HarmonyMethod(AccessTools.Method(typeof(VrIkHandling), nameof(SupportsHipTrackingPatch))));
-        }
-
-        private static bool SupportsHipTrackingPatch(ref bool __result)
-        {
-            if (IkTweaksSettings.DisableFbt.Value)
-            {
-                __result = false;
-                return false;
-            }
-
-            return true;
         }
         
         private delegate byte VrIkInit(IntPtr a, IntPtr b, IntPtr c, IntPtr d, byte e, IntPtr n);

@@ -453,17 +453,6 @@ namespace IKTweaks
             CalibrationManager.Calibrate(__1.gameObject);
         }
 
-        private static bool PatchHipAndFeetTracking(ref bool __result)
-        {
-            if (IkTweaksSettings.DisableFbt.Value)
-            {
-                __result = false;
-                return false;
-            }
-
-            return true;
-        }
-
         private static bool LateUpdatePrefix(FullBodyBipedIK __instance)
         {
             IKTweaksMod.ProcessIKLateUpdateQueue();
@@ -571,7 +560,6 @@ namespace IKTweaks
                 MelonDebug.Msg("hafts candidate: " + hipAndFeetTrackingSupportedCandidate.TryResolve()?.FullDescription());
 
             var hipAndFeetTrackingSupported = (MethodInfo) hipAndFeetTrackingSupportedCandidates.First().TryResolve();
-            harmony.Patch(hipAndFeetTrackingSupported, new HarmonyMethod(typeof(FullBodyHandling), nameof(PatchHipAndFeetTracking)));
             ourIsFbtSupported = (Func<bool>) Delegate.CreateDelegate(typeof(Func<bool>), hipAndFeetTrackingSupported);
         }
     }

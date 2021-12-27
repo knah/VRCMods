@@ -19,7 +19,7 @@ using Valve.VR;
 using Delegate = Il2CppSystem.Delegate;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.21", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.22", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -229,8 +229,10 @@ namespace IKTweaks
             DoMove(Vector3.zero);
         }
 
-        private static void CalibratePrefix()
+        private static void CalibratePrefix(MethodBase __originalMethod)
         {
+            MelonDebug.Msg("Called calibrate from " + __originalMethod);
+            
             if (!IkTweaksSettings.FullBodyVrIk.Value) return;
             
             MelonLogger.Msg("Clearing stored calibrations due to calibrate button press");
@@ -246,6 +248,13 @@ namespace IKTweaks
             foreach (var methodInfo in typeof(VRCTrackingManager).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly))
             {
                 if (!methodInfo.Name.StartsWith("Method_Public_Virtual_Final_New_Void_") || methodInfo.GetParameters().Length != 0) continue;
+
+                var callees = XrefScanner.XrefScan(methodInfo).Where(it => it.Type == XrefType.Method)
+                    .Select(it => it.TryResolve()).Where(it => it != null).ToList();
+
+                if (callees.Count != 1) continue;
+                if (callees[0].DeclaringType != typeof(VRCTrackingManager) || callees[0] is not MethodInfo mi || mi.ReturnType != typeof(bool))
+                    continue;
                 
                 HarmonyInstance.Patch(methodInfo, new HarmonyMethod(typeof(IKTweaksMod), nameof(CalibratePrefix)));
             }
