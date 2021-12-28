@@ -137,6 +137,10 @@ namespace IKTweaks
                 (nameof(MeasureAvatarMode.ImprovedWingspan), "Wingspan (accurate)"),
                 (nameof(MeasureAvatarMode.Height), "Height"),
             });
+
+            var updateVisibility = ExpansionKitApi.RegisterSettingsVisibilityCallback(IkTweaksSettings.IkTweaksCategory,
+                nameof(IkTweaksSettings.DriftMix), () => IkTweaksSettings.DriftMode.Value == DriftPreference.Custom);
+            IkTweaksSettings.DriftMode.OnValueChangedUntyped += updateVisibility;
         }
 
         private static void ShowIKTweaksMenu()

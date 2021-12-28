@@ -163,7 +163,10 @@ namespace RootMotionNew.FinalIK
 							Quaternion.FromToRotation(head.solverPosition - pelvis.solverPosition,
 								headSolverPosition - IKPositionPelvis));
 
-					delta = headSolverPosition - head.solverPosition;
+					var deltaHead = headSolverPosition - head.solverPosition;
+					var deltaHips = IKPositionPelvis - pelvis.solverPosition;
+					var mix = IkTweaksSettings.GetHeadDriftFactor();
+					delta = deltaHips * mix + deltaHead * (1f - mix);
 					foreach (VirtualBone bone in bones) bone.solverPosition += delta;
 
 					var currentDistance = (head.solverPosition - pelvis.solverPosition).magnitude;

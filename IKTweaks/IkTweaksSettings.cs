@@ -58,6 +58,8 @@ namespace IKTweaks
             OneHandedCalibration = category.CreateEntry(nameof(OneHandedCalibration), false, "One-handed calibration");
             
             NoWallFreeze = category.CreateEntry(nameof(NoWallFreeze), true, "Don't freeze head/hands inside walls");
+            DriftMode = category.CreateEntry(nameof(DriftMode), DriftPreference.Hips, "Which body part will drift?");
+            DriftMix = category.CreateEntry(nameof(DriftMix), 0.5f, "Drift mix (0=hips, 1=viewpoint, 0.5=both equally)");
             
             HandAngleOffset = category.CreateEntry(nameof(HandAngleOffset), DefaultHandAngle, "Hand angle offset", null, true);
             HandPositionOffset = category.CreateEntry(nameof(HandPositionOffset), DefaultHandOffset, "Hand position offset", null, true);
@@ -116,12 +118,25 @@ namespace IKTweaks
         public static MelonPreferences_Entry<float> WingspanMeasurementAdjustFactor;
         public static MelonPreferences_Entry<bool> OneHandedCalibration;
         public static MelonPreferences_Entry<bool> NoWallFreeze;
+        public static MelonPreferences_Entry<DriftPreference> DriftMode;
+        public static MelonPreferences_Entry<float> DriftMix;
         
         public static MelonPreferences_Entry<Vector3> HandAngleOffset;
         public static MelonPreferences_Entry<Vector3> HandPositionOffset;
 
         public static IgnoreAnimationsMode IgnoreAnimationsModeParsed;
         public static MeasureAvatarMode MeasureModeParsed;
+
+        public static float GetHeadDriftFactor()
+        {
+            return DriftMode.Value switch
+            {
+                DriftPreference.Hips => 0,
+                DriftPreference.Viewpoint => 1,
+                DriftPreference.Custom => DriftMix.Value,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
     }
 
     [Flags]
@@ -140,5 +155,12 @@ namespace IKTweaks
         Default,
         Height,
         ImprovedWingspan
+    }
+
+    public enum DriftPreference
+    {
+        Hips,
+        Viewpoint,
+        Custom
     }
 }
