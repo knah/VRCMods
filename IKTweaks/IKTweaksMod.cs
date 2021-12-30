@@ -19,7 +19,7 @@ using Valve.VR;
 using Delegate = Il2CppSystem.Delegate;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.22", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.23", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -137,10 +137,6 @@ namespace IKTweaks
                 (nameof(MeasureAvatarMode.ImprovedWingspan), "Wingspan (accurate)"),
                 (nameof(MeasureAvatarMode.Height), "Height"),
             });
-
-            var updateVisibility = ExpansionKitApi.RegisterSettingsVisibilityCallback(IkTweaksSettings.IkTweaksCategory,
-                nameof(IkTweaksSettings.DriftMix), () => IkTweaksSettings.DriftMode.Value == DriftPreference.Custom);
-            IkTweaksSettings.DriftMode.OnValueChangedUntyped += updateVisibility;
         }
 
         private static void ShowIKTweaksMenu()

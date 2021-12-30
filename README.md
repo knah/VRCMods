@@ -259,8 +259,6 @@ Given that this mod is still work in progress, these are subject to change.
  * Improved wingspan adjustment factor - your wingspan is adjusted by this factor in "Improved wingspan" scaling mode. If you consistently get avatar arms too long/short, consider tweaking this a tiny bit (to like 1.05 or 1.15)
  * One-handed calibration - pressing one trigger will be enough to calibrate. Holding the trigger slightly pressed will freeze the avatar (if enabled).
  * Don't freeze head/hands inside walls - prevents your hands/head from freezing if your head gets inside a wall.
- * Which body part will drift? - in case you want your viewpoint drift back, you monster.
- * Drift mix - if the previous setting is set to custom, decides how much viewpoint and hips can drift. 0 means viewpoint/head is fixed to the headset, 1 means hip is fixed to the tracker, values inbetween make both drift in different proportions.
  * Hand angles/offsets (found in VRChat Settings menu -> left blue panel -> More IKTweaks -> Adjust hand angles/offsets) - you can configure how avatar hands are positioned relative to controllers. Defaults were tuned for Index controllers, but should be applicable to most other controllers too.
 
 ### Partial source code
@@ -274,7 +272,6 @@ If you want to build the mod yourself, you'll need to do the following:
 * Rename `RootMotionNew.FinalIK.IKSolverVR.Leg.ApplyOffsets` to `ApplyOffsetsOld`, remove `override` from it
 * Add `ApplyBendGoal();` to the second line of `RootMotionNew.FinalIK.IKSolverVR.Leg.Solve(bool)`
 * Rename `Update`, `FixedUpdate` and `LateUpdate` on VRIK_New by adding `_ManualDrive` suffix to them and make them `internal` instead of `private`
-* In `IKSolverVR.Solve` comment out `spine.InverseTranslateToHead` in legs section
 * Fix compilation if broken
 
 ## JoinNotifier
