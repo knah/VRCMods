@@ -38,12 +38,14 @@ namespace LagFreeScreenshots
     {
         private const string SettingsCategory = "LagFreeScreenshots";
         private const string SettingEnableMod = "Enabled";
+        private const string SettingScreenshotResolution = "ScreenshotResolution";
         private const string SettingScreenshotFormat = "ScreenshotFormat";
         private const string SettingJpegPercent = "JpegPercent";
         private const string SettingAutorotation = "Auto-rotation";
         private const string SettingMetadata = "Metadata";
 
         private static MelonPreferences_Entry<bool> ourEnabled;
+        private static MelonPreferences_Entry<string> ourResolution;
         private static MelonPreferences_Entry<string> ourFormat;
         private static MelonPreferences_Entry<int> ourJpegPercent;
         private static MelonPreferences_Entry<bool> ourAutorotation;
@@ -56,7 +58,8 @@ namespace LagFreeScreenshots
         {
             var category = MelonPreferences.CreateCategory(SettingsCategory, "Lag Free Screenshots");
             ourEnabled = category.CreateEntry(SettingEnableMod, true, "Enabled");
-            ourFormat = category.CreateEntry( SettingScreenshotFormat, "png", "Screenshot format");
+            ourResolution = category.CreateEntry( SettingScreenshotResolution, "default", "Screenshot resolution");
+            ourFormat = category.CreateEntry( SettingScreenshotFormat, "auto", "Screenshot format");
             ourJpegPercent = category.CreateEntry(SettingJpegPercent, 95, "JPEG quality (0-100)");
             ourAutorotation = category.CreateEntry(SettingAutorotation, true, "Rotate picture to match camera");
             ourMetadata = category.CreateEntry(SettingMetadata, false, "Save metadata in picture");
@@ -66,19 +69,22 @@ namespace LagFreeScreenshots
             {
                 MelonLogger.Error("UI Expansion Kit is not found. Lag Free Screenshots will not work.");
                 return;
-            } 
+            }
 
             HarmonyInstance.Patch(
                 typeof(CameraTakePhotoEnumerator).GetMethod("MoveNext"),
                 new HarmonyMethod(AccessTools.Method(typeof(LagFreeScreenshotsMod), nameof(MoveNextPatchAsyncReadback))));
-            
+
             AddEnumSettings();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void AddEnumSettings()
         {
-            ExpansionKitApi.RegisterSettingAsStringEnum(SettingsCategory, SettingScreenshotFormat, new []{("png", "PNG"), ("jpeg", "JPEG")});
+            ExpansionKitApi.RegisterSettingAsStringEnum(SettingsCategory, SettingScreenshotFormat,
+                new []{("png", "PNG"), ("jpeg", "JPEG"), ("auto", "Auto")});
+            ExpansionKitApi.RegisterSettingAsStringEnum(SettingsCategory, SettingScreenshotResolution,
+                new []{("default", "Default"), ("100x100", "Thumbnail 100x100"), ("1024x1024", "Square 1024x1024"), ("720p", "720p"), ("1080p","1080p"), ("4K","4K"), ("8K", "8K")});
         }
 
         private static ScreenshotRotation GetPictureAutorotation(Camera camera)
@@ -141,6 +147,10 @@ namespace LagFreeScreenshots
             
             ourMainThread = Thread.CurrentThread;
 
+            var resFromOption = ImageResolution(ourResolution.Value);
+            if (resFromOption.HasValue)
+                (resX, resY) = resFromOption.Value;
+
             __result = false;
             TakeScreenshot(__instance.field_Public_Camera_0, resX,
                 resY, hasAlpha).ContinueWith(t =>
@@ -149,6 +159,20 @@ namespace LagFreeScreenshots
                     MelonLogger.Warning($"Free-floating task failed with exception: {t.Exception}");
             });
             return false;
+        }
+
+        public static (int width, int height)? ImageResolution(String d)
+        {
+            return d switch
+            {
+                "100x100" => (100, 100),
+                "1024x1024" => (1024, 1024),
+                "720p" => (1280, 720),
+                "1080p" => (1920, 1080),
+                "4K" => (3840, 2160),
+                "8K" => (7680, 4320),
+                _ => null,
+            };
         }
 
         private static int ourLastUsedMsaaLevel = 0;
@@ -394,6 +418,7 @@ namespace LagFreeScreenshots
 
 
             var pixelFormat = hasAlpha ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb;
+            var format = ourFormat.Value == "auto" ? (hasAlpha ? "png" : "jpeg") : ourFormat.Value;
             using var bitmap = new Bitmap(w, h, pixelFormat);
             var bitmapData = bitmap.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, pixelFormat);
             unsafe
@@ -410,7 +435,7 @@ namespace LagFreeScreenshots
             if (description != null)
             {
                 // png description is saved as iTXt chunk manually
-                if (ourFormat.Value == "jpeg")
+                if (format == "jpeg")
                 {
                     var stringBytesCount = Encoding.Unicode.GetByteCount(description);
                     var allBytes = new byte[8 + stringBytesCount];
@@ -426,7 +451,7 @@ namespace LagFreeScreenshots
                 }
             }
 
-            if (ourFormat.Value == "jpeg")
+            if (format == "jpeg")
             {
                 var encoder = GetEncoder(ImageFormat.Jpeg);
                 using var parameters = new EncoderParameters(1)
