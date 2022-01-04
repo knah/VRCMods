@@ -25,7 +25,7 @@ namespace UIExpansionKit
             transform.localScale = Vector3.one;
             transform.Cast<RectTransform>().localPosition = new Vector3(0, 0, -0.003f + -0.001f * layer);
             
-            UiExpansionKitMod.SetLayerRecursively(transform.gameObject, 4);
+            UiExpansionKitMod.SetLayerRecursively(transform.gameObject, LayerMask.NameToLayer("UI"));
         }
     }
 }
