@@ -23,7 +23,7 @@ namespace UIExpansionKit
             PinsEntry = category.CreateEntry(PinnedPrefs, "", is_hidden: true);
             
             category.CreateEntry(QmExpandoStartsCollapsed, false, "Quick Menu extra panel starts hidden");
-            category.CreateEntry(CategoriesStartCollapsed, false, "Settings categories start collapsed");
+            category.CreateEntry(CategoriesStartCollapsed, true, "Settings categories start collapsed");
             category.CreateEntry(CameraExpandoStartsCollapsed, true, "Camera expanded menu starts collapsed");
             
             category.CreateEntry(QmExpandoMinRows, 1, "Minimum rows in Quick Menu extra panel");
