@@ -153,6 +153,9 @@ namespace Styletor.Styles
 
             foreach (var styleElement in myStyleEngineWrapper.StyleEngine.GetComponentsInChildren<StyleElement>(true))
                 styleElement.Method_Protected_Void_0(); // makes the element reload its styles
+            
+            foreach (var styleElement in GameObject.Find("UserInterface/MenuContent").GetComponentsInChildren<StyleElement>(true))
+                styleElement.Method_Protected_Void_0(); // makes the element reload its styles
         }
         
         private OverrideStyle? LoadDirectOverrides(string stylesDir)
@@ -162,7 +165,7 @@ namespace Styletor.Styles
 
             if (images.Count == 0) return null;
             
-            var style = new OverrideStyle(myStyleEngineWrapper, new OverridesStyleSheet("<empty>", myStyleEngineWrapper), new StyleMetadata {Name = "Direct overrides", IsMixin = true, MixinPriority = 1_000_000});
+            var style = new OverrideStyle(myStyleEngineWrapper, new OverridesStyleSheet("<empty>", myStyleEngineWrapper), null, new StyleMetadata {Name = "Direct overrides", IsMixin = true, MixinPriority = 1_000_000});
             
             foreach (var imagePath in images)
             {

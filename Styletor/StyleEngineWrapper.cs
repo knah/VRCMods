@@ -23,6 +23,7 @@ namespace Styletor
         private readonly Dictionary<Il2CppSystem.Tuple<string, Il2CppSystem.Type>, Object> myOriginalResourcesInAllResourcesMap = new();
 
         private readonly Dictionary<string, List<ElementStyle>> myStylesCache = new();
+        private readonly Dictionary<string, List<ElementStyle>> myAddedStylesCache = new();
         private readonly Dictionary<string, string> myNormalizedToActualSpriteNames = new();
 
         private readonly Il2CppSystem.Collections.Generic.Dictionary<Sprite, Sprite> mySpriteOverrideDict = new();
@@ -34,12 +35,22 @@ namespace Styletor
 
         public List<ElementStyle>? TryGetBySelector(string normalizedSelector)
         {
-            return myStylesCache.TryGetValue(normalizedSelector, out var result) ? result : null;
+            return myStylesCache.TryGetValue(normalizedSelector, out var result) ? result : 
+                    myAddedStylesCache.TryGetValue(normalizedSelector, out result) ? result : null;
         }
 
         public Sprite? TryFindOriginalSprite(string key)
         {
             return myOriginalSpritesByLowercaseFullKey.TryGetValue(key, out var result) ? result : null;
+        }
+
+        public void RegisterAddedStyle(ElementStyle style)
+        {
+            var normalizedSelector = style.field_Public_Selector_0.ToStringNormalized();
+            if (myAddedStylesCache.TryGetValue(normalizedSelector, out var existing))
+                existing.Add(style);
+            else
+                myAddedStylesCache[normalizedSelector] = new List<ElementStyle> { style };
         }
         
         public Sprite? TryFindOriginalSpriteByShortKey(string key)
@@ -87,6 +98,7 @@ namespace Styletor
         internal void RestoreDefaultStyles()
         {
             mySpriteOverrideDict.Clear();
+            myAddedStylesCache.Clear();
             
             var styles = StyleEngine.field_Private_List_1_ElementStyle_0;
             for (var i = 0; i < myOriginalStylesBackup.Count; i++)
@@ -101,6 +113,9 @@ namespace Styletor
                 foreach (var (key, value) in backup.Properties) 
                     propsDict[key] = value;
             }
+
+            if (styles.Count > myOriginalStylesBackup.Count)
+                styles.RemoveRange(myOriginalStylesBackup.Count, styles.Count - myOriginalStylesBackup.Count);
 
             var spriteDict = StyleEngine.field_Private_Dictionary_2_String_Sprite_0;
             foreach (var keyValuePair in myOriginalSprites) 

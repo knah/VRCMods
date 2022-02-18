@@ -17,6 +17,7 @@ namespace Styletor.Styles
     public class OverrideStyle : IDisposable
     {
         private readonly OverridesStyleSheet myStyleSheet;
+        private readonly OverridesStyleSheet? mySecondarySheet;
         private readonly StyleEngineWrapper myStyleEngineWrapper;
         private readonly Dictionary<string, Sprite> myOverrideSprites = new();
         
@@ -24,9 +25,10 @@ namespace Styletor.Styles
 
         public readonly StyleMetadata Metadata;
 
-        internal OverrideStyle(StyleEngineWrapper styleEngineWrapper, OverridesStyleSheet styleSheet, StyleMetadata metadata)
+        internal OverrideStyle(StyleEngineWrapper styleEngineWrapper, OverridesStyleSheet styleSheet, OverridesStyleSheet? secondarySheet, StyleMetadata metadata)
         {
             myStyleSheet = styleSheet;
+            mySecondarySheet = secondarySheet;
             Metadata = metadata;
             myStyleEngineWrapper = styleEngineWrapper;
         }
@@ -59,6 +61,7 @@ namespace Styletor.Styles
                 myStyleEngineWrapper.OverrideSprite(keyValuePair.Key, keyValuePair.Value);
 
             myStyleSheet.ApplyOverrides(colorizer);
+            mySecondarySheet?.ApplyOverrides(colorizer);
         }
 
         public static OverrideStyle LoadFromStreams(StyleEngineWrapper styleEngine, Dictionary<string, Stream> streamMap, string fallbackName, bool closeStreams = false)
@@ -76,7 +79,11 @@ namespace Styletor.Styles
                 ? OverridesStyleSheet.ParseFrom(styleEngine, metadata.Name, styleStream.ReadAllLines()) 
                 : new OverridesStyleSheet(metadata.Name, styleEngine);
 
-            var result = new OverrideStyle(styleEngine, styleSheet, metadata);
+            var secondaryStyleSheet = streamMap.TryGetValue("overrides-secondpass.vrcss", out var secondaryStyleStream)
+                ? OverridesStyleSheet.ParseFrom(styleEngine, metadata.Name, secondaryStyleStream.ReadAllLines()) 
+                : null;
+
+            var result = new OverrideStyle(styleEngine, styleSheet, secondaryStyleSheet, metadata);
             
             foreach (var keyValuePair in streamMap)
             {

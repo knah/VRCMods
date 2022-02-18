@@ -9,7 +9,8 @@ namespace Styletor.Styles
 {
     public class OverridesStyleSheet
     {
-        private readonly Dictionary<string, string> myStyleOverrides = new();
+        private readonly Dictionary<string, (bool IsNew, string Text)> myStyleOverrides = new();
+        private readonly Dictionary<string, (string SelectorFrom, Selector SelectorTo)> myCopies = new();
         private readonly StyleEngineWrapper myStyleEngine;
 
         public readonly string Name;
@@ -28,7 +29,9 @@ namespace Styletor.Styles
             var inBody = false;
             var lastSelectorText = "";
             var bodyText = new StringBuilder();
-            int lineNumber = 0;
+            var lineNumber = 0;
+            var nextStyleNew = false;
+            var allStylesNew = false;
             foreach (var lineRaw in lines)
             {
                 lineNumber++;
@@ -59,7 +62,8 @@ namespace Styletor.Styles
                     if (line == "}")
                     {
                         inBody = false;
-                        result.ParseOverride(lastSelectorText, bodyText.ToString());
+                        result.ParseOverride(lastSelectorText, nextStyleNew || allStylesNew, bodyText.ToString());
+                        nextStyleNew = false;
                         lastSelectorText = "";
                         bodyText.Clear();
                     } else if (line.Contains("}"))
@@ -73,6 +77,36 @@ namespace Styletor.Styles
                 }
                 else
                 {
+                    if (line.StartsWith("!!styletor-copy"))
+                    {
+                        var parts = line.Substring("!!styletor-copy".Length).Split(new[] {"!!"}, StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length != 2) 
+                            throw new ArgumentException($"Copy directive has too many !! in it (at line {lineNumber})");
+                        var fromSelector = ParseSelector(parts[0]);
+                        var toSelector = ParseSelector(parts[1]);
+
+                        result.myCopies[toSelector.ToStringNormalized()] = (fromSelector.ToStringNormalized(), toSelector);
+                        continue;
+                    }
+
+                    if (line.StartsWith("!!styletor-new"))
+                    {
+                        nextStyleNew = true;
+                        continue;
+                    }
+
+                    if (line.StartsWith("!!styletor-new-block-start"))
+                    {
+                        allStylesNew = true;
+                        continue;
+                    }
+
+                    if (line.StartsWith("!!styletor-new-block-end"))
+                    {
+                        allStylesNew = false;
+                        continue;
+                    }
+
                     var openBraceIndex = line.IndexOf('{');
                     if (openBraceIndex != -1 && openBraceIndex != line.Length - 1)
                         throw new ArgumentException($"Mid-line opening braces are not supported (at line {lineNumber})");
@@ -87,38 +121,87 @@ namespace Styletor.Styles
 
         public void ApplyOverrides(ColorizerManager colorizer)
         {
+            foreach (var keyValuePair in myCopies)
+            {
+                var baseStyles = myStyleEngine.TryGetBySelector(keyValuePair.Value.SelectorFrom);
+                var targetNormalizedSelector = keyValuePair.Value.SelectorTo.ToStringNormalized();
+                if (baseStyles == null || baseStyles.Count == 0)
+                {
+                    MelonLogger.Msg($"Selector {keyValuePair.Value.SelectorFrom} not found in default style to copy into {targetNormalizedSelector}");
+                    continue;
+                }
+
+                var overrideTargets = myStyleEngine.TryGetBySelector(targetNormalizedSelector);
+                if (overrideTargets != null && overrideTargets.Count != 0)
+                {
+                    foreach (var style in baseStyles)
+                    foreach (var newStylePair in style.field_Public_Dictionary_2_Int32_PropertyValue_0)
+                    foreach (var overrideTarget in overrideTargets)
+                        overrideTarget.field_Public_Dictionary_2_Int32_PropertyValue_0[newStylePair.Key] = newStylePair.Value;
+                }
+                else
+                {
+                    var newStyle = new ElementStyle
+                    {
+                        field_Public_Selector_0 = keyValuePair.Value.SelectorTo,
+                        field_Public_UInt64_0 = baseStyles[0].field_Public_UInt64_0
+                    };
+
+                    // todo: is this necessary?
+                    myStyleEngine.StyleEngine.Method_Public_Void_ElementStyle_String_0(newStyle, "");
+                
+                    foreach (var baseStyle in baseStyles)
+                    foreach (var valuePair in baseStyle.field_Public_Dictionary_2_Int32_PropertyValue_0)
+                        newStyle.field_Public_Dictionary_2_Int32_PropertyValue_0[valuePair.Key] = valuePair.Value;
+                    
+                    myStyleEngine.StyleEngine.field_Private_List_1_ElementStyle_0.Add(newStyle);
+                    newStyle.field_Public_Int32_0 = myStyleEngine.StyleEngine.field_Private_List_1_ElementStyle_0.Count;
+                    myStyleEngine.RegisterAddedStyle(newStyle);
+                }
+            }
+            
             foreach (var keyValuePair in myStyleOverrides)
             {
                 var baseStyles = myStyleEngine.TryGetBySelector(keyValuePair.Key);
-                if (baseStyles == null)
+                if (baseStyles == null && !keyValuePair.Value.IsNew)
                 {
-                    MelonLogger.Msg($"Selector {keyValuePair.Key} overrides nothing in default style");
+                    MelonLogger.Msg($"Selector {keyValuePair.Key} overrides nothing in default style and is not marked as new (see README)");
                     continue;
                 }
                 
                 var style = new ElementStyle();
-                myStyleEngine.StyleEngine.Method_Public_Void_ElementStyle_String_0(style, colorizer.ReplacePlaceholders(keyValuePair.Value));
-                
-                foreach (var newStylePair in style.field_Public_Dictionary_2_Int32_PropertyValue_0)
-                foreach (var baseStyle in baseStyles)
-                    baseStyle.field_Public_Dictionary_2_Int32_PropertyValue_0[newStylePair.Key] = newStylePair.Value;
+                myStyleEngine.StyleEngine.Method_Public_Void_ElementStyle_String_0(style, colorizer.ReplacePlaceholders(keyValuePair.Value.Text));
+
+                if (baseStyles != null)
+                {
+                    foreach (var newStylePair in style.field_Public_Dictionary_2_Int32_PropertyValue_0)
+                    foreach (var baseStyle in baseStyles)
+                        baseStyle.field_Public_Dictionary_2_Int32_PropertyValue_0[newStylePair.Key] = newStylePair.Value;
+                }
+                else
+                {
+                    myStyleEngine.StyleEngine.field_Private_List_1_ElementStyle_0.Add(style);
+                    myStyleEngine.RegisterAddedStyle(style);
+                }
             }
             
-            MelonLogger.Msg($"Applies {myStyleOverrides.Count} overrides");
+            MelonLogger.Msg($"Applied {myStyleOverrides.Count} overrides from {Name}");
         }
 
-        private void ParseOverride(string lastSelectorText, string bodyText)
+        private static Selector ParseSelector(string selectorText) => Selector.Method_Public_Static_Selector_String_0(selectorText.Trim());
+
+        private void ParseOverride(string lastSelectorText, bool isNew, string bodyText)
         {
             try
             {
-                var selector = Selector.Method_Public_Static_Selector_String_0(lastSelectorText);
+                var selector = ParseSelector(lastSelectorText);
 
                 var selectorNormalized = selector.ToStringNormalized();
 
                 if (myStyleOverrides.ContainsKey(selectorNormalized))
                     MelonLogger.Warning($"Style sheet override {Name} contains duplicate selector {selectorNormalized}");
 
-                myStyleOverrides[selectorNormalized] = bodyText;
+                myStyleOverrides[selectorNormalized] = (isNew, bodyText);
             }
             catch (Exception ex)
             {

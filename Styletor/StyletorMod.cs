@@ -12,10 +12,9 @@ using Styletor.Styles;
 using UIExpansionKit;
 using UIExpansionKit.API;
 using UnhollowerRuntimeLib.XrefScans;
-using UnityEngine;
 using VRC.UI.Core.Styles;
 
-[assembly:MelonInfo(typeof(StyletorMod), "Styletor", "0.2.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(StyletorMod), "Styletor", "0.3.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 #nullable disable
