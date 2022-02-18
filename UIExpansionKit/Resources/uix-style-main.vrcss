@@ -1,0 +1,26 @@
+// Import default renamed style
+@import "style-sheet-uix-original";
+
+// The sole customization needed :<
+.UixToggleBackgroundIcon
+{
+	image-color: #6AE3F9;
+	image-opacity: 0.25;
+	image-preserve-aspect: true;
+	image-raycast: false;
+}
+
+.UixCameraExpandoToggleButton
+{
+	scale: 3;
+}
+
+.UixCameraExpandoToggleButton:active:enabled
+{
+	scale: 3;
+}
+
+.UixCameraExpandoToggleButton:hover:enabled
+{
+	scale: 3.1;
+}

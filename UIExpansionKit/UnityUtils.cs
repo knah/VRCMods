@@ -1,3 +1,5 @@
+using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,6 +22,18 @@ namespace UIExpansionKit
             var color = image.color;
             color.a = 1;
             image.color = color;
+        }
+
+        public static void LinkTextIntoTmp(GameObject root)
+        {
+            var normalText = root.GetComponentInChildren<Text>();
+            if (ReferenceEquals(normalText, null)) return;
+            var tmp = root.GetComponentInChildren<TMP_Text>();
+            if (ReferenceEquals(tmp, null)) return;
+
+            normalText.text = tmp.text;
+            
+            normalText.RegisterDirtyVerticesCallback(new Action(() => { tmp.SetText(normalText.text); }));
         }
     }
 }

@@ -83,7 +83,9 @@ namespace UIExpansionKit.API
         [Obsolete("There is no Moderation page in Quick Menu anymore; buttons added here will end up on the Here page")]
         ModerationQuickMenu = QuickMenuAudioSettings,
         
-        [Obsolete("There is no avatar stats page in Quick Menu anymore; buttons added here will not show up anywhere!", true)]
+        /// <summary>
+        /// Quick Menu avatar stats/info page
+        /// </summary>
         AvatarStatsQuickMenu,
         
         /// <summary>

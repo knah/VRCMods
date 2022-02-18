@@ -4,20 +4,23 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using MelonLoader;
 using UIExpansionKit;
 using UIExpansionKit.API;
 using UIExpansionKit.Components;
 using UnhollowerRuntimeLib;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.UI;
 using UnityEngine.XR;
+using VRC.UI.Core.Styles;
 using VRC.UserCamera;
 using VRCSDK2;
 using Object = UnityEngine.Object;
 using QuickMenuNew = VRC.UI.Elements.QuickMenu;
 
-[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "0.4.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(UiExpansionKitMod), "UI Expansion Kit", "1.0.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace UIExpansionKit
@@ -56,6 +59,7 @@ namespace UIExpansionKit
             (ExpandedMenu.QuickMenuAudioSettings,  "UserInterface/Canvas_QuickMenu(Clone)/Container/Window/QMParent/Menu_AudioSettings", false),
             (ExpandedMenu.UiElementsQuickMenu,  "UserInterface/Canvas_QuickMenu(Clone)/Container/Window/QMParent/Menu_Settings", false),
             (ExpandedMenu.InvitesTab,           "UserInterface/Canvas_QuickMenu(Clone)/Container/Window/QMParent/Menu_Notifications", false),
+            (ExpandedMenu.AvatarStatsQuickMenu,           "UserInterface/Canvas_QuickMenu(Clone)/Container/Window/QMParent/Menu_QM_AvatarDetails", false),
         };
         
         private readonly Dictionary<ExpandedMenu, GameObject> myMenuRoots = new();
@@ -75,7 +79,10 @@ namespace UIExpansionKit
             Instance = this;
             ClassInjector.RegisterTypeInIl2Cpp<EnableDisableListener>();
             ClassInjector.RegisterTypeInIl2Cpp<DestroyListener>();
-            ClassInjector.RegisterTypeInIl2Cpp<CameraExpandoHandler>();
+            ClassInjector.RegisterTypeInIl2Cpp<StyleElementWrapper>();
+            ClassInjector.RegisterTypeInIl2Cpp<StyleEngineUpdateDriver>();
+
+            StylingHelper.Init();
 
             ExpansionKitSettings.RegisterSettings();
             ExpansionKitSettings.PinsEntry.OnValueChangedUntyped += UpdateQuickMenuPins;
@@ -114,7 +121,7 @@ namespace UIExpansionKit
             IsInDesktop = !XRDevice.isPresent || Environment.CommandLine.Contains("--no-vr");
             
             {
-                using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UIExpansionKit.modui.assetbundle");
+                using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UIExpansionKit.Resources.modui.assetbundle");
                 using var memStream = new MemoryStream((int) stream.Length);
                 stream.CopyTo(memStream);
                 var assetBundle = AssetBundle.LoadFromMemory_Internal(memStream.ToArray(), 0);
@@ -125,6 +132,28 @@ namespace UIExpansionKit
             
             // attach it to QuickMenu. VRChat changes render queue on QM contents on world load that makes it render properly
             myStuffBundle.StoredThingsParent.transform.SetParent(GetQuickMenu().transform);
+
+            StylingHelper.StyleEngine = GetQuickMenu().GetComponent<StyleEngine>();
+
+            {
+                using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UIExpansionKit.Resources.uix-style-main.vrcss");
+                using var memStream = new MemoryStream((int) stream.Length);
+                stream.CopyTo(memStream);
+                var newStyle = Encoding.UTF8.GetString(memStream.ToArray());
+                var resourcesList = StylingHelper.StyleEngine.field_Public_StyleResource_0.resources;
+                for (var i = 0; i < resourcesList.Count; i++)
+                {
+                    var resource = resourcesList[i];
+                    if (resource.address != "style-sheet") continue;
+
+                    resource.address = "style-sheet-uix-original";
+                    resourcesList[i] = resource;
+                    break;
+                }
+                
+                resourcesList.Add(new StyleResource.Resource { address = "style-sheet", obj = new TextAsset(TextAsset.CreateOptions.CreateNativeObject, newStyle) });
+            }
+            
 
             var delegatesToInvoke = ExpansionKitApi.onUiManagerInitDelegateList;
             ExpansionKitApi.onUiManagerInitDelegateList = null;
@@ -176,8 +205,9 @@ namespace UIExpansionKit
             UnityUtils.FindInactiveObjectInActiveRoot("UserInterface/Canvas_QuickMenu(Clone)/Container")
                 .AddComponent<EnableDisableListener>().OnDisabled += BuiltinUiUtils.InvokeQuickMenuClosed;
             
-            GameObject.Find("UserInterface/MenuContent/Backdrop/Backdrop")
-                .AddComponent<EnableDisableListener>().OnDisabled += BuiltinUiUtils.InvokeFullMenuClosed;
+            var mainMenuBackground = GameObject.Find("UserInterface/MenuContent/Backdrop/Backdrop");
+            mainMenuBackground.AddComponent<EnableDisableListener>().OnDisabled += BuiltinUiUtils.InvokeFullMenuClosed;
+            mainMenuBackground.AddComponent<StyleEngineUpdateDriver>().StyleEngine = StylingHelper.StyleEngine;
 
             DecorateFullMenu();
             CheckA();
@@ -262,13 +292,6 @@ namespace UIExpansionKit
                     transform.localScale = Vector3.one * 3f; // the original menu already has scale of 0.0005
                     if (!IsInDesktop) 
                         transform.RotateAround(transform.position, transform.right, 30);
-                    else
-                    {
-                        var bg = transform.Find("Content/Background");
-                        bg.GetComponent<Image>().MakeBackgroundMoreSolid();
-                        var clone = Object.Instantiate(bg.gameObject, bg.parent, false);
-                        clone.transform.SetAsFirstSibling();
-                    }
 
                     transform.Cast<RectTransform>().localPosition = new Vector3(55, -750, -5);
 
@@ -283,17 +306,18 @@ namespace UIExpansionKit
                     if (IsInDesktop)
                     {
                         var flipToggle = flipButton.GetComponent<Toggle>();
-                        var flipText = flipButton.GetComponentInChildren<Text>();
+                        var flipIcon = flipButton.Find("Image");
+                        
                         flipToggle.isOn = false;
                         flipToggle.onValueChanged.AddListener(new Action<bool>(isUp =>
                         {
-                            flipText.text = isUp ? "V" : "^";
+                            flipIcon.localEulerAngles = isUp ? new Vector3(0, 0, 180) : Vector3.zero;
                             transform.Cast<RectTransform>().localPosition = new Vector3(55, isUp ? 500 : -750, -5);
                         }));
                     }
                     else
                     {
-                        flipButton.gameObject.active = false;
+                        flipButton.gameObject.SetActive(false);
                     }
 
                     if (ExpansionKitSettings.IsQmExpandoStartsCollapsed()) 
@@ -333,25 +357,34 @@ namespace UIExpansionKit
             }
             
             var cameraTransform = cameraController.transform.Find("ViewFinder");
+            var controlsTransform = cameraTransform.Find("PhotoControls");
+            var dummyTransform = new GameObject("UixCameraDummy");
+            dummyTransform.transform.SetParent(cameraTransform, false);
+            var constraint = dummyTransform.AddComponent<ParentConstraint>();
+            constraint.AddSource(new ConstraintSource() { sourceTransform = controlsTransform, weight = 1 });
+            constraint.constraintActive = true;
+            StylingHelper.AddStyleElement(dummyTransform, "");
+            dummyTransform.AddComponent<StyleEngineUpdateDriver>().StyleEngine = StylingHelper.StyleEngine;
             
-            var expando = Object.Instantiate(myStuffBundle.QuickMenuExpando, cameraTransform, false);
+            var expando = Object.Instantiate(myStuffBundle.QuickMenuExpando, dummyTransform.transform, false);
             myMenuRoots[ExpandedMenu.Camera] = expando;
 
             var transform = expando.transform;
             myCameraExpandoRoot = transform;
-            transform.localScale = Vector3.one * 0.00077f;
-            var handler = expando.AddComponent<CameraExpandoHandler>();
-            handler.CameraTransform = cameraTransform;
-            handler.PlayerCamera = Camera.main.transform; // todo: the actual camera?
+            transform.localScale = Vector3.one * 0.0004f;
+            transform.localPosition = new Vector3(0, 0.005f, -0.135f);
+            transform.localRotation = Quaternion.Euler(90, 180, 0);
 
             var toggleButton = transform.Find("QuickMenuExpandoToggle");
-            var content = transform.Find("Content");
+            var content = transform.Find("Content").Cast<RectTransform>();
             var flipButton = transform.Find("QuickMenuFlipUp");
-            flipButton.gameObject.active = false;
+            content.pivot = new Vector2(0.5f, 0f);
+            Object.Destroy(flipButton.gameObject);
             toggleButton.gameObject.AddUiShapeWithTriggerCollider();
+            toggleButton.GetComponent<StyleElementWrapper>().AdditionalClass = "UixCameraExpandoToggleButton";
             content.gameObject.AddUiShapeWithTriggerCollider();
-            toggleButton.localScale *= 3;
-            toggleButton.localPosition += Vector3.left * 60;
+            toggleButton.localPosition += Vector3.left * 60 + new Vector3(0, -25, 0);
+            toggleButton.localScale = Vector3.one * 3;
             var toggleComponent = toggleButton.GetComponent<Toggle>();
 
             if (ExpansionKitSettings.IsCameraExpandoStartsCollapsed()) 
@@ -369,10 +402,10 @@ namespace UIExpansionKit
 
             expando.GetOrAddComponent<EnableDisableListener>().OnEnabled += () =>
             {
-                MelonCoroutines.Start(ResizeExpandoAfterDelay(expando, toggleComponent.isOn));
+                MelonCoroutines.Start(ResizeExpandoAfterDelay(expando, toggleComponent.isOn, () => content.localPosition = new Vector3(0, -105, 0)));
             };
 
-            SetLayerRecursively(expando, 4);
+            SetLayerRecursively(expando, cameraTransform.Find("PhotoControls").gameObject.layer);
         }
 
         public override void OnUpdate()
@@ -385,10 +418,14 @@ namespace UIExpansionKit
             TaskUtilities.ourFrameEndQueue.Flush();
         }
 
-        private static IEnumerator ResizeExpandoAfterDelay(GameObject expando, bool contentsCanBeVisible)
+        private static IEnumerator ResizeExpandoAfterDelay(GameObject expando, bool contentsCanBeVisible, Action afterResize = null)
         {
             yield return null;
             DoResizeExpando(expando, contentsCanBeVisible);
+            if (afterResize == null) yield break;
+            
+            yield return null;
+            afterResize();
         }
 
         private static void DoResizeExpando(GameObject expando, bool contentsCanBeVisible)
@@ -400,14 +437,14 @@ namespace UIExpansionKit
                     totalButtons++;
             }
             
+            var content = expando.transform.Find("Content");
             var targetRows = ExpansionKitSettings.ClampQuickMenuExpandoRowCount((totalButtons + 3) / 4);
             var expandoRectTransform = expando.transform.Cast<RectTransform>();
             var oldPosition = expandoRectTransform.anchoredPosition;
             expandoRectTransform.sizeDelta = new Vector2(expandoRectTransform.sizeDelta.x, 100 * targetRows + 5);
             expandoRectTransform.anchoredPosition = oldPosition;
-            expando.transform.Find("Content").GetComponent<VRC_UiShape>().OnRectTransformDimensionsChange(); // adjust the box collider for raycasts
-            
-            expando.transform.Find("Content").gameObject.SetActive(totalButtons != 0 && contentsCanBeVisible);
+            content.GetComponent<VRC_UiShape>().OnRectTransformDimensionsChange(); // adjust the box collider for raycasts
+            content.gameObject.SetActive(totalButtons != 0 && contentsCanBeVisible);
             expando.transform.Find("QuickMenuExpandoToggle").gameObject.SetActive(totalButtons != 0);
         }
 

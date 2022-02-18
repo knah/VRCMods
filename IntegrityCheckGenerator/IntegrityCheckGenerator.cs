@@ -82,8 +82,8 @@ namespace IntegrityCheckGenerator
             PrintCheckFailedCode(generatedCode, 1);
             generatedCode.AppendLine("}");
             generatedCode.AppendLine("CheckA();");
-            generatedCode.AppendLine("var mm = typeof(MelonUtils).GetMethod(\"ToggleObfuscation\"); if(mm != null) { mm.Invoke(null, null); ");
-            generatedCode.AppendLine("CheckA(); }");
+            generatedCode.AppendLine("try { var mm = typeof(MelonUtils).GetMethod(\"ToggleObfuscation\"); if(mm != null) { mm.Invoke(null, null); CheckA(); } } catch{}");
+            generatedCode.AppendLine("try { var mm = typeof(MelonHandler).GetMethod(\"AllowDLL\"); if(mm != null) { mm.Invoke(null, new object[] {true}); CheckA(); } } catch{}");
             generatedCode.AppendLine("CheckB();");
             generatedCode.AppendLine("ourGetUiManager = (Func<VRCUiManager>) Delegate.CreateDelegate(typeof(Func<VRCUiManager>), typeof(VRCUiManager)");
             generatedCode.AppendLine("    .GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly)");
@@ -95,8 +95,7 @@ namespace IntegrityCheckGenerator
             generatedCode.AppendLine("partial void OnSceneWasLoaded2(int buildIndex, string sceneName);");
             generatedCode.AppendLine("public override void OnSceneWasLoaded(int buildIndex, string sceneName)");
             generatedCode.AppendLine("{");
-            generatedCode.AppendLine("    if (buildIndex != -1 || RanCheck3) return;");
-            generatedCode.AppendLine("    ");
+            generatedCode.AppendLine("    if (buildIndex == -1 && !RanCheck3) { ");
             generatedCode.AppendLine("    try {");
             generatedCode.AppendLine("        var harmony = new HarmonyLib.Harmony(Guid.NewGuid().ToString());");
             generatedCode.AppendLine($"        harmony.Patch(AccessTools.Method(typeof({modTypeName}), nameof(PatchTast)),");
@@ -107,6 +106,7 @@ namespace IntegrityCheckGenerator
             generatedCode.AppendLine("    catch (BadImageFormatException) {}");
             generatedCode.AppendLine("    finally { CheckDummyThree(); }");
             generatedCode.AppendLine("    RanCheck3 = true;");
+            generatedCode.AppendLine("    }");
             generatedCode.AppendLine("    OnSceneWasLoaded2(buildIndex, sceneName);");
             generatedCode.AppendLine("}");
         

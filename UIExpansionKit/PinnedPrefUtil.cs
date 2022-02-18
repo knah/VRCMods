@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using MelonLoader;
+using TMPro;
 using UIExpansionKit.API;
 using UIExpansionKit.Components;
 using UnityEngine;
@@ -46,13 +47,13 @@ namespace UIExpansionKit
         private static void CreatePinnedPrefButtonForString(MelonPreferences_Entry<string> stringEntry, IList<(string SettingsValue, string DisplayName)> possibleValues, Transform expandoRoot, GameObject buttonPrefab)
         {
             var button = Object.Instantiate(buttonPrefab, expandoRoot, false);
-            var buttonText = button.GetComponentInChildren<Text>();
+            var buttonText = button.GetComponentInChildren<TMP_Text>();
             var buttonPrefix = (stringEntry.DisplayName ?? stringEntry.Identifier) + ": ";
             
-            buttonText.resizeTextMinSize = 8;
-            buttonText.resizeTextMaxSize = buttonText.fontSize;
-            buttonText.resizeTextForBestFit = true;
-            buttonText.verticalOverflow = VerticalWrapMode.Truncate;
+            buttonText.fontSizeMin = 8;
+            buttonText.fontSizeMax = buttonText.fontSize;
+            buttonText.enableAutoSizing = true;
+            buttonText.overflowMode = TextOverflowModes.Truncate;
 
             void UpdateText()
             {
@@ -106,12 +107,12 @@ namespace UIExpansionKit
             var possibleValues = EnumPrefUtil.GetEnumSettingOptions<T>();
             
             var button = Object.Instantiate(buttonPrefab, expandoRoot, false);
-            var buttonText = button.GetComponentInChildren<Text>();
+            var buttonText = button.GetComponentInChildren<TMP_Text>();
             var buttonPrefix = (enumEntry.DisplayName ?? enumEntry.Identifier) + ": ";
 
-            buttonText.resizeTextMinSize = 8;
-            buttonText.resizeTextMaxSize = buttonText.fontSize;
-            buttonText.resizeTextForBestFit = true;
+            buttonText.fontSizeMin = 8;
+            buttonText.fontSizeMax = buttonText.fontSize;
+            buttonText.enableAutoSizing = true;
 
             void UpdateText()
             {
@@ -151,7 +152,8 @@ namespace UIExpansionKit
         private static void CreatePinnedPrefButton(MelonPreferences_Entry<bool> boolEntry, Transform expandoRoot, GameObject toggleButtonPrefab)
         {
             var toggleButton = Object.Instantiate(toggleButtonPrefab, expandoRoot, false);
-            toggleButton.GetComponentInChildren<Text>().text = boolEntry.DisplayName ?? boolEntry.Identifier;
+            var textComponent = toggleButton.GetComponentInChildren<TMP_Text>();
+            textComponent.text = boolEntry.DisplayName ?? boolEntry.Identifier;
             var toggle = toggleButton.GetComponent<Toggle>();
             toggle.isOn = boolEntry.Value;
             toggle.onValueChanged.AddListener(new Action<bool>(isOn =>

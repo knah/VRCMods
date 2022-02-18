@@ -5,7 +5,9 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using MelonLoader;
+using TMPro;
 using UIExpansionKit.API;
+using UIExpansionKit.API.Controls;
 using UIExpansionKit.Components;
 using UnityEngine;
 using UnityEngine.UI;
@@ -83,15 +85,15 @@ namespace UIExpansionKit
                     continue;
 
                 var categoryUi = Object.Instantiate(categoryPrefab, settingsContentRoot, false);
-                categoryUi.GetComponentInChildren<Text>().text = category.DisplayName ?? categoryId;
+                categoryUi.GetComponentInChildren<TMP_Text>().text = category.DisplayName ?? categoryId;
                 var categoryUiContent = categoryUi.transform.Find("CategoryEntries");
                 var expandButtonTransform = categoryUi.transform.Find("ExpandButton");
                 var expandButton = expandButtonTransform.GetComponent<Button>();
-                var expandButtonText = expandButtonTransform.GetComponentInChildren<Text>();
+                var expandIcon = expandButtonTransform.Find("Image");
 
                 void SetExpanded(bool expanded)
                 {
-                    expandButtonText.text = expanded ? "^" : "V";
+                    expandIcon.localEulerAngles = expanded ? Vector3.zero : new Vector3(0, 0, 180);
                     categoryUiContent.gameObject.SetActive(expanded);
                 }
                 
@@ -109,14 +111,13 @@ namespace UIExpansionKit
                 resetButton.onClick.AddListener(new Action(() =>
                 {
                     var clicksLeft = 3;
-                    Text resetButtonText = null;
                     var menu = ExpansionKitApi.CreateCustomFullMenuPopup(LayoutDescription.WideSlimList);
                     var resetInvisible = false;
 
                     menu.AddLabel("Are you sure you want to reset all settings in the following category:");
                     menu.AddLabel(category.DisplayName ?? categoryId);
                     
-                    menu.AddSimpleButton("Reset (3 clicks more...)", () =>
+                    menu.AddSimpleButton("Reset (3 clicks more...)", self =>
                     {
                         clicksLeft--;
                         switch (clicksLeft)
@@ -137,13 +138,13 @@ namespace UIExpansionKit
                                 break;
                             }
                             case 1:
-                                resetButtonText!.text = "Reset (1 click left...)";
+                                self.SetText("Reset (1 click left...)");
                                 break;
                             case 2:
-                                resetButtonText!.text = "Reset (2 clicks left...)";
+                                self.SetText("Reset (2 clicks left...)");
                                 break;
                         }
-                    }, go => resetButtonText = go.GetComponentInChildren<Text>(true));
+                    });
                     
                     menu.AddToggleButton("Also reset invisible settings", b => resetInvisible = b, () => resetInvisible);
                     
@@ -155,12 +156,12 @@ namespace UIExpansionKit
                 void CreateNumericSetting<T>(MelonPreferences_Entry<T> entry, Func<T, string> toString, Func<string, T?> fromString) where T:struct, IEquatable<T>
                 {
                     var textSetting = Object.Instantiate(textPrefab, categoryUiContent, false);
-                    textSetting.GetComponentInChildren<Text>().text = entry.DisplayName ?? entry.Identifier;
-                    var textField = textSetting.GetComponentInChildren<InputField>();
+                    textSetting.GetComponentInChildren<TMP_Text>().text = entry.DisplayName ?? entry.Identifier;
+                    var textField = textSetting.GetComponentInChildren<TMP_InputField>();
                     textField.text = toString(entry.Value);
                     textField.contentType = typeof(T) == typeof(float) || typeof(T) == typeof(double)
-                        ? InputField.ContentType.DecimalNumber
-                        : InputField.ContentType.IntegerNumber;
+                        ? TMP_InputField.ContentType.DecimalNumber
+                        : TMP_InputField.ContentType.IntegerNumber;
                     textField.onValueChanged.AddListener(new Action<string>(value =>
                     {
                         var parsed = fromString(value);
@@ -171,7 +172,7 @@ namespace UIExpansionKit
                     {
                         BuiltinUiUtils.ShowInputPopup(entry.DisplayName ?? entry.Identifier, textField.text,
                             InputField.InputType.Standard, false, "Done", 
-                            (result, _, __) =>
+                            (result, _, _) =>
                             {
                                 var parsed = fromString(result);
                                 if (parsed != null)
@@ -204,23 +205,23 @@ namespace UIExpansionKit
                             if (ExpansionKitApi.EnumSettings.TryGetValue((categoryId, prefId), out var enumValues))
                             {
                                 var comboSetting = Object.Instantiate(comboBoxPrefab, categoryUiContent, false);
-                                comboSetting.GetComponentInChildren<Text>().text = pref.DisplayName ?? prefId;
-                                var dropdown = comboSetting.GetComponentInChildren<Dropdown>();
+                                comboSetting.GetComponentInChildren<TMP_Text>().text = pref.DisplayName ?? prefId;
+                                var dropdown = comboSetting.GetComponentInChildren<TMP_Dropdown>();
 
                                 void RefreshOptions()
                                 {
-                                    var options = new Il2CppSystem.Collections.Generic.List<Dropdown.OptionData>();
+                                    var options = new Il2CppSystem.Collections.Generic.List<TMP_Dropdown.OptionData>();
                                     var currentValue = stringPref.Value;
                                     var selectedIndex = enumValues.Count;
                                     for (var i = 0; i < enumValues.Count; i++)
                                     {
                                         var valueTuple = enumValues[i];
-                                        options.Add(new Dropdown.OptionData(valueTuple.DisplayName));
+                                        options.Add(new TMP_Dropdown.OptionData(valueTuple.DisplayName));
                                         if (currentValue == valueTuple.SettingsValue)
                                             selectedIndex = i;
                                     }
                                     if (enumValues.All(it => it.SettingsValue != currentValue)) 
-                                        options.Add(new Dropdown.OptionData(currentValue));
+                                        options.Add(new TMP_Dropdown.OptionData(currentValue));
                                     dropdown.options = options;
                                     dropdown.value = selectedIndex;
                                 }
@@ -261,8 +262,8 @@ namespace UIExpansionKit
                             else
                             {
                                 var textSetting = Object.Instantiate(textPrefab, categoryUiContent, false);
-                                textSetting.GetComponentInChildren<Text>().text = pref.DisplayName ?? prefId;
-                                var textField = textSetting.GetComponentInChildren<InputField>();
+                                textSetting.GetComponentInChildren<TMP_Text>().text = pref.DisplayName ?? prefId;
+                                var textField = textSetting.GetComponentInChildren<TMP_InputField>();
                                 textField.text = stringPref.Value;
                                 textField.onValueChanged.AddListener(new Action<string>(value =>
                                 {
@@ -293,7 +294,7 @@ namespace UIExpansionKit
                         }
                         case MelonPreferences_Entry<bool> boolEntry:
                             var boolSetting = Object.Instantiate(boolPrefab, categoryUiContent, false);
-                            boolSetting.GetComponentInChildren<Text>().text = pref.DisplayName ?? prefId;
+                            boolSetting.GetComponentInChildren<TMP_Text>().text = pref.DisplayName ?? prefId;
                             var mainToggle = boolSetting.transform.Find("Toggle").GetComponent<Toggle>();
                             mainToggle.isOn = boolEntry.Value;
                             mainToggle.onValueChanged.AddListener(new Action<bool>(
@@ -363,16 +364,16 @@ namespace UIExpansionKit
             var enumValues = EnumPrefUtil.GetEnumSettingOptions<T>();
             
             var comboSetting = Object.Instantiate(comboBoxPrefab, categoryUiContent, false);
-            comboSetting.GetComponentInChildren<Text>().text = entry.DisplayName ?? entry.Identifier;
-            var dropdown = comboSetting.GetComponentInChildren<Dropdown>();
+            comboSetting.GetComponentInChildren<TMP_Text>().text = entry.DisplayName ?? entry.Identifier;
+            var dropdown = comboSetting.GetComponentInChildren<TMP_Dropdown>();
             
-            var options = new Il2CppSystem.Collections.Generic.List<Dropdown.OptionData>();
+            var options = new Il2CppSystem.Collections.Generic.List<TMP_Dropdown.OptionData>();
             var currentValue = entry.Value;
             var selectedIndex = enumValues.Count;
             for (var i = 0; i < enumValues.Count; i++)
             {
                 var valueTuple = enumValues[i];
-                options.Add(new Dropdown.OptionData(valueTuple.DisplayName));
+                options.Add(new TMP_Dropdown.OptionData(valueTuple.DisplayName));
                 if (currentValue.CompareTo(valueTuple.SettingsValue) == 0)
                     selectedIndex = i;
             }
