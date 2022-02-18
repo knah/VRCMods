@@ -1,9 +1,8 @@
 using System;
 using System.Collections;
-using System.Linq;
-using System.Reflection;
 using MelonLoader;
 using ParticleAndBoneLimiterSettings;
+using TMPro;
 using UIExpansionKit;
 using UIExpansionKit.API;
 using UnhollowerRuntimeLib;
@@ -13,7 +12,7 @@ using VRC.Core;
 using Object = UnityEngine.Object;
 
 [assembly: MelonGame("VRChat", "VRChat")]
-[assembly: MelonInfo(typeof(ParticleAndBoneLimiterSettingsMod), "Particle and DynBone limiter settings UI", "1.1.4", "knah", "https://github.com/knah/VRCMods")]
+[assembly: MelonInfo(typeof(ParticleAndBoneLimiterSettingsMod), "Particle and DynBone limiter settings UI", "1.1.5", "knah", "https://github.com/knah/VRCMods")]
 
 namespace ParticleAndBoneLimiterSettings
 {
@@ -41,7 +40,7 @@ namespace ParticleAndBoneLimiterSettings
             var prefabs = CustomParticleSettingsUiHandler.UixBundle = ExpansionKitApi.GetUiExpansionKitBundleContents();
 
             var rootPrefab = Object.Instantiate(prefabs.SettingsCategory, prefabs.StoredThingsParent.transform, false);
-            rootPrefab.GetComponentInChildren<Text>().text = MelonPreferences.GetCategory(SettingsCategory).DisplayName;
+            rootPrefab.GetComponentInChildren<TMP_Text>().text = MelonPreferences.GetCategory(SettingsCategory).DisplayName;
             rootPrefab.SetActive(true);
             rootPrefab.AddComponent<CustomParticleSettingsUiHandler>();
 
@@ -75,11 +74,11 @@ namespace ParticleAndBoneLimiterSettings
             var categoryUiContent = categoryUi.transform.Find("CategoryEntries");
             var expandButtonTransform = categoryUi.transform.Find("ExpandButton");
             var expandButton = expandButtonTransform.GetComponent<Button>();
-            var expandButtonText = expandButtonTransform.GetComponentInChildren<Text>();
+            var expandIcon = expandButtonTransform.Find("Image");
 
             void SetExpanded(bool expanded)
             {
-                expandButtonText.text = expanded ? "^" : "V";
+                expandIcon.localEulerAngles = expanded ? Vector3.zero : new Vector3(0, 0, 180);
                 categoryUiContent.gameObject.SetActive(expanded);
             }
                 
@@ -93,7 +92,7 @@ namespace ParticleAndBoneLimiterSettings
             var textPrefab = CustomParticleSettingsUiHandler.UixBundle.SettingsText;
             
             var boolSetting = Object.Instantiate(CustomParticleSettingsUiHandler.UixBundle.SettingsBool, categoryUiContent, false);
-            boolSetting.GetComponentInChildren<Text>().text = "Enable particle limiter (restart required)";
+            boolSetting.GetComponentInChildren<TMP_Text>().text = "Enable particle limiter (restart required)";
             var mainToggle = boolSetting.transform.Find("Toggle").GetComponent<Toggle>();
             var localConfig = ConfigManager.LocalConfig.Cast<LocalConfig>();
             mainToggle.isOn = localConfig.GetList("betas").Contains("particle_system_limiter");
@@ -122,10 +121,10 @@ namespace ParticleAndBoneLimiterSettings
                 var defaultValue = valuePair.defaultValue;
 
                 var textSetting = Object.Instantiate(textPrefab, categoryUiContent, false);
-                textSetting.GetComponentInChildren<Text>().text = prefDesc;
-                var textField = textSetting.GetComponentInChildren<InputField>();
+                textSetting.GetComponentInChildren<TMP_Text>().text = prefDesc;
+                var textField = textSetting.GetComponentInChildren<TMP_InputField>();
                 textField.text = localConfig.GetInt(prefId, defaultValue).ToString();
-                textField.contentType = InputField.ContentType.IntegerNumber;
+                textField.contentType = TMP_InputField.ContentType.IntegerNumber;
                 textField.onValueChanged.AddListener(new Action<string>(value =>
                 {
                     int parsedValue;
@@ -141,9 +140,9 @@ namespace ParticleAndBoneLimiterSettings
             }
             
             var reloadButton = Object.Instantiate(CustomParticleSettingsUiHandler.UixBundle.QuickMenuButton, categoryUiContent, false);
-            var reloadButtonText = reloadButton.GetComponentInChildren<Text>();
+            var reloadButtonText = reloadButton.GetComponentInChildren<TMP_Text>();
             reloadButtonText.text = "Click to apply limits and reload all avatars (particle limits need world rejoin)";
-            reloadButtonText.resizeTextMaxSize = reloadButtonText.resizeTextMaxSize * 15 / 10;
+            reloadButtonText.fontSizeMax = reloadButtonText.fontSizeMax * 15 / 10;
             reloadButtonText.fontSize = reloadButtonText.fontSize * 15 / 10;
             reloadButton.GetComponent<Button>().onClick.AddListener(new Action(() =>
             {

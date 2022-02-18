@@ -9,5 +9,6 @@ Changes:
  * CameraMinus: added toggles for grabbing the camera and camera UI
  * Updated the following mods to new UIX APIs:
    * CameraMinus
+   * Particle and DynBone limiter settings UI (I really should've given it a meme name like Turbones)
 
 **USE IT AT YOUR OWN RISK.** Modding the client is against VRChat ToS. I am not responsible for any bans or other punishments you may get by using these mods!
