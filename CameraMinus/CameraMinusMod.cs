@@ -1,12 +1,12 @@
 using CameraMinus;
 using MelonLoader;
 using UIExpansionKit.API;
-using UnityEngine;
+using UIExpansionKit.API.Controls;
 using VRC.SDKBase;
 using VRC.UserCamera;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(CameraMinusMod), "CameraMinus", "3.0.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(CameraMinusMod), "CameraMinus", "3.1.0", "knah", "https://github.com/knah/VRCMods")]
 
 namespace CameraMinus
 {
@@ -25,39 +25,57 @@ namespace CameraMinus
             ExpansionKitApi.GetSettingsCategory("CameraMinus")
                 .AddLabel("Disable and enable camera to update camera expando visibility");
             
-            GameObject cameraEnlargeButton = null;
-            GameObject cameraShrinkButton = null;
-            GameObject qmEnlargeButton = null;
-            GameObject qmShrinkButton = null;
+            IMenuToggle cameraGrabbableButton = null;
+            IMenuToggle qmGrabbableButton = null;
             
-            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.Camera).AddSimpleButton("Enlarge camera", Enlarge, go =>
+            IMenuToggle cameraUiVisibleButton = null;
+            IMenuToggle qmUiVisibleButton = null;
+
+            void SetCameraGrabbable(bool grabbable)
             {
-                cameraEnlargeButton = go;
-                cameraEnlargeButton.SetActive(myUseCameraExpando.Value);
-            });
-            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.Camera).AddSimpleButton("Shrink camera", Shrink, go =>
+                var controller = UserCameraController.field_Internal_Static_UserCameraController_0;
+                if (controller != null)
+                    controller.transform.Find("ViewFinder").GetComponent<VRC_Pickup>().pickupable = grabbable;
+
+                cameraGrabbableButton!.Selected = qmGrabbableButton!.Selected = grabbable;
+            }
+            
+            void SetUiVisible(bool visible)
             {
-                cameraShrinkButton = go;
-                cameraShrinkButton.SetActive(myUseCameraExpando.Value);
-            });
-            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.CameraQuickMenu).AddSimpleButton("Enlarge camera", Enlarge, go =>
+                var controller = UserCameraController.field_Internal_Static_UserCameraController_0;
+                if (controller != null)
+                    controller.transform.Find("ViewFinder/PhotoControls").gameObject.SetActive(visible);
+
+                cameraUiVisibleButton!.Selected = qmUiVisibleButton!.Selected = visible;
+            }
+
+            var cameraEnlargeButton = ExpansionKitApi.GetExpandedMenu(ExpandedMenu.Camera).AddSimpleButton("Enlarge camera", Enlarge);
+            var cameraShrinkButton = ExpansionKitApi.GetExpandedMenu(ExpandedMenu.Camera).AddSimpleButton("Shrink camera", Shrink);
+            cameraGrabbableButton = ExpansionKitApi.GetExpandedMenu(ExpandedMenu.Camera).AddToggleButton("Grabbable", SetCameraGrabbable, () => true);
+            cameraUiVisibleButton = ExpansionKitApi.GetExpandedMenu(ExpandedMenu.Camera).AddToggleButton("UI visible", SetUiVisible, () => true);
+            var qmEnlargeButton = ExpansionKitApi.GetExpandedMenu(ExpandedMenu.CameraQuickMenu).AddSimpleButton("Enlarge camera", Enlarge);
+            var qmShrinkButton = ExpansionKitApi.GetExpandedMenu(ExpandedMenu.CameraQuickMenu).AddSimpleButton("Shrink camera", Shrink);
+            qmGrabbableButton = ExpansionKitApi.GetExpandedMenu(ExpandedMenu.CameraQuickMenu).AddToggleButton("Grabbable", SetCameraGrabbable, () => true);
+            qmUiVisibleButton = ExpansionKitApi.GetExpandedMenu(ExpandedMenu.CameraQuickMenu).AddToggleButton("UI visible", SetUiVisible, () => true);
+
+            void UpdateButtonVisibility(bool value)
             {
-                qmEnlargeButton = go;
-                qmEnlargeButton.SetActive(!myUseCameraExpando.Value);
-            });
-            ExpansionKitApi.GetExpandedMenu(ExpandedMenu.CameraQuickMenu).AddSimpleButton("Shrink camera", Shrink, go =>
-            {
-                qmShrinkButton = go;
-                qmShrinkButton.SetActive(!myUseCameraExpando.Value);
-            });
+                cameraEnlargeButton.SetVisible(value);
+                cameraShrinkButton.SetVisible(value);
+                cameraGrabbableButton.SetVisible(value);
+                cameraUiVisibleButton.SetVisible(value);
+                qmEnlargeButton.SetVisible(!value);
+                qmShrinkButton.SetVisible(!value);
+                qmGrabbableButton.SetVisible(!value);
+                qmUiVisibleButton.SetVisible(!value);
+            }
 
             myUseCameraExpando.OnValueChanged += (_, value) =>
             {
-                if (cameraEnlargeButton != null) cameraEnlargeButton.SetActive(value);
-                if (cameraShrinkButton != null) cameraShrinkButton.SetActive(value);
-                if (qmEnlargeButton != null) qmEnlargeButton.SetActive(!value);
-                if (qmShrinkButton != null) qmShrinkButton.SetActive(!value);
+                UpdateButtonVisibility(value);
             };
+            
+            UpdateButtonVisibility(myUseCameraExpando.Value);
 
             myUnlimitCameraPickupDistance.OnValueChanged += (_, value) =>
             {
