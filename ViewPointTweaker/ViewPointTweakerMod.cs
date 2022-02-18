@@ -7,13 +7,13 @@ using HarmonyLib;
 using MelonLoader;
 using MelonLoader.TinyJSON;
 using UIExpansionKit.API;
+using UIExpansionKit.API.Controls;
 using UIExpansionKit.Components;
 using UnhollowerBaseLib.Attributes;
 using UnityEngine;
-using UnityEngine.UI;
 using ViewPointTweaker;
 
-[assembly:MelonInfo(typeof(ViewPointTweakerMod), "View Point Tweaker", "1.0.5", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(ViewPointTweakerMod), "View Point Tweaker", "1.0.6", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace ViewPointTweaker
@@ -159,18 +159,18 @@ namespace ViewPointTweaker
                     };
             };
 
-            Text xLabel = null;
-            Text yLabel = null;
-            Text zLabel = null;
+            IMenuLabel xLabel = null;
+            IMenuLabel yLabel = null;
+            IMenuLabel zLabel = null;
 
             void DoMove(Vector3 direction)
             {
                 var localPosition = ourCurrentHeadOffsetTransform.localPosition + direction * (myHighPrecisionMoves ? 0.001f : 0.01f);
                 SetViewPointOffset(localPosition);
 
-                xLabel.text = $"X:\n{localPosition.x:F3}";
-                yLabel.text = $"Y:\n{localPosition.y:F3}";
-                zLabel.text = $"Z:\n{localPosition.z:F3}";
+                xLabel.SetText($"X:\n{localPosition.x:F3}");
+                yLabel.SetText($"Y:\n{localPosition.y:F3}");
+                zLabel.SetText($"Z:\n{localPosition.z:F3}");
             }
             
             menu.AddSimpleButton("Up", () => DoMove(Vector3.up));
@@ -183,10 +183,10 @@ namespace ViewPointTweaker
             menu.AddSimpleButton("Right", () => DoMove(Vector3.right));
             menu.AddSpacer();
 
-            menu.AddLabel("Local\ncoords:", o => o.GetComponentInChildren<Text>().alignment = TextAnchor.MiddleCenter);
-            menu.AddLabel("X:", o => (xLabel = o.GetComponentInChildren<Text>()).alignment = TextAnchor.MiddleCenter);
-            menu.AddLabel("Y:", o => (yLabel = o.GetComponentInChildren<Text>()).alignment = TextAnchor.MiddleCenter);
-            menu.AddLabel("Z:", o => (zLabel = o.GetComponentInChildren<Text>()).alignment = TextAnchor.MiddleCenter);
+            menu.AddLabel("Local\ncoords:").SetAnchor(TextAnchor.MiddleCenter);
+            xLabel = menu.AddLabel("X:").SetAnchor(TextAnchor.MiddleCenter);
+            yLabel = menu.AddLabel("Y:").SetAnchor(TextAnchor.MiddleCenter);
+            zLabel = menu.AddLabel("Z:").SetAnchor(TextAnchor.MiddleCenter);
 
             menu.AddSimpleButton("Reset", () =>
             {
@@ -196,10 +196,10 @@ namespace ViewPointTweaker
             menu.AddSpacer();
             menu.AddSpacer();
             menu.AddSimpleButton("Back", menu.Hide);
+
+            DoMove(Vector3.zero);
             
             menu.Show();
-            
-            DoMove(Vector3.zero);
         }
     }
 }
