@@ -205,6 +205,13 @@ namespace AdvancedSafety
             {
                 var subNode = subsBase[i];
 
+                if (subNode == null)
+                {
+                    MelonDebug.Msg("Owww. My other right toe hurts!");
+                    thisPtr->DirectSubCount = 0;
+                    return totalNodes;
+                }
+
                 if (parents.Contains((IntPtr) subNode))
                 {
                     MelonDebug.Msg("Owww. My right toe hurts!");
@@ -228,14 +235,14 @@ namespace AdvancedSafety
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate void StringReallocateDelegate(NativeString* str, long newSize);
+        unsafe delegate IntPtr StringReallocateDelegate(NativeString* str, long newSize);
 
         private static StringReallocateDelegate ourOriginalRealloc;
 
         [ThreadStatic] private static unsafe NativeString* ourLastReallocatedString;
         [ThreadStatic] private static int ourLastReallocationCount;
 
-        private static unsafe void ReallocateStringPatch(NativeString* str, long newSize)
+        private static unsafe IntPtr ReallocateStringPatch(NativeString* str, long newSize)
         {
             if (str != null && newSize > 128 && str->Data != IntPtr.Zero)
             {
@@ -253,7 +260,7 @@ namespace AdvancedSafety
             }
 
             while (ourOriginalRealloc == null) Thread.Sleep(15);
-            ourOriginalRealloc(str, newSize);
+            return ourOriginalRealloc(str, newSize);
         }
 
         [StructLayout(LayoutKind.Sequential)]

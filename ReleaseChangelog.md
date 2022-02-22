@@ -8,7 +8,9 @@ Changes:
  * Styletor: various changes for UIX recoloring support
  * CameraMinus: added toggles for grabbing the camera and camera UI
  * IKTweaks: added settings for elbow/knee/chest bend goal offsets (see README)
+ * Advanced Safety: minor tuning to some patches
  * Updated the following mods to new UIX APIs:
+   * Advanced Safety 
    * CameraMinus
    * FavCat
    * IKTweaks
