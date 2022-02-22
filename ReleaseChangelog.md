@@ -7,9 +7,11 @@ Changes:
  * Styletor: added extra stylesheet declaration types. Refer to the README for details.
  * Styletor: various changes for UIX recoloring support
  * CameraMinus: added toggles for grabbing the camera and camera UI
+ * IKTweaks: added settings for elbow/knee/chest bend goal offsets (see README)
  * Updated the following mods to new UIX APIs:
    * CameraMinus
    * FavCat
+   * IKTweaks
    * Particle and DynBone limiter settings UI (I really should've given it a meme name like Turbones)
    * View Point Tweaker
 

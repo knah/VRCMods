@@ -57,6 +57,10 @@ namespace IKTweaks
             WingspanMeasurementAdjustFactor = category.CreateEntry(nameof(WingspanMeasurementAdjustFactor), 1.1f, "Improved wingspan adjustment factor");
             OneHandedCalibration = category.CreateEntry(nameof(OneHandedCalibration), false, "One-handed calibration");
             
+            ElbowGoalOffset = category.CreateEntry(nameof(ElbowGoalOffset), 0.1f, "Elbows bend goal offset (0-1)");
+            KneeGoalOffset = category.CreateEntry(nameof(KneeGoalOffset), 0.1f, "Knees bend goal offset (0-1)");
+            ChestGoalOffset = category.CreateEntry(nameof(ChestGoalOffset), 0.5f, "Chest bend goal offset (0-1)");
+            
             NoWallFreeze = category.CreateEntry(nameof(NoWallFreeze), true, "Don't freeze head/hands inside walls");
 
             ExperimentalSettingOne = category.CreateEntry(nameof(ExperimentalSettingOne), false, "Experimental setting", dont_save_default: true, is_hidden: true);
@@ -119,6 +123,10 @@ namespace IKTweaks
         public static MelonPreferences_Entry<bool> OneHandedCalibration;
         public static MelonPreferences_Entry<bool> NoWallFreeze;
         public static MelonPreferences_Entry<bool> ExperimentalSettingOne;
+        
+        public static MelonPreferences_Entry<float> ElbowGoalOffset;
+        public static MelonPreferences_Entry<float> KneeGoalOffset;
+        public static MelonPreferences_Entry<float> ChestGoalOffset;
         
         public static MelonPreferences_Entry<Vector3> HandAngleOffset;
         public static MelonPreferences_Entry<Vector3> HandPositionOffset;

@@ -260,6 +260,7 @@ Given that this mod is still work in progress, these are subject to change.
  * One-handed calibration - pressing one trigger will be enough to calibrate. Holding the trigger slightly pressed will freeze the avatar (if enabled).
  * Don't freeze head/hands inside walls - prevents your hands/head from freezing if your head gets inside a wall.
  * Hand angles/offsets (found in VRChat Settings menu -> left blue panel -> More IKTweaks -> Adjust hand angles/offsets) - you can configure how avatar hands are positioned relative to controllers. Defaults were tuned for Index controllers, but should be applicable to most other controllers too.
+ * Elbow/knee/chest bend goal offset - controls how far bend goal targets will be away from the actual joint. Lower values should produce better precision with bent joint, higher values - better stability with straight joint. Sensible range of values is between 0 and 1.
 
 ### Partial source code
 This mod includes parts of FinalIK, which is a paid Unity Store asset, therefore source code for those is not provided.  

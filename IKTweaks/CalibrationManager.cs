@@ -636,8 +636,8 @@ namespace IKTweaks
                 var leftElbowTracker = GetTracker(HumanBodyBones.LeftLowerArm);
                 var rightElbowTracker = GetTracker(HumanBodyBones.RightLowerArm);
 
-                StoreBendGoal(CalibrationPoint.LeftElbow, leftElbowTracker, avatarForward * -0.1f, ref FullBodyHandling.LeftElbowWeight);
-                StoreBendGoal(CalibrationPoint.RightElbow, rightElbowTracker, avatarForward * -0.1f, ref FullBodyHandling.RightElbowWeight);
+                StoreBendGoal(CalibrationPoint.LeftElbow, leftElbowTracker, avatarForward * -IkTweaksSettings.ElbowGoalOffset.Value, ref FullBodyHandling.LeftElbowWeight);
+                StoreBendGoal(CalibrationPoint.RightElbow, rightElbowTracker, avatarForward * -IkTweaksSettings.ElbowGoalOffset.Value, ref FullBodyHandling.RightElbowWeight);
             }
 
             if (IkTweaksSettings.UseKneeTrackers.Value)
@@ -645,15 +645,15 @@ namespace IKTweaks
                 var leftKneeTracker = GetTracker(HumanBodyBones.LeftLowerLeg);
                 var rightKneeTracker = GetTracker(HumanBodyBones.RightLowerLeg);
 
-                StoreBendGoal(CalibrationPoint.LeftKnee, leftKneeTracker, avatarForward * 0.1f, ref FullBodyHandling.LeftKneeWeight);
-                StoreBendGoal(CalibrationPoint.RightKnee, rightKneeTracker, avatarForward * 0.1f, ref FullBodyHandling.RightKneeWeight);
+                StoreBendGoal(CalibrationPoint.LeftKnee, leftKneeTracker, avatarForward * IkTweaksSettings.KneeGoalOffset.Value, ref FullBodyHandling.LeftKneeWeight);
+                StoreBendGoal(CalibrationPoint.RightKnee, rightKneeTracker, avatarForward * IkTweaksSettings.KneeGoalOffset.Value, ref FullBodyHandling.RightKneeWeight);
             }
 
             if (IkTweaksSettings.UseChestTracker.Value)
             {
                 var chestTracker = GetTracker(HumanBodyBones.UpperChest, HumanBodyBones.Chest);
 
-                StoreBendGoal(CalibrationPoint.Chest, chestTracker, avatarForward * .5f, ref FullBodyHandling.ChestWeight);
+                StoreBendGoal(CalibrationPoint.Chest, chestTracker, avatarForward * IkTweaksSettings.ChestGoalOffset.Value, ref FullBodyHandling.ChestWeight);
             }
 
             if (!willUniversallyCalibrate)

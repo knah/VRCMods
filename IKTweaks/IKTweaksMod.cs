@@ -9,17 +9,17 @@ using IKTweaks;
 using MelonLoader;
 using RootMotionNew.FinalIK;
 using UIExpansionKit.API;
+using UIExpansionKit.API.Controls;
 using UIExpansionKit.Components;
 using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 using UnhollowerRuntimeLib.XrefScans;
 using UnityEngine;
-using UnityEngine.UI;
 using Valve.VR;
 using Delegate = Il2CppSystem.Delegate;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.23", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "1.0.24", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -186,18 +186,18 @@ namespace IKTweaks
                     };
             };
 
-            Text xLabel = null;
-            Text yLabel = null;
-            Text zLabel = null;
+            IMenuLabel xLabel = null;
+            IMenuLabel yLabel = null;
+            IMenuLabel zLabel = null;
 
             void DoMove(Vector3 direction)
             {
                 offset += direction * (highPrecisionMoves ? moveStep : moveStep * 10);
                 SetHandAngles();
 
-                xLabel.text = $"X:\n{offset.x:F3}";
-                yLabel.text = $"Y:\n{offset.y:F3}";
-                zLabel.text = $"Z:\n{offset.z:F3}";
+                xLabel.SetText($"X:\n{offset.x:F3}");
+                yLabel.SetText($"Y:\n{offset.y:F3}");
+                zLabel.SetText($"Z:\n{offset.z:F3}");
             }
             
             menu.AddSimpleButton("+Y", () => DoMove(Vector3.up));
@@ -210,10 +210,10 @@ namespace IKTweaks
             menu.AddSimpleButton("-X", () => DoMove(Vector3.left));
             menu.AddSpacer();
 
-            menu.AddLabel(label, o => o.GetComponentInChildren<Text>().alignment = TextAnchor.MiddleCenter);
-            menu.AddLabel("X:", o => (xLabel = o.GetComponentInChildren<Text>()).alignment = TextAnchor.MiddleCenter);
-            menu.AddLabel("Y:", o => (yLabel = o.GetComponentInChildren<Text>()).alignment = TextAnchor.MiddleCenter);
-            menu.AddLabel("Z:", o => (zLabel = o.GetComponentInChildren<Text>()).alignment = TextAnchor.MiddleCenter);
+            menu.AddLabel(label).SetAnchor(TextAnchor.MiddleCenter);
+            xLabel = menu.AddLabel("X:").SetAnchor(TextAnchor.MiddleCenter);
+            yLabel = menu.AddLabel("Y:").SetAnchor(TextAnchor.MiddleCenter);
+            zLabel = menu.AddLabel("Z:").SetAnchor(TextAnchor.MiddleCenter);
 
             menu.AddSimpleButton("Reset", () =>
             {
