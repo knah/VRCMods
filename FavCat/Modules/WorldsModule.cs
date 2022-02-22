@@ -6,6 +6,7 @@ using FavCat.CustomLists;
 using FavCat.Database.Stored;
 using MelonLoader;
 using UIExpansionKit.API;
+using UIExpansionKit.API.Controls;
 using UIExpansionKit.Components;
 using UnityEngine;
 using UnityEngine.UI;
@@ -56,21 +57,19 @@ namespace FavCat.Modules
                 if (storedCategory.CategoryName == SearchCategoryName)
                     continue;
 
-                Text? buttonText = null;
                 availableListsMenu.AddSimpleButton(
                     $"{(!Favorites.IsFavorite(currentWorld.id, storedCategory.CategoryName) ? "Favorite to" : "Unfavorite from")} {storedCategory.CategoryName}", 
-                    () =>
+                    self =>
                     {
                         if (Favorites.IsFavorite(currentWorld.id, storedCategory.CategoryName))
                             Favorites.DeleteFavorite(currentWorld.id, storedCategory.CategoryName);
                         else
                             Favorites.AddFavorite(currentWorld.id, storedCategory.CategoryName);
 
-                        buttonText!.text = $"{(!Favorites.IsFavorite(currentWorld.id, storedCategory.CategoryName) ? "Favorite to" : "Unfavorite from")} {storedCategory.CategoryName}";
+                        self.SetText($"{(!Favorites.IsFavorite(currentWorld.id, storedCategory.CategoryName) ? "Favorite to" : "Unfavorite from")} {storedCategory.CategoryName}");
                         
                         if (FavCatSettings.HidePopupAfterFav.Value) availableListsMenu.Hide();
-                    }, 
-                    o => buttonText = o.GetComponentInChildren<Text>());
+                    });
             }
             
             availableListsMenu.Show();

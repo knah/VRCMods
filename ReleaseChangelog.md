@@ -9,6 +9,7 @@ Changes:
  * CameraMinus: added toggles for grabbing the camera and camera UI
  * Updated the following mods to new UIX APIs:
    * CameraMinus
+   * FavCat
    * Particle and DynBone limiter settings UI (I really should've given it a meme name like Turbones)
    * View Point Tweaker
 
