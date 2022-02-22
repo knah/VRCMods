@@ -9,6 +9,8 @@ Changes:
  * CameraMinus: added toggles for grabbing the camera and camera UI
  * IKTweaks: added settings for elbow/knee/chest bend goal offsets (see README)
  * Advanced Safety: minor tuning to some patches
+ * Lag Free Screenshots: added auto screenshot type (png for transparent, jpeg for non-transparent, contributed by @dakyneko)
+ * Lag Free Screenshots: added screenshot resolution override (contributed by @dakyneko)
  * Updated the following mods to new UIX APIs:
    * Advanced Safety 
    * CameraMinus

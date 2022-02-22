@@ -29,7 +29,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 // using CameraUtil = ObjectPublicCaSiVeUnique;
 
-[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.3.1", "knah, Protected", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.4.0", "knah, Protected", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace LagFreeScreenshots
@@ -43,11 +43,16 @@ namespace LagFreeScreenshots
         private const string SettingJpegPercent = "JpegPercent";
         private const string SettingAutorotation = "Auto-rotation";
         private const string SettingMetadata = "Metadata";
+        private const string SettingRecommendedMaximumFb = "RecommendedMaximumFb";
+        private const string SettingCustomResolutionX = "CustomResolutionX";
+        private const string SettingCustomResolutionY = "CustomResolutionY";
 
         private static MelonPreferences_Entry<bool> ourEnabled;
-        private static MelonPreferences_Entry<string> ourResolution;
+        private static MelonPreferences_Entry<PresetScreenshotSizes> ourResolution;
         private static MelonPreferences_Entry<string> ourFormat;
         private static MelonPreferences_Entry<int> ourJpegPercent;
+        private static MelonPreferences_Entry<int> ourCustomResolutionX;
+        private static MelonPreferences_Entry<int> ourCustomResolutionY;
         private static MelonPreferences_Entry<bool> ourAutorotation;
         private static MelonPreferences_Entry<bool> ourMetadata;
         private static MelonPreferences_Entry<int> ourRecommendedMaxFb;
@@ -58,12 +63,14 @@ namespace LagFreeScreenshots
         {
             var category = MelonPreferences.CreateCategory(SettingsCategory, "Lag Free Screenshots");
             ourEnabled = category.CreateEntry(SettingEnableMod, true, "Enabled");
-            ourResolution = category.CreateEntry( SettingScreenshotResolution, "default", "Screenshot resolution");
-            ourFormat = category.CreateEntry( SettingScreenshotFormat, "auto", "Screenshot format");
+            ourResolution = category.CreateEntry( SettingScreenshotResolution, PresetScreenshotSizes.Default, "Screenshot resolution override");
+            ourFormat = category.CreateEntry( SettingScreenshotFormat, "png", "Screenshot format");
             ourJpegPercent = category.CreateEntry(SettingJpegPercent, 95, "JPEG quality (0-100)");
             ourAutorotation = category.CreateEntry(SettingAutorotation, true, "Rotate picture to match camera");
             ourMetadata = category.CreateEntry(SettingMetadata, false, "Save metadata in picture");
-            ourRecommendedMaxFb = category.CreateEntry("RecommendedMaximumFb", 1024, "Try to keep framebuffer below (MB) by reducing MSAA");
+            ourRecommendedMaxFb = category.CreateEntry(SettingRecommendedMaximumFb, 1024, "Try to keep framebuffer below (MB) by reducing MSAA");
+            ourCustomResolutionX = category.CreateEntry(SettingCustomResolutionX, 1920, "Custom screenshot resolution (X)");
+            ourCustomResolutionY = category.CreateEntry(SettingCustomResolutionY, 1080, "Custom screenshot resolution (Y)");
             
             if (!MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit" && it.Assembly.GetName().Version >= new Version(0, 2, 6)))
             {
@@ -83,8 +90,10 @@ namespace LagFreeScreenshots
         {
             ExpansionKitApi.RegisterSettingAsStringEnum(SettingsCategory, SettingScreenshotFormat,
                 new []{("png", "PNG"), ("jpeg", "JPEG"), ("auto", "Auto")});
-            ExpansionKitApi.RegisterSettingAsStringEnum(SettingsCategory, SettingScreenshotResolution,
-                new []{("default", "Default"), ("100x100", "Thumbnail 100x100"), ("1024x1024", "Square 1024x1024"), ("720p", "720p"), ("1080p","1080p"), ("4K","4K"), ("8K", "8K")});
+            var updaterX = ExpansionKitApi.RegisterSettingsVisibilityCallback(SettingsCategory, SettingCustomResolutionX, () => ourResolution.Value == PresetScreenshotSizes.Custom);
+            var updaterY = ExpansionKitApi.RegisterSettingsVisibilityCallback(SettingsCategory, SettingCustomResolutionY, () => ourResolution.Value == PresetScreenshotSizes.Custom);
+            ourResolution.OnValueChangedUntyped += updaterX;
+            ourResolution.OnValueChangedUntyped += updaterY;
         }
 
         private static ScreenshotRotation GetPictureAutorotation(Camera camera)
@@ -161,17 +170,21 @@ namespace LagFreeScreenshots
             return false;
         }
 
-        public static (int width, int height)? ImageResolution(String d)
+        public static (int width, int height)? ImageResolution(PresetScreenshotSizes d)
         {
             return d switch
             {
-                "100x100" => (100, 100),
-                "1024x1024" => (1024, 1024),
-                "720p" => (1280, 720),
-                "1080p" => (1920, 1080),
-                "4K" => (3840, 2160),
-                "8K" => (7680, 4320),
-                _ => null,
+                PresetScreenshotSizes.Default => null,
+                PresetScreenshotSizes.Custom => (ourCustomResolutionX.Value, ourCustomResolutionY.Value),
+                PresetScreenshotSizes.Thumbnail => (100, 100),
+                PresetScreenshotSizes.Square => (1024, 1024),
+                PresetScreenshotSizes._720p => (1280, 720),
+                PresetScreenshotSizes._1080p => (1920, 1080),
+                PresetScreenshotSizes._4K => (3840, 2160),
+                PresetScreenshotSizes._8K => (7680, 4320),
+                PresetScreenshotSizes._12K => (11520, 6480),
+                PresetScreenshotSizes._16K => (15360, 8640),
+                _ => throw new ArgumentOutOfRangeException(nameof(d), d, null)
             };
         }
 
