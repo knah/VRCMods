@@ -14,7 +14,7 @@ using UIExpansionKit.API;
 using UnityEngine.SceneManagement;
 using VRC.Core;
 
-[assembly:MelonInfo(typeof(TrueShaderAntiCrashMod), "True Shader Anticrash", "1.0.6", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(TrueShaderAntiCrashMod), "True Shader Anticrash", "1.0.7", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace TrueShaderAntiCrash
