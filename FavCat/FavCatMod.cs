@@ -10,7 +10,6 @@ using FavCat.Modules;
 using HarmonyLib;
 using MelonLoader;
 using UIExpansionKit.API;
-using UnhollowerBaseLib;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -19,7 +18,7 @@ using VRC.UI;
 using ImageDownloaderClosure = ImageDownloader.__c__DisplayClass11_0;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.1.12", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(FavCatMod), "FavCat", "1.1.13", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace FavCat
@@ -161,23 +160,12 @@ namespace FavCat
 
         public static void DoPatch()
         {
-            unsafe
-            {
-                var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils
-                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(
-                        typeof(ApiModel).GetMethods().Single(it =>
-                            it.Name == nameof(ApiModel.SetApiFieldsFromJson) && it.GetParameters().Length == 2))
-                    .GetValue(null);
-                MelonUtils.NativeHookAttach((IntPtr) (&originalMethodPointer), typeof(ApiSnifferPatch).GetMethod(nameof(ApiSnifferStatic))!.MethodHandle.GetFunctionPointer());
-                ourOriginalApiPopulate = Marshal.GetDelegateForFunctionPointer<ApiPopulateDelegate>(originalMethodPointer);
-            }
-
-            unsafe
-            {
-                var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(ImageDownloaderClosureType.GetMethod(nameof(ImageDownloaderClosure._DownloadImageInternal_b__0))).GetValue(null);
-                MelonUtils.NativeHookAttach((IntPtr) (&originalMethodPointer), typeof(ApiSnifferPatch).GetMethod(nameof(ImageSnifferPatch))!.MethodHandle.GetFunctionPointer());
-                ourOriginalOnDone = Marshal.GetDelegateForFunctionPointer<ImageDownloaderOnDoneDelegate>(originalMethodPointer);
-            }
+            NativePatchUtils.NativePatch(typeof(ApiModel).GetMethods().Single(it =>
+                    it.Name == nameof(ApiModel.SetApiFieldsFromJson) && it.GetParameters().Length == 2),
+                out ourOriginalApiPopulate, ApiSnifferStatic);
+            
+            NativePatchUtils.NativePatch(ImageDownloaderClosureType.GetMethod(nameof(ImageDownloaderClosure
+                ._DownloadImageInternal_b__0))!, out ourOriginalOnDone, ImageSnifferPatch);
         }
 
         private static readonly object[] EmptyObjectArray = new object[0];

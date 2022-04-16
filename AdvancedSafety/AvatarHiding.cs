@@ -46,17 +46,8 @@ namespace AdvancedSafety
                 }
             }
 
-            unsafe
-            {
-                var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils
-                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(VRCAvatarManager).GetMethod(
-                        nameof(VRCAvatarManager.Method_Public_UniTask_1_Boolean_ApiAvatar_Single_0)))
-                    .GetValue(null);
-                
-                MelonUtils.NativeHookAttach((IntPtr)(&originalMethodPointer), typeof(AvatarHiding).GetMethod(nameof(SwitchAvatarPatch), BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
-
-                ourSwitchAvatar = Marshal.GetDelegateForFunctionPointer<SwitchAvatarDelegate>(originalMethodPointer);
-            }
+            NativePatchUtils.NativePatch(typeof(VRCAvatarManager).GetMethod(
+                nameof(VRCAvatarManager.Method_Public_UniTask_1_Boolean_ApiAvatar_Single_0))!, out ourSwitchAvatar, SwitchAvatarPatch);
 
             foreach (var methodInfo in typeof(FeaturePermissionManager).GetMethods()
                 .Where(it =>

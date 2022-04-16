@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using Finitizer;
 using MelonLoader;
@@ -8,7 +6,7 @@ using UnhollowerBaseLib;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-[assembly:MelonInfo(typeof(FinitizerMod), "Finitizer", "1.3.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(FinitizerMod), "Finitizer", "1.3.2", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace Finitizer
@@ -52,23 +50,21 @@ namespace Finitizer
             myWasEnabled = isEnabled;
         }
 
-        private void ApplyPatches()
+        private unsafe void ApplyPatches()
         {
             if (myArePatchesApplied) return;
             
-            PatchICall("UnityEngine.Transform::" + nameof(Transform.set_position_Injected), out ourOriginalTransformSetter, nameof(SetTransformVectorPatch));
-            PatchICall("UnityEngine.Transform::" + nameof(Transform.set_rotation_Injected), out ourOriginalTransformRotSetter, nameof(SetTransformQuaternionPatch));
-            PatchICall("UnityEngine.Transform::" + nameof(Transform.SetPositionAndRotation_Injected), out ourOriginalTransformTwinSetter, nameof(SetTransformVectorQuaternionPatch));
-            
-            PatchICall("UnityEngine.Rigidbody::" + nameof(Rigidbody.set_position_Injected), out ourOriginalRigidbodyPosSetter, nameof(SetRigidbodyPosPatch));
-            PatchICall("UnityEngine.Rigidbody::" + nameof(Rigidbody.set_rotation_Injected), out ourOriginalRigidbodyRotSetter, nameof(SetRigidbodyRotPatch));
-            PatchICall("UnityEngine.Rigidbody::" + nameof(Rigidbody.MovePosition_Injected), out ourOriginalRigidbodyPosMove, nameof(SetRigidbodyPosMovePatch));
-            PatchICall("UnityEngine.Rigidbody::" + nameof(Rigidbody.MoveRotation_Injected), out ourOriginalRigidbodyRotMove, nameof(SetRigidbodyRotMovePatch));
-            PatchICall("UnityEngine.Rigidbody::" + nameof(Rigidbody.set_velocity_Injected), out ourOriginalRigidbodyVelSetter, nameof(SetRigidbodyVelPatch));
-            PatchICall("UnityEngine.Rigidbody::" + nameof(Rigidbody.set_angularVelocity_Injected), out ourOriginalRigidbodyAvSetter, nameof(SetRigidbodyAvPatch));
-            
-            PatchICall("UnityEngine.Object::" + nameof(Object.Internal_InstantiateSingle_Injected), out ourOriginalInstantiateSimple, nameof(InstantiateSimplePatch));
-            PatchICall("UnityEngine.Object::" + nameof(Object.Internal_InstantiateSingleWithParent_Injected), out ourOriginalInstantiateWithParent, nameof(InstantiateWithParentPatch));
+            PatchICall("UnityEngine.Transform::" + nameof(Transform.set_position_Injected), out ourOriginalTransformSetter, SetTransformVectorPatch);
+            PatchICall("UnityEngine.Transform::" + nameof(Transform.set_rotation_Injected), out ourOriginalTransformRotSetter, SetTransformQuaternionPatch);
+            PatchICall("UnityEngine.Transform::" + nameof(Transform.SetPositionAndRotation_Injected), out ourOriginalTransformTwinSetter, SetTransformVectorQuaternionPatch);
+            PatchICall("UnityEngine.Rigidbody::" + nameof(Rigidbody.set_position_Injected), out ourOriginalRigidbodyPosSetter, SetRigidbodyPosPatch);
+            PatchICall("UnityEngine.Rigidbody::" + nameof(Rigidbody.set_rotation_Injected), out ourOriginalRigidbodyRotSetter, SetRigidbodyRotPatch);
+            PatchICall("UnityEngine.Rigidbody::" + nameof(Rigidbody.MovePosition_Injected), out ourOriginalRigidbodyPosMove, SetRigidbodyPosMovePatch);
+            PatchICall("UnityEngine.Rigidbody::" + nameof(Rigidbody.MoveRotation_Injected), out ourOriginalRigidbodyRotMove, SetRigidbodyRotMovePatch);
+            PatchICall("UnityEngine.Rigidbody::" + nameof(Rigidbody.set_velocity_Injected), out ourOriginalRigidbodyVelSetter, SetRigidbodyVelPatch);
+            PatchICall("UnityEngine.Rigidbody::" + nameof(Rigidbody.set_angularVelocity_Injected), out ourOriginalRigidbodyAvSetter, SetRigidbodyAvPatch);
+            PatchICall("UnityEngine.Object::" + nameof(Object.Internal_InstantiateSingle_Injected), out ourOriginalInstantiateSimple, InstantiateSimplePatch);
+            PatchICall("UnityEngine.Object::" + nameof(Object.Internal_InstantiateSingleWithParent_Injected), out ourOriginalInstantiateWithParent, InstantiateWithParentPatch);
 
             myArePatchesApplied = true;
             MelonLogger.Msg("Things patching complete");
@@ -101,9 +97,7 @@ namespace Finitizer
         private static InstantiatorSimple ourOriginalInstantiateSimple;
         private static InstantiatorWithParent ourOriginalInstantiateWithParent;
 
-        private static readonly Dictionary<string, (IntPtr, IntPtr)> ourOriginalPointers = new Dictionary<string, (IntPtr, IntPtr)>();
-
-        private static unsafe void PatchICall<T>(string name, out T original, string patchName) where T: MulticastDelegate
+        private static void PatchICall<T>(string name, out T original, T target) where T: MulticastDelegate
         {
             var originalPointer = IL2CPP.il2cpp_resolve_icall(name);
             if (originalPointer == IntPtr.Zero)
@@ -113,27 +107,14 @@ namespace Finitizer
                 return;
             }
 
-            var target = typeof(FinitizerMod).GetMethod(patchName, BindingFlags.Static | BindingFlags.NonPublic);
-            var functionPointer = target!.MethodHandle.GetFunctionPointer();
-
-            MelonUtils.NativeHookAttach((IntPtr) (&originalPointer), functionPointer);
-            
-            ourOriginalPointers[name] = (originalPointer, functionPointer);
-
-            original = Marshal.GetDelegateForFunctionPointer<T>(originalPointer);
+            NativePatchUtils.NativePatch(originalPointer, out original, target, name);
         }
 
-        private unsafe void UnpatchAll()
+        private void UnpatchAll()
         {
             if (!myArePatchesApplied) return;
 
-            foreach (var keyValuePair in ourOriginalPointers)
-            {
-                var pointer = keyValuePair.Value.Item1;
-                MelonUtils.NativeHookDetach((IntPtr) (&pointer), keyValuePair.Value.Item2);
-            }
-
-            ourOriginalPointers.Clear();
+            NativePatchUtils.UnpatchAll();
 
             myArePatchesApplied = false;
             MelonLogger.Msg("Things unpatching complete");

@@ -522,17 +522,9 @@ namespace IKTweaks
 
         internal static void HookFullBodyController(HarmonyLib.Harmony harmony)
         {
-            var fbbIkInit = typeof(VRCFbbIkController).GetMethod(nameof(VRCFbbIkController.Method_Public_Virtual_Final_New_Boolean_VRC_AnimationController_Animator_VRCPlayer_Boolean_0));
+            var fbbIkInit = typeof(VRCFbbIkController).GetMethod(nameof(VRCFbbIkController.Method_Public_Virtual_Final_New_Boolean_VRC_AnimationController_Animator_VRCPlayer_Boolean_0))!;
             
-            unsafe
-            {
-                var ptr = *(IntPtr*)(IntPtr)UnhollowerUtils
-                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(fbbIkInit).GetValue(null);
-                var patch = AccessTools.Method(typeof(FullBodyHandling), nameof(FbbIkInitReplacement)).MethodHandle
-                    .GetFunctionPointer();
-                MelonUtils.NativeHookAttach((IntPtr)(&ptr), patch);
-                ourOriginalFbbIkInit = Marshal.GetDelegateForFunctionPointer<FbbIkInit>(ptr);
-            }
+            NativePatchUtils.NativePatch(fbbIkInit, out ourOriginalFbbIkInit, FbbIkInitReplacement);
 
             harmony.Patch(AccessTools.Method(typeof(FullBodyBipedIK), nameof(FullBodyBipedIK.LateUpdate)),
                 new HarmonyMethod(typeof(FullBodyHandling), nameof(LateUpdatePrefix)));

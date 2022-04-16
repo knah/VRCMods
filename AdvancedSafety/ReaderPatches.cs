@@ -24,8 +24,6 @@ namespace AdvancedSafety
         // Why these numbers? Check wrld_b9f80349-74af-4840-8ce9-a1b783436590 for how *horribly* things break even on 10^6. Nothing belongs outside these bounds. The significand is that of MaxValue.
         private const float MaxAllowedValueTop = 3.402823E+7f;
         private const float MaxAllowedValueBottom = -3.402823E+7f;
-        
-        private static readonly List<object> ourPinnedDelegates = new ();
 
         private static readonly string[] ourAllowedFields = { "m_BreakForce", "m_BreakTorque", "collisionSphereDistance", "maxDistance", "inSlope", "outSlope" };
 
@@ -81,14 +79,13 @@ namespace AdvancedSafety
             }
         }
 
-        private static unsafe void DoPatch<T>(ProcessModule module, int offset, T patchDelegate, out T delegateField) where T : MulticastDelegate
+        private static void DoPatch<T>(ProcessModule module, int offset, T patchDelegate, out T delegateField) where T : MulticastDelegate
         {
             delegateField = null;
             if (offset == 0) return;
             var targetPtr = module.BaseAddress + offset;
-            ourPinnedDelegates.Add(patchDelegate);
-            MelonUtils.NativeHookAttach((IntPtr)(&targetPtr), Marshal.GetFunctionPointerForDelegate(patchDelegate));
-            delegateField = Marshal.GetDelegateForFunctionPointer<T>(targetPtr);
+            
+            NativePatchUtils.NativePatch(targetPtr, out delegateField, patchDelegate);
         }
 
         private static unsafe void FloatTransferPatch(IntPtr reader, float* result, byte* fieldName)
@@ -235,14 +232,14 @@ namespace AdvancedSafety
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        unsafe delegate IntPtr StringReallocateDelegate(NativeString* str, long newSize);
+        unsafe delegate IntPtr StringReallocateDelegate(NativePatchUtils.NativeString* str, long newSize);
 
         private static StringReallocateDelegate ourOriginalRealloc;
 
-        [ThreadStatic] private static unsafe NativeString* ourLastReallocatedString;
+        [ThreadStatic] private static unsafe NativePatchUtils.NativeString* ourLastReallocatedString;
         [ThreadStatic] private static int ourLastReallocationCount;
 
-        private static unsafe IntPtr ReallocateStringPatch(NativeString* str, long newSize)
+        private static unsafe IntPtr ReallocateStringPatch(NativePatchUtils.NativeString* str, long newSize)
         {
             if (str != null && newSize > 128 && str->Data != IntPtr.Zero)
             {
@@ -261,15 +258,6 @@ namespace AdvancedSafety
 
             while (ourOriginalRealloc == null) Thread.Sleep(15);
             return ourOriginalRealloc(str, newSize);
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct NativeString
-        {
-            public IntPtr Data;
-            public long Capacity;
-            public long Unknown;
-            public long Length;
         }
     }
 }

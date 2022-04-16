@@ -5,7 +5,8 @@
         <VrcReferences>true</VrcReferences>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
-        <Version>1.5.15.0</Version>
+        <Version>1.5.16.0</Version>
+        <UsesNativePatches>true</UsesNativePatches>
     </PropertyGroup>
 
     <ItemGroup>

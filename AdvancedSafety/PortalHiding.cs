@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using MelonLoader;
 using UnhollowerBaseLib;
@@ -15,17 +14,9 @@ namespace AdvancedSafety
     {
         public static void OnApplicationStart()
         {
-            unsafe
-            {
-                var originalMethod = *(IntPtr*) (IntPtr) UnhollowerUtils
-                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(
-                        typeof(ObjectInstantiator).GetMethod(nameof(ObjectInstantiator._InstantiateObject)))
-                    .GetValue(null);
-                MelonUtils.NativeHookAttach((IntPtr) (&originalMethod),
-                    typeof(PortalHiding).GetMethod(nameof(InstantiateObjectPatch),
-                        BindingFlags.Static | BindingFlags.NonPublic)!.MethodHandle.GetFunctionPointer());
-                ourDelegate = Marshal.GetDelegateForFunctionPointer<InstantiateObjectDelegate>(originalMethod);
-            }
+            NativePatchUtils.NativePatch(
+                typeof(ObjectInstantiator).GetMethod(nameof(ObjectInstantiator._InstantiateObject))!,
+                out ourDelegate, InstantiateObjectPatch);
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

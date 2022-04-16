@@ -119,6 +119,9 @@
                           OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false" />
     </ItemGroup>
+    <ItemGroup Condition="'$(UsesNativePatches)' == 'true'">
+        <Compile Include="$(MsBuildThisFileDirectory)/Common/NativePatchUtils.cs" Link="Common/NativePatchUtils.cs" />
+    </ItemGroup>
     <ItemGroup Condition="'$(NoModReferences)' != 'true'">
         <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
             <SpecificVersion>false</SpecificVersion>

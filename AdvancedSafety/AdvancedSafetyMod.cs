@@ -18,7 +18,7 @@ using VRC.Management;
 using Object = UnityEngine.Object;
 
 [assembly:MelonGame("VRChat", "VRChat")]
-[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.5.15", "knah, Requi, Ben", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(AdvancedSafetyMod), "Advanced Safety", "1.5.16", "knah, Requi, Ben", "https://github.com/knah/VRCMods")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
 namespace AdvancedSafety
@@ -45,21 +45,12 @@ namespace AdvancedSafety
 
             foreach (var matchingMethod in matchingMethods)
             {
-                unsafe
-                {
-                    var originalMethodPointer = *(IntPtr*) (IntPtr) UnhollowerUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(matchingMethod).GetValue(null);
+                ObjectInstantiateDelegate originalInstantiateDelegate = null;
 
-                    ObjectInstantiateDelegate originalInstantiateDelegate = null;
+                ObjectInstantiateDelegate replacement = (assetPtr, pos, rot, allowCustomShaders, isUI, validate, nativeMethodPointer) =>
+                    ObjectInstantiatePatch(assetPtr, pos, rot, allowCustomShaders, isUI, validate, nativeMethodPointer, originalInstantiateDelegate);
 
-                    ObjectInstantiateDelegate replacement = (assetPtr, pos, rot, allowCustomShaders, isUI, validate, nativeMethodPointer) =>
-                        ObjectInstantiatePatch(assetPtr, pos, rot, allowCustomShaders, isUI, validate, nativeMethodPointer, originalInstantiateDelegate);
-
-                    ourPinnedDelegates.Add(replacement);
-
-                    MelonUtils.NativeHookAttach((IntPtr) (&originalMethodPointer), Marshal.GetFunctionPointerForDelegate(replacement));
-
-                    originalInstantiateDelegate = Marshal.GetDelegateForFunctionPointer<ObjectInstantiateDelegate>(originalMethodPointer);
-                }
+                NativePatchUtils.NativePatch(matchingMethod, out originalInstantiateDelegate, replacement);
             }
             
             foreach (var nestedType in typeof(VRCAvatarManager).GetNestedTypes())
@@ -91,10 +82,8 @@ namespace AdvancedSafety
                     }
                     
                     var patchDelegate = new VoidDelegate(TaskMoveNextPatch);
-                    ourPinnedDelegates.Add(patchDelegate);
                     
-                    MelonUtils.NativeHookAttach((IntPtr)(&originalMethodPointer), Marshal.GetFunctionPointerForDelegate(patchDelegate));
-                    originalDelegate = Marshal.GetDelegateForFunctionPointer<VoidDelegate>(originalMethodPointer);
+                    NativePatchUtils.NativePatch(originalMethodPointer, out originalDelegate, patchDelegate);
                 }
             }
 

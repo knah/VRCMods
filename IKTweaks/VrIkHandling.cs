@@ -24,17 +24,9 @@ namespace IKTweaks
         public static void HookVrIkInit(HarmonyLib.Harmony harmony)
         {
             var vrikInitMethod = typeof(VRCVrIkController).GetMethod(nameof(VRCVrIkController
-                .Method_Public_Virtual_Final_New_Boolean_VRC_AnimationController_Animator_VRCPlayer_Boolean_0));
+                .Method_Public_Virtual_Final_New_Boolean_VRC_AnimationController_Animator_VRCPlayer_Boolean_0))!;
 
-            unsafe
-            {
-                var ptr = *(IntPtr*)(IntPtr)UnhollowerUtils
-                    .GetIl2CppMethodInfoPointerFieldForGeneratedMethod(vrikInitMethod).GetValue(null);
-                var patch = AccessTools.Method(typeof(VrIkHandling), nameof(VrIkInitReplacement)).MethodHandle
-                    .GetFunctionPointer();
-                MelonUtils.NativeHookAttach((IntPtr)(&ptr), patch);
-                ourOriginalVrIkInit = Marshal.GetDelegateForFunctionPointer<VrIkInit>(ptr);
-            }
+            NativePatchUtils.NativePatch(vrikInitMethod, out ourOriginalVrIkInit, VrIkInitReplacement);
         }
         
         private delegate byte VrIkInit(IntPtr a, IntPtr b, IntPtr c, IntPtr d, byte e, IntPtr n);

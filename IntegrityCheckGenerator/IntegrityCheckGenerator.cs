@@ -58,6 +58,7 @@ namespace IntegrityCheckGenerator
             generatedCode.AppendLine("using HarmonyLib;");
             generatedCode.AppendLine("using System;");
             generatedCode.AppendLine("using System.Collections;");
+            generatedCode.AppendLine("using System.Diagnostics;");
             generatedCode.AppendLine("using System.IO;");
             generatedCode.AppendLine("using System.Linq;");
             generatedCode.AppendLine("using System.Reflection;");
@@ -171,32 +172,39 @@ namespace IntegrityCheckGenerator
             generatedCode.AppendLine("        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(\"_dummy3_.dll\");");
             generatedCode.AppendLine("        using var memStream = new MemoryStream((int) stream.Length);");
             generatedCode.AppendLine("        stream.CopyTo(memStream);");
-            generatedCode.AppendLine("        Assembly.Load(memStream.ToArray()).GetTypes();");
+            generatedCode.AppendLine("        Assembly.Load(memStream.ToArray(), null).GetTypes();");
             generatedCode.AppendLine("        while(true);");
             generatedCode.AppendLine("    }");
             generatedCode.AppendLine("    catch (BadImageFormatException)");
             generatedCode.AppendLine("    {");
             generatedCode.AppendLine("    }");
             generatedCode.AppendLine("}");
+
+            var modHumanName = modTypeName;
+            if (modHumanName.EndsWith("Mod")) modHumanName = modHumanName.Substring(0, modHumanName.Length - 3);
             
             generatedCode.AppendLine("private static readonly string[] ourAnnoyingMessages = {");
             generatedCode.AppendLine("    \"===================================================================\",");
             generatedCode.AppendLine("    \"I'm afraid I can't let you do that, Dave\",");
             generatedCode.AppendLine("    \"\",");
-            generatedCode.AppendLine("    \"You're using MelonLoader with important security features missing.\",");
-            generatedCode.AppendLine("    \"In addition to such versions being a requirement for malicious mods,\",");
+            generatedCode.AppendLine("    \"You're using MelonLoader with important security features missing,\",");
+            generatedCode.AppendLine("    \"or a tool, mod, or plugin that disables those security features.\",");
+            generatedCode.AppendLine("    \"In addition to this being a requirement for malicious mods,\",");
             generatedCode.AppendLine("    \"this exposes you to additional risks from certain malicious actors,\",");
             generatedCode.AppendLine("    \"including ACCOUNT THEFT, ACCOUNT BANS, and other unwanted consequences\",");
             generatedCode.AppendLine("    \"This is not limited to VRChat - other accounts (i.e. Discord) can be affected\",");
             generatedCode.AppendLine("    \"This is not what you want, so download the official installer from\",");
             generatedCode.AppendLine("    \"https://github.com/LavaGang/MelonLoader/releases\",");
             generatedCode.AppendLine("    \"then close this console, and reinstall MelonLoader using it.\",");
+            generatedCode.AppendLine("    \"Additionally, remove any mods, plugins, or other tools designed\",");
+            generatedCode.AppendLine("    \"to interfere with MelonLoader's security measures.\",");
             generatedCode.AppendLine("    \"\",");
             generatedCode.AppendLine("    \"You can read more about why this message is a thing here:\",");
             generatedCode.AppendLine("    \"https://github.com/knah/VRCMods/blob/master/Malicious-Mods.md\",");
             generatedCode.AppendLine("    \"\",");
+            generatedCode.AppendLine($"    \"{modHumanName} is not compatible with malicious mods.\",");
             generatedCode.AppendLine("    \"Rejecting malicious mods is the only way forward.\",");
-            generatedCode.AppendLine("    \"Pressing enter will close VRChat.\",");
+            generatedCode.AppendLine("    \"Pressing enter will open the link above in your browser and close VRChat.\",");
             generatedCode.AppendLine("    \"===================================================================\",");
             generatedCode.AppendLine("};");
 
@@ -213,6 +221,7 @@ namespace IntegrityCheckGenerator
             builder.AppendLine(prefix + "    MustStayFalse = true;");
             builder.AppendLine(prefix + "    foreach (var message in ourAnnoyingMessages) MelonLogger.Error(message);");
             builder.AppendLine(prefix + "    Console.In.ReadLine();");
+            builder.AppendLine(prefix + "    try { Process.Start(\"https://github.com/knah/VRCMods/blob/master/Malicious-Mods.md\"); } catch {};");
             builder.AppendLine(prefix + "    Environment.Exit(1);");
             builder.AppendLine(prefix + "} finally {");
             builder.AppendLine(prefix + "    try { Marshal.GetDelegateForFunctionPointer<Action>(Marshal.AllocHGlobal(16))(); } finally { while(true); }");

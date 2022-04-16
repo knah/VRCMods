@@ -136,8 +136,8 @@ A textbook example of a "client" developer going crazy and stealing auth tokens 
 Appears to be a renamed KiraiMod (to the point its makers were too lazy to rename the assembly).  
 Malicious code in question will fill user's desktop with (normal, deletable) copies of mods with GUID names, remove all mods from Mods folder, and appears to try to cause a "modified client detected" ban.  
 Afterwards, it tries to cause a BSOD and, if that fails, simply terminates VRChat process.  
-![code screenshot with maicious code sample](https://cdn.discordapp.com/attachments/757187539638550610/865256495011856394/unknown.png)
+![code screenshot with malicious code sample](https://cdn.discordapp.com/attachments/757187539638550610/865256495011856394/unknown.png)
 
 #### Malicious mod user ban waves
 Unfortunately (for this section), none of these were worthy of an announcement. After all, they didn't affect VRCMG mod users, so why bother them with an unnecessary ping, or give any attention to malicious mods?  
-For what it's worth, practically everyone who complained about mod-caused bans in the VRCMG in the last year and a half was either using malicious mods, or was being very obvious about mod use (i.e. streaming with mods, noclipping in public, and so on).
+For what it's worth, practically everyone who complained about mod-caused bans in the VRCMG since Unity 2018 update (April 1st, 2020) was either using malicious mods, or was being very obvious about mod use (i.e. streaming with mods, noclipping in public, and so on).
