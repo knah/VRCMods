@@ -2,6 +2,7 @@ Read the [Malicious Mods and you](https://github.com/knah/VRCMods/blob/master/Ma
 
 Changes:
  * Advanced Safety: fix error spam if sorting order enforcement was enabled
+ * Styletor: minor fix for initialization
  * Made native patches in the following mods more formally-correct:
    * Advanced Safety
    * Finitizer

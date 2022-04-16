@@ -14,7 +14,7 @@ using UIExpansionKit.API;
 using UnhollowerRuntimeLib.XrefScans;
 using VRC.UI.Core.Styles;
 
-[assembly:MelonInfo(typeof(StyletorMod), "Styletor", "0.3.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(StyletorMod), "Styletor", "0.3.1", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 #nullable disable
@@ -126,11 +126,13 @@ namespace Styletor
             }
 
             var initCandidates = typeof(StyleEngine).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
-                .Where(it => it.Name.StartsWith("Method_Public_Void_") && it.GetParameters().Length == 0).ToList();
+                .Where(it => it.Name.StartsWith("Method_Public_Void_") && it.GetParameters().Length == 0 && !it.Name.Contains("_PDM_")).ToList();
 
-            var initMethod = initCandidates.SingleOrDefault(it =>
+            var initMethods = initCandidates.Where(it =>
                 XrefScanner.XrefScan(it).Any(jt =>
-                    jt.Type == XrefType.Global && jt.ReadAsObject()?.ToString() == "style-sheet"));
+                    jt.Type == XrefType.Global && jt.ReadAsObject()?.ToString() == "style-sheet")).ToList();
+
+            var initMethod = initMethods.Count == 1 ? initMethods[0] : null;
 
             if (initMethod == null) 
                 MelonLogger.Warning("No Init method on StyleEngine, will wait for natural init");
