@@ -21,7 +21,7 @@ namespace AdvancedSafety
         {
             for (var i = 0; i < myRenderersToHammer.Length; i++)
             {
-                if(ReferenceEquals(myRenderersToHammer[i], null)) continue;
+                if(myRenderersToHammer[i] is null) continue;
                 
                 try
                 {
