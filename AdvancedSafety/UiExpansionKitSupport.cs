@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using AdvancedSafety.BundleVerifier;
 using MelonLoader;
 using UIExpansionKit;
 using UIExpansionKit.API;
@@ -20,19 +21,26 @@ namespace AdvancedSafety
         private static Action<string> ourHideAuthorTextSink;
         private static Action<string> ourHideAvatarTextSink;
 
+        private static Action<bool> ourForceAllowBundleSink;
+
         public static void OnApplicationStart()
         {
             ClassInjector.RegisterTypeInIl2Cpp<QuickMenuHideAvatarButtonHandler>();
             
             var hideAuthorButton = ExpansionKitApi.GetExpandedMenu(ExpandedMenu.UserDetailsMenu).AddSimpleButton("Hide all avatars by this author", OnHideBigClick);
             var hideAvatarButton = ExpansionKitApi.GetExpandedMenu(ExpandedMenu.UserQuickMenu).AddSimpleButton("Hide this avatar (on anyone)", OnHideAvatarClick);
+            var forceAllowBundleButton = ExpansionKitApi.GetExpandedMenu(ExpandedMenu.UserQuickMenu).AddSimpleButton("Force allow this avatar bundle", OnForceAllowBundleClick);
 
             ourHideAuthorTextSink = s => hideAuthorButton.Text = s;
             ourHideAvatarTextSink = s => hideAvatarButton.Text = s;
+            ourForceAllowBundleSink = b => forceAllowBundleButton.Visible = b;
             
             hideAvatarButton.OnInstanceCreated += obj => obj.AddComponent<QuickMenuHideAvatarButtonHandler>();
 
             ExpansionKitApi.GetExpandedMenu(ExpandedMenu.SettingsMenu).AddSimpleButton("Reload all avatars", () => ScanningReflectionCache.ReloadAllAvatars(false));
+
+            ExpansionKitApi.GetSettingsCategory(BundleVerifierMod.SettingsCategory)
+                .AddSimpleButton("Reset corrupted bundle cache", () => BundleVerifierMod.BadBundleCache.Clear());
 
             MelonCoroutines.Start(InitThings());
         }
@@ -58,6 +66,17 @@ namespace AdvancedSafety
             
             AvatarHiding.SaveBlockedAvatars();
             
+            ScanningReflectionCache.ReloadAllAvatars(true);
+        }
+        
+        private static void OnForceAllowBundleClick()
+        {
+            var apiAvatar = GetUserSelectedInQm()?.GetPlayer()?._vrcplayer?.prop_VRCAvatarManager_0?.field_Private_ApiAvatar_0;
+            if (apiAvatar == null) return;
+
+            if (BundleVerifierMod.BadBundleCache.Contains(apiAvatar.assetUrl))
+                BundleVerifierMod.ForceAllowedCache.Add(apiAvatar.assetUrl);
+
             ScanningReflectionCache.ReloadAllAvatars(true);
         }
 
@@ -114,6 +133,8 @@ namespace AdvancedSafety
             ourHideAvatarTextSink(AvatarHiding.ourBlockedAvatars.ContainsKey(currentAvatar.id)
                 ? "Unhide this avatar (on anyone)"
                 : "Hide this avatar (on anyone)");
+
+            ourForceAllowBundleSink(BundleVerifierMod.BadBundleCache.Contains(currentAvatar.assetUrl));
         }
     }
 }

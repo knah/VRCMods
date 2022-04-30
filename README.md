@@ -31,12 +31,31 @@ Features:
  * Hide a specific avatar, no matter who uses it (requires UI Expansion Kit, button in in user quick menu)
  * Hide portals from blocked users or non-friends
    * That blocked user will no longer be able to portal drop you
+ * Check downloaded avatars for corruption and prevent crashes from them 
 
 This mod will introduce small lag spikes when avatars are loaded. These should be tolerable compared to VRChat's own lag spikes.  
 All numeric limits are configurable.  
  * Don't set animators limit to 0 - you will break all humanoid avatars horribly if you do  
 
 Configurable for friends and vanilla "show avatar" button.  
+
+### Bundle verifier notes
+Corrupted bundle protection uses a separate Unity process to crash instead of the main one. This comes with several implications:
+ * The extra process uses additional system resources, up to a limit
+   * Parallel avatar downloads can create multiple processes with corresponding memory usage
+   * Avatar data is held in memory while it's being checked, increasing memory consumption even more during avatar download
+ * Newly downloaded avatars take longer to load - this is usually a few seconds extra per avatar
+   * Avatars loaded from cache are not checked and load as fast as before.
+   * Most corrupted avatars never get cached (VRC crashes before writing them into cache), but in some rare situations you might end up with a cached corrupted avatar. In this case you may need to clear your cache, once.
+   * The download progress completes twice for checked avatars - once for the download, second time for loading it in Unity itself
+ * Some avatars might be rejected because they require too many resources to load. Default limits are 15 CPU-seconds (download time is not included in those) and 2GB RAM. Limits can be changed in settings.
+   * After changing limits to be higher, click the "Reset corrupted bundle cache" button to allow re-checking already-rejected avatars.
+   * If you have a weaker PC, you may need to increase time limit to be higher.
+   * If people around you use horribly unoptimized avatars, you may need to increase the RAM limit.
+   * The point above also applies to component limit.
+ * Bundle checking is only enabled in public instances by default, but if your friends are somehow not nice, you can enable the mod in all instance types.
+   * It ignores "show avatar" as it works on a more-global level
+ * All of this should be done by VRChat on their servers, once for every uploaded avatar. AWS Lambda pricing would be under a cent per upload. Alas.
 
 **Canny tickets**:
 * [Allow changing safety settings based on trust rank of avatar uploader, not wearer](https://feedback.vrchat.com/feature-requests/p/allow-changing-safety-settings-based-on-trust-rank-of-avatar-uploader-not-wearer) (I wanted to implement this, but it would be too API request heavy to be safe)
