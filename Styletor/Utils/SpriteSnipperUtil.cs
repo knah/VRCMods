@@ -73,12 +73,41 @@ namespace Styletor.Utils
             return ourGrayscaledTexturesMap[original] = newTexture;
         }
 
+        private static Rect GetTextureRect(Sprite sprite)
+        {
+            if (!sprite.packed || sprite.packingMode != SpritePackingMode.Tight) 
+                return sprite.textureRect;
+            
+            var xMin = 1f;
+            var yMin = 1f;
+            var xMax = 0f;
+            var yMax = 0f;
+                
+            foreach (var v in sprite.uv)
+            {
+                if (xMax < v.x) xMax = v.x;
+                if (xMin > v.x) xMin = v.x;
+                if (yMax < v.y) yMax = v.y;
+                if (yMin > v.y) yMin = v.y;
+            }
+
+            var texSize = (sprite.texture.width, sprite.texture.height);
+            return new Rect
+            {
+                m_XMin = xMin * texSize.width,
+                m_YMin = yMin * texSize.height,
+                m_Width = (xMax - xMin) * texSize.width,
+                m_Height = (yMax - yMin) * texSize.height
+            };
+
+        }
+
         public static Sprite GetGrayscaledSprite(Sprite original, bool normalizeWhite)
         {
             if (ourGrayscaledSpritesMap.ContainsKey(original))
                 return ourGrayscaledSpritesMap[original];
 
-            var newTexture = Copy(EnsureReadable(original.texture), original.textureRect, normalizeWhite ? ProcessPixelsToGrayscaleNormalized : ProcessPixelsToGrayscale);
+            var newTexture = Copy(EnsureReadable(original.texture), GetTextureRect(original), normalizeWhite ? ProcessPixelsToGrayscaleNormalized : ProcessPixelsToGrayscale);
 
             newTexture.hideFlags |= HideFlags.DontUnloadUnusedAsset;
 

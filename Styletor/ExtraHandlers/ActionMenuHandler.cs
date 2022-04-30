@@ -74,6 +74,7 @@ namespace Styletor.ExtraHandlers
             {
                 if (myTexturesByName.TryGetValue(textureName, out var texture))
                 {
+                    texture.hideFlags |= HideFlags.DontUnloadUnusedAsset;
                     var grayscaled = SpriteSnipperUtil.GetGrayscaledTexture(texture, true);
 
                     myGrayTexturesToColorTextures[grayscaled] = texture;
@@ -84,6 +85,7 @@ namespace Styletor.ExtraHandlers
                 
                 if (mySpritesByName.TryGetValue(textureName, out var sprite))
                 {
+                    sprite.hideFlags |= HideFlags.DontUnloadUnusedAsset;
                     var grayscaled = SpriteSnipperUtil.GetGrayscaledSprite(sprite, true);
 
                     myGraySpritesToColorSprites[grayscaled] = sprite;
