@@ -44,7 +44,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrityCheckGenerator", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Styletor", "Styletor\Styletor.csproj", "{27F7A678-72DD-4BEA-B5FA-4589299FE595}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScaleGoessBrr", "ScaleGoessBrr\ScaleGoessBrr.csproj", "{6E79F8CC-0513-43DB-974F-983867F9CBBD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScaleGoesBrr", "ScaleGoesBrr\ScaleGoesBrr.csproj", "{6E79F8CC-0513-43DB-974F-983867F9CBBD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -3,7 +3,7 @@ using System.Collections;
 using HarmonyLib;
 using MelonLoader;
 using RootMotion.FinalIK;
-using ScaleGoessBrr;
+using ScaleGoesBrr;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using VRC.SDKBase;
@@ -11,7 +11,7 @@ using VRC.SDKBase;
 [assembly:MelonInfo(typeof(ScaleGoesBrrMod), "Scale Goes Brr", "1.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
-namespace ScaleGoessBrr
+namespace ScaleGoesBrr
 {
     public partial class ScaleGoesBrrMod : MelonMod
     {

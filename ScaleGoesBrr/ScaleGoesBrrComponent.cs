@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using RootMotion.FinalIK;
 using UnityEngine;
 
-namespace ScaleGoessBrr
+namespace ScaleGoesBrr
 {
     public class ScaleGoesBrrComponent : MonoBehaviour
     {
