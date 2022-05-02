@@ -343,6 +343,19 @@ Requires UI Expansion Kit. Settings are placed into the Mod Settings menu.
 **Canny tickets**:
 * [Particle Limiter](https://feedback.vrchat.com/feature-requests/p/particle-limitier)
 
+## ScaleGoesBrr
+This mod adds proper support for scale sliders on AV3 avatars that have them.
+Proper support includes properly scaling your playspace and viewpoint in VR, including in FBT, so the avatar functions the same way as if you scaled it in Unity (and adjusted the viewpoint).
+This requires avatars to actually have a scaling control, but adding that to your own avatar is not terribly complicated if you're familiar with AV3.
+
+**Required avatar setup**:  
+All the avatar needs to do is scale **avatar root** (not armature, not hips, and not any other bone).
+No further setup is necessary - no state behaviors, no animating viewpoint position, no pose space or other hacks, just root scale.  
+It's not recommended to scale avatar too small (below 0.1 scale) or too big as that might lead to issues with using the menu, similar to extremely tiny or huge avatars.  
+
+**Canny tickets**:
+ * [Remeasure avatar](https://vrchat.canny.io/avatar-30/p/remeasure-avatar) (not this exact feature, but a similar one)
+
 ## SparkleBeGone
 This mod is deprecated with the new Quick Menu (UI 1.5). Last revision containing its code can be found [here](https://github.com/knah/VRCMods/tree/c1c21edbb0ce13ef4c12b5ffefe0d9fcc0161f77)
 
