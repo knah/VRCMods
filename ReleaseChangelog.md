@@ -1,15 +1,7 @@
 Read the [Malicious Mods and you](https://github.com/knah/VRCMods/blob/master/Malicious-Mods.md) doc!
 
 Changes:
- * New mod: ScaleGoesBrr. See README for more info.
- * Advanced Safety: fix error spam if sorting order enforcement was enabled
- * Advanced Safety: new feature - bundle verifier. Aimed at preventing all possible corrupted-bundle-caused crashes. Read README for more info.
- * Styletor: minor fix for initialization
- * Styletor: fixed Action Menu joystick being invisible if recolored
- * Made native patches in the following mods more formally-correct:
-   * Advanced Safety
-   * Finitizer
-   * FavCat
-   * IKTweaks
+ * ScaleGoesBrr: add an option to scale towards avatar root instead of playspace center
+ * ScaleGoesBrr: reduce console spam
 
 **USE IT AT YOUR OWN RISK.** Modding the client is against VRChat ToS. I am not responsible for any bans or other punishments you may get by using these mods!
