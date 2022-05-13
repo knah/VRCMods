@@ -50,12 +50,14 @@ namespace FavCat.Database
                 Tags = world.tags.ToArray(),
             };
 
+            var hasNoAssetUrl = world.assetUrl == null;
+
             myUpdateThreadQueue.Enqueue(() =>
             {
                 var preExisting = myStoredWorlds.FindById(id);
                 if (preExisting != null)
                 {
-                    if (world.assetUrl == null) storedWorld.SupportedPlatforms = preExisting.SupportedPlatforms;
+                    if (hasNoAssetUrl) storedWorld.SupportedPlatforms = preExisting.SupportedPlatforms;
                 
                     storedWorld.Description ??= preExisting.Description;
                 }

@@ -139,6 +139,9 @@ namespace FavCat.Database
         public Task StoreImageAsync(string url, Il2CppStructArray<byte> data)
         {
             if (string.IsNullOrEmpty(url)) return Task.CompletedTask;
+
+            // copy the byte[] on calling thread to avoid issues
+            var stream = new MemoryStream(data);
             
             return Task.Run(() =>
             {
@@ -147,7 +150,7 @@ namespace FavCat.Database
                     if (myFileDatabase.FileStorage.Exists(url))
                         return;
 
-                    myFileDatabase.FileStorage.Upload(url, url, new MemoryStream(data));
+                    myFileDatabase.FileStorage.Upload(url, url, stream);
 
                     var newImageInfo = new StoredImageInfo {Id = url, LastAccessed = DateTime.MinValue};
                     myImageInfos.Upsert(newImageInfo);

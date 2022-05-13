@@ -6,7 +6,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
     <ClearOutputDirectory>False</ClearOutputDirectory>
-    <AssemblyVersion>1.1.13.0</AssemblyVersion>
+    <AssemblyVersion>1.1.14.0</AssemblyVersion>
     <UsesNativePatches>true</UsesNativePatches>
   </PropertyGroup>
   <ItemGroup>
