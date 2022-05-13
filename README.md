@@ -57,6 +57,9 @@ Corrupted bundle protection uses a separate Unity process to crash instead of th
    * It ignores "show avatar" as it works on a more-global level
  * All of this should be done by VRChat on their servers, once for every uploaded avatar. AWS Lambda pricing would be under a cent per upload. Alas.
 
+#### Extra credits
+Avatar safety is a complex and ever-evolving field, and this mod would not be as great as it is without contributions from @Requi and Ben (of ReMod fame).
+
 **Canny tickets**:
 * [Allow changing safety settings based on trust rank of avatar uploader, not wearer](https://feedback.vrchat.com/feature-requests/p/allow-changing-safety-settings-based-on-trust-rank-of-avatar-uploader-not-wearer) (I wanted to implement this, but it would be too API request heavy to be safe)
 * [Allow hiding all avatars made by a specific user](https://feedback.vrchat.com/feature-requests/p/allow-hiding-all-avatars-made-by-a-specific-user)
@@ -93,7 +96,6 @@ An all-in-one local favorites mod. Unlimited favorite lists with unlimited favor
 * Many more small things
 
 #### Known limitations
-* Player favorites don't show online status
 * Lists with over a thousand elements can take a bit of time on game startup/list creation
 
 #### Canny tickets
@@ -481,3 +483,5 @@ With the following exceptions, all mods here are provided under the terms of [GN
 * ILRepack is covered by [Apache 2.0 license](https://github.com/gluck/il-repack/blob/master/LICENSE)
 * UI Expansion Kit is additionally covered by [LGPLv3](UIExpansionKit/COPYING.LESSER) to allow other mods to link to it
 * IKTweaks source code is not covered by a permissive license and provided for reference purposes only
+* Bundle Verifier executable shipped in Advanced Safety is provided as-is, all-rights-reserved, without any warranty, and without source code (for the time being, it will be opensourced eventually)
+* Assetbundles included in some mods are not code (so not covered by GPL) and all-rights-reserved for the time being. Opensourcing Unity projects is mildly painful, but I'll likely do that eventually too under some kind of CC license
