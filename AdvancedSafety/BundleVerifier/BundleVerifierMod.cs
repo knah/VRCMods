@@ -93,7 +93,7 @@ namespace AdvancedSafety.BundleVerifier
             MelonDebug.Msg($"Got instance, intercept state: {BundleDlInterceptor.ShouldIntercept}");
         }
 
-        private const string VerifierVersion = "1.1-2019.4.31";
+        private const string VerifierVersion = "1.2-2019.4.31";
         internal const string SettingsCategory = "ASBundleVerifier";
 
         private static void PrepareVerifierDir()
@@ -107,6 +107,8 @@ namespace AdvancedSafety.BundleVerifier
                 var existingVersion = File.ReadAllText(versionFile);
                 if (existingVersion == VerifierVersion) return;
             }
+            
+            BadBundleCache.Clear();
             
             File.Copy(Path.Combine(MelonUtils.GameDirectory, "UnityPlayer.dll"), Path.Combine(baseDir, "UnityPlayer.dll"), true);
             using var zipFile = new ZipArchive(Assembly.GetExecutingAssembly().GetManifestResourceStream("AdvancedSafety.BundleVerifier.BundleVerifier.zip")!, ZipArchiveMode.Read, false);

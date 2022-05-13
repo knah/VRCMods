@@ -100,7 +100,7 @@ namespace AdvancedSafety.BundleVerifier
             if (exitCode != 0)
             {
                 var cleanedUrl = BundleVerifierMod.SanitizeUrl(Url);
-                MelonLogger.Msg($"Verifier process failed with exit code {exitCode} for bundle uid={cleanedUrl.Item1}+{cleanedUrl.Item2}");
+                MelonLogger.Msg($"Verifier process failed with exit code {exitCode} ({VerifierExitCodes.GetExitCodeDescription(exitCode)}) for bundle uid={cleanedUrl.Item1}+{cleanedUrl.Item2}");
                 BundleVerifierMod.BadBundleCache.Add(Url);
                 MelonDebug.Msg("Reporting completion without data");
                 // feed some garbage into it, otherwise it dies
