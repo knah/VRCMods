@@ -149,7 +149,7 @@ namespace IKTweaks
         private static GameObject[] ourTargets = new GameObject[0];
         private static async Task ApplyStoredCalibration(GameObject avatarRoot, string avatarId)
         {
-            // await IKTweaksMod.AwaitLateUpdate();
+            if (!avatarRoot) return;
 
             var dummyMuscles = new Il2CppStructArray<float>(HumanTrait.MuscleCount);
 
@@ -340,8 +340,6 @@ namespace IKTweaks
             
             await IKTweaksMod.AwaitVeryLateUpdate();
 
-            if (!avatarRoot) return;
-            
             await ApplyStoredCalibration(avatarRoot, avatarId);
         }
 
@@ -407,6 +405,12 @@ namespace IKTweaks
             var nativeMuscles = (Il2CppStructArray<float>) (IkTweaksSettings.APoseCalibration.Value ? APoseMuscles : TPoseMuscles);
             var dummyMuscles = new Il2CppStructArray<float>(nativeMuscles.Count);
             var poseHandler = new HumanPoseHandler(animator.avatar, animator.transform);
+
+            if (hips == null || head == null)
+            {
+                MelonLogger.Msg($"Avatar is missing hips or head, IKTweaks doesn't support this");
+                return;
+            }
 
             var forwardDirection = avatarRootTransform.parent;
             var hipsRelativeToForwardDirection = Quaternion.Inverse(forwardDirection.rotation) * hips.rotation;

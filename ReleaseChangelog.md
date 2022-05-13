@@ -5,6 +5,7 @@ Changes:
  * Advanced Safety: taught BundleVerifier to intentionally crash on additional corrupted bundle type
  * FavCat: minor fixes for not-strictly-correct internals
  * FavCat: fix hiding social and avatar favorite lists
+ * IKTweaks: speculative fix for exceptions when resetting avatar
  * ScaleGoesBrr: add an option to scale towards avatar root instead of playspace center
  * ScaleGoesBrr: reduce console spam
 
