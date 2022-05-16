@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using MelonLoader;
+using UnhollowerBaseLib;
 
 namespace AdvancedSafety
 {
@@ -27,12 +28,13 @@ namespace AdvancedSafety
 
         private static readonly string[] ourAllowedFields = { "m_BreakForce", "m_BreakTorque", "collisionSphereDistance", "maxDistance", "inSlope", "outSlope" };
 
-        private static readonly Dictionary<string, (int ProduceMixer, int TransferFloat, int CountNodes, int DebugAssert, int ReaderOOB, int ReallocateString)> ourOffsets = new() {
-            { "aCEmIwSIcjYriBQDFjQlpTNNW1/kA8Wlbkqelmt1USOMB09cnKwK7QWyOulz9d7DEYJh4+vO0Ldv8gdH+dZCrg==", (0x4997C0, 0xD7320, 0, 0, 0, 0) }, // U2018.4.20 non-dev
-            { "5dkhl/dWeTREXhHCIkZK17mzZkbjhTKlxb+IUSk+YaWzZrrV+G+M0ekTOEGjZ4dJuB4O3nU/oE3dycXWeJq9uA==", (0xA80660, 0xC7B40, 0, 0, 0, 0) }, // U2019.4.28 non-dev
-            { "MV6xP7theydao4ENbGi6BbiBxdZsgGOBo/WrPSeIqh6A/E00NImjUNZn+gL+ZxzpVbJms7nUb6zluLL3+aIcfg==", (0xA82350, 0xC7E50, 0, 0, 0, 0) }, // U2019.4.29 non-dev
-            { "ccZ4F7iE7a78kWdXdMekJzP7/ktzS5jOOS8IOITxa1C5Jg2TKxC0/ywY8F0o9I1vZHsxAO4eh7G2sOGzsR/+uQ==", (0xA83410, 0xC7E80, 0, 0, 0, 0) }, // U2019.4.30 non-dev
-            { "sgZUlX3+LSHKnTiTC+nXNcdtLOTrAB1fNjBLOwDdKzCyndlFLAdL0udR4S1szTC/q5pnFhG3Kdspsj5jvwLY1A==", (0xA86270, 0xC8230, 0xDF29F0, 0xDDBDC0, 0x7B9EB0, 0xC69F0) }, // U2019.4.31 non-dev
+        private static readonly Dictionary<string, (int ProduceMixer, int TransferFloat, int CountNodes, int DebugAssert, 
+            int ReaderOOB, int ReallocateString, int TransferMonoObject, int TransferUEObjectSBR)> ourOffsets = new()
+            {
+                {
+                    "sgZUlX3+LSHKnTiTC+nXNcdtLOTrAB1fNjBLOwDdKzCyndlFLAdL0udR4S1szTC/q5pnFhG3Kdspsj5jvwLY1A==",
+                    (0xA86270, 0xC8230, 0xDF29F0, 0xDDBDC0, 0x7B9EB0, 0xC69F0, 0x8D1160, 0x8E5CD0)
+                }, // U2019.4.31 non-dev
         };
 
         internal static void ApplyPatches()
@@ -73,6 +75,12 @@ namespace AdvancedSafety
                     
                     // core::StringStorageDefault<char>::reallocate, identified to be an issue by Requi&Ben
                     DoPatch(module, offsets.ReallocateString, ReallocateStringPatch, out ourOriginalRealloc);
+                    
+                    // TransferPPtrToMonoObject
+                    DoPatch(module, offsets.TransferMonoObject, TransferMonoObjectPatch, out ourOriginalTransferMonoObject);
+                    
+                    // TransferField_NonArray<SafeBinaryRead,Converter_UnityEngineObject>
+                    DoPatch(module, offsets.TransferUEObjectSBR, TransferUeObjectSbrPatch, out ourOriginalTransferUeObjectSbr);
                 }
 
                 break;
@@ -149,6 +157,63 @@ namespace AdvancedSafety
             }
         }
         
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate void TransferObjectSbrDelegate(IntPtr staticInfo, IntPtr runtimeInfo, IntPtr converter);
+
+        [ThreadStatic] private static Stack<IntPtr> ourCurrentSafeTransferStack;
+        private static TransferObjectSbrDelegate ourOriginalTransferUeObjectSbr;
+
+        private static void TransferUeObjectSbrPatch(IntPtr staticInfo, IntPtr runtimeInfo, IntPtr converter)
+        {
+            ourCurrentSafeTransferStack ??= new Stack<IntPtr>();
+            ourCurrentSafeTransferStack.Push(staticInfo);
+            try
+            {
+                ourOriginalTransferUeObjectSbr(staticInfo, runtimeInfo, converter);
+            }
+            finally
+            {
+                ourCurrentSafeTransferStack.Pop();
+            }
+        }
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate IntPtr TransferMonoObjectDelegate(ref IntPtr hiddenThisReturn, IntPtr instanceId,
+            IntPtr il2cppClass, IntPtr dataToCreateNull, IntPtr transferFlags);
+
+        private static TransferMonoObjectDelegate ourOriginalTransferMonoObject;
+
+        private static unsafe IntPtr TransferMonoObjectPatch(ref IntPtr hiddenThisReturn, IntPtr instanceId,
+            IntPtr il2cppClass, IntPtr dataToCreateNull, IntPtr transferFlags)
+        {
+            var result = ourOriginalTransferMonoObject(ref hiddenThisReturn, instanceId, il2cppClass, dataToCreateNull, transferFlags);
+
+            if (hiddenThisReturn == IntPtr.Zero || ourCurrentSafeTransferStack == null || ourCurrentSafeTransferStack.Count == 0) return result;
+
+            var objectType = *(IntPtr*)hiddenThisReturn;
+
+            var topStaticInfo = (StaticTransferInfoPrefix*)ourCurrentSafeTransferStack.Peek();
+            var staticFieldInfoPtr = topStaticInfo->field;
+
+            var fieldType = IL2CPP.il2cpp_class_from_type(staticFieldInfoPtr->typePtr);
+            if (IL2CPP.il2cpp_class_is_assignable_from(fieldType, objectType)) return result;
+            
+            var fieldName = Marshal.PtrToStringAnsi(staticFieldInfoPtr->name);
+            
+            MelonDebug.Msg($"While deserializing field of type {RenderTypeName(fieldType)} named {fieldName} we got an object of type {RenderTypeName(objectType)}");
+            hiddenThisReturn = IntPtr.Zero;
+
+            return result;
+        }
+
+        private static string RenderTypeName(IntPtr classPtr) => Il2CppSystem.Type.internal_from_handle(IL2CPP.il2cpp_class_get_type(classPtr)).ToString();
+
+        [StructLayout(LayoutKind.Sequential)]
+        private unsafe struct StaticTransferInfoPrefix
+        {
+            public Il2CppFieldInfo_24_1* field;
+        }
+
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void DebugAssertDelegate(IntPtr data);
