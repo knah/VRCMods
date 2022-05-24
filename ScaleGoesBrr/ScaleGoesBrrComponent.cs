@@ -33,6 +33,8 @@ namespace ScaleGoesBrr
         public float amSingle3;
         public float amSingle4;
         public float amSingle5;
+        public float amSingle6;
+        public float amSingle7;
         
         public Vector3 tmSV0;
         public Vector3 tmSV1;
@@ -106,6 +108,8 @@ namespace ScaleGoesBrr
             avatarManager.field_Private_Single_3 = amSingle3 * scaleFactor;
             avatarManager.field_Private_Single_4 = amSingle4 * scaleFactor;
             avatarManager.field_Private_Single_5 = amSingle5 * scaleFactor;
+            avatarManager.field_Private_Single_6 = amSingle6 * scaleFactor;
+            avatarManager.field_Private_Single_7 = amSingle7 * scaleFactor;
 
             if (!tmReady) return;
             

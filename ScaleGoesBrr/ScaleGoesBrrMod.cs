@@ -8,7 +8,7 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 using VRC.SDKBase;
 
-[assembly:MelonInfo(typeof(ScaleGoesBrrMod), "Scale Goes Brr", "1.1.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(ScaleGoesBrrMod), "Scale Goes Brr", "1.1.1", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace ScaleGoesBrr
@@ -142,6 +142,8 @@ namespace ScaleGoesBrr
             comp.amSingle3 = avatarManager.field_Private_Single_3;
             comp.amSingle4 = avatarManager.field_Private_Single_4;
             comp.amSingle5 = avatarManager.field_Private_Single_5;
+            comp.amSingle6 = avatarManager.field_Private_Single_6;
+            comp.amSingle7 = avatarManager.field_Private_Single_7;
 
             comp.targetVp = avatarManager.field_Private_VRC_AnimationController_0
                 .GetComponentInChildren<IKHeadAlignment>().transform;
