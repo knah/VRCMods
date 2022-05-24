@@ -14,7 +14,7 @@ using UIExpansionKit.API;
 using UnhollowerRuntimeLib.XrefScans;
 using VRC.UI.Core.Styles;
 
-[assembly:MelonInfo(typeof(StyletorMod), "Styletor", "0.3.2", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(StyletorMod), "Styletor", "0.3.3", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 #nullable disable
@@ -125,7 +125,8 @@ namespace Styletor
                     myStyleEngine = new StyleEngineWrapper(styleEngine);
             }
 
-            var initCandidates = typeof(StyleEngine).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+            // not necessary in 1200?
+            /*var initCandidates = typeof(StyleEngine).GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
                 .Where(it => it.Name.StartsWith("Method_Public_Void_") && it.GetParameters().Length == 0 && !it.Name.Contains("_PDM_")).ToList();
 
             var initMethods = initCandidates.Where(it =>
@@ -137,7 +138,7 @@ namespace Styletor
             if (initMethod == null) 
                 MelonLogger.Warning("No Init method on StyleEngine, will wait for natural init");
             else
-                initMethod.Invoke(myStyleEngine.StyleEngine, Array.Empty<object>());
+                initMethod.Invoke(myStyleEngine.StyleEngine, Array.Empty<object>());*/
 
             while (myStyleEngine.StyleEngine.field_Private_List_1_ElementStyle_0.Count == 0)
                 yield return null;

@@ -1,6 +1,7 @@
 Read the [Malicious Mods and you](https://github.com/knah/VRCMods/blob/master/Malicious-Mods.md) doc!
 
 Changes:
+ * All mods: updated for build 1200 of VRChat
  * Advanced Safety: integrate [FinalIKSanity](https://github.com/FenrixTheFox/FinalIKSanity) and additional IK-related fixes by @Requi
  * Advanced Safety: taught BundleVerifier to intentionally crash on additional corrupted bundle type
  * Advanced Safety: added a patch for a specific bundle corruption type that's not immediately caught by BundleVerifier
