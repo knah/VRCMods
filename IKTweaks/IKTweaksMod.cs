@@ -289,7 +289,6 @@ namespace IKTweaks
             // only one of them is the correct type, so just try all of them 
             steamVrControllerManager.field_Private_Action_0.TryCast<SteamVR_Events.Action<VREvent_t>>()?.action?.Invoke(new VREvent_t());
             steamVrControllerManager.field_Private_Action_1.TryCast<SteamVR_Events.Action<VREvent_t>>()?.action?.Invoke(new VREvent_t());
-            steamVrControllerManager.field_Private_Action_2.TryCast<SteamVR_Events.Action<VREvent_t>>()?.action?.Invoke(new VREvent_t());
 
             myAfkIcon = GameObject.Find("UserInterface/UnscaledUI/HudContent/Hud/AFK").transform.Find("Icon").gameObject;
         }
