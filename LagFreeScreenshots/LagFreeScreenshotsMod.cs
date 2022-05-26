@@ -27,9 +27,10 @@ using System.Collections.Generic;
 using LagFreeScreenshots.API;
 using Unity.Collections.LowLevel.Unsafe;
 
+
 // using CameraUtil = ObjectPublicCaSiVeUnique;
 
-[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.4.0", "knah, Protected", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(LagFreeScreenshotsMod), "Lag Free Screenshots", "1.4.1", "knah, Protected", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace LagFreeScreenshots
@@ -513,7 +514,7 @@ namespace LagFreeScreenshots
                     .GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly).Single(it =>
                         it.Name.StartsWith("Method_Private_Static_String_Int32_Int32_") && XrefScanner.XrefScan(it)
                             .Any(jt => jt.Type == XrefType.Global &&
-                                       "yyyy-MM-dd_HH-mm-ss.fff" == jt.ReadAsObject()?.ToString())));
+                                       "{0}{1}{2}" == jt.ReadAsObject()?.ToString())));
 
             return ourOurGetPathMethod(w, h);
         }
