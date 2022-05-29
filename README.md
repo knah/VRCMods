@@ -443,6 +443,5 @@ With the following exceptions, all mods here are provided under the terms of [GN
 * ILRepack.Lib.MSBuild.Task is covered by [its own license](https://github.com/ravibpatel/ILRepack.Lib.MSBuild.Task/blob/master/LICENSE.md)
 * ILRepack is covered by [Apache 2.0 license](https://github.com/gluck/il-repack/blob/master/LICENSE)
 * UI Expansion Kit is additionally covered by [LGPLv3](UIExpansionKit/COPYING.LESSER) to allow other mods to link to it
-* IKTweaks source code is not covered by a permissive license and provided for reference purposes only
 * Bundle Verifier executable shipped in Advanced Safety is provided as-is, all-rights-reserved, without any warranty, and without source code (for the time being, it will be opensourced eventually)
 * Assetbundles included in some mods are not code (so not covered by GPL) and all-rights-reserved for the time being. Opensourcing Unity projects is mildly painful, but I'll likely do that eventually too under some kind of CC license
