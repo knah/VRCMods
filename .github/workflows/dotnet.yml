@@ -22,13 +22,6 @@ jobs:
         token: ${{ secrets.LibsRepositoryToken }}
         path: Libs
       
-    - name: Checkout IKTweaks/FinalIK
-      uses: actions/checkout@v2
-      with:
-        repository: knah/IKTweaks-FinalIK
-        token: ${{ secrets.IKTRepositoryToken }}
-        path: IKTweaks/FinalIK
-      
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:

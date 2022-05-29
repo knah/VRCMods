@@ -217,84 +217,45 @@ Known instance types are `Public`, `FriendOfGuests`, `FriendsOnly`, `InvitePlus`
 * [Allow setting your home world to a friends/friends+ instance](https://feedback.vrchat.com/feature-requests/p/allow-setting-your-home-world-to-a-friendsfriends-instance)
 
 ## IKTweaks
-This mod offers a customized VRIK solver for full body tracking, and a few other IK-related tweaks.  
+This mod offers a customized spine solver for full body tracking, and a few other IK-related tweaks.  
 Features:
-* No more viewpoint drift in FBT. Instead, your spine bends (up to a limit), or your hip drifts (above the limit).
-* No more weird chest rotations when laying down or upside down
-* No more weird spine/neck stretching
+* Alternative spine solver for FBT that people know and love
+* The alternative solver can bend the spine more than "lock one" but less than "lock both" modes
+* Flexible configuration for said solver, allowing you to fine-tune IK for your avatars and preferences
 * Remote players see the new IK too, there's no mismatch between what you and others see
-* Support for universal calibration - calibrate once for all avatars, even ones using different rigs or proportions
-* Support for per-avatar calibration saving (when not using universal calibration)
-* Half-click head follow calibration: hold one trigger to freeze the avatar in place to be able to look at your feet
-* Support for elbow, knee and chest trackers (read below)
-* Optional local NetIK pass to ensure you see the same thing as remote players (not necessary for Index Controller users)
-* Disable FBT even if you have trackers connected, for when you're charging them from your PC
+* Stop freezing in walls and tables (or anywhere near them)
+* Say goodbye to locomotion animations on all avatars if you hate them
+* Adjust hand offsets so your virtual hands line up better with your real ones
+* Tune some aspects of IK 2.0, like that pesky elbow-torso avoidance that sometimes makes your elbows *go places*
+* Most features are compatible with 3-point and higher IK 2.0
 
 It's recommended to use a normal humanoid rig without any rig hacks (so no neck fix, no FBT fix, no inverted hip, no zero-length spine bones).  
-It requires at least three trackers (legs and hip). 3-point (no trackers) and 4-point (hip tracker) modes are not affected by the mod.
 
 **Canny tickets**:
-* [More trackers for fullbody tracking](https://feedback.vrchat.com/feature-requests/p/more-trackers-for-fullbody-tracking)
-* [Add control to temporarily disable FBT](https://feedback.vrchat.com/feature-requests/p/add-control-to-temporarily-disable-fbt)
-* [Retain FBT Calibration settings during play session](https://feedback.vrchat.com/feature-requests/p/retain-fbt-calibration-settings-during-play-session)
-* [Full Body Tracking problems](https://feedback.vrchat.com/feature-requests/p/full-body-tracking-problems)
-* [Avatar local neck stretching on some setups](https://feedback.vrchat.com/bug-reports/p/avatar-local-neck-stretching-on-some-setups)
-* [Shoulder move is different when using only VR and fullbody tracking](https://feedback.vrchat.com/bug-reports/p/shoulder-move-is-different-when-using-only-vr-and-fullbody-tracking)
-* [Spine always straight with full body tracking](https://feedback.vrchat.com/bug-reports/p/spine-always-straight-with-full-body-tracking)
-* [Full body spine/chest/neck stretching occurs locally with specific controllers](https://feedback.vrchat.com/bug-reports/p/full-body-spinechestneck-stretching-occurs-locally-with-specific-controllers)
-* Check comments on some of those - they have links to other related posts
-
-### Using additional trackers
-You need to enable additional trackers in mod settings before you're able to use them.  
-To use knee trackers, there are no additional requirements - just calibrate normally.  
-To use elbow or chest trackers, you'll need to stand straight and T-pose your arms during calibration.  
-Chest tracker is kinda useless and janky, so don't bother buying a tracker for it.  
-It's recommended to put elbow/knee trackers as close to the joint they're tracking as possible (but not on the joint itself). For arms, the recommended position is on the outer surface of the lower or upper arm next to the elbow.  
-If you're using additional trackers, your avatar should generally match your physical proportions - that is, all body parts should line up reasonably well without real height hacks.
+* [Add an option to disable locomotion animations on all avatars](https://feedback.vrchat.com/vrchat-ik-20/p/add-an-option-to-disable-locomotion-animations-on-all-avatars)
+* [Stop locking avatars in place when players walk through walls](https://feedback.vrchat.com/vrchat-ik-20/p/stop-locking-avatars-in-place-when-players-walk-through-walls)
+* [Provide in-depth IK configuration options for enthusiasts](https://feedback.vrchat.com/vrchat-ik-20/p/provide-in-depth-ik-configuration-options-for-enthusiasts)
+* ... and the rest of IK 2.0 Beta board (assuming it stays)
 
 ### Brief settings description
 Given that this mod is still work in progress, these are subject to change.
  * Use Pitch-Yaw Shoulders - changes how shoulder angles are computed in 3/4-point tracking. Enabling it usually provides better-looking results
- * Animations mode in FBT - control which part of your body can be controlled by animations when using custom FBT IK
+ * Animations mode in FBT - control which part of your body can be controlled by animations when in 6-point FBT
  * Feet stick to ground - uncheck if you want your feet (and the rest of your avatar) to be unable to leave the ground, like in ol' good times
- * Enable IKTweaks (use custom VRIK) - uncheck to go back to default VRC FBT IK. Most mod features won't work.
- * Enforce local NetIK (see what others see) - adds an extra pass similar to NetIK so that you can be certain that you see the smae thing that remote players do. Does nothing for Index Controllers users (VRC does that already)
- * Map toes (use if your feet trackers move with your toes) - if enabled, IK will control your avatar's toes with tracker positions, enabling you to tiptoe. Works best if your trackers actually move with your toes (i.e. are mounted on shoe toes)
- * Use extra trackers - must be enabled to make use of extra trackers. Don't enable options for trackers you don't have.
- * Avatar follows head when calibrating (recommended) - avatars moves with your head when calibrating. This provides better calibration results.
- * Freeze avatar on one trigger hold in follow head mode - if you have previous setting enabled, holding one trigger when calibrating will stop your avatar from following your head. You can use this to align your feet.
- * Use universal calibration (requires follow head mode) - allows you to calibrate once for all avatars. No more standing up to switch avatars!
- * Store calibration per avatar (when not using universal calibration) - if you don't want universal calibration, enable this to save calibration per-avatar.
+ * Enable IKTweaks (use custom spine solver) - uncheck to go back to default VRC FBT IK.
  * Enforce hip rotation match - if enabled, avatar's hip rotation will exactly match tracker's rotation. Otherwise, IK may rotate the hip to bend the spine more.
  * Shift hip pivot (support inverted hip) - if enabled, the hip will be rotated around the midpoint of two leg bones (where the hip bone should be normally). This greatly improves IK on avatars with the inverted hip rig hack.
  * Pre-straighten spine (improve IK stability) - if enabled, you avatar's spine will be forcefully straightened before solving it. This reduces flippiness/jitter on avatars that have spine bent backwards by default.
  * Straighten neck - this does something cursed to the neck. No further description can be provided.
  * Spine Relax Iterations (max 25) - how much work will be done on bending the spine. Below 5 is not recommended, 10 will provide about 1mm precision for hip positioning, 25 is the maximum sensible value.
- * Maximum bend angles - how much spine/neck can be bent forward/back. If your spine bends too much to your taste or looks cursed on your specific avatar, reduce these angles (minimum recommended value is 1 though)
+ * Maximum bend angles - how much spine/neck can be bent forward/back. If your spine bends too much to your taste or looks cursed on your specific avatar, reduce these angles (minimum recommended value is 1 though). **Angle limits are ignored in "lock both" mode.**
  * Neck bend priority - neck will bend this much faster than the spine. This is intended to handle the fact that people move their neck way more than their spine, so IK should start off by bending it, not spine.
- * Straight spine angle - withing this angle from perfectly straight, the spine will be considered almost straight and maximum bend angles will be reduced.
+ * Straight spine angle - within this angle from perfectly straight, the spine will be considered almost straight and maximum bend angles will be reduced.
  * Straight spine power - controls the curve with which the spine transitions from straight to bend within the straight angle. Recommended values are between 1 and 2.
- * Avatar scaling mode - controls how your avatar scale is computed. "Height" scales the avatar so that your real floor alights with the virtual one (at the cost of you likely getting t-rex arms), "Improved wingspan" attempts to measure avatar arm span more accurately than VRC default.
- * A-pose calibration - use a different calibration pose. In case you don't want to assert too much dominance with a T-pose.
  * Allow more head rotation in 3/4-point tracking - ever tried to look up when close to the ground in 3/4-point tracking? Now you can, even if it breaks your neck.
- * Improved wingspan adjustment factor - your wingspan is adjusted by this factor in "Improved wingspan" scaling mode. If you consistently get avatar arms too long/short, consider tweaking this a tiny bit (to like 1.05 or 1.15)
- * One-handed calibration - pressing one trigger will be enough to calibrate. Holding the trigger slightly pressed will freeze the avatar (if enabled).
  * Don't freeze head/hands inside walls - prevents your hands/head from freezing if your head gets inside a wall.
+ * Disable IK2 elbow-chest avoidance - brings behavior of elbows closer to old 3-point IK, solving some issues with elbows spazzing out in some poses
  * Hand angles/offsets (found in VRChat Settings menu -> left blue panel -> More IKTweaks -> Adjust hand angles/offsets) - you can configure how avatar hands are positioned relative to controllers. Defaults were tuned for Index controllers, but should be applicable to most other controllers too.
- * Elbow/knee/chest bend goal offset - controls how far bend goal targets will be away from the actual joint. Lower values should produce better precision with bent joint, higher values - better stability with straight joint. Sensible range of values is between 0 and 1.
-
-### Partial source code
-This mod includes parts of FinalIK, which is a paid Unity Store asset, therefore source code for those is not provided.  
-If you want to build the mod yourself, you'll need to do the following:
-* Get a copy of FinalIK from asset store
-* Copy the VRIK solver, VRIK component and TwistRelaxer component into mod sources folder
-* Rename them to match with what the rest of mod source expects, make VRIK_New `partial`
-* Add the following line to start of `RootMotionNew.FinalIK.IKSolverVR.Spine.FABRIKPass` : `weight = Mathf.Clamp01(weight - pelvisPositionWeight);`
-* Remove `RootMotionNew.FinalIK.IKSolverVR.Spine.SolvePelvis` from the original VRIK solver
-* Rename `RootMotionNew.FinalIK.IKSolverVR.Leg.ApplyOffsets` to `ApplyOffsetsOld`, remove `override` from it
-* Add `ApplyBendGoal();` to the second line of `RootMotionNew.FinalIK.IKSolverVR.Leg.Solve(bool)`
-* Rename `Update`, `FixedUpdate` and `LateUpdate` on VRIK_New by adding `_ManualDrive` suffix to them and make them `internal` instead of `private`
-* Fix compilation if broken
 
 ## JoinNotifier
 A VRChat mod to notify you when someone joins the instance you're in

@@ -4,13 +4,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <VrcReferences>true</VrcReferences>
-    <AssemblyVersion>1.0.26</AssemblyVersion>
+    <AssemblyVersion>2.0.0</AssemblyVersion>
     <UsesNativePatches>true</UsesNativePatches>
   </PropertyGroup>
-  <ItemGroup>
-    <None Remove="iktweaks" />
-    <EmbeddedResource Include="iktweaks" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UIExpansionKit\UIExpansionKit.csproj" />
   </ItemGroup>
