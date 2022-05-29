@@ -7,11 +7,11 @@ namespace ScaleGoesBrr
 {
     public class ScaleGoesBrrComponent : MonoBehaviour
     {
+        private static Vector3 vOne = Vector3.one;
+        
         public Vector3 originalSourceScale;
         public Vector3 originalTargetPsScale;
         public Vector3 originalTargetAlScale;
-        public Vector3 originalTargetUiScale;
-        public Vector3 originalTargetUiInvertedScale;
         public Transform source;
         public Transform targetPs;
         public Transform targetAl;
@@ -38,6 +38,7 @@ namespace ScaleGoesBrr
         
         public Vector3 tmSV0;
         public Vector3 tmSV1;
+        public Vector3 tmSV2;
         public bool tmReady;
 
         private float lastScaleFactor = 1;
@@ -90,8 +91,8 @@ namespace ScaleGoesBrr
             var scaleFactor = sourceScale.y / originalSourceScale.y;
             DoScale(scaleFactor, originalTargetPsScale, targetPs);
             DoScale(1 / scaleFactor, originalTargetAlScale, targetAl);
-            DoScale(scaleFactor, originalTargetUiScale, targetUi);
-            DoScale(1 / scaleFactor, originalTargetUiInvertedScale, targetUiInverted);
+            DoScale(scaleFactor, originalTargetPsScale, targetUi);
+            DoScale(1 / scaleFactor / originalTargetPsScale.y, vOne, targetUiInverted);
 
             var scaleVector = new Vector3
             {
@@ -115,6 +116,7 @@ namespace ScaleGoesBrr
             
             VRCTrackingManager.field_Private_Static_Vector3_0 = Scale(tmSV0, scaleFactor);
             VRCTrackingManager.field_Private_Static_Vector3_1 = Scale(tmSV1, scaleFactor);
+            VRCTrackingManager.field_Private_Static_Vector3_2 = Scale(tmSV2, scaleFactor);
 
             if (Math.Abs(scaleFactor - lastScaleFactor) > lastScaleFactor / 100)
             {

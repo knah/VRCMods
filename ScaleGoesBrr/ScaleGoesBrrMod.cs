@@ -8,7 +8,7 @@ using UnhollowerRuntimeLib;
 using UnityEngine;
 using VRC.SDKBase;
 
-[assembly:MelonInfo(typeof(ScaleGoesBrrMod), "Scale Goes Brr", "1.1.1", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(ScaleGoesBrrMod), "Scale Goes Brr", "1.1.2", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace ScaleGoesBrr
@@ -92,8 +92,10 @@ namespace ScaleGoesBrr
         internal static void FixAvatarRootFlyingOff(Transform avatarRoot)
         {
             if (!ourFixFlyOff.Value) return;
-            
-            avatarRoot.localPosition = Vector3.zero;
+
+            avatarRoot.get_localPosition_Injected(out var oldPos);
+            oldPos.x = oldPos.z = 0;
+            avatarRoot.localPosition = oldPos;
         }
 
         private static IEnumerator OnLocalPlayerAvatarCreatedCoro(Vector3 originalScale, GameObject go)
@@ -126,9 +128,7 @@ namespace ScaleGoesBrr
             comp.originalSourceScale = originalScale;
             comp.originalTargetPsScale = originalTrackingRootScale;
             comp.targetUi = uiRoot.transform;
-            comp.originalTargetUiScale = comp.targetUi.localScale;
             comp.targetUiInverted = unscaledUi;
-            comp.originalTargetUiInvertedScale = comp.targetUiInverted.localScale;
 
             comp.vrik = go.GetComponent<VRIK>().solver.locomotion;
             comp.originalStep = comp.vrik.footDistance;
@@ -155,6 +155,7 @@ namespace ScaleGoesBrr
 
             comp.tmSV0 = VRCTrackingManager.field_Private_Static_Vector3_0;
             comp.tmSV1 = VRCTrackingManager.field_Private_Static_Vector3_1;
+            comp.tmSV1 = VRCTrackingManager.field_Private_Static_Vector3_2;
             comp.tmReady = true;
         }
 
