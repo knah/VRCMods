@@ -93,7 +93,7 @@ namespace AdvancedSafety.BundleVerifier
             MelonDebug.Msg($"Got instance, intercept state: {BundleDlInterceptor.ShouldIntercept}");
         }
 
-        private const string VerifierVersion = "1.2-2019.4.31";
+        private const string VerifierVersion = "1.4-2019.4.31";
         internal const string SettingsCategory = "ASBundleVerifier";
 
         private static void PrepareVerifierDir()
