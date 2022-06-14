@@ -21,10 +21,16 @@ namespace ScaleGoesBrr
         public Transform targetVp;
         public Transform targetHandParentL;
         public Transform targetHandParentR;
+        
+        public IKSolverVR.Arm targetLeftArm;
+        public IKSolverVR.Arm targetRightArm;
+
+        public float leftArmOriginalShoulder;
+        public float rightArmOriginalShoulder;
 
         public Transform RootFix;
 
-        public IKSolverVR.Locomotion vrik;
+        public IKSolverVR.Locomotion locomotion;
         public float originalStep;
 
         public VRCAvatarManager avatarManager;
@@ -94,6 +100,12 @@ namespace ScaleGoesBrr
             DoScale(scaleFactor, originalTargetPsScale, targetUi);
             DoScale(1 / scaleFactor / originalTargetPsScale.y, vOne, targetUiInverted);
 
+            if (ScaleGoesBrrMod.DoShoulderScaling.Value)
+            {
+                targetLeftArm.vrcShoulderHeightAboveChest = leftArmOriginalShoulder * scaleFactor;
+                targetRightArm.vrcShoulderHeightAboveChest = rightArmOriginalShoulder * scaleFactor;
+            }
+
             var scaleVector = new Vector3
             {
                 x = scaleFactor,
@@ -124,7 +136,7 @@ namespace ScaleGoesBrr
                 targetVp.get_localPosition_Injected(out var vpOffset);
                 vpOffset = Scale(vpOffset, scaleFactor); // it will be applied by VpParent scale
                 ScaleGoesBrrMod.UpdateCameraOffsetForScale(vpOffset);
-                vrik.footDistance = originalStep * scaleFactor;
+                locomotion.footDistance = originalStep * scaleFactor;
                 ScaleGoesBrrMod.FireScaleChange(source, scaleFactor);
             }
 
