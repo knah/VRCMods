@@ -232,9 +232,10 @@ Features:
 It's recommended to use a normal humanoid rig without any rig hacks (so no neck fix, no FBT fix, no inverted hip, no zero-length spine bones).  
 
 **Canny tickets**:
-* [Add an option to disable locomotion animations on all avatars](https://feedback.vrchat.com/vrchat-ik-20/p/add-an-option-to-disable-locomotion-animations-on-all-avatars)
 * [Stop locking avatars in place when players walk through walls](https://feedback.vrchat.com/vrchat-ik-20/p/stop-locking-avatars-in-place-when-players-walk-through-walls)
 * [Provide in-depth IK configuration options for enthusiasts](https://feedback.vrchat.com/vrchat-ik-20/p/provide-in-depth-ik-configuration-options-for-enthusiasts)
+* [Add calibration mirror or something similar.](https://vrchat.canny.io/vrchat-ik-20/p/feature-request-add-calibration-mirror-or-something-similar)
+* [Add support for one-handed calibration](https://vrchat.canny.io/vrchat-ik-20/p/featureaccessibility-add-support-for-one-handed-calibration)
 * ... and the rest of IK 2.0 Beta board (assuming it stays)
 
 ### Brief settings description
@@ -255,6 +256,7 @@ Given that this mod is still work in progress, these are subject to change.
  * Allow more head rotation in 3/4-point tracking - ever tried to look up when close to the ground in 3/4-point tracking? Now you can, even if it breaks your neck.
  * Don't freeze head/hands inside walls - prevents your hands/head from freezing if your head gets inside a wall.
  * Disable IK2 elbow-chest avoidance - brings behavior of elbows closer to old 3-point IK, solving some issues with elbows spazzing out in some poses
+ * Knee angle mode - affects how knee angle is chosen when you have leg trackers but not knee trackers. "IKT classic" should be the old knee positioner, which is... Bad. "IKT Natural" attempts to bend knees into a more relaxed pose.
  * Hand angles/offsets (found in VRChat Settings menu -> left blue panel -> More IKTweaks -> Adjust hand angles/offsets) - you can configure how avatar hands are positioned relative to controllers. Defaults were tuned for Index controllers, but should be applicable to most other controllers too.
 
 ## JoinNotifier

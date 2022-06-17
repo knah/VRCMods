@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -9,7 +10,7 @@ using UIExpansionKit.API.Controls;
 using UIExpansionKit.Components;
 using UnityEngine;
 
-[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "2.0.0", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(IKTweaksMod), "IKTweaks", "2.1.0", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 [assembly:MelonOptionalDependencies("UIExpansionKit")]
 
@@ -33,6 +34,32 @@ namespace IKTweaks
         private static void AddUixActions()
         {
             ExpansionKitApi.GetExpandedMenu(ExpandedMenu.SettingsMenu).AddSimpleButton("More IKTweaks...", ShowIKTweaksMenu);
+
+            var settingNameList = new[]
+            {
+                nameof(IkTweaksSettings.StraightSpineAngle), 
+                nameof(IkTweaksSettings.StraightSpinePower), 
+                nameof(IkTweaksSettings.DoHipShifting), 
+                nameof(IkTweaksSettings.PreStraightenSpine), 
+                nameof(IkTweaksSettings.StraightenNeck), 
+                nameof(IkTweaksSettings.PinHipRotation), 
+                nameof(IkTweaksSettings.NeckPriority), 
+                nameof(IkTweaksSettings.SpineRelaxIterations), 
+                nameof(IkTweaksSettings.MaxNeckAngleBack),
+                nameof(IkTweaksSettings.MaxNeckAngleFwd),
+                nameof(IkTweaksSettings.MaxSpineAngleBack),
+                nameof(IkTweaksSettings.MaxSpineAngleFwd),
+            };
+            var updateCallbacks = new List<Action>();
+            
+            foreach (var s in settingNameList)
+                updateCallbacks.Add(ExpansionKitApi.RegisterSettingsVisibilityCallback(
+                    IkTweaksSettings.IkTweaksCategory, s, () => IkTweaksSettings.FullBodyVrIk.Value));
+
+            IkTweaksSettings.FullBodyVrIk.OnValueChangedUntyped += () =>
+            {
+                foreach (var it in updateCallbacks) it();
+            };
         }
 
         private static void ShowIKTweaksMenu()

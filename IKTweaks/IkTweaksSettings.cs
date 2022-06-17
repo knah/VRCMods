@@ -43,6 +43,7 @@ namespace IKTweaks
             NoWallFreeze = category.CreateEntry(nameof(NoWallFreeze), true, "Don't freeze head/hands inside walls");
 
             DisableElbowAvoidance = category.CreateEntry(nameof(DisableElbowAvoidance), false, "Disable IK2 elbow-chest avoidance");
+            IktKneeMode = category.CreateEntry(nameof(IktKneeMode), KneeBendNormalMode.Natural, "Knee angle mode (with no trackers)");
 
             ExperimentalSettingOne = category.CreateEntry(nameof(ExperimentalSettingOne), false, "Experimental setting", dont_save_default: true, is_hidden: true);
 
@@ -73,6 +74,8 @@ namespace IKTweaks
         public static MelonPreferences_Entry<bool> Unrestrict3PointHeadRotation;
         public static MelonPreferences_Entry<bool> NoWallFreeze;
         public static MelonPreferences_Entry<bool> DisableElbowAvoidance;
+        public static MelonPreferences_Entry<KneeBendNormalMode> IktKneeMode;
+        
         public static MelonPreferences_Entry<bool> ExperimentalSettingOne;
         
         public static MelonPreferences_Entry<Vector3> HandAngleOffset;
@@ -96,5 +99,15 @@ namespace IKTweaks
         Others = 4,
         [Description("Ignore all (always slide around)")]
         All = HandAndHead | Others
+    }
+
+    public enum KneeBendNormalMode
+    {
+        [Description("IK2 Default")]
+        Default,
+        [Description("IKT Classic")]
+        Classic,
+        [Description("IKT Natural")]
+        Natural
     }
 }

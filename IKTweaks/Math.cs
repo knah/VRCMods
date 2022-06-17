@@ -99,6 +99,9 @@ namespace IKTweaks
             planeNormal = planeNormal.normalized;
             return a - planeNormal * Dot(planeNormal, a);
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Float3 Lerp(Float3 a, Float3 b, float t) => a * (1 - t) + b * t;
 
         public override string ToString()
         {

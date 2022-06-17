@@ -12,6 +12,9 @@ namespace IKTweaks
         public readonly IKSolverVR.Arm RightArm;
         public readonly IKSolverVR.Locomotion Locomotion;
 
+        public readonly IKSolverVR.VirtualBone[] LeftLegBones;
+        public readonly IKSolverVR.VirtualBone[] RightLegBones;
+
         public CachedSolver(IKSolverVR solver)
         {
             Solver = solver;
@@ -21,6 +24,9 @@ namespace IKTweaks
             RightArm = solver.rightArm;
             RightLeg = solver.rightLeg;
             Locomotion = solver.locomotion;
+
+            LeftLegBones = LeftLeg.bones;
+            RightLegBones = RightLeg.bones;
         }
     }
 }

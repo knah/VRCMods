@@ -4,7 +4,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <VrcReferences>true</VrcReferences>
-    <AssemblyVersion>2.0.0</AssemblyVersion>
+    <AssemblyVersion>2.1.0</AssemblyVersion>
     <UsesNativePatches>true</UsesNativePatches>
   </PropertyGroup>
   <ItemGroup>

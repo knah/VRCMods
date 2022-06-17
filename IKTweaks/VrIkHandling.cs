@@ -31,6 +31,8 @@ namespace IKTweaks
             NativePatchUtils.NativePatch(typeof(IKSolverVR.Spine).GetMethod(nameof(IKSolverVR.Spine.Solve))!, out ourOriginalSolveSpine, SolveSpinePatch);
             
             NativePatchUtils.NativePatch(typeof(IKSolverVR.Arm).GetMethod(nameof(IKSolverVR.Arm.VrcAvoidElbowClipping))!, out ourOriginalElbowClipping, ElbowClippingPatch);
+            
+            NativePatchUtils.NativePatch(typeof(IKSolverVR.Leg).GetMethod(nameof(IKSolverVR.Leg.Solve))!, out ourOriginalLegSolve, LegSolvePatch);
         }
         
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -46,6 +48,7 @@ namespace IKTweaks
         private static VoidDelegate ourOriginalSolverVrLateUpdate;
         private static VoidDelegate ourOriginalSolverUpdate;
         private static BoolDelegate ourOriginalElbowClipping;
+        private static BoolDelegate ourOriginalLegSolve;
 
         private static VoidDelegate ourOriginalSolvePelvis;
         private static SolveSpineDelegate ourOriginalSolveSpine;
@@ -141,8 +144,60 @@ namespace IKTweaks
 
         private static void ElbowClippingPatch(IntPtr thisPtr, byte boolValue, IntPtr methodPtr)
         {
-            if (thisPtr != ourCachedSolver.LeftArm?.Pointer && thisPtr != ourCachedSolver.RightArm?.Pointer || !IkTweaksSettings.DisableElbowAvoidance.Value)
+            if (!IkTweaksSettings.DisableElbowAvoidance.Value || thisPtr != ourCachedSolver.LeftArm?.Pointer && thisPtr != ourCachedSolver.RightArm?.Pointer)
                 ourOriginalElbowClipping(thisPtr, boolValue, methodPtr);
+        }
+
+        private static void LegSolvePatch(IntPtr thisPtr, byte boolValue, IntPtr methodPtr)
+        {
+            var kneeMode = IkTweaksSettings.IktKneeMode.Value;
+            
+            if (kneeMode != KneeBendNormalMode.Default && ourLastIkController.field_Private_IkType_0 == IkController.IkType.SixPoint && (thisPtr == ourCachedSolver.LeftLeg.Pointer || thisPtr == ourCachedSolver.RightLeg.Pointer))
+            {
+                var isLeftLeg = thisPtr == ourCachedSolver.LeftLeg.Pointer;
+                var currentLeg = isLeftLeg
+                    ? ourCachedSolver.LeftLeg
+                    : ourCachedSolver.RightLeg;
+
+                var weight = currentLeg.bendGoalWeight;
+                var oldUseKneeTarget = currentLeg.vrcUseKneeTarget;
+                if (weight < 1)
+                {
+                    Float3 newNormal;
+                    var currentLegBones = isLeftLeg ? ourCachedSolver.LeftLegBones : ourCachedSolver.RightLegBones;
+                    if (kneeMode == KneeBendNormalMode.Classic)
+                    {
+                        newNormal = (Quat)currentLeg.IKRotation * currentLeg.vrcBendNormalRelToFoot;
+                    }
+                    else
+                    {
+                        var baseFootUpDirectionG = currentLegBones[1].solverPosition - (Float3)currentLegBones[2].solverPosition;
+                        var baseKneeBendGoalDirectionRelToFoot = (Quat)currentLeg.rotation * Quat.Inverse(currentLegBones[2].solverRotation) * baseFootUpDirectionG;
+                        var legRootToFoot = (Float3)currentLeg.position - (Float3)currentLegBones[0].solverPosition;
+                        var newNormalCandidate = Float3.Cross(baseKneeBendGoalDirectionRelToFoot.normalized, legRootToFoot.normalized);
+                        
+                        // mix between "dumb" normal and "smart" one based on cross product length;
+                        // longer cross = presumably higher precision so mix more of "smart" normal in
+                        var newNormalLength = newNormalCandidate.magnitude;
+                        var baseNormal = (Quat)currentLeg.IKRotation * currentLeg.vrcBendNormalRelToFoot;
+                        newNormal = Float3.Lerp(baseNormal.normalized, newNormalCandidate, newNormalLength).normalized;
+                    }
+
+                    // this neat little thing seemingly makes VRC recalculate the normal in some weird way
+                    // but also... we set it ourself? whatever
+                    currentLeg.vrcUseKneeTarget = false;
+
+                    currentLeg.bendNormal = Float3.Lerp(newNormal, currentLeg.bendNormal, weight);
+                }
+                
+                ourOriginalLegSolve(thisPtr, boolValue, methodPtr);
+
+                currentLeg.vrcUseKneeTarget = oldUseKneeTarget;
+                
+                return;
+            }
+
+            ourOriginalLegSolve(thisPtr, boolValue, methodPtr);
         }
 
         private static byte VrIkInitReplacement(IntPtr thisPtr, IntPtr vrcAnimController, IntPtr animatorPtr, IntPtr playerPtr, byte isLocalPlayer, IntPtr nativeMethod)
