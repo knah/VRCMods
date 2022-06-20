@@ -270,6 +270,7 @@ namespace LagFreeScreenshots
             QualitySettings.antiAliasing = oldGraphicsMsaa;
             
             renderTexture.ResolveAntiAliasedSurface();
+            LfsApi.InvokeScreenshotTexture(renderTexture);
 
             (IntPtr, int) data = default;
             var readbackSupported = SystemInfo.supportsAsyncGPUReadback;
