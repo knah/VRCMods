@@ -214,21 +214,55 @@ namespace LagFreeScreenshots
         {
             await TaskUtilities.YieldToFrameEnd();
 
-            // var renderTexture = RenderTexture.GetTemporary(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, 8);
-            var renderTexture = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
-            var maxMsaa = MaxMsaaCount(w, h);
-            renderTexture.antiAliasing = maxMsaa;
-
             var oldCameraTarget = camera.targetTexture;
             var oldCameraFov = camera.fieldOfView;
             var oldAllowMsaa = camera.allowMSAA;
             var oldGraphicsMsaa = QualitySettings.antiAliasing;
+
+            // make screenshot upside up by rotating camera just for the rendering
+            var t = camera.transform;
+            Quaternion? camOrigRot = null;
+            ScreenshotRotation shotRotation = ScreenshotRotation.AutoRotationDisabled;
+            if (ourAutorotation.Value)
+            {
+                shotRotation = GetPictureAutorotation(camera);
+                var inverseAngle = shotRotation switch
+                {
+                    // we need to also compensate for upside-down texture rendering (later below)
+                    ScreenshotRotation.CounterClockwise90 => 90,
+                    ScreenshotRotation.Clockwise90        => -90,
+                    ScreenshotRotation.NoRotation         => 180,
+                    _ => 0,
+                };
+                if (inverseAngle != 0)
+                {
+                    camOrigRot = t.rotation;
+                    t.rotation *= Quaternion.AngleAxis(inverseAngle, Vector3.forward); // inverse rotation
+                }
+
+                // for some rotation, we have to swap width / height
+                if (shotRotation == ScreenshotRotation.Clockwise90 || shotRotation == ScreenshotRotation.CounterClockwise90)
+                {
+                    // we have to swap FOV to preserve the original viewport
+                    camera.fieldOfView = Camera.VerticalToHorizontalFieldOfView(camera.fieldOfView, h * 1f / w);
+                    // and rotate the resolution
+                    (w, h) = (h, w);
+                }
+            }
+
+            // var renderTexture = RenderTexture.GetTemporary(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default, 8);
+            var renderTexture = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
+            var maxMsaa = MaxMsaaCount(w, h);
+            renderTexture.antiAliasing = maxMsaa;
 
             camera.targetTexture = renderTexture;
             camera.allowMSAA = maxMsaa > 1;
             QualitySettings.antiAliasing = maxMsaa;
             
             camera.Render();
+
+            if (camOrigRot != null)
+                t.rotation = camOrigRot.Value; // restore
 
             camera.targetTexture = oldCameraTarget;
             camera.fieldOfView = oldCameraFov;
@@ -329,53 +363,6 @@ namespace LagFreeScreenshots
             return null;
         }
 
-        private static unsafe (IntPtr, int) TransposeAndDestroyOriginal((IntPtr, int Length) data, int w, int h, int step)
-        {
-            (IntPtr, int) newData = (Marshal.AllocHGlobal(data.Length), data.Length);
-
-            byte* pixels = (byte*) data.Item1;
-            byte* newPixels = (byte*) newData.Item1;
-            for (var x = 0; x < w; x++)
-            for (var y = 0; y < h; y++)
-            for (var s = 0; s < step; s++)
-                newPixels[s + y * step + x * h * step] = pixels[s + x * step + y * w * step];
-
-            Marshal.FreeHGlobal(data.Item1);
-            return newData;
-        }
-
-        private static unsafe void FlipVertInPlace((IntPtr, int Length) data, int w, int h, int step)
-        {
-            byte* pixels = (byte*) data.Item1;
-            for (var y = 0; y < h / 2; y++)
-            {
-                for (var x = 0; x < w * step; x++)
-                {
-                    var t = pixels[x + y * w * step];
-                    pixels[x + y * w * step] = pixels[x + (h - y - 1) * w * step];
-                    pixels[x + (h - y - 1) * w * step] = t;
-                }
-            }
-        }
-
-        private static unsafe void FlipHorInPlace((IntPtr, int Length) data, int w, int h, int step)
-        {
-            byte* pixels = (byte*) data.Item1;
-            for (var x = 0; x < w / 2; x++)
-            {
-                for (var y = 0; y < h; y++)
-                {
-                    for (var s = 0; s < step; s++)
-                    {
-                        var t = pixels[s + x * step + y * w * step];
-                        pixels[s + x * step + y * w * step] = pixels[s + (w - x - 1) * step + y * w * step];
-                        pixels[s + (w - x - 1) * step + y * w * step] = t;
-                    }
-                }
-            }
-        }
-
-
         private static async Task EncodeAndSavePicture(string filePath, (IntPtr, int Length) pixelsPair, int w, int h,
             bool hasAlpha, ScreenshotRotation rotationQuarters, MetadataV2 metadata)
         {
@@ -387,61 +374,40 @@ namespace LagFreeScreenshots
             if (Thread.CurrentThread == ourMainThread)
                 MelonLogger.Error("Image encode is executed on main thread - it's a bug!");
 
-            var step = hasAlpha ? 4 : 3;
-
-            unsafe
-            {
-                // swap colors [a]rgb -> bgr[a]
-                byte* pixels = (byte*) pixelsPair.Item1;
-                for (int i = 0; i < pixelsPair.Length; i += step)
-                {
-                    var t = pixels[i];
-                    pixels[i] = pixels[i + step - 1];
-                    pixels[i + step - 1] = t;
-                    if (step != 4) continue;
-
-                    t = pixels[i + 1];
-                    pixels[i + 1] = pixels[i + step - 2];
-                    pixels[i + step - 2] = t;
-                }
-            }
-
-            if (rotationQuarters == ScreenshotRotation.Clockwise90) //90deg cw
-            {
-                pixelsPair = TransposeAndDestroyOriginal(pixelsPair, w, h, step);
-                var t = w;
-                w = h;
-                h = t;
-            }
-            else if (rotationQuarters == ScreenshotRotation.Clockwise180) //180deg cw
-            {
-                FlipHorInPlace(pixelsPair, w, h, step);
-            }
-            else if (rotationQuarters == ScreenshotRotation.CounterClockwise90) //270deg cw
-            {
-                FlipHorInPlace(pixelsPair, w, h, step);
-                FlipVertInPlace(pixelsPair, w, h, step);
-                pixelsPair = TransposeAndDestroyOriginal(pixelsPair, w, h, step);
-                var t = w; w = h; h = t;
-            }
-            else
-            {
-                FlipVertInPlace(pixelsPair, w, h, step);
-            }
-
-
             var pixelFormat = hasAlpha ? PixelFormat.Format32bppArgb : PixelFormat.Format24bppRgb;
-            var format = ourFormat.Value == "auto" ? (hasAlpha ? "png" : "jpeg") : ourFormat.Value;
             using var bitmap = new Bitmap(w, h, pixelFormat);
             var bitmapData = bitmap.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, pixelFormat);
             unsafe
             {
-                Buffer.MemoryCopy((void*) pixelsPair.Item1, (void*) bitmapData.Scan0, pixelsPair.Length, pixelsPair.Length);
+                // swap colors [a]rgb -> bgr[a] AND horizontal flip (unity render is 0,0 bottom left)
+                if (hasAlpha) // 32 bits
+                {
+                    uint* input = (uint*)pixelsPair.Item1;
+                    uint* output = (uint*)bitmapData.Scan0 + w - 1; // scan X-axis backward
+                    for (uint y = 0; y < h; ++y, output += 2*w)
+                        for (uint x = 0; x < w; ++x, ++input, --output)
+                        {
+                            uint v = *input;
+                            // flip bit order (endianness)
+                            *output = ((v >> 24) & 0xff) | ((v >> 8) & 0xff00) | ((v << 8) & 0xff0000) | ((v << 24) & 0xff000000);
+                        }
+                }
+                else { // 24 bits
+                    Int24Bits* input = (Int24Bits*)pixelsPair.Item1;
+                    Int24Bits* output = (Int24Bits*)bitmapData.Scan0 + w - 1; // scan X-axis backward
+                    for (uint y = 0; y < h; ++y, output += 2*w)
+                        for (uint x = 0; x < w; ++x, ++input, --output)
+                        {
+                            // flip bit order (endianness)
+                            (output->r, output->g, output->b) = (input->b, input->g, input->r);
+                        }
+                }
             }
 
             bitmap.UnlockBits(bitmapData);
             Marshal.FreeHGlobal(pixelsPair.Item1);
 
+            var format = ourFormat.Value == "auto" ? (hasAlpha ? "png" : "jpeg") : ourFormat.Value;
             var description = metadata?.ToString();
 
             // https://docs.microsoft.com/en-us/windows/win32/gdiplus/-gdiplus-constant-property-item-descriptions
@@ -518,5 +484,13 @@ namespace LagFreeScreenshots
 
             return ourOurGetPathMethod(w, h);
         }
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 0)]
+    internal struct Int24Bits
+    {
+        public byte r;
+        public byte g;
+        public byte b;
     }
 }
