@@ -90,6 +90,11 @@
             <Private>false</Private>
             <HintPath>$(MsBuildThisFileDirectory)Libs\MelonLoader.dll</HintPath>
         </Reference>
+		<Reference Include="0Harmony">
+            <SpecificVersion>false</SpecificVersion>
+            <Private>false</Private>
+            <HintPath>$(MsBuildThisFileDirectory)Libs\0Harmony.dll</HintPath>
+        </Reference>
         <Reference Include="UnhollowerBaseLib, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
             <SpecificVersion>false</SpecificVersion>
             <Private>false</Private>
