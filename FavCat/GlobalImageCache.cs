@@ -82,7 +82,7 @@ namespace FavCat
             
             ourNextAllowedUpdate = Time.time + RequestDelay;
             
-            MelonLogger.Msg($"Performing image request to {url}");
+            FavCatMod.Logger.Msg($"Performing image request to {url}");
             ImageDownloader.DownloadImage(url, 256, new Action<Texture2D>(tex =>
             {
                 if (!Textures.TryGetValue(url, out var oldTex) || !oldTex)

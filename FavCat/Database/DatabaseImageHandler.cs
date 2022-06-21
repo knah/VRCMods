@@ -72,12 +72,12 @@ namespace FavCat.Database
 
                 await TaskUtilities.YieldToMainThread();
                 
-                MelonLogger.Msg($"Removed {cutoffPoint} images from cache");
+                FavCatMod.Logger.Msg($"Removed {cutoffPoint} images from cache");
             }).ContinueWith(task =>
             {
                 if (!task.IsFaulted) return;
                 
-                MelonLogger.Warning("Image cache trim failed; assuming cache corrupted, clearing collections. Exception: " + task.Exception);
+                FavCatMod.Logger.Warning("Image cache trim failed; assuming cache corrupted, clearing collections. Exception: " + task.Exception);
                 myFileDatabase.GetCollection<LiteFileInfo<string>>("_files").DeleteAll();
                 myFileDatabase.GetCollection("_chunks").DeleteAll();
             });
@@ -109,13 +109,13 @@ namespace FavCat.Database
                 }
                 catch (Exception ex)
                 {
-                    MelonLogger.Error($"Exception in onDone callback: {ex}");
+                    FavCatMod.Logger.Error($"Exception in onDone callback: {ex}");
                 }
             }
             catch (Exception ex)
             {
                 if (MelonDebug.IsEnabled())
-                    MelonLogger.Warning($"Exception in image load, will delete offending image: {ex}");
+                    FavCatMod.Logger.Warning($"Exception in image load, will delete offending image: {ex}");
                 myFileDatabase.FileStorage.Delete(url);
                 myImageInfos.Delete(url);
                 onDone(AssetsHandler.PreviewLoading.texture);
@@ -158,7 +158,7 @@ namespace FavCat.Database
                 catch (LiteException ex)
                 {
                     if (MelonDebug.IsEnabled())
-                        MelonLogger.Warning($"Database exception in image store handler: {ex}");
+                        FavCatMod.Logger.Warning($"Database exception in image store handler: {ex}");
                 }
             });
         }

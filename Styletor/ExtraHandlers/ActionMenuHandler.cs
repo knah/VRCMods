@@ -139,7 +139,7 @@ namespace Styletor.ExtraHandlers
             var name = texture.name;
             
             if (myTexturesByName.TryGetValue(name, out var previous) && previous != texture)
-                MelonLogger.Msg($"Object named {name} as a texture different from previous one: {previous.name} != {texture.name}");
+                StyletorMod.Instance.Logger.Msg($"Object named {name} as a texture different from previous one: {previous.name} != {texture.name}");
 
             myTexturesByName[name] = texture;
         }
@@ -175,7 +175,7 @@ namespace Styletor.ExtraHandlers
             var name = texture.name;
             
             if (mySpritesByName.TryGetValue(name, out var previous) && previous != texture)
-                MelonLogger.Msg($"Object named {name} as a texture different from previous one: {previous.name} != {texture.name}");
+                StyletorMod.Instance.Logger.Msg($"Object named {name} as a texture different from previous one: {previous.name} != {texture.name}");
 
             mySpritesByName[name] = texture;
         }
@@ -189,11 +189,11 @@ namespace Styletor.ExtraHandlers
             if (graphics.Count > 0)
             {
                 if (graphics.Count > 1)
-                    MelonLogger.Msg($"AM object {fullName} (in {t.parent.gameObject.name}) has more than one Graphic!");
+                    StyletorMod.Instance.Logger.Msg($"AM object {fullName} (in {t.parent.gameObject.name}) has more than one Graphic!");
 
                 var color = graphics[0].color;
                 if (myOriginalGraphicColorsByObjectName.TryGetValue(fullName, out var oldColor) && oldColor != color)
-                    MelonLogger.Msg($"Object named {fullName} was seen with two different colors: {oldColor.ToString()} vs {color.ToString()}");
+                    StyletorMod.Instance.Logger.Msg($"Object named {fullName} was seen with two different colors: {oldColor.ToString()} vs {color.ToString()}");
 
                 myOriginalGraphicColorsByObjectName[fullName] = color;
                 

@@ -42,7 +42,7 @@ namespace FavCat.Database
             }
             catch (Exception ex)
             {
-                MelonLogger.Warning("Exception when creating image cache; assuming it's corrupted and deleting it. Exception: " + ex);
+                FavCatMod.Logger.Warning("Exception when creating image cache; assuming it's corrupted and deleting it. Exception: " + ex);
                 File.Delete(imageDbPath);
                 myImageDatabase = new LiteDatabase(new ConnectionString { Filename = imageDbPath, Connection = connectionType });
             }
@@ -79,7 +79,7 @@ namespace FavCat.Database
                     }
                     catch (Exception ex)
                     {
-                        MelonLogger.Error($"Exception in DB update thread: {ex}");
+                        FavCatMod.Logger.Error($"Exception in DB update thread: {ex}");
                     }
                 } else
                     Thread.Sleep(100);

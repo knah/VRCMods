@@ -43,8 +43,8 @@ namespace TrueShaderAntiCrash
 
             if (!ourOffsets.TryGetValue(unityPlayerHash, out var offset))
             {
-                MelonLogger.Error($"Unknown UnityPlayer hash: {unityPlayerHash}");
-                MelonLogger.Error("The mod will not work");
+                LoggerInstance.Error($"Unknown UnityPlayer hash: {unityPlayerHash}");
+                LoggerInstance.Error("The mod will not work");
                 return;
             }
             
@@ -63,7 +63,7 @@ namespace TrueShaderAntiCrash
             }
             catch (IOException ex)
             {
-                MelonLogger.Warning("Failed to write native unity plugin; will attempt loading it anyway. This is normal if you're running multiple instances of VRChat");
+                LoggerInstance.Warning("Failed to write native unity plugin; will attempt loading it anyway. This is normal if you're running multiple instances of VRChat");
                 MelonDebug.Msg(ex.ToString());
             }
 
@@ -81,7 +81,7 @@ namespace TrueShaderAntiCrash
 
                 if (loaded == IntPtr.Zero)
                 {
-                    MelonLogger.Error("Module load failed");
+                    LoggerInstance.Error("Module load failed");
                     return;
                 }
 

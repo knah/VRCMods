@@ -18,7 +18,7 @@ namespace UIExpansionKit
             }
             catch (Exception ex)
             {
-                MelonLogger.Error($"Exception when creating a button for registration of {registration}: {ex}");
+                UiExpansionKitMod.Instance.Logger.Error($"Exception when creating a button for registration of {registration}: {ex}");
             }
         }
         

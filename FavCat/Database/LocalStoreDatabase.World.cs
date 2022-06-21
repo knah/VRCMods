@@ -13,7 +13,7 @@ namespace FavCat.Database
     {
         internal void RunBackgroundWorldSearch(string text, Action<IEnumerable<StoredWorld>> callback)
         {
-            MelonLogger.Msg($"Running local world search for text {text}");
+            FavCatMod.Logger.Msg($"Running local world search for text {text}");
             Task.Run(() => {
                 var searchText = text.ToLowerInvariant();
                 var list = myStoredWorlds.Find(stored =>

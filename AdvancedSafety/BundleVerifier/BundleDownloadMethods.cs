@@ -43,8 +43,8 @@ namespace AdvancedSafety.BundleVerifier
 
             if (!ourBundleDownloadOffsets.TryGetValue(unityPlayerHash, out var offsets))
             {
-                MelonLogger.Error($"Unknown UnityPlayer hash: {unityPlayerHash}");
-                MelonLogger.Error("Bundle verifier will not work");
+                AdvancedSafetyMod.Logger.Error($"Unknown UnityPlayer hash: {unityPlayerHash}");
+                AdvancedSafetyMod.Logger.Error("Bundle verifier will not work");
                 return false;
             }
 
@@ -91,7 +91,7 @@ namespace AdvancedSafety.BundleVerifier
             }
             catch (Exception ex)
             {
-                MelonLogger.Error($"Exception in CreateCached patch: {ex}");
+                AdvancedSafetyMod.Logger.Error($"Exception in CreateCached patch: {ex}");
             }
             return result;
         }

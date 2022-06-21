@@ -92,7 +92,7 @@ namespace Styletor.Styles
                 var loadedTexture = Utils.Utils.LoadTexture(keyValuePair.Value);
                 if (loadedTexture == null)
                 {
-                    MelonLogger.Msg($"Failed to load a texture from {keyValuePair.Key}");
+                    StyletorMod.Instance.Logger.Msg($"Failed to load a texture from {keyValuePair.Key}");
                     continue;
                 }
 

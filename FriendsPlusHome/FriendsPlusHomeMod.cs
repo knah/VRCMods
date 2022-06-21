@@ -25,9 +25,12 @@ namespace FriendsPlusHome
 
         private static MelonPreferences_Entry<string> StartupName;
         private static MelonPreferences_Entry<string> ButtonName;
+        private static MelonLogger.Instance Logger;
 
         public override void OnApplicationStart()
         {
+            Logger = LoggerInstance;
+            
             var category = MelonPreferences.CreateCategory(SettingsCategory, "Friends+ Home");
             StartupName = category.CreateEntry(SettingStartupName, nameof(InstanceAccessType.FriendsOfGuests), "Startup instance type");
             ButtonName = category.CreateEntry(SettingButtonName, nameof(InstanceAccessType.FriendsOfGuests), "\"Go Home\" instance type");
@@ -43,7 +46,7 @@ namespace FriendsPlusHome
                 if (!XrefScanner.XrefScan(methodInfo).Any(it => it.Type == XrefType.Global && it.ReadAsObject()?.ToString() == "Going to Home Location: ")) 
                     continue;
                 
-                MelonLogger.Msg($"Patched {methodInfo.Name}");
+                Logger.Msg($"Patched {methodInfo.Name}");
                 HarmonyInstance.Patch(methodInfo, postfix: new HarmonyMethod(AccessTools.Method(typeof(FriendsPlusHomeMod), nameof(GoHomePatch))));
             }
             
@@ -78,7 +81,7 @@ namespace FriendsPlusHome
         private static void StartEnforcingInstanceType(VRCFlowManager flowManager, bool isButton)
         {
             var targetType = Enum.TryParse<InstanceAccessType>(isButton ? ButtonName.Value : StartupName.Value, out var type) ? type : InstanceAccessType.FriendsOfGuests;
-            MelonLogger.Msg($"Enforcing home instance type: {targetType}");
+            Logger.Msg($"Enforcing home instance type: {targetType}");
             flowManager.field_Protected_InstanceAccessType_0 = targetType;
 
             MelonCoroutines.Start(EnforceTargetInstanceType(flowManager, targetType, isButton ? 10 : 30));

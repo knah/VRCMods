@@ -80,7 +80,7 @@ namespace Styletor.Styles
             }
             catch (Exception ex)
             {
-                MelonLogger.Warning($"Can't load style {styleRawName}: {ex}");
+                StyletorMod.Instance.Logger.Warning($"Can't load style {styleRawName}: {ex}");
             }
         }
 
@@ -140,11 +140,11 @@ namespace Styletor.Styles
 
             if (myStyles.TryGetValue(styleName, out var style))
             {
-                MelonLogger.Msg($"Applying style {styleName}");
+                StyletorMod.Instance.Logger.Msg($"Applying style {styleName}");
                 style.ApplyOverrides(myColorizer);
             }
             else
-                MelonLogger.Msg($"Style {styleName} not found");
+                StyletorMod.Instance.Logger.Msg($"Style {styleName} not found");
             
             foreach (var overrideStyle in mixinsToUse.Where(it => it.Metadata.MixinPriority >= 0))
                 overrideStyle.ApplyOverrides(myColorizer);
@@ -175,14 +175,14 @@ namespace Styletor.Styles
 
                 if (spriteThisWouldReplace == null || originalSpriteFullKey == null)
                 {
-                    MelonLogger.Msg($"Image {normalizedName} in StyletorStyles would replace nothing; it will be ignored");
+                    StyletorMod.Instance.Logger.Msg($"Image {normalizedName} in StyletorStyles would replace nothing; it will be ignored");
                     continue;
                 }
 
                 var texture = Utils.Utils.LoadTexture(imagePath);
                 if (texture == null)
                 {
-                    MelonLogger.Msg($"Could not load texture from image {normalizedName} in StyletorStyles");
+                    StyletorMod.Instance.Logger.Msg($"Could not load texture from image {normalizedName} in StyletorStyles");
                     continue;
                 }
 

@@ -147,7 +147,7 @@ namespace FavCat.CustomLists
             }
             catch (Exception ex)
             {
-                MelonLogger.Error(ex.ToString());
+                FavCatMod.Logger.Error(ex.ToString());
             }
         }
 

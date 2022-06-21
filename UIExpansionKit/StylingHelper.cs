@@ -84,13 +84,13 @@ namespace UIExpansionKit
             var requestedStyle = SewElementTypeIdField.Get(wrapper);
             if (string.IsNullOrEmpty(requestedStyle))
             {
-                MelonLogger.Error("Empty requested style on SEW");
+                UiExpansionKitMod.Instance.Logger.Error("Empty requested style on SEW");
                 return;
             }
 
             if (!ourDefaultStyleMap.TryGetValue(requestedStyle, out var className))
             {
-                MelonLogger.Error($"Unknown requested style: {requestedStyle}");
+                UiExpansionKitMod.Instance.Logger.Error($"Unknown requested style: {requestedStyle}");
                 return;
             }
 

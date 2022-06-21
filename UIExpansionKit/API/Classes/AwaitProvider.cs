@@ -50,7 +50,7 @@ namespace UIExpansionKit.API.Classes
                 }
                 catch (Exception ex)
                 {
-                    MelonLogger.Warning($"Exception in delegate queue {QueueName}: {ex}");
+                    UiExpansionKitMod.Instance.Logger.Warning($"Exception in delegate queue {QueueName}: {ex}");
                 }
             }
         }

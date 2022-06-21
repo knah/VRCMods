@@ -47,7 +47,7 @@ namespace FavCat
                 }
                 catch (Exception ex)
                 {
-                    MelonLogger.Msg($"Import of {file} failed: {ex}");
+                    FavCatMod.Logger.Msg($"Import of {file} failed: {ex}");
                 }
             }
             
@@ -62,7 +62,7 @@ namespace FavCat
                 }
                 catch (Exception ex)
                 {
-                    MelonLogger.Msg($"Import of {file} failed: {ex}");
+                    FavCatMod.Logger.Msg($"Import of {file} failed: {ex}");
                 }
             }
 
@@ -78,12 +78,12 @@ namespace FavCat
             var database = FavCatMod.Database;
             if (database == null)
             {
-                MelonLogger.Msg("Database does not exist, can't import");
+                FavCatMod.Logger.Msg("Database does not exist, can't import");
                 return;
             }
             
             var fileName = Path.GetFileName(filePath);
-            MelonLogger.Msg($"Started avatar import process for file {fileName}");
+            FavCatMod.Logger.Msg($"Started avatar import process for file {fileName}");
             
             var toAddUsers = new List<string>();
             var toAddWorlds = new List<string>();
@@ -158,7 +158,7 @@ namespace FavCat
             DoAddCategories(toAddWorlds, database.WorldFavorites, FavCatMod.Instance.WorldsModule, database.myStoredWorlds);
             DoAddCategories(toAddUsers, database.PlayerFavorites, FavCatMod.Instance.PlayerModule, database.myStoredPlayers);
             
-            MelonLogger.Msg($"Done importing {fileName}");
+            FavCatMod.Logger.Msg($"Done importing {fileName}");
             File.Delete(filePath);
         }
         
@@ -169,12 +169,12 @@ namespace FavCat
                 var database = FavCatMod.Database;
                 if (database == null)
                 {
-                    MelonLogger.Msg("Database does not exist, can't merge");
+                    FavCatMod.Logger.Msg("Database does not exist, can't merge");
                     return;
                 }
                 
                 var fileName = Path.GetFileName(foreignStorePath);
-                MelonLogger.Msg($"Started merging database with {fileName}");
+                FavCatMod.Logger.Msg($"Started merging database with {fileName}");
                 using var storeDatabase = new LiteDatabase(new ConnectionString {Filename = foreignStorePath, ReadOnly = true, Connection = ConnectionType.Direct});
             
                 var storedAvatars = storeDatabase.GetCollection<StoredAvatar>("avatars");
@@ -205,7 +205,7 @@ namespace FavCat
                         database.myStoredWorlds.Upsert(storedWorld);
                 }
                 
-                MelonLogger.Msg($"Done merging database with {fileName}");
+                FavCatMod.Logger.Msg($"Done merging database with {fileName}");
             });
         }
     }

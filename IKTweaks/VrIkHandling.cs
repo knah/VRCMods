@@ -64,7 +64,7 @@ namespace IKTweaks
             }
             catch (Exception ex)
             {
-                MelonLogger.Error($"Exception in IK solver: {ex}");
+                IKTweaksMod.Logger.Error($"Exception in IK solver: {ex}");
             }
         }
 
@@ -122,7 +122,7 @@ namespace IKTweaks
             }
             catch (Exception ex)
             {
-                MelonLogger.Error($"Exception in IK spine solver: {ex}");
+                IKTweaksMod.Logger.Error($"Exception in IK spine solver: {ex}");
             }
         }
 

@@ -19,12 +19,16 @@ namespace Finitizer
         // Why these numbers? Check wrld_b9f80349-74af-4840-8ce9-a1b783436590 for how *horribly* things break even on 10^6. Nothing belongs outside these bounds. The significand is that of MaxValue.
         private const float MaxAllowedValueTop = 3.402823E+7f;
         private const float MaxAllowedValueBottom = -3.402823E+7f;
+        
+        private static MelonLogger.Instance Logger;
 
         private bool myArePatchesApplied;
         private bool myWasEnabled;
         
         public override void OnApplicationStart()
         {
+            Logger = LoggerInstance;
+            
             var category = MelonPreferences.CreateCategory(SettingsCategory, SettingsCategory);
             var entry = category.CreateEntry(EnabledSetting, true, "FP fix enabled");
             entry.OnValueChanged += (_, value) =>
@@ -45,7 +49,7 @@ namespace Finitizer
             else
                 UnpatchAll();
             
-            MelonLogger.Msg($"Finitizer is now {(isEnabled ? "enabled" : "disabled")}");
+            Logger.Msg($"Finitizer is now {(isEnabled ? "enabled" : "disabled")}");
 
             myWasEnabled = isEnabled;
         }
@@ -67,7 +71,7 @@ namespace Finitizer
             PatchICall("UnityEngine.Object::" + nameof(Object.Internal_InstantiateSingleWithParent_Injected), out ourOriginalInstantiateWithParent, InstantiateWithParentPatch);
 
             myArePatchesApplied = true;
-            MelonLogger.Msg("Things patching complete");
+            Logger.Msg("Things patching complete");
         }
         
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -102,7 +106,7 @@ namespace Finitizer
             var originalPointer = IL2CPP.il2cpp_resolve_icall(name);
             if (originalPointer == IntPtr.Zero)
             {
-                MelonLogger.Warning($"ICall {name} was not found, not patching");
+                Logger.Warning($"ICall {name} was not found, not patching");
                 original = null;
                 return;
             }
@@ -117,7 +121,7 @@ namespace Finitizer
             NativePatchUtils.UnpatchAll();
 
             myArePatchesApplied = false;
-            MelonLogger.Msg("Things unpatching complete");
+            Logger.Msg("Things unpatching complete");
         }
         
         public static unsafe bool IsInvalid(float f) => (*(int*) &f & int.MaxValue) >= 2139095040;

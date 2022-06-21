@@ -40,7 +40,7 @@ namespace UIExpansionKit.API
             task.ContinueWith(tsk =>
             {
                 if (tsk.IsFaulted)
-                    MelonLogger.Error($"Free-floating {taskInfo} failed with exception: {tsk.Exception}");
+                    UiExpansionKitMod.Instance.Logger.Error($"Free-floating {taskInfo} failed with exception: {tsk.Exception}");
             });
         }
     }

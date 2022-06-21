@@ -47,8 +47,8 @@ namespace AdvancedSafety.BundleVerifier
             }
             catch (IOException ex)
             {
-                MelonLogger.Error("Unable to extract bundle verifier app, the mod will not work");
-                MelonLogger.Error(ex.ToString());
+                AdvancedSafetyMod.Logger.Error("Unable to extract bundle verifier app, the mod will not work");
+                AdvancedSafetyMod.Logger.Error(ex.ToString());
                 return;
             }
 
@@ -84,7 +84,7 @@ namespace AdvancedSafety.BundleVerifier
             if (!EnabledSetting.Value)
             {
                 BundleDlInterceptor.ShouldIntercept = false;
-                MelonLogger.Msg($"Bundle intercept disabled in settings");
+                AdvancedSafetyMod.Logger.Msg($"Bundle intercept disabled in settings");
                 yield break;
             }
 

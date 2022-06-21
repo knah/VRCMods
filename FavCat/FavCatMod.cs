@@ -26,17 +26,20 @@ namespace FavCat
     internal partial class FavCatMod : MelonMod
     {
         public static LocalStoreDatabase? Database;
+        public static MelonLogger.Instance Logger;
+        
         internal static FavCatMod Instance;
 
         internal AvatarModule? AvatarModule;
         internal WorldsModule? WorldsModule;
         internal PlayersModule? PlayerModule;
-        
+
         internal static PageUserInfo PageUserInfo;
         
         public override void OnApplicationStart()
         {
             Instance = this;
+            Logger = LoggerInstance;
             if (!CheckWasSuccessful || !MustStayTrue || MustStayFalse) return;
 
             Directory.CreateDirectory("./UserData/FavCatImport");
@@ -48,7 +51,7 @@ namespace FavCat
             
             FavCatSettings.RegisterSettings();
             
-            MelonLogger.Msg("Creating database");
+            Logger.Msg("Creating database");
             Database = new LocalStoreDatabase(FavCatSettings.DatabasePath.Value, FavCatSettings.ImageCachePath.Value);
             
             Database.ImageHandler.TrimCache(FavCatSettings.MaxCacheSizeBytes).NoAwait();
@@ -96,7 +99,7 @@ namespace FavCat
             }
             catch (Exception ex)
             {
-                MelonLogger.Error($"Exception in avatar module init: {ex}");
+                Logger.Error($"Exception in avatar module init: {ex}");
             }
 
             try
@@ -106,7 +109,7 @@ namespace FavCat
             }
             catch (Exception ex)
             {
-                MelonLogger.Error($"Exception in world module init: {ex}");
+                Logger.Error($"Exception in world module init: {ex}");
             }
             
             try
@@ -116,11 +119,11 @@ namespace FavCat
             }
             catch (Exception ex)
             {
-                MelonLogger.Error($"Exception in player module init: {ex}");
+                Logger.Error($"Exception in player module init: {ex}");
             }
 
             PageUserInfo = GameObject.Find("UserInterface/MenuContent/Screens/UserInfo").GetComponent<PageUserInfo>();
-            MelonLogger.Msg("Initialized!");
+            Logger.Msg("Initialized!");
         }
 
         public override void OnUpdate()
@@ -202,7 +205,7 @@ namespace FavCat
             }
             catch (Exception ex)
             {
-                MelonLogger.Error($"Exception in image downloader patch: {ex}");
+                FavCatMod.Logger.Error($"Exception in image downloader patch: {ex}");
             }
         }
 
@@ -238,7 +241,7 @@ namespace FavCat
             }
             catch (Exception ex)
             {
-                MelonLogger.Error($"Exception in API sniffer patch: {ex}");
+                FavCatMod.Logger.Error($"Exception in API sniffer patch: {ex}");
             }
         }
     }

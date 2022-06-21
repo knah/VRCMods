@@ -31,7 +31,7 @@ namespace FavCat.Modules
         {
             myCurrentAnnoyingMessage = CanPerformAdditiveActions ? "WillBeObsolete" : (CanShowExistingLists ? "CantAddWithCanny" : "NoFavorites");
             
-            MelonLogger.Msg("Adding button to UI - Looking up for Change Button");
+            FavCatMod.Logger.Msg("Adding button to UI - Looking up for Change Button");
             var foundAvatarPage = Resources.FindObjectsOfTypeAll<PageAvatar>()?.FirstOrDefault(p => p.transform.Find("Change Button") != null);
             if (foundAvatarPage == null)
                 throw new ApplicationException("No avatar page, can't initialize extended favorites");

@@ -36,6 +36,8 @@ namespace LagFreeScreenshots
 {
     internal partial class LagFreeScreenshotsMod : MelonMod
     {
+        public static MelonLogger.Instance Logger;
+        
         private const string SettingsCategory = "LagFreeScreenshots";
         private const string SettingEnableMod = "Enabled";
         private const string SettingScreenshotResolution = "ScreenshotResolution";
@@ -61,6 +63,8 @@ namespace LagFreeScreenshots
 
         public override void OnApplicationStart()
         {
+            Logger = LoggerInstance;
+            
             var category = MelonPreferences.CreateCategory(SettingsCategory, "Lag Free Screenshots");
             ourEnabled = category.CreateEntry(SettingEnableMod, true, "Enabled");
             ourResolution = category.CreateEntry( SettingScreenshotResolution, PresetScreenshotSizes.Default, "Screenshot resolution override");
@@ -74,7 +78,7 @@ namespace LagFreeScreenshots
             
             if (!MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit" && it.Assembly.GetName().Version >= new Version(0, 2, 6)))
             {
-                MelonLogger.Error("UI Expansion Kit is not found. Lag Free Screenshots will not work.");
+                Logger.Error("UI Expansion Kit is not found. Lag Free Screenshots will not work.");
                 return;
             }
 
@@ -165,7 +169,7 @@ namespace LagFreeScreenshots
                 resY, hasAlpha).ContinueWith(t =>
             {
                 if (t.IsFaulted)
-                    MelonLogger.Warning($"Free-floating task failed with exception: {t.Exception}");
+                    Logger.Warning($"Free-floating task failed with exception: {t.Exception}");
             });
             return false;
         }
@@ -203,7 +207,7 @@ namespace LagFreeScreenshots
 
             if (maxMsaa != ourLastUsedMsaaLevel)
             {
-                MelonLogger.Msg($"Using MSAA x{maxMsaa} for screenshots (FB size {(colorSizePerLevel * maxMsaa + colorSizePerLevel / 2) / 1024 / 1024}MB)");
+                Logger.Msg($"Using MSAA x{maxMsaa} for screenshots (FB size {(colorSizePerLevel * maxMsaa + colorSizePerLevel / 2) / 1024 / 1024}MB)");
                 ourLastUsedMsaaLevel = (int) maxMsaa;
             }
 
@@ -247,7 +251,7 @@ namespace LagFreeScreenshots
                 var request = AsyncGPUReadback.Request(renderTexture, 0, hasAlpha ? TextureFormat.ARGB32 : TextureFormat.RGB24, new Action<AsyncGPUReadbackRequest>(r =>
                 {
                     if (r.hasError)
-                        MelonLogger.Warning("Readback request finished with error (w)");
+                        Logger.Warning("Readback request finished with error (w)");
                     
                     data = ToBytes(r.GetDataRaw(0), r.GetLayerDataSize());
                     MelonDebug.Msg($"Bytes readback took total {stopwatch.ElapsedMilliseconds}");
@@ -257,7 +261,7 @@ namespace LagFreeScreenshots
                     await TaskUtilities.YieldToMainThread();
 
                 if (request.hasError)
-                    MelonLogger.Warning("Readback request finished with error");
+                    Logger.Warning("Readback request finished with error");
                 
                 if (data.Item1 == IntPtr.Zero)
                 {
@@ -269,7 +273,7 @@ namespace LagFreeScreenshots
             {
                 unsafe
                 {
-                    MelonLogger.Msg("Does not support readback, using fallback texture read method");
+                    Logger.Msg("Does not support readback, using fallback texture read method");
                 
                     RenderTexture.active = renderTexture;
                     var newTexture = new Texture2D(w, h, hasAlpha ? TextureFormat.ARGB32 : TextureFormat.RGB24, false);
@@ -385,7 +389,7 @@ namespace LagFreeScreenshots
             await Task.Delay(1).ConfigureAwait(false);
             
             if (Thread.CurrentThread == ourMainThread)
-                MelonLogger.Error("Image encode is executed on main thread - it's a bug!");
+                Logger.Error("Image encode is executed on main thread - it's a bug!");
 
             var step = hasAlpha ? 4 : 3;
 
@@ -492,7 +496,7 @@ namespace LagFreeScreenshots
 
             await TaskUtilities.YieldToMainThread();
 
-            MelonLogger.Msg($"Image saved to {filePath}");
+            Logger.Msg($"Image saved to {filePath}");
 
             // compatibility with log-reading tools
             UnityEngine.Debug.Log($"Took screenshot to: {filePath}");

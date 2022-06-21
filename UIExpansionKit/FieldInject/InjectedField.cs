@@ -31,7 +31,7 @@ namespace UIExpansionKit.FieldInject
                 var ownerClass = (Il2CppClass_24_2*) classPointer;
 
                 myOffset = (int)ownerClass->instance_size - IntPtr.Size;
-                MelonLogger.Msg($"Injecting field: current size {ownerClass->instance_size} added size {addedSize} offset {myOffset}");
+                UiExpansionKitMod.Instance.Logger.Msg($"Injecting field: current size {ownerClass->instance_size} added size {addedSize} offset {myOffset}");
 
                 var fieldType = (Il2CppType_16_0*)Marshal.AllocHGlobal(Marshal.SizeOf<Il2CppType_16_0>());
                 *fieldType = ((Il2CppClass_24_2*)fieldTypePointer)->byval_arg;

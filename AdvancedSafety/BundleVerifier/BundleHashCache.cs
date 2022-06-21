@@ -29,7 +29,7 @@ namespace AdvancedSafety.BundleVerifier
                 var readBytes = myHashWriterStream.Read(transferArray, 0, transferArray.Length);
                 if (readBytes != transferArray.Length)
                 {
-                    MelonLogger.Error($"Failure to read {transferArray.Length} bytes from cached bad URL file");
+                    AdvancedSafetyMod.Logger.Error($"Failure to read {transferArray.Length} bytes from cached bad URL file");
                     myHashWriterStream.Position = 0;
                     break;
                 }

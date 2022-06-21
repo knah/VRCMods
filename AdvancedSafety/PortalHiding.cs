@@ -45,7 +45,7 @@ namespace AdvancedSafety
                 if (APIUser.CurrentUser?.id == apiUser.id) return;
                 
                 if (MelonDebug.IsEnabled())
-                    MelonLogger.Msg($"User {apiUser.displayName} dropped a portal");
+                    AdvancedSafetyMod.Logger.Msg($"User {apiUser.displayName} dropped a portal");
 
                 string denyReason = null;
                 if (AdvancedSafetySettings.HidePortalsFromBlockedUsers.Value && IsBlockedEitherWay(apiUser.id))
@@ -62,13 +62,13 @@ namespace AdvancedSafety
                 if (dict.ContainsKey(networkId))
                 {
                     var someStruct = dict[networkId];
-                    MelonLogger.Msg(denyReason);
+                    AdvancedSafetyMod.Logger.Msg(denyReason);
                     MelonCoroutines.Start(HideGameObjectAfterDelay(someStruct.field_Public_GameObject_0));
                 }
             }
             catch (Exception ex)
             {
-                MelonLogger.Error($"Exception in portal hider patch: {ex}");
+                AdvancedSafetyMod.Logger.Error($"Exception in portal hider patch: {ex}");
             }
         }
 

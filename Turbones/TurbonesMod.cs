@@ -17,6 +17,8 @@ namespace Turbones
 {
     internal partial class TurbonesMod : MelonMod
     {
+        public static MelonLogger.Instance Logger;
+        
         private static IntPtr ourDynBoneCollideEntryPoint;
         private static IntPtr ourDynBoneUpdateEntryPoint;
         private static IntPtr ourLastPatchPointer;
@@ -24,6 +26,8 @@ namespace Turbones
         public override void OnApplicationStart()
         {
             ClassInjector.RegisterTypeInIl2Cpp<BoneDeleteHandler>();
+
+            Logger = LoggerInstance;
             
             var category = MelonPreferences.CreateCategory("Turbones");
             var enableCollisionChecks = category.CreateEntry("OptimizedCollisionChecks", true, "Enable optimized collision checks");
@@ -43,13 +47,13 @@ namespace Turbones
             }
             catch (IOException ex)
             {
-                MelonLogger.Warning("Failed to write native dll; will attempt loading it anyway. This is normal if you're running multiple instances of VRChat");
+                Logger.Warning("Failed to write native dll; will attempt loading it anyway. This is normal if you're running multiple instances of VRChat");
                 MelonDebug.Msg(ex.ToString());
             }
 
             if (!JigglySolverApi.Initialize("VRChat_Data/Plugins/" + dllName))
             {
-                MelonLogger.Error("Error initializing native library; mod won't work");
+                Logger.Error("Error initializing native library; mod won't work");
                 return;
             }
 
@@ -71,7 +75,7 @@ namespace Turbones
                 fixed(IntPtr* a = &ourDynBoneCollideEntryPoint)
                     MelonUtils.NativeHookAttach((IntPtr)a, JigglySolverApi.LibDynBoneCollideEntryPoint);
 
-                MelonLogger.Msg("Patched DynamicBone Collide");
+                Logger.Msg("Patched DynamicBone Collide");
                 isCollidePatched = true;
             }
 
@@ -82,7 +86,7 @@ namespace Turbones
                 fixed(IntPtr* a = &ourDynBoneCollideEntryPoint)
                     MelonUtils.NativeHookDetach((IntPtr)a, JigglySolverApi.LibDynBoneCollideEntryPoint);
                 
-                MelonLogger.Msg("Unpatched DynamicBone Collide");
+                Logger.Msg("Unpatched DynamicBone Collide");
                 isCollidePatched = false;
             }
 
@@ -96,7 +100,7 @@ namespace Turbones
                     fixed(IntPtr* a = &ourDynBoneUpdateEntryPoint)
                         MelonUtils.NativeHookDetach((IntPtr)a, ourLastPatchPointer);
                     
-                    MelonLogger.Msg("Unpatched DynamicBone Update");
+                    Logger.Msg("Unpatched DynamicBone Update");
                     ourLastPatchPointer = IntPtr.Zero;
                 }
                 
@@ -109,7 +113,7 @@ namespace Turbones
                     fixed(IntPtr* a = &ourDynBoneUpdateEntryPoint)
                         MelonUtils.NativeHookAttach((IntPtr)a, ourLastPatchPointer);
 
-                    MelonLogger.Msg($"Patched DynamicBone Update (multithreaded: {useMt})");
+                    Logger.Msg($"Patched DynamicBone Update (multithreaded: {useMt})");
                 }
                 else
                 {
@@ -120,7 +124,7 @@ namespace Turbones
 
                     JigglySolverApi.SetOriginalBoneUpdateDelegate(ourDynBoneUpdateEntryPoint);
 
-                    MelonLogger.Msg($"Patched DynamicBone Update (notify)");
+                    Logger.Msg($"Patched DynamicBone Update (notify)");
                 }
             }
             

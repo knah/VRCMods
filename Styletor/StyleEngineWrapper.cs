@@ -161,7 +161,7 @@ namespace Styletor
                     myOriginalSpritesByLowercaseFullKey[keyValuePair.Key.Item1] = keyValuePair.Value.Cast<Sprite>();
             }
 
-            MelonLogger.Msg($"Stored default style: {myOriginalStylesBackup.Count} styles, {myOriginalSprites.Count} sprites");
+            StyletorMod.Instance.Logger.Msg($"Stored default style: {myOriginalStylesBackup.Count} styles, {myOriginalSprites.Count} sprites");
         }
 
         public string? GetSpriteFullNameByOriginalSprite(Sprite? originalSprite)
