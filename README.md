@@ -1,9 +1,19 @@
+## This repository is no longer maintained
+As you may know, VRChat implemented a client-side anti-cheat in a "security update". This prevents the use of MelonLoader, and with it, these mods.  
+Fighting against a commercial anti-cheat is not something I want to spend my time on, goes against the spirit of wholesome modding, and risks bans for people who would choose to use a "bypass". This means that this repository will not see any further development. It will soon be archived.  
+If you're looking for a social VR platform that still supports modding and listens to the community, you can check out [ChilloutVR](https://store.steampowered.com/app/661130/ChilloutVR/) ([discord server](https://discord.gg/abi); [modding group discord](https://discord.gg/dndGPM3bxu)) or [NeosVR](https://store.steampowered.com/app/740250/Neos_VR/)  
+You can still upvote linked Canny posts for ex-mod features - links for them remain below.  
+
+So long, and thanks for all the fish!
+
+## Original README follows
+
 This repository contains my mods for VRChat. Join the [VRChat Modding Group discord](https://discord.gg/rCqKSvR) for support and more mods!  
 Looking for more (universal) mods? [Check out my universal mods repository!](https://github.com/knah/ML-UniversalMods)
 
-# **Don't want to install mods manually? [Check out the VRCMelonAssistant, an automatic mod installer!](https://github.com/knah/VRCMelonAssistant)**
+### ~~**Don't want to install mods manually? [Check out the VRCMelonAssistant, an automatic mod installer!](https://github.com/knah/VRCMelonAssistant)**~~
 
-## Alternatively, [read the manual installation section](#installation)
+### ~~Alternatively, [read the manual installation section](#installation)~~
 
 ## Preface
 Modifying the VRChat client is not allowed by VRChat Terms of Service and can lead to your account being banned.  
