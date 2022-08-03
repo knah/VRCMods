@@ -14,7 +14,7 @@ using UIExpansionKit.API;
 using UnityEngine.SceneManagement;
 using VRC.Core;
 
-[assembly:MelonInfo(typeof(TrueShaderAntiCrashMod), "True Shader Anticrash", "1.0.6", "knah", "https://github.com/knah/VRCMods")]
+[assembly:MelonInfo(typeof(TrueShaderAntiCrashMod), "True Shader Anticrash", "1.0.7", "knah", "https://github.com/knah/VRCMods")]
 [assembly:MelonGame("VRChat", "VRChat")]
 
 namespace TrueShaderAntiCrash
@@ -110,20 +110,17 @@ namespace TrueShaderAntiCrash
 
             void UpdateLimiters()
             {
-                if (enabledInPublicsOnly.Value)
+                var room = RoomManager.field_Internal_Static_ApiWorldInstance_0;
+                if (room == null)
                 {
-                    var room = RoomManager.field_Internal_Static_ApiWorldInstance_0;
-                    if (room == null)
-                    {
-                        MelonCoroutines.Start(WaitForRoomManagerAndUpdate());
-                        return;
-                    }
+                    MelonCoroutines.Start(WaitForRoomManagerAndUpdate());
+                    return;
+                }
 
-                    if (room.type != InstanceAccessType.Public)
-                    {
-                        ShaderFilterApi.SetFilteringState(false, false, false);
-                        return;
-                    }
+                if (enabledInPublicsOnly.Value && room.type != InstanceAccessType.Public)
+                {
+                    ShaderFilterApi.SetFilteringState(false, false, false);
+                    return;
                 }
                 
                 ShaderFilterApi.SetFilteringState(loopsEnabled.Value, geometryEnabled.Value, tessEnabled.Value);
