@@ -22,6 +22,7 @@ namespace ScaleGoesBrr
 
         private static VRCVrCameraSteam ourSteamCamera;
         private static Transform ourCameraTransform;
+        private static MelonLogger.Instance ourLogger;
 
         public static event Action<Transform, float> OnAvatarScaleChanged;
 
@@ -33,6 +34,8 @@ namespace ScaleGoesBrr
         public override void OnApplicationStart()
         {
             ClassInjector.RegisterTypeInIl2Cpp<ScaleGoesBrrComponent>();
+
+            ourLogger = LoggerInstance;
 
             var category = MelonPreferences.CreateCategory("ScaleGoesBrr", "Scale Goes Brr");
             ourIsEnabled = category.CreateEntry("Enabled", true, "Enable avatar scaling support");
@@ -119,7 +122,7 @@ namespace ScaleGoesBrr
 
             var originalTrackingRootScale = trackingRoot.localScale;
 
-            MelonLogger.Msg($"Initialized scaling support for current avatar: avatar initial scale {originalScale.y}, tracking initial scale {originalTrackingRootScale.y}");
+            ourLogger.Msg($"Initialized scaling support for current avatar: avatar initial scale {originalScale.y}, tracking initial scale {originalTrackingRootScale.y}");
 
             var comp = go.AddComponent<ScaleGoesBrrComponent>();
             comp.source = go.transform;
@@ -173,7 +176,7 @@ namespace ScaleGoesBrr
             
             if (descriptor == null || descriptor.TryCast<VRCSDK2.VRC_AvatarDescriptor>() != null)
             {
-                MelonLogger.Msg("Current avatar is SDK2, ignoring rescaling support");
+                ourLogger.Msg("Current avatar is SDK2, ignoring rescaling support");
                 return;
             }
 

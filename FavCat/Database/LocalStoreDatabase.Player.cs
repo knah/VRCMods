@@ -31,7 +31,7 @@ namespace FavCat.Database
         
         internal void RunBackgroundPlayerSearch(string text, Action<IEnumerable<StoredPlayer>> callback)
         {
-            MelonLogger.Msg($"Running local player search for text {text}");
+            FavCatMod.Logger.Msg($"Running local player search for text {text}");
             Task.Run(() => {
                 var searchText = text.ToLowerInvariant();
                 var list = myStoredPlayers.Find(stored => stored.Name.Contains(searchText)).ToList();

@@ -34,10 +34,12 @@ namespace Styletor
         private ActionMenuHandler myActionMenuHandler;
         
         public SettingsHolder Settings => mySettings;
+        public MelonLogger.Instance Logger;
 
         public override void OnApplicationStart()
         {
             Instance = this;
+            Logger = LoggerInstance;
 
             Directory.CreateDirectory(Path.Combine(MelonUtils.UserDataDirectory, StylesLoader.StylesSubDir));
             
@@ -136,7 +138,7 @@ namespace Styletor
             var initMethod = initMethods.Count == 1 ? initMethods[0] : null;
 
             if (initMethod == null) 
-                MelonLogger.Warning("No Init method on StyleEngine, will wait for natural init");
+                Logger.Warning("No Init method on StyleEngine, will wait for natural init");
             else
                 initMethod.Invoke(myStyleEngine.StyleEngine, Array.Empty<object>());*/
 
@@ -153,7 +155,7 @@ namespace Styletor
             }
             catch (Exception ex)
             {
-                MelonLogger.Error($"UI Laser recoloring handler failed to initialize: {ex}");
+                Logger.Error($"UI Laser recoloring handler failed to initialize: {ex}");
             }
             
             try
@@ -162,7 +164,7 @@ namespace Styletor
             }
             catch (Exception ex)
             {
-                MelonLogger.Error($"Action Menu recoloring handler failed to initialize: {ex}");
+                Logger.Error($"Action Menu recoloring handler failed to initialize: {ex}");
             }
         }
 

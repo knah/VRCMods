@@ -104,7 +104,7 @@ namespace Turbones
             var lib = LoadLibraryA(dllName);
             if (lib == IntPtr.Zero)
             {
-                MelonLogger.Error("Native library load failed, mod won't work");
+                TurbonesMod.Logger.Error("Native library load failed, mod won't work");
                 return false;
             }
 
@@ -145,7 +145,7 @@ namespace Turbones
         private static T GetPointer<T>(IntPtr lib, string name) where T : MulticastDelegate
         {
             var result = Marshal.GetDelegateForFunctionPointer<T>(GetProcAddress(lib, name));
-            if (result == null) MelonLogger.Error($"Delegate for {name} not found! Bug?");
+            if (result == null) TurbonesMod.Logger.Error($"Delegate for {name} not found! Bug?");
 
             return result;
         }

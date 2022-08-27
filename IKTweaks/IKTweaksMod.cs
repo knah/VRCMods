@@ -18,9 +18,13 @@ namespace IKTweaks
 {
     internal partial class IKTweaksMod : MelonMod
     {
+        public static MelonLogger.Instance Logger;
+        
         public override void OnApplicationStart()
         {
             if (!CheckWasSuccessful || !MustStayTrue || MustStayFalse) return;
+
+            Logger = LoggerInstance;
             
             IkTweaksSettings.RegisterSettings();
 

@@ -13,7 +13,7 @@ namespace FavCat.Database
     {
         internal void RunBackgroundAvatarSearch(string text, Action<IEnumerable<StoredAvatar>> callback)
         {
-            MelonLogger.Msg($"Running local avatar search for text {text}");
+            FavCatMod.Logger.Msg($"Running local avatar search for text {text}");
             var ownerId = APIUser.CurrentUser.id;
             Task.Run(() => {
                 var searchText = text.ToLowerInvariant();
@@ -31,7 +31,7 @@ namespace FavCat.Database
         
         internal void RunBackgroundAvatarSearchByUser(string userId, Action<IEnumerable<StoredAvatar>> callback)
         {
-            MelonLogger.Msg($"Running local avatar search for user {userId}");
+            FavCatMod.Logger.Msg($"Running local avatar search for user {userId}");
             var ownerId = APIUser.CurrentUser.id;
             Task.Run(() => {
                 var list = myStoredAvatars.Find(stored =>

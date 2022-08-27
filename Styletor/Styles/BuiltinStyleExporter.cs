@@ -19,7 +19,7 @@ namespace Styletor.Styles
             var spriteType = Il2CppType.Of<Sprite>();
             var audioClipType = Il2CppType.Of<AudioClip>();
             
-            MelonLogger.Msg($"Exporting default VRC skin to {baseDir}");
+            StyletorMod.Instance.Logger.Msg($"Exporting default VRC skin to {baseDir}");
             foreach (var keyValuePair in styleEngine.field_Private_Dictionary_2_Tuple_2_String_Type_Object_0)
             {
                 var basePath = Path.Combine(baseDir, keyValuePair.Key.Item1);
@@ -42,7 +42,7 @@ namespace Styletor.Styles
                     WriteWaveFile(basePath + ".wav", audioClip);
                 }
             }
-            MelonLogger.Msg($"Export finished");
+            StyletorMod.Instance.Logger.Msg($"Export finished");
         }
 
         private static void WriteWaveFile(string filePath, AudioClip clip)

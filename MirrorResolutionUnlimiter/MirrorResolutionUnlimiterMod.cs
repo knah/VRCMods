@@ -27,6 +27,7 @@ namespace MirrorResolutionUnlimiter
         private static bool ourAllMirrorsAuto = false;
         private static int ourMirrorMsaa = 0;
         private static MelonPreferences_Entry<bool> ourMsaaIsUpperLimit;
+        private static MelonLogger.Instance ourLogger;
         internal static MelonPreferences_Entry<bool> UiInMirrors;
 
         private MelonPreferences_Entry<string> myPixelLightsSetting;
@@ -34,6 +35,8 @@ namespace MirrorResolutionUnlimiter
         public override void OnApplicationStart()
         {
             ClassInjector.RegisterTypeInIl2Cpp<OriginalPixelLightsSettingKeeper>();
+
+            ourLogger = LoggerInstance;
 
             var category = MelonPreferences.CreateCategory(ModCategory, "Mirror Resolution");
             var maxTextureRes = category.CreateEntry(MaxResPref, 4096, "Max eye texture size");
@@ -68,7 +71,7 @@ namespace MirrorResolutionUnlimiter
 
             if (MelonHandler.Mods.Any(it => it.Info.Name == "UI Expansion Kit"))
             {
-                MelonLogger.Msg("Adding UIExpansionKit buttons");
+                ourLogger.Msg("Adding UIExpansionKit buttons");
                 UiExtensionsAddon.Init();
             }
         }
@@ -169,7 +172,7 @@ namespace MirrorResolutionUnlimiter
             }
             catch (Exception ex)
             {
-                MelonLogger.Error("Exception happened in GetReflectionData override" + ex);
+                ourLogger.Error("Exception happened in GetReflectionData override" + ex);
             }
             return true;
         }

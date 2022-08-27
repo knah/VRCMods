@@ -49,7 +49,7 @@ namespace JoinNotifier
         public override void OnApplicationStart()
         {
             if (!CheckWasSuccessful || !MustStayTrue || MustStayFalse) return;
-            
+
             JoinNotifierSettings.RegisterSettings();
 
             MelonCoroutines.Start(InitThings());
@@ -89,7 +89,7 @@ namespace JoinNotifier
 
             if (File.Exists(CustomJoinSoundFileName))
             {
-                MelonLogger.Msg("Loading custom join sound");
+                LoggerInstance.Msg("Loading custom join sound");
                 var uwr = UnityWebRequest.Get($"file://{Path.Combine(Environment.CurrentDirectory, CustomJoinSoundFileName)}");
                 uwr.SendWebRequest();
 
@@ -105,7 +105,7 @@ namespace JoinNotifier
 
             if (File.Exists(CustomLeaveSoundFileName))
             {
-                MelonLogger.Msg("Loading custom leave sound");
+                LoggerInstance.Msg("Loading custom leave sound");
                 
                 var uwr = UnityWebRequest.Get($"file://{Path.Combine(Environment.CurrentDirectory, CustomLeaveSoundFileName)}");
                 uwr.SendWebRequest();
@@ -216,7 +216,7 @@ namespace JoinNotifier
             var hudRoot = GameObject.Find("UserInterface/UnscaledUI/HudContent_Old/Hud");
             if (hudRoot == null)
             {
-                MelonLogger.Msg("Not creating gameobjects - no hud root");
+                LoggerInstance.Msg("Not creating gameobjects - no hud root");
                 return;
             }
             
@@ -267,7 +267,7 @@ namespace JoinNotifier
             if (JoinNotifierSettings.ShouldShowNames(true))
                 MelonCoroutines.Start(ShowName(myJoinText, myJoinNames, playerName, true, isFriendsWith));
             if (JoinNotifierSettings.LogToConsole.Value)
-                MelonLogger.Msg(isFriendsWith && JoinNotifierSettings.ShowFriendsInDifferentColor.Value
+                LoggerInstance.Msg(isFriendsWith && JoinNotifierSettings.ShowFriendsInDifferentColor.Value
                         ? ConsoleColor.DarkYellow : ConsoleColor.DarkCyan, 
                     $"{(isFriendsWith ? "Friend " : "")}{playerName} joined");
         }
@@ -295,7 +295,7 @@ namespace JoinNotifier
             if (JoinNotifierSettings.ShouldShowNames(false))
                 MelonCoroutines.Start(ShowName(myLeaveText, myLeaveNames, playerName, false, isFriendsWith));
             if (JoinNotifierSettings.LogToConsole.Value)
-                MelonLogger.Msg(isFriendsWith && JoinNotifierSettings.ShowFriendsInDifferentColor.Value
+                LoggerInstance.Msg(isFriendsWith && JoinNotifierSettings.ShowFriendsInDifferentColor.Value
                         ? ConsoleColor.DarkYellow : ConsoleColor.DarkMagenta, 
                     $"{(isFriendsWith ? "Friend " : "")}{playerName} left");
         }

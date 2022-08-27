@@ -348,7 +348,7 @@ namespace UIExpansionKit
                                 break;
                             }
                             if (MelonDebug.IsEnabled())
-                                MelonLogger.Msg($"Unknown mod pref type {pref.GetType()}");
+                                UiExpansionKitMod.Instance.Logger.Msg($"Unknown mod pref type {pref.GetType()}");
                             break;
                     }
                 }

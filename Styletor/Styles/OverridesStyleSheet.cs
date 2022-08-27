@@ -127,7 +127,7 @@ namespace Styletor.Styles
                 var targetNormalizedSelector = keyValuePair.Value.SelectorTo.ToStringNormalized();
                 if (baseStyles == null || baseStyles.Count == 0)
                 {
-                    MelonLogger.Msg($"Selector {keyValuePair.Value.SelectorFrom} not found in default style to copy into {targetNormalizedSelector}");
+                    StyletorMod.Instance.Logger.Msg($"Selector {keyValuePair.Value.SelectorFrom} not found in default style to copy into {targetNormalizedSelector}");
                     continue;
                 }
 
@@ -165,7 +165,7 @@ namespace Styletor.Styles
                 var baseStyles = myStyleEngine.TryGetBySelector(keyValuePair.Key);
                 if (baseStyles == null && !keyValuePair.Value.IsNew)
                 {
-                    MelonLogger.Msg($"Selector {keyValuePair.Key} overrides nothing in default style and is not marked as new (see README)");
+                    StyletorMod.Instance.Logger.Msg($"Selector {keyValuePair.Key} overrides nothing in default style and is not marked as new (see README)");
                     continue;
                 }
                 
@@ -185,7 +185,7 @@ namespace Styletor.Styles
                 }
             }
             
-            MelonLogger.Msg($"Applied {myStyleOverrides.Count} overrides from {Name}");
+            StyletorMod.Instance.Logger.Msg($"Applied {myStyleOverrides.Count} overrides from {Name}");
         }
 
         private static Selector ParseSelector(string selectorText) => Selector.Method_Public_Static_Selector_String_0(selectorText.Trim());
@@ -199,13 +199,13 @@ namespace Styletor.Styles
                 var selectorNormalized = selector.ToStringNormalized();
 
                 if (myStyleOverrides.ContainsKey(selectorNormalized))
-                    MelonLogger.Warning($"Style sheet override {Name} contains duplicate selector {selectorNormalized}");
+                    StyletorMod.Instance.Logger.Warning($"Style sheet override {Name} contains duplicate selector {selectorNormalized}");
 
                 myStyleOverrides[selectorNormalized] = (isNew, bodyText);
             }
             catch (Exception ex)
             {
-                MelonLogger.Warning($"Error while parsing override style {Name}: {ex}");
+                StyletorMod.Instance.Logger.Warning($"Error while parsing override style {Name}: {ex}");
             }
         }
     }

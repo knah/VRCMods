@@ -85,7 +85,7 @@ namespace UIExpansionKit.API
         {
             if (CustomCategoryUIs.ContainsKey(categoryName))
             {
-                MelonLogger.Error($"Custom UI for category {categoryName} is already registered");
+                UiExpansionKitMod.Instance.Logger.Error($"Custom UI for category {categoryName} is already registered");
                 return;
             }
 

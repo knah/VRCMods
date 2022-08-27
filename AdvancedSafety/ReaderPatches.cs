@@ -48,8 +48,8 @@ namespace AdvancedSafety
 
             if (!ourOffsets.TryGetValue(unityPlayerHash, out var offsets))
             {
-                MelonLogger.Error($"Unknown UnityPlayer hash: {unityPlayerHash}");
-                MelonLogger.Error("Some features will not work");
+                AdvancedSafetyMod.Logger.Error($"Unknown UnityPlayer hash: {unityPlayerHash}");
+                AdvancedSafetyMod.Logger.Error("Some features will not work");
                 return;
             }
 
@@ -238,7 +238,7 @@ namespace AdvancedSafety
             }
             catch (Exception ex)
             {
-                MelonLogger.Error($"Exception in CountNodes patch: {ex}");
+                AdvancedSafetyMod.Logger.Error($"Exception in CountNodes patch: {ex}");
                 return 1;
             }
         }

@@ -37,7 +37,7 @@ namespace AdvancedSafety.BundleVerifier
             if (ourInterceptedContext.TryGetValue(thisPtr, out var context) && context.IsBadUrl)
             {
                 var cleanedUrl = BundleVerifierMod.SanitizeUrl(context.Url);
-                MelonLogger.Msg($"Bundle for ptr {thisPtr} uid={cleanedUrl.Item1}+{cleanedUrl.Item2} is pre-marked as bad, faking failed download");
+                AdvancedSafetyMod.Logger.Msg($"Bundle for ptr {thisPtr} uid={cleanedUrl.Item1}+{cleanedUrl.Item2} is pre-marked as bad, faking failed download");
                 // indicate that it should use the DL stream
                 Marshal.WriteInt32(thisPtr + 0x90, 1);
                 // and then indicate the downloader that we don't want the download

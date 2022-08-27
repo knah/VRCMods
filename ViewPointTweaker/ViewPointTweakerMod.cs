@@ -63,7 +63,7 @@ namespace ViewPointTweaker
                 return;
             }
             
-            MelonLogger.Error("Steam tracking not found, things will break");
+            LoggerInstance.Error("Steam tracking not found, things will break");
         }
 
         private void SaveViewpoints()
@@ -78,7 +78,7 @@ namespace ViewPointTweaker
             var json = File.ReadAllText(ViewPointsFilePath);
             JSON.MakeInto(JSON.Load(json), out ourSavedViewpoints);
             
-            MelonLogger.Msg($"Loaded {ourSavedViewpoints.Count} saved viewpoints");
+            LoggerInstance.Msg($"Loaded {ourSavedViewpoints.Count} saved viewpoints");
         }
 
         private static void HeadAlignmentInitPatch(IKHeadAlignment __instance)

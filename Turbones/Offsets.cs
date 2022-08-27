@@ -12,7 +12,7 @@ namespace Turbones
         public static IntPtr GetICall(string name)
         {
             var result = IL2CPP.il2cpp_resolve_icall(name);
-            if (result == IntPtr.Zero) MelonLogger.Error($"ICall {name} not found, crash will likely follow");
+            if (result == IntPtr.Zero) TurbonesMod.Logger.Error($"ICall {name} not found, crash will likely follow");
             
             MelonDebug.Msg($"ICall pointer for {name} is {result}");
             return result;
@@ -23,7 +23,7 @@ namespace Turbones
             var classPtr = Il2CppClassPointerStore<T>.NativeClassPtr;
             if (classPtr == IntPtr.Zero)
             {
-                MelonLogger.Error($"{typeof(T)} class pointer is null");
+                TurbonesMod.Logger.Error($"{typeof(T)} class pointer is null");
                 return 0;
             }
 
@@ -33,21 +33,21 @@ namespace Turbones
                 var managedField = typeof(T).GetField("NativeFieldInfoPtr_" + fieldName, BindingFlags.Static | BindingFlags.NonPublic);
                 if (managedField == null)
                 {
-                    MelonLogger.Error($"Field {fieldName} is not found on type {typeof(T)} (managed)");
+                    TurbonesMod.Logger.Error($"Field {fieldName} is not found on type {typeof(T)} (managed)");
                     return 0;
                 }
                 fieldPtr = (IntPtr) managedField.GetValue(null);
 
                 if (fieldPtr == IntPtr.Zero)
                 {
-                    MelonLogger.Error($"Field {fieldName} is not found on type {typeof(T)} (ptr)");
+                    TurbonesMod.Logger.Error($"Field {fieldName} is not found on type {typeof(T)} (ptr)");
                     return 0;
                 }
             }
 
             var fieldOffset = IL2CPP.il2cpp_field_get_offset(fieldPtr);
             if (fieldOffset <= 0) 
-                MelonLogger.Error($"Field offset for field {typeof(T)}.{fieldName} is {fieldOffset}");
+                TurbonesMod.Logger.Error($"Field offset for field {typeof(T)}.{fieldName} is {fieldOffset}");
             
             MelonDebug.Msg($"Field offset for field {typeof(T)}.{fieldName} is {fieldOffset}");
 
@@ -59,7 +59,7 @@ namespace Turbones
             if (module == IntPtr.Zero) return IntPtr.Zero;
             var result = JigglySolverApi.GetProcAddress(module, name);
             if (result == IntPtr.Zero)
-                MelonLogger.Error($"No entry point for {name}");
+                TurbonesMod.Logger.Error($"No entry point for {name}");
             else
                 MelonDebug.Msg($"Entry point for {name} is {result}");
 
@@ -72,7 +72,7 @@ namespace Turbones
 
             if (ga == IntPtr.Zero)
             {
-                MelonLogger.Error("GameAssembly was not found, crash will likely follow");
+                TurbonesMod.Logger.Error("GameAssembly was not found, crash will likely follow");
             }
 
             var icalls = new ICallOffsets

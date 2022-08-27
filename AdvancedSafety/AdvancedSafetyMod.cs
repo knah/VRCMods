@@ -26,6 +26,8 @@ namespace AdvancedSafety
 {
     internal partial class AdvancedSafetyMod : MelonMod
     {
+        public static MelonLogger.Instance Logger;
+        
         internal static bool CanReadAudioMixers = true;
         internal static bool CanReadBadFloats = true;
 
@@ -35,6 +37,8 @@ namespace AdvancedSafety
         public override void OnApplicationStart()
         {
             if (!CheckWasSuccessful || !MustStayTrue || MustStayFalse) return;
+
+            Logger = LoggerInstance;
             
             AdvancedSafetySettings.RegisterSettings();
             ClassInjector.RegisterTypeInIl2Cpp<SortingOrderHammerer>();
@@ -45,7 +49,7 @@ namespace AdvancedSafety
             }
             catch (Exception ex)
             {
-                MelonLogger.Error($"Error initializing Bundle Verifier: {ex}");
+                Logger.Error($"Error initializing Bundle Verifier: {ex}");
             }
 
             var matchingMethods = typeof(AssetManagement)
@@ -251,7 +255,7 @@ namespace AdvancedSafety
                 go.AddComponent<SortingOrderHammerer>();
 
             if (MelonDebug.IsEnabled() || destroyedObjects > 100)
-                MelonLogger.Msg($"Cleaned avatar ({avatarManager.field_Private_ApiAvatar_0?.name}) used by \"{vrcPlayer.prop_VRCPlayerApi_0?.displayName}\" in {start.ElapsedMilliseconds}ms, scanned {scannedObjects} things, destroyed {destroyedObjects} things");
+                Logger.Msg($"Cleaned avatar ({avatarManager.field_Private_ApiAvatar_0?.name}) used by \"{vrcPlayer.prop_VRCPlayerApi_0?.displayName}\" in {start.ElapsedMilliseconds}ms, scanned {scannedObjects} things, destroyed {destroyedObjects} things");
         }
 
         private static IEnumerator CheckSpawnSounds(GameObject go, List<AudioSource> audioSourcesList)
@@ -303,7 +307,7 @@ namespace AdvancedSafety
             }
             catch (Exception ex)
             {
-                MelonLogger.Error($"Exception when cleaning avatar: {ex}");
+                Logger.Error($"Exception when cleaning avatar: {ex}");
             }
             
             return result;

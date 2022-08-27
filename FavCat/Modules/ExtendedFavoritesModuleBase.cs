@@ -257,7 +257,7 @@ namespace FavCat.Modules
             foreach (var list in GatherLists(true))
             {
                 if (MelonDebug.IsEnabled() && knownLists.ContainsKey(list.ListName))
-                    MelonLogger.Msg($"List {list.ListName} is duplicated");
+                    FavCatMod.Logger.Msg($"List {list.ListName} is duplicated");
                 
                 knownLists[list.ListName] = list;
             }
@@ -582,7 +582,7 @@ namespace FavCat.Modules
             mySearchResult = null;
             if (results == null) return;
             
-            MelonLogger.Msg("Local search done, {0} results", results.Count);
+            FavCatMod.Logger.Msg("Local search done, {0} results", results.Count);
 
             SortModelList(SearchList.Category.SortType, SearchCategoryName, results);
             SearchList.SetList(results.Select(it => WrapModel(null, it.it)), true);

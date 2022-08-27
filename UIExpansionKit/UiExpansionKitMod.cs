@@ -40,6 +40,8 @@ namespace UIExpansionKit
         internal Transform myCameraExpandoRoot;
         internal Transform myQmExpandosRoot;
         
+        public MelonLogger.Instance Logger;
+        
         private static readonly List<(ExpandedMenu, string, bool isFullMenu)> GameObjectToCategoryList = new List<(ExpandedMenu, string, bool)>
         {
             (ExpandedMenu.AvatarMenu, "UserInterface/MenuContent/Screens/Avatar", true),
@@ -77,6 +79,7 @@ namespace UIExpansionKit
         public override void OnApplicationStart()
         {
             Instance = this;
+            Logger = LoggerInstance;
             ClassInjector.RegisterTypeInIl2Cpp<EnableDisableListener>();
             ClassInjector.RegisterTypeInIl2Cpp<DestroyListener>();
             ClassInjector.RegisterTypeInIl2Cpp<StyleElementWrapper>();
@@ -165,7 +168,7 @@ namespace UIExpansionKit
                 }
                 catch (Exception ex)
                 {
-                    MelonLogger.Error($"Error while invoking UI-manager-init delegate {action.GetType().FullName}: {ex}");
+                    Logger.Error($"Error while invoking UI-manager-init delegate {action.GetType().FullName}: {ex}");
                 }
             }
 
@@ -182,7 +185,7 @@ namespace UIExpansionKit
                     }
                     catch (Exception ex)
                     {
-                        MelonLogger.Error($"Error while waiting for init of coroutine with type {coroutine.GetType().FullName}: {ex}");
+                        Logger.Error($"Error while waiting for init of coroutine with type {coroutine.GetType().FullName}: {ex}");
                         break;
                     }
                     yield return coroutine.Current;
@@ -217,7 +220,7 @@ namespace UIExpansionKit
 
         private void DecorateMenuPages()
         {
-            MelonLogger.Msg("Decorating menus");
+            Logger.Msg("Decorating menus");
             
             var quickMenuExpandoPrefab = myStuffBundle.QuickMenuExpando;
             var quickMenuRoot = GetQuickMenu().transform.Find("Container").gameObject;
@@ -244,7 +247,7 @@ namespace UIExpansionKit
                 var gameObject = UnityUtils.FindInactiveObjectInActiveRoot(gameObjectPath);
                 if (gameObject == null)
                 {
-                    MelonLogger.Error($"GameObject at path {gameObjectPath} for category {categoryEnum} was not found, not decorating");
+                    Logger.Error($"GameObject at path {gameObjectPath} for category {categoryEnum} was not found, not decorating");
                     continue;
                 }
                 
@@ -352,7 +355,7 @@ namespace UIExpansionKit
             var cameraController = UserCameraController.field_Internal_Static_UserCameraController_0;
             if (cameraController == null)
             {
-                MelonLogger.Warning("Camera controller not found, not decorating the camera");
+                Logger.Warning("Camera controller not found, not decorating the camera");
                 return;
             }
             

@@ -48,7 +48,7 @@ namespace AdvancedSafety.BundleVerifier
             }
             catch (Exception ex)
             {
-                MelonLogger.Error($"Error while initializing verifier internals: {ex}");
+                AdvancedSafetyMod.Logger.Error($"Error while initializing verifier internals: {ex}");
                 return false;
             }
 
@@ -63,8 +63,8 @@ namespace AdvancedSafety.BundleVerifier
             }
             catch (IOException ex)
             {
-                MelonLogger.Error($"Received more bytes than declared for bundle URL {Url} (declared: {BundleDlInterceptor.GetTotalSize(OriginalBundleDownload)})");
-                MelonLogger.Error(ex.ToString());
+                AdvancedSafetyMod.Logger.Error($"Received more bytes than declared for bundle URL {Url} (declared: {BundleDlInterceptor.GetTotalSize(OriginalBundleDownload)})");
+                AdvancedSafetyMod.Logger.Error(ex.ToString());
                 DoBackSpew();
                 unsafe
                 {
@@ -100,7 +100,7 @@ namespace AdvancedSafety.BundleVerifier
             if (exitCode != 0)
             {
                 var cleanedUrl = BundleVerifierMod.SanitizeUrl(Url);
-                MelonLogger.Msg($"Verifier process failed with exit code {exitCode} ({VerifierExitCodes.GetExitCodeDescription(exitCode)}) for bundle uid={cleanedUrl.Item1}+{cleanedUrl.Item2}");
+                AdvancedSafetyMod.Logger.Msg($"Verifier process failed with exit code {exitCode} ({VerifierExitCodes.GetExitCodeDescription(exitCode)}) for bundle uid={cleanedUrl.Item1}+{cleanedUrl.Item2}");
                 BundleVerifierMod.BadBundleCache.Add(Url);
                 MelonDebug.Msg("Reporting completion without data");
                 // feed some garbage into it, otherwise it dies
